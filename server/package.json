@@ -1,0 +1,20 @@
+{
+  "name": "quadcoach",
+  "version": "1.0.0",
+  "description": "QuadCoach - The digital assistant coach for Quadball",
+  "main": "index.js",
+  "scripts": {
+    "start": "node server",
+    "dev": "nodemon server"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2",
+    "mongoose": "^7.5.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}
