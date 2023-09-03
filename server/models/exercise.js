@@ -4,11 +4,11 @@ const Schema = mongoose.Schema;
 const exerciseSchema = new Schema({
     name: {
         type: String,
-        requiered: true
+        required: true
     },
     description: {
         type: String,
-        requiered: true
+        required: true
     },
     video_url: {
         type: String
@@ -34,8 +34,8 @@ const exerciseSchema = new Schema({
     coaching_points: {
         type: String
     }
-},{timestamps: true});
+}, { timestamps: true });
 
-const Exercise = mongoose.model('Exercise', exerciseSchema);
+const Exercise = mongoose.model('exercises', exerciseSchema);
 
 module.exports = Exercise;
