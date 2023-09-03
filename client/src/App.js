@@ -1,10 +1,14 @@
-import logo from './logo.svg';
 import './App.css';
+import Nav from './Nav'
+import {BrowserRouter} from 'react-router-dom'
 
 function App() {
   return (
     <div className="App">
-      <h1>QuadCoach</h1>
+      <BrowserRouter>
+        <Nav />
+        <h1>QuadCoach</h1>
+      </BrowserRouter>
     </div>
   );
 }
