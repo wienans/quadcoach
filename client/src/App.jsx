@@ -1,5 +1,6 @@
 import './App.css'
-import Nav from './Nav'
+import Nav from './components/Nav'
+import Footer from './components/Footer'
 import {BrowserRouter, Routes, Route} from 'react-router-dom'
 
 function App() {
@@ -13,6 +14,7 @@ function App() {
           <Route path="/edit" element={<h1>edit Exercise component</h1>} />
         </Routes>
       </BrowserRouter>
+      <Footer/>
     </div>
   )
 }
