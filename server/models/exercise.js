@@ -33,6 +33,9 @@ const exerciseSchema = new Schema({
     },
     coaching_points: {
         type: String
+    },
+    creator: {
+        type: String
     }
 }, { timestamps: true });
 

@@ -33,12 +33,8 @@ app.get("/api", (req, res) => {
   res.json({ message: "Hello from server!" })
 })
 
-app.get("/add-exercise", (req, res) => {
-  const exercise = new Exercise({
-    name: "New Exercise",
-    description: "This is a test Exercise",
-    persons: 5
-  })
+app.post("/add-exercise", (req, res) => {
+  let exercise = new Exercise(req.body)
   exercise.save()
     .then((result) => {
       res.send(result)
