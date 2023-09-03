@@ -4,7 +4,7 @@
   background-color: skyblue;
 }
 
-.nav-ul li{
+.nav-ul li {
   display: inline-block;
 }
 
@@ -22,7 +22,7 @@
   text-align: center;
 }
 
-.appButton{
+.appButton {
   margin: 20px;
   width: auto;
   padding: 10px;
@@ -31,11 +31,12 @@
   cursor: pointer;
 }
 
-.register{
+.register,
+.add-product {
   margin-left: 30%;
 }
 
-.inputBox{
+.inputBox {
   padding: 7px;
   display: block;
   border: 1px solid skyblue;
@@ -73,6 +74,7 @@
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }

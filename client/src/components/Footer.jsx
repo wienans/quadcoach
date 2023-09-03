@@ -1,6 +1,6 @@
 import React from "react";
-const Footer=()=>{
-    return(
+const Footer = () => {
+    return (
         <div className="footer">
             <h3>
                 QuadCoach - the digital assistant coach

@@ -8,12 +8,12 @@ const SignUp = () => {
     const [password, setPassword] = useState("");
     const navigate = useNavigate()
 
-    useEffect(()=>{
+    useEffect(() => {
         const auth = localStorage.getItem('user')
-        if(auth){
+        if (auth) {
             navigate('/')
         }
-    },[])
+    }, [])
 
     const signUpData = async () => {
         let result = await fetch("http://localhost:3001/register", {

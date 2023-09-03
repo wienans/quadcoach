@@ -17,7 +17,7 @@ const exerciseSchema = new Schema({
         type: Number
     },
     materials: {
-        type: String
+        type: Array
     },
     beaters: {
         type: Number
