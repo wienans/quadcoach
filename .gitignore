@@ -103,3 +103,7 @@ dist
 
 # TernJS port file
 .tern-port
+
+server/env_secrets.sh
+
+server/package-lock.json
