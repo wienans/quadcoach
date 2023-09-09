@@ -44,6 +44,13 @@
   margin: 20px;
 }
 
+.invalid-input {
+  color: red;
+  margin-top: -20px;
+  display: block;
+  margin-left: 20px;
+}
+
 .App-logo {
   height: 40vmin;
   pointer-events: none;

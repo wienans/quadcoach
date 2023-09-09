@@ -9,13 +9,17 @@ const AddExercise = () => {
     const [time_min, setTimeMin] = useState(0);
     const [persons, setPersons] = useState(0);
     const [materials_string, setMaterials] = useState("");
+    const [error, setError] = useState(false)
 
     const navigate = useNavigate()
 
     const add = async () => {
+        if (!name || !description) {
+            setError(true)
+            return false
+        }
         let materials = materials_string.replace(/\s/g, '').split(',')
 
-        console.warn(name, description, video_url, time_min, persons, materials)
         console.warn(JSON.stringify({ name, description, video_url, time_min, persons, materials }))
         let result = await fetch("http://localhost:3001/add-exercise", {
             method: 'post',
@@ -33,8 +37,10 @@ const AddExercise = () => {
             <h1> Add Exercise</h1>
             <input className="inputBox" type="text" placeholder="Enter Name"
                 value={name} onChange={(e) => setName(e.target.value)} />
+            {error && !name && <span className="invalid-input">Enter name</span>}
             <input className="inputBox" type="text" placeholder="Enter Description"
                 value={description} onChange={(e) => setDescription(e.target.value)} />
+            {error && !description && <span className="invalid-input">Enter description</span>}
             <input className="inputBox" type="text" placeholder="Enter Video URL"
                 value={video_url} onChange={(e) => setVideoUrl(e.target.value)} />
             <label>Suggested Time in minutes</label>
