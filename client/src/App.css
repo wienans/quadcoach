@@ -60,6 +60,14 @@
   margin: 20px;
 }
 
+.search-exercise-box {
+  width: auto;
+  margin: 20px;
+  height: 38px;
+  padding-left: 30px;
+  border: solid 1px skyblue;
+}
+
 .invalid-input {
   color: red;
   margin-top: -20px;

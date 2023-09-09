@@ -112,3 +112,24 @@ app.put("/exercise/:id", async (req, res) => {
     { $set: req.body })
   res.send(result)
 })
+
+app.get("/search/:key", async (req, res) => {
+  const result = await Exercise.find({
+    "$or": [
+      {
+        name: { $regex: req.params.key },
+
+      }
+      // ,
+      // {
+      //   // name: { $regex: req.params.key },
+      //   tags: { $regex: req.params.key },
+      // }
+    ]
+  })
+  if (result) {
+    res.send(result)
+  } else {
+    res.send({ "result": "No Record Found" })
+  }
+})
