@@ -36,6 +36,22 @@
   margin-left: 30%;
 }
 
+.exercise-list {
+  text-align: center;
+  margin-top: 50px;
+}
+
+.exercise-list ul {
+  margin: 0px;
+}
+
+.exercise-list ul li {
+  display: inline-block;
+  width: 150px;
+  border: 1px solid skyblue;
+  padding: 5px;
+}
+
 .inputBox {
   padding: 7px;
   display: block;

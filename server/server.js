@@ -78,3 +78,37 @@ app.post("/register", (req, res) => {
       res.send(err)
     })
 })
+
+app.get("/exercises", async (req, res) => {
+  const exercises = await Exercise.find()
+  if (exercises.length > 0) {
+    res.send(exercises)
+  } else {
+    res.send({ result: "No Exercises found" })
+  }
+})
+
+app.delete("/exercise/:id", async (req, res) => {
+  const result = await Exercise.deleteOne({ _id: req.params.id })
+  if (result) {
+    res.send(result)
+  } else {
+    res.send({ "result": "No Record Found" })
+  }
+})
+
+app.get("/exercise/:id", async (req, res) => {
+  const result = await Exercise.findOne({ _id: req.params.id })
+  if (result) {
+    res.send(result)
+  } else {
+    res.send({ "result": "No Record Found" })
+  }
+})
+
+app.put("/exercise/:id", async (req, res) => {
+  const result = await Exercise.updateOne(
+    { _id: req.params.id },
+    { $set: req.body })
+  res.send(result)
+})

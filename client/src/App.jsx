@@ -4,6 +4,8 @@ import Footer from './components/Footer'
 import SignUp from './components/SignUp'
 import PrivateComponent from './components/PrivateComponent'
 import AddExercise from './components/AddExercise'
+import ExerciseList from './components/ExerciseList'
+import UpdateExercise from './components/UpdateExercise'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 
 function App() {
@@ -12,11 +14,13 @@ function App() {
       <BrowserRouter>
         <Nav />
         <Routes>
-          <Route path="/" element={<h1>Exercise component</h1>} />
+          <Route path="/" element={<ExerciseList />} />
           <Route path="/signup" element={<SignUp />} />
           {/* <Route element={<PrivateComponent/>}> */}
           <Route path="/add" element={<AddExercise />} />
           <Route path="/edit" element={<h1>edit Exercise component</h1>} />
+          <Route path="/exercise/:id" element={<h1>Exercise</h1>} />
+          <Route path="/update/:id" element={<UpdateExercise />} />
           {/* </Route> */}
         </Routes>
       </BrowserRouter>

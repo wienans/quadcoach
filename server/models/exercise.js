@@ -29,7 +29,7 @@ const exerciseSchema = new Schema({
         type: Number
     },
     tags: {
-        type: String
+        type: Array
     },
     coaching_points: {
         type: String
