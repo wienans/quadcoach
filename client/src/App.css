@@ -34,6 +34,7 @@
 .register,
 .add-product {
   margin-left: 30%;
+  margin-right: 30%;
 }
 
 .exercise-list {
@@ -73,6 +74,60 @@
   margin-top: -20px;
   display: block;
   margin-left: 20px;
+}
+
+.content {
+  /* border: 1px solid rgb(128, 123, 123); */
+  padding: 0.5rem;
+  border-radius: 5px;
+  background-color: #f1f1f1;
+}
+
+.content-parent {
+  height: 0px;
+  overflow: hidden;
+  transition: height ease 0.9s;
+}
+
+.collapsible {
+  background-color: #777;
+  color: white;
+  cursor: pointer;
+  padding: 18px;
+  width: 100%;
+  border: none;
+  text-align: left;
+  outline: none;
+  font-size: 15px;
+}
+
+.active,
+.collapsible:hover {
+  color: white;
+  cursor: pointer;
+  padding: 18px;
+  width: 100%;
+  border: none;
+  text-align: left;
+  outline: none;
+  font-size: 15px;
+  background-color: #555;
+}
+
+.collapsible:after {
+  content: '\002B';
+  color: white;
+  font-weight: bold;
+  float: right;
+  margin-left: 5px;
+}
+
+.active:after {
+  content: "\2212";
+  color: white;
+  font-weight: bold;
+  float: right;
+  margin-left: 5px;
 }
 
 .App-logo {

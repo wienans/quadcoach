@@ -39,7 +39,7 @@ const ExerciseList = () => {
             {
                 exercises.map((item) =>
                     <ul key={item._id}>
-                        <li><Link to={"/update/" + item._id}>{item.name}</Link></li>
+                        <li><Link to={"/exercise/" + item._id}>{item.name}</Link></li>
                         <li>{item.persons}</li>
                         {item.tags != "" && <li>{item.tags.toString()}</li>}
                         {item.tags == "" && <li>No Tags</li>}

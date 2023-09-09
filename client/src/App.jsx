@@ -6,6 +6,7 @@ import PrivateComponent from './components/PrivateComponent'
 import AddExercise from './components/AddExercise'
 import ExerciseList from './components/ExerciseList'
 import UpdateExercise from './components/UpdateExercise'
+import Exercise from './components/Exercise'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 
 function App() {
@@ -19,7 +20,7 @@ function App() {
           {/* <Route element={<PrivateComponent/>}> */}
           <Route path="/add" element={<AddExercise />} />
           <Route path="/edit" element={<h1>edit Exercise component</h1>} />
-          <Route path="/exercise/:id" element={<h1>Exercise</h1>} />
+          <Route path="/exercise/:id" element={<Exercise />} />
           <Route path="/update/:id" element={<UpdateExercise />} />
           {/* </Route> */}
         </Routes>
