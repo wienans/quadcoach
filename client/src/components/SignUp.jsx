@@ -16,7 +16,7 @@ const SignUp = () => {
     }, [])
 
     const signUpData = async () => {
-        let result = await fetch("http://localhost:3001/register", {
+        let result = await fetch("/api/register", {
             method: 'post',
             body: JSON.stringify({ name, email, password }),
             headers: {

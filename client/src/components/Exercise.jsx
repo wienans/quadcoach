@@ -23,7 +23,7 @@ const Exercise = () => {
     }, [])
 
     const getExerciseDetails = async () => {
-        let result = await fetch(`http://localhost:3001/exercise/${params.id}`)
+        let result = await fetch(`/api/exercise/${params.id}`)
         result = await result.json()
         console.warn(result)
         setName(result.name)
@@ -42,7 +42,7 @@ const Exercise = () => {
     }
 
     const deleteExercise = async () => {
-        let result = await fetch(`http://localhost:3001/exercise/${params.id}`, {
+        let result = await fetch(`/api/exercise/${params.id}`, {
             method: "delete",
             headers: {
                 'Content-Type': 'application/json'

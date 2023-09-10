@@ -23,7 +23,7 @@ const AddExercise = () => {
         let tags = tags_string.replace(/\s/g, '').split(',')
 
         console.warn(JSON.stringify({ name, description, video_url, time_min, persons, materials, tags }))
-        let result = await fetch("http://localhost:3001/add-exercise", {
+        let result = await fetch("/api/add-exercise", {
             method: 'post',
             body: JSON.stringify({ name, description, video_url, time_min, persons, materials, tags }),
             headers: {

@@ -1,0 +1,48 @@
+version: "3"
+
+services:
+  frontend:
+    image: quadcoach-frontend
+    container_name: quadcoach-frontend
+    build:
+      context: client
+    ports:
+      - "5173:5173"
+    env_file:
+      - env.env
+    networks:
+      - mern-network
+    depends_on:
+      - mongodb
+  backend:
+    image: quadcoach-backend
+    container_name: quadcoach-backend
+    env_file:
+      - env.env
+    build:
+      context: server
+    ports:
+      - "3001:3001"
+    networks:
+      - mern-network
+    depends_on:
+      - mongodb
+  mongodb:
+
+    image: mongo:latest
+    container_name: quadcoach-mongodb
+    env_file:
+      - env.env
+      - mongo.env
+    volumes:
+      - data_db:/data/db
+      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    ports:
+      - "27017:27017"
+    networks:
+      - mern-network
+networks:
+  mern-network:
+    driver: bridge
+volumes:
+  data_db:
