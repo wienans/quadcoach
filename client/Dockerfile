@@ -1,4 +1,5 @@
 FROM node:20
+VOLUME [ "/client" ]
 WORKDIR /client
 COPY ./package.json ./package.json
 COPY ./index.html ./index.html
