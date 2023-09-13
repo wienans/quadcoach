@@ -3,6 +3,6 @@ QuadCoach - The digital assistant coach for Quadball
 
 
 ``` bash
-sudo service mongod start
-sudo service mongod status
+docker compose -f docker-compose.dev up --build
+docker compose -f docker-compose.dev up --build
 ```

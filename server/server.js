@@ -32,6 +32,10 @@ mongoose.connect(dbURI)
 // Middleware
 app.use(express.json())
 app.use(cors())
+
+app.use(express.static('dist'))
+
+
 // API's
 app.get("/api", (req, res) => {
   res.json({ message: "Hello from server!" })
@@ -56,10 +60,6 @@ app.get("/api/all-exercises", (req, res) => {
     .catch((err) => {
       console.log(err)
     })
-})
-
-app.get("/", (req, res) => {
-  res.send("app is working...")
 })
 
 app.post("/api/register", (req, res) => {
