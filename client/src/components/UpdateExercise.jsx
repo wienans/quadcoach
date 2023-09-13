@@ -21,7 +21,7 @@ const UpdateExercise = () => {
     }, [])
 
     const getExerciseDetails = async () => {
-        let result = await fetch(`http://localhost:3001/exercise/${params.id}`)
+        let result = await fetch(`/api/exercise/${params.id}`)
         result = await result.json()
         console.warn(result)
         setName(result.name)
@@ -39,7 +39,7 @@ const UpdateExercise = () => {
         let tags = tags_string.replace(/\s/g, '').split(',')
 
         console.warn(JSON.stringify({ name, description, video_url, time_min, persons, materials, tags }))
-        let result = await fetch(`http://localhost:3001/exercise/${params.id}`, {
+        let result = await fetch(`/api/exercise/${params.id}`, {
             method: "put",
             body: JSON.stringify({ name, description, video_url, time_min, persons, materials, tags }),
             headers: {
@@ -55,7 +55,7 @@ const UpdateExercise = () => {
     }
 
     const deleteExercise = async () => {
-        let result = await fetch(`http://localhost:3001/exercise/${params.id}`, {
+        let result = await fetch(`/api/exercise/${params.id}`, {
             method: "delete",
             headers: {
                 'Content-Type': 'application/json'

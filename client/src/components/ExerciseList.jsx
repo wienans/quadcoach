@@ -8,7 +8,7 @@ const ExerciseList = () => {
     }, [])
 
     const getExercises = async () => {
-        let result = await fetch("http://localhost:3001/exercises")
+        let result = await fetch("/api/exercises")
         result = await result.json()
         setExercises(result)
     }
@@ -16,7 +16,7 @@ const ExerciseList = () => {
     const searchHandle = async (event) => {
         let key = event.target.value
         if (key) {
-            let result = await fetch(`http://localhost:3001/search/${key}`)
+            let result = await fetch(`/api/search/${key}`)
             result = await result.json()
             if (result) {
                 setExercises(result)
