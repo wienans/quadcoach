@@ -1,5 +1,5 @@
 FROM node:20
-VOLUME [ "/server" ]
+# VOLUME [ "/server" ]
 WORKDIR /server
 COPY ./package.json ./package.json
 COPY ./models ./models
