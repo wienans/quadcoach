@@ -14,6 +14,7 @@ services:
       - mern-network
     volumes:
       - ./client:/client
+      - /client/node_modules/
     depends_on:
       - mongodb
   backend:
@@ -29,6 +30,7 @@ services:
       - mern-network
     volumes:
       - ./server:/server
+      - /server/node_modules/
     depends_on:
       - mongodb
   mongodb:
