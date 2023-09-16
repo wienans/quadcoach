@@ -12,8 +12,8 @@ services:
       - env.env
     networks:
       - mern-network
-    volumes:
-      - ./client:/client
+    # volumes:
+    #   - ./client:/client
     depends_on:
       - mongodb
   backend:
@@ -27,8 +27,8 @@ services:
       - "3001:3001"
     networks:
       - mern-network
-    volumes:
-      - ./server:/server
+    # volumes:
+    #   - ./server:/server
     depends_on:
       - mongodb
   mongodb:
