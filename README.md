@@ -1,6 +1,10 @@
 # QuadCoach
 QuadCoach - The digital assistant coach for Quadball
 
+## Requirements
+
+* Docker (https://docs.docker.com/engine/install/ubuntu/)
+
 ## Development Environment
 
 ### Toolchain
@@ -24,6 +28,22 @@ Go to your Browser and access the  [Page](http://localhost:5173)
 ## Production Environment
 
 In Production Vite will build the React App and then we will copy the data into the docker container. 
+
+To build the app without installing all dependencies on the host PC do the following
+
+``` bash
+docker compose -f docker-compose.dev up --build -d
+```
+to start the compose in detached mode.
+Then 
+``` bash
+docker exec -it quadcoach-frontend /bin/bash
+```
+into the container and
+``` bash
+npm run build
+```
+to build the App. Due to Volume mounting we now have the build App also in the host machine and can use
 
 ``` bash
 bash start_prod.bash

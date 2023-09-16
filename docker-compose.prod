@@ -13,6 +13,7 @@ services:
       - "3001:3001"
     networks:
       - mern-network
+    restart: always
     depends_on:
       - mongodb-prod
   mongodb-prod:
@@ -28,6 +29,7 @@ services:
       - "27017:27017"
     networks:
       - mern-network
+    restart: always
 networks:
   mern-network:
     driver: bridge

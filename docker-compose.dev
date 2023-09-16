@@ -12,9 +12,10 @@ services:
       - env.env
     networks:
       - mern-network
+    restart: always
     volumes:
       - ./client:/client
-      - /client/node_modules/
+      - /client/node_modules/ # Mask Node Modules to not overwrite npm install
     depends_on:
       - mongodb
   backend:
@@ -28,9 +29,10 @@ services:
       - "3001:3001"
     networks:
       - mern-network
+    restart: always
     volumes:
       - ./server:/server
-      - /server/node_modules/
+      - /server/node_modules/ # Mask Node Modules to not overwrite npm install
     depends_on:
       - mongodb
   mongodb:
@@ -47,6 +49,7 @@ services:
       - "27017:27017"
     networks:
       - mern-network
+    restart: always
 networks:
   mern-network:
     driver: bridge
