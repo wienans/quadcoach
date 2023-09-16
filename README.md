@@ -24,6 +24,9 @@ docker compose -f docker-compose.dev up --build
 
 Go to your Browser and access the  [Page](http://localhost:5173)
 
+``` bash
+docker compose -f docker-compose.dev up --build -d
+```
 
 ## Production Environment
 
