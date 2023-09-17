@@ -1,6 +1,11 @@
 import React from "react";
 import { useParams, useNavigate } from "react-router-dom"
 import { useState, useEffect } from "react";
+import Button from '@mui/material/Button'
+import TextField from '@mui/material/TextField'
+import Stack from '@mui/material/Stack';
+import InputAdornment from '@mui/material/InputAdornment';
+import { Typography } from "@mui/material";
 
 const UpdateExercise = () => {
     const [name, setName] = useState("");
@@ -10,7 +15,7 @@ const UpdateExercise = () => {
     const [persons, setPersons] = useState(0);
     const [materials_string, setMaterials] = useState("");
     const [tags_string, setTags] = useState("");
-    // const [error, setError] = useState(false)
+    const [error, setError] = useState(false)
 
     const params = useParams()
 
@@ -34,7 +39,10 @@ const UpdateExercise = () => {
     }
 
     const update = async () => {
-
+        if (!name || !description) {
+            setError(true)
+            return false
+        }
         let materials = materials_string.replace(/\s/g, '').split(',')
         let tags = tags_string.replace(/\s/g, '').split(',')
 
@@ -69,27 +77,20 @@ const UpdateExercise = () => {
 
     return (
         <div className="add-product">
-            <h1> Update Exercise</h1>
-            <input className="inputBox" type="text" placeholder="Enter Name"
-                value={name} onChange={(e) => setName(e.target.value)} />
-            {/* {error && !name && <span className="invalid-input">Enter name</span>} */}
-            <input className="inputBox" type="text" placeholder="Enter Description"
-                value={description} onChange={(e) => setDescription(e.target.value)} />
-            {/* {error && !description && <span className="invalid-input">Enter description</span>} */}
-            <input className="inputBox" type="text" placeholder="Enter Video URL"
-                value={video_url} onChange={(e) => setVideoUrl(e.target.value)} />
-            <label>Suggested Time in minutes</label>
-            <input className="inputBox" type="number" min="0" step="1"
-                value={time_min} onChange={(e) => setTimeMin(e.target.value)} />
-            <label>Person Number</label>
-            <input className="inputBox" type="number" min="0" step="1"
-                value={persons} onChange={(e) => setPersons(e.target.value)} />
-            <input className="inputBox" type="text" placeholder="Material"
-                value={materials_string} onChange={(e) => setMaterials(e.target.value)} />
-            <input className="inputBox" type="text" placeholder="Tags"
-                value={tags_string} onChange={(e) => setTags(e.target.value)} />
-            <button onClick={update} className="appButton" type="button">Update Exercise</button>
-            <button onClick={deleteExercise} className="appButton" type="button">Delete Exercise</button>
+            <Stack spacing={2} sx={{ mt: 3 }}>
+                <Typography variant="h3">Update Exercise</Typography>
+                <TextField error={error && !name} required id="outlined-basic" label="Name" variant="outlined" helperText={error && !name ? 'Enter Name' : ''} value={name} onChange={(e) => setName(e.target.value)} />
+                <TextField error={error && !description} required multiline id="outlined-textarea" label="Description" variant="outlined" helperText={error && !description ? 'Enter Description' : ''} value={description} onChange={(e) => setDescription(e.target.value)} />
+                <TextField id="outlined-basic" label="Video URL" variant="outlined" placeholder="https://www.youtube.com/" value={video_url} onChange={(e) => setVideoUrl(e.target.value)} />
+                <TextField type="number" inputProps={{ min: 0, step: "1" }} id="outlined-basic" label="Suggested Time" variant="outlined" InputProps={{ endAdornment: <InputAdornment position="end">minutes</InputAdornment>, }} value={time_min} onChange={(e) => setTimeMin(e.target.value)} />
+                <TextField type="number" inputProps={{ min: 0, step: "1" }} id="outlined-basic" label="Person Number" variant="outlined" value={persons} onChange={(e) => setPersons(e.target.value)} />
+                <TextField multiline id="outlined-textarea" label="Material" variant="outlined" value={materials_string} onChange={(e) => setMaterials(e.target.value)} />
+                <TextField multiline id="outlined-textarea" label="Tags" variant="outlined" value={tags_string} onChange={(e) => setTags(e.target.value)} />
+                <Stack direction="row" spacing={1}>
+                    <Button onClick={update} sx={{ margin: 1 }} variant="contained">Update Exercise</Button>
+                    <Button onClick={deleteExercise} sx={{ margin: 1 }} variant="contained">Delete Exercise</Button>
+                </Stack>
+            </Stack>
         </div>
     )
 }
