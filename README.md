@@ -4,6 +4,7 @@ QuadCoach - The digital assistant coach for Quadball
 ## Requirements
 
 * Docker (https://docs.docker.com/engine/install/ubuntu/)
+* Node.js min. v20.5.1 (if you want to run the system without docker)
 
 ## Development Environment
 
