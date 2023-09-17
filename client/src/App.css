@@ -129,6 +129,12 @@
   margin-left: 5px;
 }
 
+.App {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
 .App-logo {
   height: 40vmin;
   pointer-events: none;
