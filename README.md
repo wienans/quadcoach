@@ -29,6 +29,14 @@ Go to your Browser and access the  [Page](http://localhost:5173)
 docker compose -f docker-compose.dev up --build -d
 ```
 
+If you use new Node modules you need to make sure that the image is rebuild completly with
+
+``` bash
+docker compose -f docker-compose.dev down
+docker rm quadcoach-backend quadcoach-frontend
+docker image rm quadcoach-backend quadcoach-frontend
+```
+
 ## Production Environment
 
 In Production Vite will build the React App and then we will copy the data into the docker container. 
