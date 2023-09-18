@@ -1,7 +1,7 @@
 import React from "react";
 import { useParams, useNavigate } from "react-router-dom"
 import { useState, useEffect } from "react";
-import Collapsible from "./Collapsible";
+import Collapsible from "../../components/Collapsible";
 // import { Link } from "react-router-dom";
 import Link from '@mui/material/Link';
 import Button from '@mui/material/Button';
