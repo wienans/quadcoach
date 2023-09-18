@@ -5,5 +5,5 @@ COPY ./server/package.json ./package.json
 COPY ./server/models ./models
 COPY ./server/server.js ./server.js
 RUN npm install
-EXPOSE 3002
+EXPOSE 3001
 CMD ["npm", "start"]
