@@ -37,39 +37,52 @@ import SidenavCard from "./SidenavCard";
 // Custom styles for the Sidenav
 import SidenavRoot from "./SidenavRoot";
 import sidenavLogoLabel from "./styles/sidenav";
+import { useDispatch, useSelector } from "react-redux";
+import { createSelector } from "@reduxjs/toolkit";
+import { setMiniSideNav } from "../layoutSlice";
 
 // Soft UI Dashboard React context
 // import { useSoftUIController, setMiniSidenav } from "context";
 
+// create a selector when selecting two or properties at once for better performance
+const selectMiniSidenav = state => state.layout.miniSidenav;
+const selectTransparentSidenav = state => state.layout.transparentSidenav;
+const sidenavSelector = createSelector(
+  selectMiniSidenav,
+  selectTransparentSidenav,
+  (miniSidenav, transparentSidenav) => ({
+    miniSidenav,
+    transparentSidenav
+  })
+)
+
 function Sidenav ({ color, brand, brandName, routes, ...rest }) {
-  // const [controller, dispatch] = useSoftUIController();
-  // const { miniSidenav, transparentSidenav } = controller;
-  const [miniSidenav, setMiniSidenav] = useState(false)
-  const [transparentSidenav] = useState(true)
+  const dispatch = useDispatch();
+  const { miniSidenav, transparentSidenav } = useSelector(sidenavSelector)
   const location = useLocation();
   const { pathname } = location;
   const collapseName = pathname.split("/").slice(1)[0];
 
   // const closeSidenav = () => setMiniSidenav(dispatch, true);
-  const closeSidenav = () => setMiniSidenav(true);
+  const closeSidenav = () => dispatch(setMiniSideNav(true));
 
-  // useEffect(() => {
-  //   // A function that sets the mini state of the sidenav.
-  //   function handleMiniSidenav () {
-  //     setMiniSidenav(dispatch, window.innerWidth < 1200);
-  //   }
+  useEffect(() => {
+    // A function that sets the mini state of the sidenav.
+    function handleMiniSidenav () {
+      dispatch(setMiniSideNav(window.innerWidth < 1200));
+    }
 
-  //   /** 
-  //    The event listener that's calling the handleMiniSidenav function when resizing the window.
-  //   */
-  //   window.addEventListener("resize", handleMiniSidenav);
+    /** 
+     The event listener that's calling the handleMiniSidenav function when resizing the window.
+    */
+    window.addEventListener("resize", handleMiniSidenav);
 
-  //   // Call the handleMiniSidenav function to set the state with the initial value.
-  //   handleMiniSidenav();
+    // Call the handleMiniSidenav function to set the state with the initial value.
+    handleMiniSidenav();
 
-  //   // Remove event listener on cleanup
-  //   return () => window.removeEventListener("resize", handleMiniSidenav);
-  // }, [dispatch, location]);
+    // Remove event listener on cleanup
+    return () => window.removeEventListener("resize", handleMiniSidenav);
+  }, [dispatch, location]);
 
   // Render all the routes from the routes.js (All the visible items on the Sidenav)
   const renderRoutes = routes.map(({ type, name, icon, title, noCollapse, key, route, href, regExp, }) => {
