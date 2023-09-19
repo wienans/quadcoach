@@ -56,61 +56,66 @@ import logoSpotify from "../../assets/images/small-logos/logo-spotify.svg";
 
 // import AuthApi from "../../../api/auth";
 import { useNavigate } from "react-router-dom";
+import { createSelector } from "@reduxjs/toolkit";
+import { useDispatch, useSelector } from "react-redux";
+import { setMiniSideNav, setOpenConfigurator, setTransparentNavbar } from "../Layout/layoutSlice";
+
+// create a selector when selecting two or properties at once for better performance
+const selectMiniSidenav = state => state.layout.miniSidenav;
+const selectTransparentNavbar = state => state.layout.transparentNavbar;
+const selectFixedNavbar = state => state.layout.fixedNavbar;
+const selectOpenConfigurator = state => state.layout.openConfigurator;
+const dashboardNavbarSelector = createSelector(
+    selectMiniSidenav,
+    selectTransparentNavbar,
+    selectFixedNavbar,
+    selectOpenConfigurator,
+    (miniSidenav, transparentNavbar, fixedNavbar, openConfigurator) => ({
+        miniSidenav,
+        transparentNavbar,
+        fixedNavbar,
+        openConfigurator
+    })
+)
 
 function DashboardNavbar ({ absolute, light, isMini }) {
+    const dispatch = useDispatch();
     const [navbarType, setNavbarType] = useState();
-    // const [controller, dispatch] = useSoftUIController();
-    // const { miniSidenav, transparentNavbar, fixedNavbar, openConfigurator } = controller;
-    const miniSidenav = false;
-    const transparentNavbar = true;
-    const fixedNavbar = true;
-    const openConfigurator = false;
+    const { miniSidenav, transparentNavbar, fixedNavbar, openConfigurator } = useSelector(dashboardNavbarSelector)
 
     const [openMenu, setOpenMenu] = useState(false);
     const route = useLocation().pathname.split("/").slice(1);
-    const navigate = useNavigate();
 
-    // const { user } = useAuth();
-    // const { setUser } = useAuth();
-    const user = undefined
+    useEffect(() => {
+        // Setting the navbar type
+        if (fixedNavbar) {
+            setNavbarType("sticky");
+        } else {
+            setNavbarType("static");
+        }
 
-    // useEffect(() => {
-    //     // Setting the navbar type
-    //     if (fixedNavbar) {
-    //         setNavbarType("sticky");
-    //     } else {
-    //         setNavbarType("static");
-    //     }
+        // A function that sets the transparent state of the navbar.
+        function handleTransparentNavbar () {
+            dispatch(setTransparentNavbar((fixedNavbar && window.scrollY === 0) || !fixedNavbar));
+        }
 
-    //     // A function that sets the transparent state of the navbar.
-    //     function handleTransparentNavbar () {
-    //         setTransparentNavbar(dispatch, (fixedNavbar && window.scrollY === 0) || !fixedNavbar);
-    //     }
+        /** 
+         The event listener that's calling the handleTransparentNavbar function when 
+         scrolling the window.
+        */
+        window.addEventListener("scroll", handleTransparentNavbar);
 
-    //     /** 
-    //      The event listener that's calling the handleTransparentNavbar function when 
-    //      scrolling the window.
-    //     */
-    //     window.addEventListener("scroll", handleTransparentNavbar);
+        // Call the handleTransparentNavbar function to set the state with the initial value.
+        handleTransparentNavbar();
 
-    //     // Call the handleTransparentNavbar function to set the state with the initial value.
-    //     handleTransparentNavbar();
+        // Remove event listener on cleanup
+        return () => window.removeEventListener("scroll", handleTransparentNavbar);
+    }, [dispatch, fixedNavbar]);
 
-    //     // Remove event listener on cleanup
-    //     return () => window.removeEventListener("scroll", handleTransparentNavbar);
-    // }, [dispatch, fixedNavbar]);
-
-    const handleMiniSidenav = () => { } // setMiniSidenav(dispatch, !miniSidenav);
-    const handleConfiguratorOpen = () => { } // setOpenConfigurator(dispatch, !openConfigurator);
+    const handleMiniSidenav = () => { dispatch(setMiniSideNav(!miniSidenav)) }
+    const handleConfiguratorOpen = () => { dispatch(setOpenConfigurator(!openConfigurator)) }
     const handleOpenMenu = (event) => setOpenMenu(event.currentTarget);
     const handleCloseMenu = () => setOpenMenu(false);
-
-    const handleLogout = () => {
-        // AuthApi.Logout(user);
-        // setUser(null);
-        // localStorage.removeItem("user");
-        // return navigate("/authentication/sign-in");
-    };
 
     // Render the notifications menu
     const renderMenu = () => (
@@ -170,43 +175,6 @@ function DashboardNavbar ({ absolute, light, isMini }) {
                             />
                         </SoftBox>
                         <SoftBox color={light ? "white" : "inherit"}>
-                            {user && user.token ? (
-                                <IconButton
-                                    size="small"
-                                    color="inherit"
-                                    sx={navbarIconButton}
-                                    aria-controls="logout"
-                                    aria-haspopup="true"
-                                    variant="contained"
-                                    onClick={handleLogout}
-                                >
-                                    <SoftTypography
-                                        variant="button"
-                                        fontWeight="medium"
-                                        color={light ? "white" : "dark"}
-                                    >
-                                        Logout
-                                    </SoftTypography>
-                                </IconButton>
-                            ) : (
-                                <Link to="/authentication/sign-in">
-                                    <IconButton sx={navbarIconButton} size="small">
-                                        <Icon
-                                            sx={({ palette: { dark, white } }) => ({
-                                                color: light ? white.main : dark.main,
-                                            })}
-                                        >
-                                            account_circle
-                                        </Icon>
-                                        <SoftTypography
-                                            variant="button"
-                                            fontWeight="medium"
-                                            color={light ? "white" : "dark"}
-                                        >
-                                            Sign in
-                                        </SoftTypography>
-                                    </IconButton>
-                                </Link>)}
                             <IconButton
                                 size="small"
                                 color="inherit"

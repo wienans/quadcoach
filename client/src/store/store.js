@@ -1,6 +1,6 @@
 import { configureStore } from "@reduxjs/toolkit";
 import logger from "redux-logger";
-import LayoutReducer from "../components/Layout";
+import { LayoutReducer } from "../components/Layout";
 
 const middleware = [logger];
 
