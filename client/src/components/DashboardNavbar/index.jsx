@@ -42,14 +42,6 @@ import {
     navbarMobileMenu,
 } from "./styles";
 
-// Soft UI Dashboard React context
-// import {
-//     useSoftUIController,
-//     setTransparentNavbar,
-//     setMiniSidenav,
-//     setOpenConfigurator,
-// } from "context";
-
 // Images
 import team2 from "../../assets/images/team-2.jpg";
 import logoSpotify from "../../assets/images/small-logos/logo-spotify.svg";
@@ -58,30 +50,30 @@ import logoSpotify from "../../assets/images/small-logos/logo-spotify.svg";
 import { useNavigate } from "react-router-dom";
 import { createSelector } from "@reduxjs/toolkit";
 import { useDispatch, useSelector } from "react-redux";
-import { setMiniSideNav, setOpenConfigurator, setTransparentNavbar } from "../Layout/layoutSlice";
+import { setMiniSideNav, setOpenSettingsMenu, setTransparentNavbar } from "../Layout/layoutSlice";
 
 // create a selector when selecting two or properties at once for better performance
 const selectMiniSidenav = state => state.layout.miniSidenav;
 const selectTransparentNavbar = state => state.layout.transparentNavbar;
 const selectFixedNavbar = state => state.layout.fixedNavbar;
-const selectOpenConfigurator = state => state.layout.openConfigurator;
+const selectOpenSettingsMenu = state => state.layout.openSettingsMenu;
 const dashboardNavbarSelector = createSelector(
     selectMiniSidenav,
     selectTransparentNavbar,
     selectFixedNavbar,
-    selectOpenConfigurator,
-    (miniSidenav, transparentNavbar, fixedNavbar, openConfigurator) => ({
+    selectOpenSettingsMenu,
+    (miniSidenav, transparentNavbar, fixedNavbar, openSettingsMenu) => ({
         miniSidenav,
         transparentNavbar,
         fixedNavbar,
-        openConfigurator
+        openSettingsMenu
     })
 )
 
 function DashboardNavbar ({ absolute, light, isMini }) {
     const dispatch = useDispatch();
     const [navbarType, setNavbarType] = useState();
-    const { miniSidenav, transparentNavbar, fixedNavbar, openConfigurator } = useSelector(dashboardNavbarSelector)
+    const { miniSidenav, transparentNavbar, fixedNavbar, openSettingsMenu } = useSelector(dashboardNavbarSelector)
 
     const [openMenu, setOpenMenu] = useState(false);
     const route = useLocation().pathname.split("/").slice(1);
@@ -113,7 +105,7 @@ function DashboardNavbar ({ absolute, light, isMini }) {
     }, [dispatch, fixedNavbar]);
 
     const handleMiniSidenav = () => { dispatch(setMiniSideNav(!miniSidenav)) }
-    const handleConfiguratorOpen = () => { dispatch(setOpenConfigurator(!openConfigurator)) }
+    const handleConfiguratorOpen = () => { dispatch(setOpenSettingsMenu(!openSettingsMenu)) }
     const handleOpenMenu = (event) => setOpenMenu(event.currentTarget);
     const handleCloseMenu = () => setOpenMenu(false);
 

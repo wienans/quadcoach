@@ -6,6 +6,7 @@ import HomeIcon from '@mui/icons-material/Home';
 import PlaylistAddIcon from '@mui/icons-material/PlaylistAdd';
 import { DashboardLayout } from "../LayoutContainers";
 import DashboardNavbar from "../DashboardNavbar";
+import SettingsMenu from "../SettingsMenu";
 
 const sidebarNavRoutes = [
     {
@@ -41,6 +42,7 @@ const Layout = () => {
             />
             <DashboardLayout>
                 <DashboardNavbar />
+                <SettingsMenu />
                 <Outlet />
             </DashboardLayout>
         </>

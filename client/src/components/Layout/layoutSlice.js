@@ -4,10 +4,13 @@ import { createSlice } from "@reduxjs/toolkit";
 const initialState = {
     miniSidenav: false,
     transparentSidenav: true,
+    // We set sidenavColor fixed to info inside components/Layout/Layout.tsx and components/Layout/Sidenav 
+    // => sidenavColor property needs to be deleted
+    // available colors: "primary", "dark", "info", "success", "warning", "error"
     sidenavColor: "info",
     transparentNavbar: true,
     fixedNavbar: true,
-    openConfigurator: false,
+    openSettingsMenu: false,
     direction: "ltr",
     layout: "dashboard",
 }
@@ -32,8 +35,8 @@ export const layoutSlice = createSlice({
         setFixedNavbar: (state, action) => {
             state.fixedNavbar = action.payload
         },
-        setOpenConfigurator: (state, action) => {
-            state.openConfigurator = action.payload
+        setOpenSettingsMenu: (state, action) => {
+            state.openSettingsMenu = action.payload
         },
         setDirection: (state, action) => {
             state.direction = action.payload
@@ -44,6 +47,6 @@ export const layoutSlice = createSlice({
     },
 });
 
-export const { setMiniSideNav, setTransparentSidenav, setSidenavColor, setTransparentNavbar, setFixedNavbar, setOpenConfigurator, setDirection, setLayout } = layoutSlice.actions;
+export const { setMiniSideNav, setTransparentSidenav, setSidenavColor, setTransparentNavbar, setFixedNavbar, setOpenSettingsMenu, setDirection, setLayout } = layoutSlice.actions;
 
 export default layoutSlice.reducer;
