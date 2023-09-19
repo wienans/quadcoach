@@ -6,7 +6,7 @@ const cors = require("cors")
 const Exercise = require("./models/exercise")
 const User = require("./models/user")
 // Read out Port or use Default
-const PORT = process.env.PORT || 3002
+const PORT = process.env.PORT || 3001
 
 // Start Express
 const app = express()
