@@ -1,27 +1,64 @@
 import React from "react";
 import { useParams, useNavigate } from "react-router-dom"
 import { useState, useEffect } from "react";
-import Collapsible from "../../components/Collapsible";
 // import { Link } from "react-router-dom";
 import Link from '@mui/material/Link';
-import Button from '@mui/material/Button';
-import Stack from '@mui/material/Stack';
-import { Container, Grid, Typography } from "@mui/material";
-import Divider from '@mui/material/Divider';
-import { SoftButton, SoftTypography } from "../../components";
+import { Card, Grid, } from "@mui/material";
+import { SoftBox, SoftButton, SoftTypography } from "../../components";
 import { useUpdateBreadcrumbs } from "../../components/Layout/hooks";
 
-const Exercise = () => {
-    const [name, setName] = useState("");
-    const [description, setDescription] = useState("");
-    const [video_url, setVideoUrl] = useState("");
-    const [time_min, setTimeMin] = useState(0);
-    const [persons, setPersons] = useState(0);
-    const [materials_string, setMaterials] = useState("");
-    const [tags_string, setTags] = useState("");
-    // const [error, setError] = useState(false)
+const values = [
+    {
+        label: "Description:",
+        getElement: exercise => (
+            <SoftTypography variant="button" fontWeight="regular" color="text">{exercise.description}</SoftTypography>
+        )
+    },
+    {
+        label: "Video URL:",
+        getElement: exercise => exercise.videoUrl && exercise.videoUrl !== ""
+            ? <Link variant="button" fontWeight="regular" href={exercise.videoUrl} target="_blank">{exercise.videoUrl}</Link>
+            : <SoftTypography variant="button" fontWeight="regular" color="text">-</SoftTypography>
+    },
+    {
+        label: "Suggested Time (minutes):",
+        getElement: exercise => (
+            <SoftTypography variant="button" fontWeight="regular" color="text">{exercise.timeMin}</SoftTypography>
+        )
+    },
+    {
+        label: "Person Number:",
+        getElement: exercise => (
+            <SoftTypography variant="button" fontWeight="regular" color="text">{exercise.persons}</SoftTypography>
+        )
+    },
+    {
+        label: "Material:",
+        getElement: exercise => (
+            <SoftTypography variant="button" fontWeight="regular" color="text">{exercise.materialsString}</SoftTypography>
+        )
+    },
+    {
+        label: "Tags:",
+        getElement: exercise => (
+            <SoftTypography variant="button" fontWeight="regular" color="text">{exercise.tagsString}</SoftTypography>
+        )
+    },
+]
 
-    useUpdateBreadcrumbs(name ? `Übung ${name}` : "Übung ansehen", [{ title: "Übungen", to: "exercises" }])
+const Exercise = () => {
+    const [exercise, setExercise] = useState({
+        id: null,
+        name: "",
+        description: "",
+        videoUrl: "",
+        timeMin: 0,
+        persons: 0,
+        materialsString: "",
+        tagsString: "",
+    })
+
+    useUpdateBreadcrumbs(name ? `Exercise ${name}` : "View exercise", [{ title: "Exercises", to: "exercises" }])
 
     const params = useParams()
 
@@ -34,14 +71,17 @@ const Exercise = () => {
     const getExerciseDetails = async () => {
         let result = await fetch(`/api/exercise/${params.id}`)
         result = await result.json()
-        console.warn(result)
-        setName(result.name)
-        setDescription(result.description)
-        setVideoUrl(result.video_url)
-        setTimeMin(result.time_min)
-        setPersons(result.persons)
-        setMaterials(result.materials.toString())
-        setTags(result.tags.toString())
+
+        setExercise({
+            id: result._id,
+            name: result.name,
+            description: result.description,
+            videoUrl: result.video_url,
+            timeMin: result.time_min,
+            persons: result.persons,
+            materialsString: result.materials.toString(),
+            tagsString: result.tags.toString(),
+        })
     }
 
     const update = async () => {
@@ -61,52 +101,71 @@ const Exercise = () => {
         }
     }
 
-    const hasVideoUrl = video_url && video_url !== ""
-
     return (
-        <Container fixed>
-            <Grid container spacing={2}>
-                <Grid item xs={12} justifyContent="center" display="flex">
-                    <SoftTypography variant="h1">{`Exercise: ${name}`}</SoftTypography>
+        <>
+            <Card
+                sx={{
+                    backdropFilter: `saturate(200%) blur(30px)`,
+                    backgroundColor: ({ functions: { rgba }, palette: { white } }) => rgba(white.main, 0.8),
+                    boxShadow: ({ boxShadows: { navbarBoxShadow } }) => navbarBoxShadow,
+                    position: "relative",
+                    py: 2,
+                    px: 2,
+                }}
+            >
+                <Grid container spacing={3} alignItems="center">
+                    <Grid item>
+                        <SoftBox height="100%" mt={0.5} lineHeight={1}>
+                            <SoftTypography variant="h5" fontWeight="medium">
+                                {exercise.name}
+                            </SoftTypography>
+                            <SoftTypography variant="button" color="text" fontWeight="medium">
+                                Exercise
+                            </SoftTypography>
+                        </SoftBox>
+                    </Grid>
+                    <Grid item sx={{ ml: "auto" }}>
+                        <SoftButton
+                            onClick={update}
+                            color="primary"
+                            sx={{ marginRight: 1 }}
+                        >
+                            Update Exercise
+                        </SoftButton>
+                        <SoftButton
+                            onClick={deleteExercise}
+                            color="error"
+                        >
+                            Delete Exercise
+                        </SoftButton>
+                    </Grid>
                 </Grid>
-                <Grid item xs={12} justifyContent="center" display="flex">
-                    <SoftTypography variant="h3">{`Description: ${description}`}</SoftTypography>
+            </Card>
+            <SoftBox mt={5} mb={3}>
+                <Grid container spacing={3}>
+                    <Grid item xs={12}>
+                        <Card sx={{ height: "100%" }}>
+                            <SoftBox p={2}>
+                                <SoftBox>
+                                    <Grid container spacing={2}>
+                                        {values.map(({ label, getElement }) => (
+                                            <Grid item xs={4} key={label}>
+                                                <SoftBox key={label} display="flex" py={1} pr={2}>
+                                                    <SoftTypography variant="button" fontWeight="bold" textTransform="capitalize" mr={2}>
+                                                        {label}
+                                                    </SoftTypography>
+                                                    {getElement(exercise)}
+                                                </SoftBox>
+                                            </Grid>
+                                        ))}
+                                    </Grid>
+                                </SoftBox>
+                            </SoftBox>
+                        </Card>
+                    </Grid>
                 </Grid>
-                <Grid item xs={12} justifyContent="center" display="flex">
-                    <SoftTypography variant="h3">{`Video URL:${hasVideoUrl ? " " : " -"}`}</SoftTypography>
-                    {
-                        hasVideoUrl && <Link href={video_url}>open</Link>
-                    }
-                </Grid>
-                <Grid item xs={12} justifyContent="center" display="flex">
-                    <SoftTypography variant="h3">{`Suggested Time in minutes: ${time_min}`}</SoftTypography>
-                </Grid>
-                <Grid item xs={12} justifyContent="center" display="flex">
-                    <SoftTypography variant="h3">{`Person Number: ${persons}`}</SoftTypography>
-                </Grid>
-                <Grid item xs={12} justifyContent="center" display="flex">
-                    <SoftTypography variant="h3">{`Material: ${materials_string}`}</SoftTypography>
-                </Grid>
-                <Grid item xs={12} justifyContent="center" display="flex">
-                    <SoftTypography variant="h3">{`Tags: ${tags_string}`}</SoftTypography>
-                </Grid>
-                <Grid item xs={12} justifyContent="center" display="flex">
-                    <SoftButton
-                        onClick={update}
-                        color="primary"
-                        sx={{ marginRight: 1 }}
-                    >
-                        Update Exercise
-                    </SoftButton>
-                    <SoftButton
-                        onClick={deleteExercise}
-                        color="error"
-                    >
-                        Delete Exercise
-                    </SoftButton>
-                </Grid>
-            </Grid>
-        </Container>
+            </SoftBox>
+        </>
     )
 }
 

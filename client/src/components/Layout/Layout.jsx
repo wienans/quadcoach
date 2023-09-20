@@ -22,7 +22,7 @@ const sidebarNavRoutes = [
     },
     {
         type: "collapse",
-        name: "Übungen",
+        name: "Exercises",
         key: "exercises",
         route: "/exercises",
         icon: <ListIcon size="12px" />,
@@ -32,7 +32,7 @@ const sidebarNavRoutes = [
     },
     {
         type: "collapse",
-        name: "Übung hinzufügen",
+        name: "Add Exercise",
         key: "addExercise",
         route: "/exercises/add",
         icon: <PlaylistAddIcon size="12px" />,
