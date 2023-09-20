@@ -1,0 +1,33 @@
+{
+  // typescriptreact
+  "FunctionComponent": {
+    "scope": "javascriptreact",
+    "prefix": "FuCo",
+    "body": [
+      "const ${1:$TM_FILENAME_BASE} = () => {",
+      "",
+      "return (",
+      "${0:<p></p>}",
+      ");",
+      "}",
+      "",
+      "export default ${1:$TM_FILENAME_BASE};"
+    ],
+    "description": "Creates a FunctionComponent without props"
+  },
+  "FunctionComponentWithProps": {
+    "scope": "javascriptreact",
+    "prefix": "FuCoProps",
+    "body": [
+      "const ${1:$TM_FILENAME_BASE} = ({}) => {",
+      "",
+      "return (",
+      "<p>${1:$TM_FILENAME_BASE}</p>",
+      ");",
+      "}",
+      "",
+      "export default ${1:$TM_FILENAME_BASE};"
+    ],
+    "description": "Creates a FunctionComponent with props"
+  }
+}
