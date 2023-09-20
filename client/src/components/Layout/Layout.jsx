@@ -4,6 +4,7 @@ import { Outlet } from 'react-router-dom'
 
 import HomeIcon from '@mui/icons-material/Home';
 import PlaylistAddIcon from '@mui/icons-material/PlaylistAdd';
+import ListIcon from '@mui/icons-material/List';
 import { DashboardLayout } from "../LayoutContainers";
 import DashboardNavbar from "../DashboardNavbar";
 import SettingsMenu from "../SettingsMenu";
@@ -21,13 +22,23 @@ const sidebarNavRoutes = [
     },
     {
         type: "collapse",
+        name: "Übungen",
+        key: "exercises",
+        route: "/exercises",
+        icon: <ListIcon size="12px" />,
+        noCollapse: true,
+        protected: true,
+        regExp: new RegExp("\\/exercises$"),
+    },
+    {
+        type: "collapse",
         name: "Übung hinzufügen",
         key: "addExercise",
-        route: "/exercise/add",
+        route: "/exercises/add",
         icon: <PlaylistAddIcon size="12px" />,
         noCollapse: true,
         protected: true,
-        regExp: new RegExp("\\/exercise\\/add$"),
+        regExp: new RegExp("\\/exercises\\/add$"),
     },
 ]
 

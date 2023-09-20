@@ -7,8 +7,11 @@ import Stack from '@mui/material/Stack';
 import InputAdornment from '@mui/material/InputAdornment';
 import { Container, Grid, Typography } from "@mui/material";
 import { SoftButton, SoftInput } from "../../components";
+import { useUpdateBreadcrumbs } from "../../components/Layout/hooks";
 
 const AddExercise = () => {
+    useUpdateBreadcrumbs("Übung hinzufügen", [{ title: "Übungen", to: "exercises" }])
+
     const [name, setName] = useState("");
     const [description, setDescription] = useState("");
     const [video_url, setVideoUrl] = useState("");

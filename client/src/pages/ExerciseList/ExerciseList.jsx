@@ -1,41 +1,45 @@
 import React, { useEffect, useState } from "react";
 import Box from '@mui/material/Box';
 import { DataGrid } from '@mui/x-data-grid';
-import { Typography } from "@mui/material";
-import { useNavigate } from "react-router-dom"
+import { Container, Grid, Typography } from "@mui/material";
+import { useLocation, useNavigate } from "react-router-dom"
 import TextField from '@mui/material/TextField'
 import Stack from '@mui/material/Stack';
+import { useUpdateBreadcrumbs } from "../../components/Layout/hooks";
+import { SoftInput } from "../../components";
 const ExerciseList = () => {
+    const location = useLocation().pathname;
+    const isDashboard = location === "/"
     const [exercises, setExercises] = useState([])
+    const [exerciseSearchValue, setExerciseSearchValue] = useState("")
+
+    useUpdateBreadcrumbs(isDashboard ? "Dashboard" : "Übungen", [])
 
     useEffect(() => {
-        getExercises()
-    }, [])
-    const navigate = useNavigate()
-    const getExercises = async () => {
-        let result = await fetch("/api/exercises")
-        result = await result.json()
-        setExercises(result)
-    }
-
-    const searchHandle = async (event) => {
-        let key = event.target.value
-        if (key) {
-            let result = await fetch(`/api/search/${key}`)
-            result = await result.json()
-            if (result) {
-                setExercises(result)
+        const getExercises = async (searchString) => {
+            // refactor api, normaly we would use same endpoint and just add a queryparameter
+            // /api/exercises => all, api/exercises?search=MySearchValue
+            let searchPath = "/api/exercises"
+            if (searchString && searchString !== "") {
+                searchPath = `/api/search/${searchString}`
             }
-        } else {
-            getExercises()
+
+            let result = await fetch(searchPath)
+            result = await result.json()
+
+            setExercises(result ? result : [])
         }
-    }
+
+        getExercises(exerciseSearchValue)
+    }, [exerciseSearchValue])
+    const navigate = useNavigate()
+
     const handleRowClick = (
         params, // GridRowParams
         event, // MuiEvent<React.MouseEvent<HTMLElement>>
         details, // GridCallbackDetails
     ) => {
-        navigate("/exercise/" + params.id)
+        navigate(`/exercises/${params.id}`)
     };
     const columns2 = [
         {
@@ -60,11 +64,22 @@ const ExerciseList = () => {
 
     console.log(exercises)
     return (
-        <div className="exercise-list">
-            <Stack spacing={2} sx={{ mt: 3 }}>
-                <Typography variant="h3">Exercise List</Typography>
-                <TextField id="outlined-basic" variant="outlined" placeholder="Search Exercise" onChange={searchHandle} />
-                <Box sx={{ height: 400, width: '100%' }}>
+        <Container fixed>
+            <Grid container spacing={2}>
+                <Grid item xs={12}>
+                    <Typography variant="h3">Exercise List</Typography>
+                </Grid>
+                <Grid item xs={12}>
+                    <SoftInput
+                        id="outlined-basic"
+                        placeholder="Search Exercise"
+                        variant="outlined"
+                        value={exerciseSearchValue}
+                        onChange={(event) => setExerciseSearchValue(event.target.value)}
+                        fullWidth
+                    />
+                </Grid>
+                <Grid item xs={12} sx={{ height: "400px" }}>
                     <DataGrid getRowId={(row) => row._id}
                         rows={exercises}
                         columns={columns2}
@@ -79,9 +94,9 @@ const ExerciseList = () => {
                         disableRowSelectionOnClick
                         onRowClick={handleRowClick}
                     />
-                </Box>
-            </Stack>
-        </div>
+                </Grid>
+            </Grid>
+        </Container>
     )
 }
 

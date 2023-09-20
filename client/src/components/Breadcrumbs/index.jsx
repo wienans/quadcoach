@@ -26,9 +26,7 @@ import Icon from "@mui/material/Icon";
 // Soft UI Dashboard React components
 import { SoftBox, SoftTypography } from "../"
 
-function Breadcrumbs ({ icon, title, route, light }) {
-    const routes = route.slice(0, -1);
-
+function Breadcrumbs ({ icon, title, routes, light }) {
     return (
         <SoftBox mr={{ xs: 0, xl: 8 }}>
             <MuiBreadcrumbs
@@ -49,9 +47,10 @@ function Breadcrumbs ({ icon, title, route, light }) {
                         <Icon>{icon}</Icon>
                     </SoftTypography>
                 </Link>
-                {routes.map((el) => (
-                    <Link to={`/${el}`} key={el}>
+                {routes && routes.map((el) => {
+                    const TitleElement =
                         <SoftTypography
+                            key={el.title}
                             component="span"
                             variant="button"
                             fontWeight="regular"
@@ -60,10 +59,16 @@ function Breadcrumbs ({ icon, title, route, light }) {
                             opacity={light ? 0.8 : 0.5}
                             sx={{ lineHeight: 0 }}
                         >
-                            {el}
+                            {el.title}
                         </SoftTypography>
-                    </Link>
-                ))}
+
+                    if (!el.to) return TitleElement
+                    return (
+                        <Link to={el.to} key={el.title}>
+                            {TitleElement}
+                        </Link>
+                    )
+                })}
                 <SoftTypography
                     variant="button"
                     fontWeight="regular"
@@ -71,7 +76,7 @@ function Breadcrumbs ({ icon, title, route, light }) {
                     color={light ? "white" : "dark"}
                     sx={{ lineHeight: 0 }}
                 >
-                    {title.replace("-", " ")}
+                    {title}
                 </SoftTypography>
             </MuiBreadcrumbs>
             <SoftTypography
@@ -81,7 +86,7 @@ function Breadcrumbs ({ icon, title, route, light }) {
                 color={light ? "white" : "dark"}
                 noWrap
             >
-                {title.replace("-", " ")}
+                {title}
             </SoftTypography>
         </SoftBox>
     );
@@ -96,7 +101,10 @@ Breadcrumbs.defaultProps = {
 Breadcrumbs.propTypes = {
     icon: PropTypes.node.isRequired,
     title: PropTypes.string.isRequired,
-    route: PropTypes.oneOfType([PropTypes.string, PropTypes.array]).isRequired,
+    routes: PropTypes.arrayOf(PropTypes.shape({
+        title: PropTypes.string.isRequired,
+        to: PropTypes.string
+    })),
     light: PropTypes.bool,
 };
 

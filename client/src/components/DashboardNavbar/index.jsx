@@ -57,26 +57,27 @@ const selectMiniSidenav = state => state.layout.miniSidenav;
 const selectTransparentNavbar = state => state.layout.transparentNavbar;
 const selectFixedNavbar = state => state.layout.fixedNavbar;
 const selectOpenSettingsMenu = state => state.layout.openSettingsMenu;
+const selectBreadcrumbs = state => state.layout.breadcrumbs;
 const dashboardNavbarSelector = createSelector(
     selectMiniSidenav,
     selectTransparentNavbar,
     selectFixedNavbar,
     selectOpenSettingsMenu,
-    (miniSidenav, transparentNavbar, fixedNavbar, openSettingsMenu) => ({
+    selectBreadcrumbs,
+    (miniSidenav, transparentNavbar, fixedNavbar, openSettingsMenu, breadcrumbs) => ({
         miniSidenav,
         transparentNavbar,
         fixedNavbar,
-        openSettingsMenu
+        breadcrumbs,
     })
 )
 
 function DashboardNavbar ({ absolute, light, isMini }) {
     const dispatch = useDispatch();
     const [navbarType, setNavbarType] = useState();
-    const { miniSidenav, transparentNavbar, fixedNavbar, openSettingsMenu } = useSelector(dashboardNavbarSelector)
+    const { miniSidenav, transparentNavbar, fixedNavbar, openSettingsMenu, breadcrumbs } = useSelector(dashboardNavbarSelector)
 
     const [openMenu, setOpenMenu] = useState(false);
-    const route = useLocation().pathname.split("/").slice(1);
 
     useEffect(() => {
         // Setting the navbar type
@@ -155,9 +156,13 @@ function DashboardNavbar ({ absolute, light, isMini }) {
             sx={(theme) => navbar(theme, { transparentNavbar, absolute, light })}
         >
             <Toolbar sx={(theme) => navbarContainer(theme)}>
-                <SoftBox color="inherit" mb={{ xs: 1, md: 0 }} sx={(theme) => navbarRow(theme, { isMini })}>
-                    <Breadcrumbs icon="home" title={route[route.length - 1]} route={route} light={light} />
-                </SoftBox>
+                {
+                    breadcrumbs ?
+                        <SoftBox color="inherit" mb={{ xs: 1, md: 0 }} sx={(theme) => navbarRow(theme, { isMini })}>
+                            <Breadcrumbs icon="home" title={breadcrumbs.title} routes={breadcrumbs.routes} light={light} />
+                        </SoftBox>
+                        : <SoftBox />
+                }
                 {isMini ? null : (
                     <SoftBox sx={(theme) => navbarRow(theme, { isMini })}>
                         <SoftBox pr={1}>

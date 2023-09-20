@@ -6,8 +6,10 @@ import Collapsible from "../../components/Collapsible";
 import Link from '@mui/material/Link';
 import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
-import { Typography } from "@mui/material";
+import { Container, Grid, Typography } from "@mui/material";
 import Divider from '@mui/material/Divider';
+import { SoftButton, SoftTypography } from "../../components";
+import { useUpdateBreadcrumbs } from "../../components/Layout/hooks";
 
 const Exercise = () => {
     const [name, setName] = useState("");
@@ -18,6 +20,8 @@ const Exercise = () => {
     const [materials_string, setMaterials] = useState("");
     const [tags_string, setTags] = useState("");
     // const [error, setError] = useState(false)
+
+    useUpdateBreadcrumbs(name ? `Übung ${name}` : "Übung ansehen", [{ title: "Übungen", to: "exercises" }])
 
     const params = useParams()
 
@@ -41,9 +45,7 @@ const Exercise = () => {
     }
 
     const update = async () => {
-
-        navigate(`/update/${params.id}`)
-
+        navigate(`/exercises/${params.id}/update`)
     }
 
     const deleteExercise = async () => {
@@ -59,35 +61,52 @@ const Exercise = () => {
         }
     }
 
+    const hasVideoUrl = video_url && video_url !== ""
 
     return (
-        <div className="add-product">
-            <Stack spacing={2} sx={{ mt: 3 }}>
-                <Typography variant="h3">Exercise: {name}</Typography>
-                <Collapsible label="Description">
-                    {description}
-                </Collapsible>
-                <Divider />
-                <Link href={video_url}>Video URL</Link>{' '}
-                <Divider />
-                <Typography>Suggested Time in minutes: {time_min}</Typography>
-                <Divider />
-                <Typography>Person Number:  {persons}</Typography>
-                <Divider />
-                <Collapsible label="Material">
-                    {materials_string}
-                </Collapsible>
-                <Divider />
-                <Collapsible label="Tags">
-                    {tags_string}
-                </Collapsible>
-                <Divider />
-                <Stack direction="row" spacing={1}>
-                    <Button onClick={update} sx={{ margin: 1 }} variant="contained">Update Exercise</Button>
-                    <Button onClick={deleteExercise} sx={{ margin: 1 }} variant="contained">Delete Exercise</Button>
-                </Stack>
-            </Stack>
-        </div >
+        <Container fixed>
+            <Grid container spacing={2}>
+                <Grid item xs={12} justifyContent="center" display="flex">
+                    <SoftTypography variant="h1">{`Exercise: ${name}`}</SoftTypography>
+                </Grid>
+                <Grid item xs={12} justifyContent="center" display="flex">
+                    <SoftTypography variant="h3">{`Description: ${description}`}</SoftTypography>
+                </Grid>
+                <Grid item xs={12} justifyContent="center" display="flex">
+                    <SoftTypography variant="h3">{`Video URL:${hasVideoUrl ? " " : " -"}`}</SoftTypography>
+                    {
+                        hasVideoUrl && <Link href={video_url}>open</Link>
+                    }
+                </Grid>
+                <Grid item xs={12} justifyContent="center" display="flex">
+                    <SoftTypography variant="h3">{`Suggested Time in minutes: ${time_min}`}</SoftTypography>
+                </Grid>
+                <Grid item xs={12} justifyContent="center" display="flex">
+                    <SoftTypography variant="h3">{`Person Number: ${persons}`}</SoftTypography>
+                </Grid>
+                <Grid item xs={12} justifyContent="center" display="flex">
+                    <SoftTypography variant="h3">{`Material: ${materials_string}`}</SoftTypography>
+                </Grid>
+                <Grid item xs={12} justifyContent="center" display="flex">
+                    <SoftTypography variant="h3">{`Tags: ${tags_string}`}</SoftTypography>
+                </Grid>
+                <Grid item xs={12} justifyContent="center" display="flex">
+                    <SoftButton
+                        onClick={update}
+                        color="primary"
+                        sx={{ marginRight: 1 }}
+                    >
+                        Update Exercise
+                    </SoftButton>
+                    <SoftButton
+                        onClick={deleteExercise}
+                        color="error"
+                    >
+                        Delete Exercise
+                    </SoftButton>
+                </Grid>
+            </Grid>
+        </Container>
     )
 }
 

@@ -17,8 +17,18 @@ const routes = [
                     };
                 },
             },
+            // For future, we might have a dashboard on home instead of list of only exercise
             {
-                path: "/exercise/add",
+                path: "/exercises",
+                async lazy () {
+                    const ExerciseList = (await import("./ExerciseList")).default;
+                    return {
+                        element: <ExerciseList />,
+                    };
+                },
+            },
+            {
+                path: "/exercises/add",
                 async lazy () {
                     const AddExercise = (await import("./AddExercise")).default;
                     return {
@@ -27,7 +37,7 @@ const routes = [
                 },
             },
             {
-                path: "/exercise/:id",
+                path: "/exercises/:id",
                 async lazy () {
                     const Exercise = (await import("./Exercise")).default;
                     return {
@@ -36,7 +46,7 @@ const routes = [
                 },
             },
             {
-                path: "/exercise/:id/update",
+                path: "/exercises/:id/update",
                 async lazy () {
                     const UpdateExercise = (await import("./UpdateExercise")).default;
                     return {

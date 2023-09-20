@@ -13,6 +13,7 @@ const initialState = {
     openSettingsMenu: false,
     direction: "ltr",
     layout: "dashboard",
+    breadcrumbs: undefined,
 }
 
 export const layoutSlice = createSlice({
@@ -44,9 +45,26 @@ export const layoutSlice = createSlice({
         setLayout: (state, action) => {
             state.layout = action.payload
         },
+        /**
+         * 
+         * @param {*} state 
+         * @param {object} action with following structure
+         * {
+         *  payload: {
+         *     title: string,
+         *     routes: { 
+         *        title: string,
+         *        to: string
+         *      }[],
+         *  }
+         * }
+         */
+        setBreadcrumbs: (state, action) => {
+            state.breadcrumbs = action.payload
+        },
     },
 });
 
-export const { setMiniSideNav, setTransparentSidenav, setSidenavColor, setTransparentNavbar, setFixedNavbar, setOpenSettingsMenu, setDirection, setLayout } = layoutSlice.actions;
+export const { setMiniSideNav, setTransparentSidenav, setSidenavColor, setTransparentNavbar, setFixedNavbar, setOpenSettingsMenu, setDirection, setLayout, setBreadcrumbs } = layoutSlice.actions;
 
 export default layoutSlice.reducer;
