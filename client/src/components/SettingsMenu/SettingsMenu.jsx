@@ -73,7 +73,7 @@ function SettingsMenu () {
             <SoftBox pt={1.25} pb={3} px={3}>
                 <SoftBox textAlign="center">
                     <SoftBox mb={0.5}>
-                        <SoftTypography variant="h6">Thank you for using Quid Coach!</SoftTypography>
+                        <SoftTypography variant="h6">Thank you for using QuadCoach!</SoftTypography>
                     </SoftBox>
 
                     <SoftBox display="flex" justifyContent="center">
