@@ -47,17 +47,17 @@ import team2 from "../../assets/images/team-2.jpg";
 import logoSpotify from "../../assets/images/small-logos/logo-spotify.svg";
 
 // import AuthApi from "../../../api/auth";
-import { useNavigate } from "react-router-dom";
 import { createSelector } from "@reduxjs/toolkit";
-import { useDispatch, useSelector } from "react-redux";
 import { setMiniSideNav, setOpenSettingsMenu, setTransparentNavbar } from "../Layout/layoutSlice";
+import { useAppDispatch, useAppSelector } from "../../store/hooks";
+import { RootState } from "../../store/store";
 
 // create a selector when selecting two or properties at once for better performance
-const selectMiniSidenav = state => state.layout.miniSidenav;
-const selectTransparentNavbar = state => state.layout.transparentNavbar;
-const selectFixedNavbar = state => state.layout.fixedNavbar;
-const selectOpenSettingsMenu = state => state.layout.openSettingsMenu;
-const selectBreadcrumbs = state => state.layout.breadcrumbs;
+const selectMiniSidenav = (state: RootState) => state.layout.miniSidenav;
+const selectTransparentNavbar = (state: RootState) => state.layout.transparentNavbar;
+const selectFixedNavbar = (state: RootState) => state.layout.fixedNavbar;
+const selectOpenSettingsMenu = (state: RootState) => state.layout.openSettingsMenu;
+const selectBreadcrumbs = (state: RootState) => state.layout.breadcrumbs;
 const dashboardNavbarSelector = createSelector(
     selectMiniSidenav,
     selectTransparentNavbar,
@@ -68,14 +68,15 @@ const dashboardNavbarSelector = createSelector(
         miniSidenav,
         transparentNavbar,
         fixedNavbar,
+        openSettingsMenu,
         breadcrumbs,
     })
 )
 
 function DashboardNavbar({ absolute, light, isMini }) {
-    const dispatch = useDispatch();
+    const dispatch = useAppDispatch();
     const [navbarType, setNavbarType] = useState();
-    const { miniSidenav, transparentNavbar, fixedNavbar, openSettingsMenu, breadcrumbs } = useSelector(dashboardNavbarSelector)
+    const { miniSidenav, transparentNavbar, fixedNavbar, openSettingsMenu, breadcrumbs } = useAppSelector(dashboardNavbarSelector)
 
     const [openMenu, setOpenMenu] = useState(false);
 

@@ -1,7 +1,28 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { PayloadAction, createSlice } from "@reduxjs/toolkit";
+import { BreadcrumbRoute } from "../Breadcrumbs";
+
+export type StoredBreadCrumbs = {
+    title: string;
+    routes: BreadcrumbRoute[];
+}
+
+type SidenavColors = "primary" | "dark" | "info" | "success" | "warning" | "error"
+
+// Define a type for the slice state
+interface LayoutState {
+    miniSidenav: boolean;
+    transparentSidenav: boolean;
+    sidenavColor: SidenavColors;
+    transparentNavbar: boolean;
+    fixedNavbar: boolean;
+    openSettingsMenu: boolean;
+    direction: string; // TODO check possible values. ltr and rtl?
+    layout: string;
+    breadcrumbs?: StoredBreadCrumbs
+}
 
 /** For now we will add all properties from ui template. In future we would delete not needed properties. */
-const initialState = {
+const initialState: LayoutState = {
     miniSidenav: true,
     transparentSidenav: true,
     // We set sidenavColor fixed to info inside components/Layout/Layout.tsx and components/Layout/Sidenav 
@@ -21,45 +42,31 @@ export const layoutSlice = createSlice({
     // `createSlice` will infer the state type from the `initialState` argument
     initialState,
     reducers: {
-        setMiniSideNav: (state, action) => {
+        setMiniSideNav: (state, action: PayloadAction<boolean>) => {
             state.miniSidenav = action.payload
         },
-        setTransparentSidenav: (state, action) => {
+        setTransparentSidenav: (state, action: PayloadAction<boolean>) => {
             state.transparentSidenav = action.payload
         },
-        setSidenavColor: (state, action) => {
+        setSidenavColor: (state, action: PayloadAction<SidenavColors>) => {
             state.sidenavColor = action.payload
         },
-        setTransparentNavbar: (state, action) => {
+        setTransparentNavbar: (state, action: PayloadAction<boolean>) => {
             state.transparentNavbar = action.payload
         },
-        setFixedNavbar: (state, action) => {
+        setFixedNavbar: (state, action: PayloadAction<boolean>) => {
             state.fixedNavbar = action.payload
         },
-        setOpenSettingsMenu: (state, action) => {
+        setOpenSettingsMenu: (state, action: PayloadAction<boolean>) => {
             state.openSettingsMenu = action.payload
         },
-        setDirection: (state, action) => {
+        setDirection: (state, action: PayloadAction<string>) => {
             state.direction = action.payload
         },
-        setLayout: (state, action) => {
+        setLayout: (state, action: PayloadAction<string>) => {
             state.layout = action.payload
         },
-        /**
-         * 
-         * @param {*} state 
-         * @param {object} action with following structure
-         * {
-         *  payload: {
-         *     title: string,
-         *     routes: { 
-         *        title: string,
-         *        to: string
-         *      }[],
-         *  }
-         * }
-         */
-        setBreadcrumbs: (state, action) => {
+        setBreadcrumbs: (state, action: PayloadAction<StoredBreadCrumbs | undefined>) => {
             state.breadcrumbs = action.payload
         },
     },

@@ -12,7 +12,7 @@ Coded by www.creative-tim.com
 
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 */
-import { useSelector } from "react-redux";
+import { useAppSelector } from "../../store/hooks";
 
 // prop-types is a library for typechecking of props.
 import PropTypes from "prop-types";
@@ -23,8 +23,8 @@ import SoftBox from "../SoftBox";
 // Soft UI Dashboard React context
 // import { useSoftUIController, setLayout } from "context";
 
-function DashboardLayout ({ children }) {
-    const miniSidenav = useSelector(state => state.layout.miniSidenav)
+function DashboardLayout({ children }) {
+    const miniSidenav = useAppSelector(state => state.layout.miniSidenav)
 
     return (
         <SoftBox

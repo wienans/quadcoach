@@ -37,16 +37,17 @@ import SidenavCard from "./SidenavCard";
 // Custom styles for the Sidenav
 import SidenavRoot from "./SidenavRoot";
 import sidenavLogoLabel from "./styles/sidenav";
-import { useDispatch, useSelector } from "react-redux";
 import { createSelector } from "@reduxjs/toolkit";
 import { setMiniSideNav } from "../layoutSlice";
+import { useAppDispatch, useAppSelector } from "../../../store/hooks";
+import { RootState } from "../../../store/store";
 
 // Soft UI Dashboard React context
 // import { useSoftUIController, setMiniSidenav } from "context";
 
 // create a selector when selecting two or properties at once for better performance
-const selectMiniSidenav = state => state.layout.miniSidenav;
-const selectTransparentSidenav = state => state.layout.transparentSidenav;
+const selectMiniSidenav = (state: RootState) => state.layout.miniSidenav;
+const selectTransparentSidenav = (state: RootState) => state.layout.transparentSidenav;
 const sidenavSelector = createSelector(
   selectMiniSidenav,
   selectTransparentSidenav,
@@ -57,8 +58,8 @@ const sidenavSelector = createSelector(
 )
 
 function Sidenav({ color, brand, brandName, routes, ...rest }) {
-  const dispatch = useDispatch();
-  const { miniSidenav, transparentSidenav } = useSelector(sidenavSelector)
+  const dispatch = useAppDispatch();
+  const { miniSidenav, transparentSidenav } = useAppSelector(sidenavSelector)
   const location = useLocation();
   const { pathname } = location;
   const collapseName = pathname.split("/").slice(1)[0];

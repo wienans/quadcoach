@@ -30,12 +30,12 @@ import { SoftBox, SoftTypography, SoftButton } from ".."
 
 // Custom styles for the Configurator
 import SettingsMenuRoot from "./SettingsMenuRoot";
-import { useDispatch, useSelector } from "react-redux";
 import { setOpenSettingsMenu } from "../Layout/layoutSlice";
+import { useAppDispatch, useAppSelector } from "../../store/hooks";
 
 function SettingsMenu() {
-    const dispatch = useDispatch();
-    const openSettingsMenu = useSelector(state => state.layout.openSettingsMenu)
+    const dispatch = useAppDispatch();
+    const openSettingsMenu = useAppSelector(state => state.layout.openSettingsMenu)
 
     const handleCloseConfigurator = () => dispatch(setOpenSettingsMenu(false));
 
