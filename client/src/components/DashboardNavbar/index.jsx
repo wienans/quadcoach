@@ -72,7 +72,7 @@ const dashboardNavbarSelector = createSelector(
     })
 )
 
-function DashboardNavbar ({ absolute, light, isMini }) {
+function DashboardNavbar({ absolute, light, isMini }) {
     const dispatch = useDispatch();
     const [navbarType, setNavbarType] = useState();
     const { miniSidenav, transparentNavbar, fixedNavbar, openSettingsMenu, breadcrumbs } = useSelector(dashboardNavbarSelector)
@@ -88,7 +88,7 @@ function DashboardNavbar ({ absolute, light, isMini }) {
         }
 
         // A function that sets the transparent state of the navbar.
-        function handleTransparentNavbar () {
+        function handleTransparentNavbar() {
             dispatch(setTransparentNavbar((fixedNavbar && window.scrollY === 0) || !fixedNavbar));
         }
 
@@ -175,7 +175,6 @@ function DashboardNavbar ({ absolute, light, isMini }) {
                             <IconButton
                                 size="small"
                                 color="inherit"
-                                sx={navbarMobileMenu}
                                 onClick={handleMiniSidenav}
                             >
                                 <Icon className={light ? "text-white" : "text-dark"}>

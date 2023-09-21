@@ -2,7 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 
 /** For now we will add all properties from ui template. In future we would delete not needed properties. */
 const initialState = {
-    miniSidenav: false,
+    miniSidenav: true,
     transparentSidenav: true,
     // We set sidenavColor fixed to info inside components/Layout/Layout.tsx and components/Layout/Sidenav 
     // => sidenavColor property needs to be deleted
