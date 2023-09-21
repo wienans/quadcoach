@@ -159,7 +159,7 @@ function DashboardNavbar({ absolute, light, isMini }) {
                 {
                     breadcrumbs ?
                         <SoftBox color="inherit" mb={{ xs: 1, md: 0 }} sx={(theme) => navbarRow(theme, { isMini })}>
-                            <Breadcrumbs icon="home" title={breadcrumbs.title} routes={breadcrumbs.routes} light={light} />
+                            {/* <Breadcrumbs icon="home" title={breadcrumbs.title} routes={breadcrumbs.routes} light={light} /> */}
                         </SoftBox>
                         : <SoftBox />
                 }
@@ -189,7 +189,7 @@ function DashboardNavbar({ absolute, light, isMini }) {
                             >
                                 <Icon>settings</Icon>
                             </IconButton>
-                            <IconButton
+                            {/* <IconButton
                                 size="small"
                                 color="inherit"
                                 sx={navbarIconButton}
@@ -199,7 +199,7 @@ function DashboardNavbar({ absolute, light, isMini }) {
                                 onClick={handleOpenMenu}
                             >
                                 <Icon className={light ? "text-white" : "text-dark"}>notifications</Icon>
-                            </IconButton>
+                            </IconButton> */}
                             {renderMenu()}
                         </SoftBox>
                     </SoftBox>
