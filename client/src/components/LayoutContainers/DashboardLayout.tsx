@@ -32,13 +32,14 @@ function DashboardLayout({ children }) {
                 p: 3,
                 position: "relative",
 
-                [breakpoints.up("xl")]: {
-                    marginLeft: miniSidenav ? pxToRem(120) : pxToRem(274),
-                    transition: transitions.create(["margin-left", "margin-right"], {
-                        easing: transitions.easing.easeInOut,
-                        duration: transitions.duration.standard,
-                    }),
-                },
+                // Move content with Sidenav
+                // [breakpoints.up("xl")]: {
+                //     marginLeft: miniSidenav ? pxToRem(0) : pxToRem(274),
+                //     transition: transitions.create(["margin-left", "margin-right"], {
+                //         easing: transitions.easing.easeInOut,
+                //         duration: transitions.duration.standard,
+                //     }),
+                // },
             })}
         >
             {children}
