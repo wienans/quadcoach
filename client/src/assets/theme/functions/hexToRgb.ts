@@ -21,7 +21,7 @@ Coded by www.creative-tim.com
 // chroma-js is a library for all kinds of color conversions and color scales.
 import chroma from "chroma-js";
 
-function hexToRgb(color: string | number | chroma.Color) {
+function hexToRgb(color: string | number | chroma.Color): string {
   return chroma(color).rgb().join(", ");
 }
 

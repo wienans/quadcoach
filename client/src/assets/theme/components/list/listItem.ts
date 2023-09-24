@@ -12,8 +12,13 @@ Coded by www.creative-tim.com
 
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 */
+import { ComponentsOverrides, ComponentsProps, ComponentsVariants, Theme } from "@mui/material";
 
-const listItem = {
+const listItem: {
+  defaultProps?: ComponentsProps['MuiListItem'];
+  styleOverrides?: ComponentsOverrides<Theme>['MuiListItem'];
+  variants?: ComponentsVariants['MuiListItem'];
+} = {
   defaultProps: {
     disableGutters: true,
   },

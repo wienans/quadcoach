@@ -12,20 +12,25 @@ Coded by www.creative-tim.com
 
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 */
+import { ComponentsOverrides, ComponentsProps, ComponentsVariants, Theme } from "@mui/material";
 
 // Soft UI Dashboard React base styles
-import typography from "../base/typography";
+import typography from "../../base/typography";
 
 // Soft UI Dashboard React helper functions
-import pxToRem from "../functions/pxToRem";
+import pxToRem from "../../functions/pxToRem";
 
 const { size } = typography;
 
-const dialogTitle = {
+const dialogTitle: {
+  defaultProps?: ComponentsProps['MuiDialogTitle'];
+  styleOverrides?: ComponentsOverrides<Theme>['MuiDialogTitle'];
+  variants?: ComponentsVariants['MuiDialogTitle'];
+} = {
   styleOverrides: {
     root: {
       padding: pxToRem(16),
-      fontSize: size.xl,
+      fontSize: size!.xl,
     },
   },
 };

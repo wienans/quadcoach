@@ -21,7 +21,7 @@ Coded by www.creative-tim.com
 // Soft UI Dashboard React helper functions
 import hexToRgb from "./hexToRgb";
 
-function rgba(color: string | number | chroma.Color, opacity: number) {
+function rgba(color: string | number | chroma.Color, opacity: number): string {
   return `rgba(${hexToRgb(color)}, ${opacity})`;
 }
 

@@ -53,6 +53,51 @@ const baseDisplayProperties = {
   lineHeight: 1.2,
 };
 
+export type TypographySizeBreakpoints = "xxs" | "xs" | "sm" | "md" | "lg" | "xl"
+export type TypographySize = Record<TypographySizeBreakpoints, string>
+
+export type TypographyLineHeightBreakpoints = "sm" | "md" | "lg"
+export type TypographyLineHeight = Record<TypographyLineHeightBreakpoints, number>
+
+declare module '@mui/material/styles' {
+  interface TypographyVariants {
+    d1: React.CSSProperties;
+    d2: React.CSSProperties;
+    d3: React.CSSProperties;
+    d4: React.CSSProperties;
+    d5: React.CSSProperties;
+    d6: React.CSSProperties;
+    size: TypographySize;
+    lineHeight: TypographyLineHeight;
+  }
+
+  // allow configuration using `createTheme`
+  interface TypographyVariantsOptions {
+    d1?: React.CSSProperties;
+    d2?: React.CSSProperties;
+    d3?: React.CSSProperties;
+    d4?: React.CSSProperties;
+    d5?: React.CSSProperties;
+    d6?: React.CSSProperties;
+    size?: TypographySize;
+    lineHeight?: TypographyLineHeight;
+  }
+}
+
+// Update the Typography's variant prop options
+declare module '@mui/material/Typography' {
+  interface TypographyPropsVariantOverrides {
+    d1: true;
+    d2: true;
+    d3: true;
+    d4: true;
+    d5: true;
+    d6: true;
+    size: true;
+    lineHeight: true;
+  }
+}
+
 const typography: TypographyOptions = {
   fontFamily: baseProperties.fontFamily,
   fontWeightLight: baseProperties.fontWeightLight,

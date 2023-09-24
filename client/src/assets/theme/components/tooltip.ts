@@ -12,6 +12,7 @@ Coded by www.creative-tim.com
 
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 */
+import { ComponentsOverrides, ComponentsProps, ComponentsVariants, Theme, SimplePaletteColorOptions } from "@mui/material";
 
 // @mui material components
 import Fade from "@mui/material/Fade";
@@ -28,7 +29,11 @@ const { black, light } = colors;
 const { size, fontWeightRegular } = typography;
 const { borderRadius } = borders;
 
-const tooltip = {
+const tooltip: {
+  defaultProps?: ComponentsProps['MuiTooltip'];
+  styleOverrides?: ComponentsOverrides<Theme>['MuiTooltip'];
+  variants?: ComponentsVariants['MuiTooltip'];
+} = {
   defaultProps: {
     arrow: true,
     TransitionComponent: Fade,
@@ -37,9 +42,9 @@ const tooltip = {
   styleOverrides: {
     tooltip: {
       maxWidth: pxToRem(200),
-      backgroundColor: black.main,
-      color: light.main,
-      fontSize: size.sm,
+      backgroundColor: (black as SimplePaletteColorOptions).main,
+      color: (light as SimplePaletteColorOptions).main,
+      fontSize: size!.sm,
       fontWeight: fontWeightRegular,
       textAlign: "center",
       borderRadius: borderRadius.md,
@@ -48,7 +53,7 @@ const tooltip = {
     },
 
     arrow: {
-      color: black.main,
+      color: (black as SimplePaletteColorOptions).main,
     },
   },
 };

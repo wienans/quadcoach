@@ -12,6 +12,7 @@ Coded by www.creative-tim.com
 
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 */
+import { ComponentsOverrides, ComponentsProps, ComponentsVariants, Theme } from "@mui/material";
 
 // Soft UI Dashboard React Button Styles
 import root from "./root";
@@ -19,27 +20,31 @@ import contained from "./contained";
 import outlined from "./outlined";
 import buttonText from "./text";
 
-const button = {
+const button: {
+  defaultProps?: ComponentsProps['MuiButton'];
+  styleOverrides?: ComponentsOverrides<Theme>['MuiButton'];
+  variants?: ComponentsVariants['MuiButton'];
+} = {
   defaultProps: {
     disableRipple: true,
   },
   styleOverrides: {
-    root: { ...root },
-    contained: { ...contained.base },
-    containedSizeSmall: { ...contained.small },
-    containedSizeLarge: { ...contained.large },
-    containedPrimary: { ...contained.primary },
-    containedSecondary: { ...contained.secondary },
-    outlined: { ...outlined.base },
-    outlinedSizeSmall: { ...outlined.small },
-    outlinedSizeLarge: { ...outlined.large },
-    outlinedPrimary: { ...outlined.primary },
-    outlinedSecondary: { ...outlined.secondary },
-    text: { ...buttonText.base },
-    textSizeSmall: { ...buttonText.small },
-    textSizeLarge: { ...buttonText.large },
-    textPrimary: { ...buttonText.primary },
-    textSecondary: { ...buttonText.secondary },
+    root: { ...(root as Record<string, unknown>) },
+    contained: { ...(contained!.base as Record<string, unknown>) },
+    containedSizeSmall: { ...contained.small as {} },
+    containedSizeLarge: { ...contained.large as {} },
+    containedPrimary: { ...contained.primary as {} },
+    containedSecondary: { ...contained.secondary as {} },
+    outlined: { ...outlined.base as {} },
+    outlinedSizeSmall: { ...outlined.small as {} },
+    outlinedSizeLarge: { ...outlined.large as {} },
+    outlinedPrimary: { ...outlined.primary as {} },
+    outlinedSecondary: { ...outlined.secondary as {} },
+    text: { ...buttonText.base as {} },
+    textSizeSmall: { ...buttonText.small as {} },
+    textSizeLarge: { ...buttonText.large as {} },
+    textPrimary: { ...buttonText.primary as {} },
+    textSecondary: { ...buttonText.secondary as {} },
   },
 };
 

@@ -19,15 +19,22 @@ import borders from "../../base/borders";
 
 // Soft UI Dashboard React Helper Functions
 import pxToRem from "../../functions/pxToRem";
+import { ButtonProps, CSSInterpolation } from "@mui/material";
+import { Theme } from "@mui/system";
 
 const { fontWeightBold, size } = typography;
 const { borderRadius } = borders;
 
-const root = {
+const root: CSSInterpolation
+  | ((
+    // Record<string, unknown> is for other props that the slot receive internally
+    // Documenting all ownerStates could be a huge work, let's wait until we have a real needs from developers.
+    props: ({ ownerState: ButtonProps & Record<string, unknown> }) & { theme: Theme } & Record<string, unknown>,
+  ) => CSSInterpolation) = {
   display: "inline-flex",
   justifyContent: "center",
   alignItems: "center",
-  fontSize: size.xs,
+  fontSize: size!.xs,
   fontWeight: fontWeightBold,
   borderRadius: borderRadius.md,
   padding: `${pxToRem(12)} ${pxToRem(24)}`,

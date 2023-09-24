@@ -11,7 +11,7 @@ Coded by www.creative-tim.com
  =========================================================
 
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-*/
+*/import { ComponentsOverrides, ComponentsProps, ComponentsVariants, Theme, SimplePaletteColorOptions } from "@mui/material";
 
 // Soft UI Dashboard React base styles
 import colors from "../../base/colors";
@@ -20,16 +20,21 @@ import boxShadows from "../../base/boxShadows";
 
 // Soft UI Dashboard React helper functions
 import pxToRem from "../../functions/pxToRem";
+import important from "../../functions/important";
 
 const { grey, white } = colors;
 const { borderRadius } = borders;
 const { tabsBoxShadow } = boxShadows;
 
-const tabs = {
+const tabs: {
+  defaultProps?: ComponentsProps['MuiTabs'];
+  styleOverrides?: ComponentsOverrides<Theme>['MuiTabs'];
+  variants?: ComponentsVariants['MuiTabs'];
+} = {
   styleOverrides: {
     root: {
       position: "relative",
-      backgroundColor: grey[100],
+      backgroundColor: grey![100],
       borderRadius: borderRadius.lg,
       minHeight: "unset",
       padding: pxToRem(4),
@@ -42,8 +47,8 @@ const tabs = {
     },
 
     fixed: {
-      overflow: "unset !important",
-      overflowX: "unset !important",
+      overflow: important("unset"),
+      overflowX: important("unset"),
     },
 
     vertical: {
@@ -55,7 +60,7 @@ const tabs = {
     indicator: {
       height: "100%",
       borderRadius: borderRadius.md,
-      backgroundColor: white.main,
+      backgroundColor: (white as SimplePaletteColorOptions).main,
       boxShadow: tabsBoxShadow.indicator,
       transition: "all 500ms ease",
     },

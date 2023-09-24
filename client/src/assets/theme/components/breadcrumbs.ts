@@ -12,6 +12,7 @@ Coded by www.creative-tim.com
 
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 */
+import { ComponentsOverrides, ComponentsProps, ComponentsVariants, Theme } from "@mui/material";
 
 // Soft UI Dashboard React base styles
 import colors from "../base/colors";
@@ -20,15 +21,19 @@ import typography from "../base/typography";
 const { grey } = colors;
 const { size } = typography;
 
-const breadcrumbs = {
+const breadcrumbs: {
+  defaultProps?: ComponentsProps['MuiBreadcrumbs'];
+  styleOverrides?: ComponentsOverrides<Theme>['MuiBreadcrumbs'];
+  variants?: ComponentsVariants['MuiBreadcrumbs'];
+} = {
   styleOverrides: {
     li: {
       lineHeight: 0,
     },
 
     separator: {
-      fontSize: size.sm,
-      color: grey[600],
+      fontSize: size!.sm,
+      color: grey![600],
     },
   },
 };

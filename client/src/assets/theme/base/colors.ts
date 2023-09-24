@@ -14,6 +14,7 @@ Coded by www.creative-tim.com
 */
 
 import { PaletteOptions, SimplePaletteColorOptions } from "@mui/material";
+import "./paletteTypes"
 
 /**
  * The base colors for the Soft UI Dashboard React.

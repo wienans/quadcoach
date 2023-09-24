@@ -12,6 +12,7 @@ Coded by www.creative-tim.com
 
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 */
+import { ComponentsOverrides, ComponentsProps, ComponentsVariants, Theme, SimplePaletteColorOptions } from "@mui/material";
 
 // Soft UI Dashboard React base styles
 import borders from "../../base/borders";
@@ -23,8 +24,13 @@ import linearGradient from "../../functions/linearGradient";
 
 const { borderWidth, borderColor } = borders;
 const { transparent, gradients, info } = colors;
+const transparentSimplePaletteColorOptions = transparent as SimplePaletteColorOptions;
 
-const checkbox = {
+const checkbox: {
+  defaultProps?: ComponentsProps['MuiCheckbox'];
+  styleOverrides?: ComponentsOverrides<Theme>['MuiCheckbox'];
+  variants?: ComponentsVariants['MuiCheckbox'];
+} = {
   styleOverrides: {
     root: {
       backgroundPosition: "center",
@@ -34,26 +40,26 @@ const checkbox = {
       height: pxToRem(20),
       marginRight: pxToRem(6),
       padding: 0,
-      color: transparent.main,
+      color: transparentSimplePaletteColorOptions.main,
       border: `${borderWidth[1]} solid ${borderColor}`,
       borderRadius: pxToRem(5.6),
       transition: "all 250ms ease",
 
       "&:hover": {
-        backgroundColor: transparent.main,
+        backgroundColor: transparentSimplePaletteColorOptions.main,
       },
 
       "& .MuiSvgIcon-root": {
-        fill: transparent.main,
+        fill: transparentSimplePaletteColorOptions.main,
       },
 
       "&.Mui-focusVisible": {
-        border: `${borderWidth[2]} solid ${info.main} !important`,
+        border: `${borderWidth[2]} solid ${(info as SimplePaletteColorOptions).main} !important`,
       },
     },
 
     colorPrimary: {
-      backgroundColor: transparent.main,
+      backgroundColor: transparentSimplePaletteColorOptions.main,
 
       "&.Mui-checked": {
         backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -1 22 22'%3e%3cpath fill='none' stroke='%23fff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2.5' d='M6 10l3 3l6-6'/%3e%3c/svg%3e"), ${linearGradient(
@@ -64,12 +70,12 @@ const checkbox = {
       },
 
       "&:hover": {
-        backgroundColor: transparent.main,
+        backgroundColor: transparentSimplePaletteColorOptions.main,
       },
     },
 
     colorSecondary: {
-      backgroundColor: transparent.main,
+      backgroundColor: transparentSimplePaletteColorOptions.main,
 
       "&.Mui-checked": {
         backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -1 22 22'%3e%3cpath fill='none' stroke='%23fff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2.5' d='M6 10l3 3l6-6'/%3e%3c/svg%3e"), ${linearGradient(
@@ -80,7 +86,7 @@ const checkbox = {
       },
 
       "&:hover": {
-        backgroundColor: transparent.main,
+        backgroundColor: transparentSimplePaletteColorOptions.main,
       },
     },
   },

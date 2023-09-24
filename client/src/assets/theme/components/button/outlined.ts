@@ -12,6 +12,7 @@ Coded by www.creative-tim.com
 
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 */
+import { ButtonProps, CSSInterpolation, SimplePaletteColorOptions, Theme } from "@mui/material";
 
 // Soft UI Dashboard React Base Styles
 import colors from "../../base/colors";
@@ -25,16 +26,49 @@ const { transparent, light, info, secondary } = colors;
 const { size } = typography;
 const { buttonBoxShadow } = boxShadows;
 
-const outlined = {
+export type Outlined = {
+  base: CSSInterpolation
+  | ((
+    // Record<string, unknown> is for other props that the slot receive internally
+    // Documenting all ownerStates could be a huge work, let's wait until we have a real needs from developers.
+    props: ({ ownerState: ButtonProps & Record<string, unknown> }) & { theme: Theme } & Record<string, unknown>,
+  ) => CSSInterpolation);
+  small: CSSInterpolation
+  | ((
+    // Record<string, unknown> is for other props that the slot receive internally
+    // Documenting all ownerStates could be a huge work, let's wait until we have a real needs from developers.
+    props: ({ ownerState: ButtonProps & Record<string, unknown> }) & { theme: Theme } & Record<string, unknown>,
+  ) => CSSInterpolation);
+  large: CSSInterpolation
+  | ((
+    // Record<string, unknown> is for other props that the slot receive internally
+    // Documenting all ownerStates could be a huge work, let's wait until we have a real needs from developers.
+    props: ({ ownerState: ButtonProps & Record<string, unknown> }) & { theme: Theme } & Record<string, unknown>,
+  ) => CSSInterpolation);
+  primary: CSSInterpolation
+  | ((
+    // Record<string, unknown> is for other props that the slot receive internally
+    // Documenting all ownerStates could be a huge work, let's wait until we have a real needs from developers.
+    props: ({ ownerState: ButtonProps & Record<string, unknown> }) & { theme: Theme } & Record<string, unknown>,
+  ) => CSSInterpolation);
+  secondary: CSSInterpolation
+  | ((
+    // Record<string, unknown> is for other props that the slot receive internally
+    // Documenting all ownerStates could be a huge work, let's wait until we have a real needs from developers.
+    props: ({ ownerState: ButtonProps & Record<string, unknown> }) & { theme: Theme } & Record<string, unknown>,
+  ) => CSSInterpolation);
+}
+
+const outlined: Outlined = {
   base: {
     minHeight: pxToRem(42),
-    color: light.main,
-    borderColor: light.main,
+    color: (light as SimplePaletteColorOptions).main,
+    borderColor: (light as SimplePaletteColorOptions).main,
     padding: `${pxToRem(12)} ${pxToRem(24)}`,
 
     "&:hover": {
       opacity: 0.75,
-      backgroundColor: transparent.main,
+      backgroundColor: (transparent as SimplePaletteColorOptions).main,
     },
 
     "&:focus:not(:hover)": {
@@ -49,7 +83,7 @@ const outlined = {
   small: {
     minHeight: pxToRem(34),
     padding: `${pxToRem(8)} ${pxToRem(32)}`,
-    fontSize: size.xs,
+    fontSize: size!.xs,
 
     "& .material-icon, .material-icons-round, svg": {
       fontSize: `${pxToRem(12)} !important`,
@@ -59,7 +93,7 @@ const outlined = {
   large: {
     minHeight: pxToRem(49),
     padding: `${pxToRem(14)} ${pxToRem(64)}`,
-    fontSize: size.sm,
+    fontSize: size!.sm,
 
     "& .material-icon, .material-icons-round, svg": {
       fontSize: `${pxToRem(22)} !important`,
@@ -67,11 +101,11 @@ const outlined = {
   },
 
   primary: {
-    backgroundColor: transparent.main,
-    borderColor: info.main,
+    backgroundColor: (transparent as SimplePaletteColorOptions).main,
+    borderColor: (info as SimplePaletteColorOptions).main,
 
     "&:hover": {
-      backgroundColor: transparent.main,
+      backgroundColor: (transparent as SimplePaletteColorOptions).main,
     },
 
     "&:focus:not(:hover)": {
@@ -80,11 +114,11 @@ const outlined = {
   },
 
   secondary: {
-    backgroundColor: transparent.main,
-    borderColor: secondary.main,
+    backgroundColor: (transparent as SimplePaletteColorOptions).main,
+    borderColor: (secondary as SimplePaletteColorOptions).main,
 
     "&:hover": {
-      backgroundColor: transparent.main,
+      backgroundColor: (transparent as SimplePaletteColorOptions).main,
     },
 
     "&:focus:not(:hover)": {

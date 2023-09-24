@@ -12,6 +12,7 @@ Coded by www.creative-tim.com
 
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 */
+import { ComponentsOverrides, ComponentsProps, ComponentsVariants, Theme, SimplePaletteColorOptions } from "@mui/material";
 
 // Soft UI Dashboard React base styles
 import colors from "../base/colors";
@@ -26,7 +27,11 @@ const { light, white, sliderColors, black, gradients } = colors;
 const { borderRadius, borderWidth } = borders;
 const { sliderBoxShadow } = boxShadows;
 
-const slider = {
+const slider: {
+  defaultProps?: ComponentsProps['MuiSlider'];
+  styleOverrides?: ComponentsOverrides<Theme>['MuiSlider'];
+  variants?: ComponentsVariants['MuiSlider'];
+} = {
   styleOverrides: {
     root: {
       width: "100%",
@@ -36,13 +41,13 @@ const slider = {
       },
 
       "& .MuiSlider-valueLabel": {
-        color: black.main,
+        color: (black as SimplePaletteColorOptions).main,
       },
     },
 
     rail: {
       height: pxToRem(3),
-      backgroundColor: light.main,
+      backgroundColor: (light as SimplePaletteColorOptions).main,
       borderRadius: borderRadius.sm,
     },
 
@@ -59,7 +64,7 @@ const slider = {
     thumb: {
       width: pxToRem(15),
       height: pxToRem(15),
-      backgroundColor: white.main,
+      backgroundColor: (white as SimplePaletteColorOptions).main,
       zIndex: 10,
       boxShadow: sliderBoxShadow.thumb,
       border: `${borderWidth[1]} solid ${sliderColors.thumb.borderColor}`,

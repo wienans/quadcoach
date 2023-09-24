@@ -12,6 +12,7 @@ Coded by www.creative-tim.com
 
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 */
+import { ComponentsOverrides, ComponentsProps, ComponentsVariants, SimplePaletteColorOptions, Theme } from "@mui/material";
 
 // Soft UI Dashboard React base styles
 import borders from "../base/borders";
@@ -23,7 +24,11 @@ import pxToRem from "../functions/pxToRem";
 const { borderRadius } = borders;
 const { light } = colors;
 
-const linearProgress = {
+const linearProgress: {
+  defaultProps?: ComponentsProps['MuiLinearProgress'];
+  styleOverrides?: ComponentsOverrides<Theme>['MuiLinearProgress'];
+  variants?: ComponentsVariants['MuiLinearProgress'];
+} = {
   styleOverrides: {
     root: {
       height: pxToRem(3),
@@ -33,11 +38,11 @@ const linearProgress = {
     },
 
     colorPrimary: {
-      backgroundColor: light.main,
+      backgroundColor: (light as SimplePaletteColorOptions).main,
     },
 
     colorSecondary: {
-      backgroundColor: light.main,
+      backgroundColor: (light as SimplePaletteColorOptions).main,
     },
 
     bar: {

@@ -12,6 +12,7 @@ Coded by www.creative-tim.com
 
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 */
+import { ComponentsOverrides, ComponentsProps, ComponentsVariants, Theme } from "@mui/material";
 
 // Soft UI Dashboard React Base Styles
 import colors from "../../base/colors";
@@ -23,7 +24,11 @@ import pxToRem from "../../functions/pxToRem";
 const { inputColors } = colors;
 const { borderWidth, borderRadius } = borders;
 
-const input = {
+const input: {
+  defaultProps?: ComponentsProps['MuiInput'];
+  styleOverrides?: ComponentsOverrides<Theme>['MuiInput'];
+  variants?: ComponentsVariants['MuiInput'];
+} = {
   styleOverrides: {
     root: {
       display: "flex !important",

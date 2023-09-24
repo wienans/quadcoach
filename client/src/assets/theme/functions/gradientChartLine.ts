@@ -21,8 +21,9 @@ Coded by www.creative-tim.com
 import rgba from "./rgba";
 import chroma from "chroma-js";
 
-function gradientChartLine (chart, color: string | number | chroma.Color, opacity = 0.2) {
+function gradientChartLine(chart: HTMLCanvasElement, color: string | number | chroma.Color, opacity = 0.2) {
   const ctx = chart.getContext("2d");
+  if (ctx == null) throw new Error("Context of chart is null")
   const gradientStroke = ctx.createLinearGradient(0, 230, 0, 50);
   const primaryColor = rgba(color, opacity).toString();
 

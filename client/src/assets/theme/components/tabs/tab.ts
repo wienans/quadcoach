@@ -12,6 +12,7 @@ Coded by www.creative-tim.com
 
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 */
+import { ComponentsOverrides, ComponentsProps, ComponentsVariants, Theme, SimplePaletteColorOptions } from "@mui/material";
 
 // Soft UI Dashboard React base styles
 import typography from "../../base/typography";
@@ -25,7 +26,11 @@ const { size, fontWeightRegular } = typography;
 const { borderRadius } = borders;
 const { dark } = colors;
 
-const tab = {
+const tab: {
+  defaultProps?: ComponentsProps['MuiTab'];
+  styleOverrides?: ComponentsOverrides<Theme>['MuiTab'];
+  variants?: ComponentsVariants['MuiTab'];
+} = {
   styleOverrides: {
     root: {
       display: "flex",
@@ -36,13 +41,13 @@ const tab = {
       maxWidth: "unset !important",
       minWidth: "unset !important",
       minHeight: "unset !important",
-      fontSize: size.md,
+      fontSize: size!.md,
       fontWeight: fontWeightRegular,
       textTransform: "none",
       lineHeight: "inherit",
       padding: pxToRem(4),
       borderRadius: borderRadius.md,
-      color: `${dark.main} !important`,
+      color: `${(dark as SimplePaletteColorOptions).main} !important`,
       opacity: "1 !important",
 
       "& .material-icons, .material-icons-round": {

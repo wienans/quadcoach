@@ -20,11 +20,18 @@ import borders from "../base/borders";
 // Soft UI Dashboard React helper functions
 import rgba from "../functions/rgba";
 import pxToRem from "../functions/pxToRem";
+import { ComponentsOverrides, ComponentsProps, ComponentsVariants, SimplePaletteColorOptions, Theme } from "@mui/material";
 
 const { white } = colors;
 const { borderRadius } = borders;
 
-const sidenav = {
+const whiteSimplePaletteColorOptions = white as SimplePaletteColorOptions
+
+const sidenav: {
+  defaultProps?: ComponentsProps['MuiDrawer'];
+  styleOverrides?: ComponentsOverrides<Theme>['MuiDrawer'];
+  variants?: ComponentsVariants['MuiDrawer'];
+} = {
   styleOverrides: {
     root: {
       width: pxToRem(250),
@@ -34,7 +41,7 @@ const sidenav = {
 
     paper: {
       width: pxToRem(250),
-      backgroundColor: rgba(white.main, 0.8),
+      backgroundColor: rgba(whiteSimplePaletteColorOptions.main, 0.8),
       backdropFilter: `saturate(200%) blur(${pxToRem(30)})`,
       height: `calc(100vh - ${pxToRem(32)})`,
       margin: pxToRem(16),

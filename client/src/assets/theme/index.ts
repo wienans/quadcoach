@@ -76,6 +76,24 @@ import icon from "./components/icon";
 import svgIcon from "./components/svgIcon";
 import link from "./components/link";
 
+export type ThemeFunctions = {
+  boxShadow: (offset: number[], radius: number[], color: string | number | chroma.Color, opacity: number, inset?: string) => string;
+  hexToRgb: (color: string | number | chroma.Color) => string;
+  linearGradient: (color: string, colorState: string, angle?: number) => string;
+  pxToRem: (number: number, baseNumber: number | undefined) => string;
+  rgba: (color: string | number | chroma.Color, opacity: number) => string;
+}
+
+declare module '@mui/material/styles' {
+  interface Theme {
+    functions: ThemeFunctions
+  }
+  // allow configuration using `createTheme`
+  interface ThemeOptions {
+    functions: ThemeFunctions
+  }
+}
+
 export default createTheme({
   breakpoints: { ...breakpoints },
   palette: { ...colors },
@@ -93,8 +111,8 @@ export default createTheme({
   components: {
     MuiCssBaseline: {
       styleOverrides: {
-        ...globals,
-        ...container,
+        ...(globals as Record<string, unknown>),
+        ...(container as Record<string, unknown>),
       },
     },
     MuiDrawer: { ...sidenav },

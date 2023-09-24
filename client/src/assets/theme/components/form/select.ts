@@ -12,6 +12,7 @@ Coded by www.creative-tim.com
 
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 */
+import { ComponentsOverrides, ComponentsProps, ComponentsVariants, Theme, SimplePaletteColorOptions } from "@mui/material";
 
 // Soft UI Dashboard React base styles
 import colors from "../../base/colors";
@@ -21,7 +22,11 @@ import pxToRem from "../../functions/pxToRem";
 
 const { transparent } = colors;
 
-const select = {
+const select: {
+  defaultProps?: ComponentsProps['MuiSelect'];
+  styleOverrides?: ComponentsOverrides<Theme>['MuiSelect'];
+  variants?: ComponentsVariants['MuiSelect'];
+} = {
   styleOverrides: {
     select: {
       display: "grid",
@@ -29,16 +34,17 @@ const select = {
       padding: `0 ${pxToRem(12)} !important`,
 
       "& .Mui-selected": {
-        backgroundColor: transparent.main,
+        backgroundColor: (transparent as SimplePaletteColorOptions).main,
       },
     },
 
-    selectMenu: {
-      background: "none",
-      height: "none",
-      minHeight: "none",
-      overflow: "unset",
-    },
+    // TODO: If we man to use it in future uncomment
+    // selectMenu: {
+    //   background: "none",
+    //   height: "none",
+    //   minHeight: "none",
+    //   overflow: "unset",
+    // },
 
     icon: {
       display: "none",

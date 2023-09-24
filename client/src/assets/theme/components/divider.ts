@@ -12,6 +12,7 @@ Coded by www.creative-tim.com
 
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 */
+import { ComponentsOverrides, ComponentsProps, ComponentsVariants, SimplePaletteColorOptions, Theme } from "@mui/material";
 
 // Soft UI Dashboard React base styles
 import colors from "../base/colors";
@@ -21,15 +22,22 @@ import rgba from "../functions/rgba";
 import pxToRem from "../functions/pxToRem";
 
 const { dark, transparent, white } = colors;
+const transparentSimplePaletteColorOptions = transparent as SimplePaletteColorOptions
+const whiteSimplePaletteColorOptions = white as SimplePaletteColorOptions
+const darkSimplePaletteColorOptions = dark as SimplePaletteColorOptions
 
-const divider = {
+const divider: {
+  defaultProps?: ComponentsProps['MuiDivider'];
+  styleOverrides?: ComponentsOverrides<Theme>['MuiDivider'];
+  variants?: ComponentsVariants['MuiDivider'];
+} = {
   styleOverrides: {
     root: {
-      backgroundColor: transparent.main,
-      backgroundImage: `linear-gradient(to right, ${rgba(dark.main, 0)}, ${rgba(
-        dark.main,
+      backgroundColor: transparentSimplePaletteColorOptions.main,
+      backgroundImage: `linear-gradient(to right, ${rgba(darkSimplePaletteColorOptions.main, 0)}, ${rgba(
+        darkSimplePaletteColorOptions.main,
         0.5
-      )}, ${rgba(dark.main, 0)}) !important`,
+      )}, ${rgba(darkSimplePaletteColorOptions.main, 0)}) !important`,
       height: pxToRem(1),
       margin: `${pxToRem(16)} 0`,
       borderBottom: "none",
@@ -37,11 +45,11 @@ const divider = {
     },
 
     vertical: {
-      backgroundColor: transparent.main,
-      backgroundImage: `linear-gradient(to bottom, ${rgba(dark.main, 0)}, ${rgba(
-        dark.main,
+      backgroundColor: transparentSimplePaletteColorOptions.main,
+      backgroundImage: `linear-gradient(to bottom, ${rgba(darkSimplePaletteColorOptions.main, 0)}, ${rgba(
+        darkSimplePaletteColorOptions.main,
         0.5
-      )}, ${rgba(dark.main, 0)}) !important`,
+      )}, ${rgba(darkSimplePaletteColorOptions.main, 0)}) !important`,
       width: pxToRem(1),
       height: "100%",
       margin: `0 ${pxToRem(16)}`,
@@ -49,17 +57,17 @@ const divider = {
     },
 
     light: {
-      backgroundColor: transparent.main,
-      backgroundImage: `linear-gradient(to right, ${rgba(white.main, 0)}, ${rgba(
-        white.main,
+      backgroundColor: transparentSimplePaletteColorOptions.main,
+      backgroundImage: `linear-gradient(to right, ${rgba(whiteSimplePaletteColorOptions.main, 0)}, ${rgba(
+        whiteSimplePaletteColorOptions.main,
         0.5
-      )}, ${rgba(white.main, 0)}) !important`,
+      )}, ${rgba(whiteSimplePaletteColorOptions.main, 0)}) !important`,
 
       "&.MuiDivider-vertical": {
-        backgroundImage: `linear-gradient(to bottom, ${rgba(white.main, 0)}, ${rgba(
-          white.main,
+        backgroundImage: `linear-gradient(to bottom, ${rgba(whiteSimplePaletteColorOptions.main, 0)}, ${rgba(
+          whiteSimplePaletteColorOptions.main,
           0.5
-        )}, ${rgba(white.main, 0)}) !important`,
+        )}, ${rgba(whiteSimplePaletteColorOptions.main, 0)}) !important`,
       },
     },
   },

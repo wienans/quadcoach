@@ -25,10 +25,24 @@ import colors from "./colors";
 // Soft UI Dashboard React Helper Functions
 import pxToRem from "../functions/pxToRem";
 
+export type ValidBorderWidth = 0 | 1 | 2 | 3 | 4 | 5
+
+export type BorderWidth = Record<ValidBorderWidth, number | string>
+
+export type ValidBorderRadius = "xs" | "sm" | "md" | "lg" | "xl" | "xxl" | "section"
+
+export type BorderRadius = Record<ValidBorderRadius, string>
+
+export type Borders = {
+  borderColor?: string;
+  borderWidth: BorderWidth;
+  borderRadius: BorderRadius;
+}
+
 const { grey } = colors;
 
-const borders = {
-  borderColor: grey[300],
+const borders: Borders = {
+  borderColor: grey?.[300],
 
   borderWidth: {
     0: 0,
@@ -49,5 +63,15 @@ const borders = {
     section: pxToRem(160),
   },
 };
+
+declare module '@mui/material/styles' {
+  interface Theme {
+    borders: Borders
+  }
+  // allow configuration using `createTheme`
+  interface ThemeOptions {
+    borders: Borders
+  }
+}
 
 export default borders;

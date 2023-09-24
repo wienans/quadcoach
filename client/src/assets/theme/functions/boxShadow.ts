@@ -22,7 +22,7 @@ import rgba from "./rgba";
 import pxToRem from "./pxToRem";
 import chroma from "chroma-js";
 
-function boxShadow (offset = [], radius = [], color: string | number | chroma.Color, opacity: number, inset = "") {
+function boxShadow(offset: number[] = [], radius: number[] = [], color: string | number | chroma.Color, opacity: number, inset: string = ""): string {
   const [x, y] = offset;
   const [blur, spread] = radius;
 

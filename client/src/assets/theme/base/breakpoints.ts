@@ -19,7 +19,20 @@ Coded by www.creative-tim.com
  * You can customized the breakpoints for the entire Soft UI Dashboard React using thie file.
  */
 
-const breakpoints = {
+export type BreakpointsValues = {
+  xs: number;
+  sm: number;
+  md: number;
+  lg: number;
+  xl: number;
+  xxl: number;
+}
+
+export type Breakpoints = {
+  values: BreakpointsValues
+}
+
+const breakpoints: Breakpoints = {
   values: {
     xs: 0,
     sm: 576,

@@ -12,6 +12,7 @@ Coded by www.creative-tim.com
 
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 */
+import { ComponentsOverrides, Theme } from "@mui/material";
 
 // Soft UI Dashboard React base styles
 import breakpoints from "../base/breakpoints";
@@ -29,7 +30,16 @@ const LG = `@media (min-width: ${lg}px)`;
 const XL = `@media (min-width: ${xl}px)`;
 const XXL = `@media (min-width: ${xxl}px)`;
 
-const sharedClasses = {
+export type SharedClasses = {
+  paddingRight: string,
+  paddingLeft: string,
+  marginRight: string,
+  marginLeft: string,
+  width: string,
+  position: string,
+}
+
+const sharedClasses: SharedClasses = {
   paddingRight: `${pxToRem(24)} !important`,
   paddingLeft: `${pxToRem(24)} !important`,
   marginRight: "auto !important",
@@ -38,7 +48,7 @@ const sharedClasses = {
   position: "relative",
 };
 
-const container = {
+const container: ComponentsOverrides<Theme>['MuiCssBaseline'] = {
   [SM]: {
     ".MuiContainer-root": {
       ...sharedClasses,

@@ -12,6 +12,7 @@ Coded by www.creative-tim.com
 
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 */
+import { ComponentsOverrides, ComponentsProps, ComponentsVariants, SimplePaletteColorOptions, Theme } from "@mui/material";
 
 // Soft UI Dashboard React base styles
 import colors from "../../base/colors";
@@ -22,10 +23,14 @@ const { white } = colors;
 const { xxl } = boxShadows;
 const { borderRadius } = borders;
 
-const tableContainer = {
+const tableContainer: {
+  defaultProps?: ComponentsProps['MuiTableContainer'];
+  styleOverrides?: ComponentsOverrides<Theme>['MuiTableContainer'];
+  variants?: ComponentsVariants['MuiTableContainer'];
+} = {
   styleOverrides: {
     root: {
-      backgroundColor: white.main,
+      backgroundColor: (white as SimplePaletteColorOptions).main,
       boxShadow: xxl,
       borderRadius: borderRadius.xl,
     },

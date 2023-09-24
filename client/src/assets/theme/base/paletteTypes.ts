@@ -1,8 +1,3 @@
-import { Theme } from "@mui/material/styles"
-// const theme: Theme = {
-//     palette
-// }
-
 export type PaletteGradient = {
     main: string;
     state: string;

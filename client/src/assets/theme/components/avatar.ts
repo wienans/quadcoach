@@ -12,13 +12,18 @@ Coded by www.creative-tim.com
 
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 */
+import { ComponentsOverrides, ComponentsProps, ComponentsVariants, Theme } from "@mui/material";
 
 // Soft UI Dashboard React base styles
 import borders from "../base/borders";
 
 const { borderRadius } = borders;
 
-const avatar = {
+const avatar: {
+  defaultProps?: ComponentsProps['MuiAvatar'];
+  styleOverrides?: ComponentsOverrides<Theme>['MuiAvatar'];
+  variants?: ComponentsVariants['MuiAvatar'];
+} = {
   styleOverrides: {
     root: {
       transition: "all 200ms ease-in-out",

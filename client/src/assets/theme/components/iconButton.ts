@@ -14,15 +14,20 @@ Coded by www.creative-tim.com
 */
 
 // Soft UI Dashboard React Base Styles
+import { ComponentsOverrides, ComponentsProps, ComponentsVariants, SimplePaletteColorOptions, Theme } from "@mui/material";
 import colors from "../base/colors";
 
 const { transparent } = colors;
 
-const iconButton = {
+const iconButton: {
+  defaultProps?: ComponentsProps['MuiIconButton'];
+  styleOverrides?: ComponentsOverrides<Theme>['MuiIconButton'];
+  variants?: ComponentsVariants['MuiIconButton'];
+} = {
   styleOverrides: {
     root: {
       "&:hover": {
-        backgroundColor: transparent.main,
+        backgroundColor: (transparent as SimplePaletteColorOptions).main,
       },
     },
   },

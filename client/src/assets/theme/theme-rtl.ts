@@ -94,8 +94,8 @@ export default createTheme({
   components: {
     MuiCssBaseline: {
       styleOverrides: {
-        ...globals,
-        ...container,
+        ...globals as {},
+        ...container as {},
       },
     },
     MuiDrawer: { ...sidenav },

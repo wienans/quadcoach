@@ -12,6 +12,7 @@ Coded by www.creative-tim.com
 
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 */
+import { ComponentsOverrides, ComponentsProps, ComponentsVariants, Theme, SimplePaletteColorOptions } from "@mui/material";
 
 // Soft UI Dashboard React base styles
 import borders from "../../base/borders";
@@ -23,8 +24,13 @@ import linearGradient from "../../functions/linearGradient";
 
 const { borderWidth, borderColor } = borders;
 const { transparent, gradients, info } = colors;
+const transparentSimplePaletteColorOptions = transparent as SimplePaletteColorOptions;
 
-const radio = {
+const radio: {
+  defaultProps?: ComponentsProps['MuiRadio'];
+  styleOverrides?: ComponentsOverrides<Theme>['MuiRadio'];
+  variants?: ComponentsVariants['MuiRadio'];
+} = {
   styleOverrides: {
     root: {
       backgroundPosition: "center",
@@ -34,26 +40,26 @@ const radio = {
       height: pxToRem(20),
       marginRight: pxToRem(6),
       padding: 0,
-      color: transparent.main,
+      color: transparentSimplePaletteColorOptions.main,
       border: `${borderWidth[1]} solid ${borderColor}`,
       borderRadius: "50%",
       transition: "all 250ms ease",
 
       "&:hover": {
-        backgroundColor: transparent.main,
+        backgroundColor: transparentSimplePaletteColorOptions.main,
       },
 
       "& .MuiSvgIcon-root": {
-        fill: transparent.main,
+        fill: transparentSimplePaletteColorOptions.main,
       },
 
       "&.Mui-focusVisible": {
-        border: `${borderWidth[2]} solid ${info.main} !important`,
+        border: `${borderWidth[2]} solid ${(info as SimplePaletteColorOptions).main} !important`,
       },
     },
 
     colorPrimary: {
-      backgroundColor: transparent.main,
+      backgroundColor: transparentSimplePaletteColorOptions.main,
 
       "&.Mui-checked": {
         backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' height='15px' width='15px'%3E%3Ccircle cx='50%' cy='50%' r='3' fill='%23fff' /%3E%3C/svg%3E"), ${linearGradient(
@@ -64,12 +70,12 @@ const radio = {
       },
 
       "&:hover": {
-        backgroundColor: transparent.main,
+        backgroundColor: transparentSimplePaletteColorOptions.main,
       },
     },
 
     colorSecondary: {
-      backgroundColor: transparent.main,
+      backgroundColor: transparentSimplePaletteColorOptions.main,
 
       "&.Mui-checked": {
         backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' height='15px' width='15px'%3E%3Ccircle cx='50%' cy='50%' r='3' fill='%23fff' /%3E%3C/svg%3E"), ${linearGradient(
@@ -80,7 +86,7 @@ const radio = {
       },
 
       "&:hover": {
-        backgroundColor: transparent.main,
+        backgroundColor: transparentSimplePaletteColorOptions.main,
       },
     },
   },

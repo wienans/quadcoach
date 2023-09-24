@@ -12,6 +12,7 @@ Coded by www.creative-tim.com
 
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 */
+import { ComponentsOverrides, ComponentsProps, ComponentsVariants, Theme, SimplePaletteColorOptions } from "@mui/material";
 
 // Soft UI Dashboard React base styles
 import colors from "../../base/colors";
@@ -24,12 +25,18 @@ import boxShadow from "../../functions/boxShadow";
 const { dark, white } = colors;
 const { borderWidth, borderColor } = borders;
 
-const stepIcon = {
+const darkSimplePaletteColorOptions = dark as SimplePaletteColorOptions
+
+const stepIcon: {
+  defaultProps?: ComponentsProps['MuiStepIcon'];
+  styleOverrides?: ComponentsOverrides<Theme>['MuiStepIcon'];
+  variants?: ComponentsVariants['MuiStepIcon'];
+} = {
   styleOverrides: {
     root: {
-      background: white.main,
-      fill: white.main,
-      stroke: white.main,
+      background: (white as SimplePaletteColorOptions).main,
+      fill: (white as SimplePaletteColorOptions).main,
+      stroke: (white as SimplePaletteColorOptions).main,
       strokeWidth: pxToRem(10),
       width: pxToRem(13),
       height: pxToRem(13),
@@ -39,19 +46,19 @@ const stepIcon = {
       transition: "all 200ms linear",
 
       "&.Mui-active": {
-        background: dark.main,
-        fill: dark.main,
-        stroke: dark.main,
-        borderColor: dark.main,
-        boxShadow: boxShadow([0, 0], [0, 2], dark.main, 1),
+        background: darkSimplePaletteColorOptions.main,
+        fill: darkSimplePaletteColorOptions.main,
+        stroke: darkSimplePaletteColorOptions.main,
+        borderColor: darkSimplePaletteColorOptions.main,
+        boxShadow: boxShadow([0, 0], [0, 2], darkSimplePaletteColorOptions.main, 1),
       },
 
       "&.Mui-completed": {
-        background: dark.main,
-        fill: dark.main,
-        stroke: dark.main,
-        borderColor: dark.main,
-        boxShadow: boxShadow([0, 0], [0, 2], dark.main, 1),
+        background: darkSimplePaletteColorOptions.main,
+        fill: darkSimplePaletteColorOptions.main,
+        stroke: darkSimplePaletteColorOptions.main,
+        borderColor: darkSimplePaletteColorOptions.main,
+        boxShadow: boxShadow([0, 0], [0, 2], darkSimplePaletteColorOptions.main, 1),
       },
     },
   },

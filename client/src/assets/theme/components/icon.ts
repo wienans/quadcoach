@@ -12,11 +12,16 @@ Coded by www.creative-tim.com
 
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 */
+import { ComponentsOverrides, ComponentsProps, ComponentsVariants, Theme } from "@mui/material";
 
 // Soft UI Dashboard React helper functions
 import pxToRem from "../functions/pxToRem";
 
-const icon = {
+const icon: {
+  defaultProps?: ComponentsProps['MuiIcon'];
+  styleOverrides?: ComponentsOverrides<Theme>['MuiIcon'];
+  variants?: ComponentsVariants['MuiIcon'];
+} = {
   defaultProps: {
     baseClassName: "material-icons-round",
     fontSize: "inherit",

@@ -12,6 +12,7 @@ Coded by www.creative-tim.com
 
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 */
+import { ComponentsOverrides, ComponentsProps, ComponentsVariants, Theme, SimplePaletteColorOptions } from "@mui/material";
 
 // Soft UI Dashboard React base styles
 import colors from "../../base/colors";
@@ -21,14 +22,18 @@ import pxToRem from "../../functions/pxToRem";
 
 const { transparent } = colors;
 
-const stepper = {
+const stepper: {
+  defaultProps?: ComponentsProps['MuiStepper'];
+  styleOverrides?: ComponentsOverrides<Theme>['MuiStepper'];
+  variants?: ComponentsVariants['MuiStepper'];
+} = {
   styleOverrides: {
     root: {
       margin: `${pxToRem(48)} 0`,
       padding: `0 ${pxToRem(12)}`,
 
       "&.MuiPaper-root": {
-        backgroundColor: transparent.main,
+        backgroundColor: (transparent as SimplePaletteColorOptions).main,
       },
     },
   },

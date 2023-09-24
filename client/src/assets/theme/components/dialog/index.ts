@@ -12,15 +12,20 @@ Coded by www.creative-tim.com
 
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 */
+import { ComponentsOverrides, ComponentsProps, ComponentsVariants, Theme } from "@mui/material";
 
 // Soft UI Dashboard React base styles
-import borders from "../base/borders";
-import boxShadows from "../base/boxShadows";
+import borders from "../../base/borders";
+import boxShadows from "../../base/boxShadows";
 
 const { borderRadius } = borders;
 const { xxl } = boxShadows;
 
-const dialog = {
+const dialog: {
+  defaultProps?: ComponentsProps['MuiDialog'];
+  styleOverrides?: ComponentsOverrides<Theme>['MuiDialog'];
+  variants?: ComponentsVariants['MuiDialog'];
+} = {
   styleOverrides: {
     paper: {
       borderRadius: borderRadius.lg,

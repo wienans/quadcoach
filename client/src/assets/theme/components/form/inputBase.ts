@@ -12,6 +12,7 @@ Coded by www.creative-tim.com
 
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 */
+import { ComponentsOverrides, ComponentsProps, ComponentsVariants, SimplePaletteColorOptions, Theme } from "@mui/material";
 
 // Soft UI Dashboard React Base Styles
 import colors from "../../base/colors";
@@ -20,12 +21,17 @@ import borders from "../../base/borders";
 
 // Soft UI Dashboard PRO helper functions
 import pxToRem from "../../functions/pxToRem";
+import important from "../../functions/important";
 
 const { dark, white, grey, inputColors } = colors;
 const { size, fontWeightRegular } = typography;
 const { borderWidth, borderRadius } = borders;
 
-const inputBase = {
+const inputBase: {
+  defaultProps?: ComponentsProps['MuiInputBase'];
+  styleOverrides?: ComponentsOverrides<Theme>['MuiInputBase'];
+  variants?: ComponentsVariants['MuiInputBase'];
+} = {
   styleOverrides: {
     root: {
       display: "grid !important",
@@ -33,14 +39,14 @@ const inputBase = {
       width: "100% !important",
       height: "auto !important",
       padding: `${pxToRem(8)} ${pxToRem(12)}`,
-      fontSize: `${size.sm} !important`,
+      fontSize: `${size!.sm} !important`,
       fontWeight: `${fontWeightRegular} !important`,
       lineHeight: "1.4 !important",
-      color: `${grey[700]} !important`,
-      backgroundColor: `${white.main} !important`,
+      color: `${grey![700]} !important`,
+      backgroundColor: `${(white as SimplePaletteColorOptions).main} !important`,
       backgroundClip: "padding-box !important",
       border: `${borderWidth[1]} solid ${inputColors.borderColor.main}`,
-      appearance: "none !important",
+      appearance: important("none"),//"none !important",
       borderRadius: borderRadius.md,
       transition: "box-shadow 150ms ease, border-color 150ms ease, padding 150ms ease !important",
     },
@@ -51,7 +57,7 @@ const inputBase = {
       padding: "0 !important",
 
       "&::-webkit-input-placeholder": {
-        color: `${dark.main} !important`,
+        color: `${(dark as SimplePaletteColorOptions).main} !important`,
       },
     },
   },
