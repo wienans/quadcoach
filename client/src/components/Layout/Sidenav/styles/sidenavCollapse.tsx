@@ -78,24 +78,6 @@ function collapseIconBox(theme, ownerState) {
       duration: transitions.duration.standard,
     }),
 
-    [breakpoints.up("xl")]: {
-      background: () => {
-        let background;
-
-        if (!active) {
-          background = transparentSidenav ? white.main : light.main;
-        } else if (color === "default") {
-          background = info.main;
-        } else if (color === "warning") {
-          background = gradients.warning.main;
-        } else {
-          background = palette[color].main;
-        }
-
-        return background;
-      },
-    },
-
     "& svg, svg g": {
       fill: active ? white.main : gradients.dark.state,
     },
