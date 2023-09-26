@@ -16,16 +16,12 @@ Coded by www.creative-tim.com
 import { forwardRef } from "react";
 import { Property } from "csstype";
 
-// prop-types is a library for typechecking of props
-import PropTypes from "prop-types";
-
 // Custom styles for SoftBox
 import SoftBoxRoot, { Gradients, SoftBoxColors, Variant } from "./SoftBoxRoot";
-import { BoxProps, SxProps } from "@mui/material";
+import { BoxProps } from "@mui/material";
 import { ValidBoxShadows } from "../../assets/theme/base/boxShadows";
-import { Theme } from "@mui/material/styles";
 
-// export interface SoftBoxProps extends BoxProps {
+// TODO improve SoftBox to split gradients props from normal color settings, so that it is clear which gradients are available
 export interface SoftBoxProps extends BoxProps {
     bgColor?: Gradients | SoftBoxColors | string;
     opacity?: number;
@@ -53,15 +49,5 @@ SoftBox.defaultProps = {
     borderRadius: "none",
     shadow: "none",
 };
-
-// Typechecking props for the SoftBox
-// SoftBox.propTypes = {
-//     variant: PropTypes.oneOf(["contained", "gradient"]),
-//     bgColor: PropTypes.string,
-//     color: PropTypes.string,
-//     opacity: PropTypes.number,
-//     borderRadius: PropTypes.string,
-//     shadow: PropTypes.string,
-// };
 
 export default SoftBox;

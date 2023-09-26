@@ -37,15 +37,15 @@ export enum NormalColors {
 }
 
 export enum GreyColors {
-    grey100 = "grey-100",
-    grey200 = "grey-200",
-    grey300 = "grey-300",
-    grey400 = "grey-400",
-    grey500 = "grey-500",
-    grey600 = "grey-600",
-    grey700 = "grey-700",
-    grey800 = "grey-800",
-    grey900 = "grey-900",
+    grey100 = "grey100",
+    grey200 = "grey200",
+    grey300 = "grey300",
+    grey400 = "grey400",
+    grey500 = "grey500",
+    grey600 = "grey600",
+    grey700 = "grey700",
+    grey800 = "grey800",
+    grey900 = "grey900",
 }
 
 export type SoftBoxColors = NormalColors | GreyColors
@@ -66,9 +66,9 @@ export function getPaletteColorForGreyColors(color: GreyColors, palette: Palette
     return greyColors.get(color)
 }
 
-export function getPaletteColorForSoftBoxColors(color: SoftBoxColors, palette: Palette): string | undefined {
-    const greyColor = Object.entries(GreyColors).find(([key]) => key === color.toString())?.[1]
-    const normalColor = Object.entries(NormalColors).find(([key]) => key === color.toString())?.[1]
+export function getPaletteColorForSoftBoxColors(color: string, palette: Palette): string | undefined {
+    const greyColor = Object.entries(GreyColors).find(([key]) => key === color)?.[1]
+    const normalColor = Object.entries(NormalColors).find(([key]) => key === color)?.[1]
     if (greyColor) {
         return getPaletteColorForGreyColors(greyColor, palette);
     }
@@ -95,9 +95,6 @@ export type OwnerState = {
     variant?: Variant;
     bgColor?: Gradients | SoftBoxColors | string;
     color?: string;
-    // color: ResponsiveStyleValue<string[] | Property.Color | undefined> |
-    // ((theme: Theme) => ResponsiveStyleValue<string[] | Property.Color | undefined>);
-    // color?: string[] | Property.Color | Property.Color[] | undefined;
     borderRadius?:
     ResponsiveStyleValue<
         Property.BorderRadius<string | number>
@@ -122,21 +119,18 @@ export default styled(Box)<SoftBoxRootProps>(({ theme, ownerState }) => {
     const { borderRadius: radius } = borders;
 
     // background value
-    let backgroundValue: Property.Background | undefined;
-
+    let backgroundValue: Property.Background | undefined = bgColor;
     if (variant === "gradient") {
         const gradient = Object.values(Gradients).find(v => v === bgColor)
         backgroundValue = gradient
             ? linearGradient(gradients[gradient].main, gradients[gradient].state)
             : white.main;
-    } else if (typeof bgColor === "string") {
-        backgroundValue = bgColor;
     } else if (bgColor) {
-        backgroundValue = getPaletteColorForSoftBoxColors(bgColor, palette);
+        const paletteColor = getPaletteColorForSoftBoxColors(bgColor, palette);
+        backgroundValue = paletteColor ? paletteColor : bgColor;
     }
 
     // color value
-    // let colorValue: Property.Color | string[] | Property.Color[] | undefined = color;
     let colorValue: string[] | Property.Color | Property.Color[] | undefined = color ? [color] : undefined;
     const greyColor = color ? Object.entries(GreyColors).find(([key]) => key === color)?.[1] : undefined;
     const normalColor = color ? Object.entries(NormalColors).find(([key]) => key === color)?.[1] : undefined
@@ -147,20 +141,15 @@ export default styled(Box)<SoftBoxRootProps>(({ theme, ownerState }) => {
         colorValue = palette[normalColor].main;
     }
 
-    // borderRadius value
+    // border radius
     let borderRadiusValue: (string | (string & {}))[] | Property.BorderRadius<string | number> | NonNullable<Property.BorderRadius<string | number> | undefined>[] | undefined
-        = undefined// radius[borderRadius]; //borderRadius;
-
+        = undefined
     const validBorderRadius = borderRadius ? Object.entries(ValidBorderRadius).find(([key]) => key === borderRadius)?.[1] : undefined
     if (validBorderRadius) {
         borderRadiusValue = radius[validBorderRadius]
     }
 
-    // if (validBorderRadius.find((el) => el === borderRadius)) {
-    //     borderRadiusValue = radius[borderRadius];
-    // }
-
-    // boxShadow value
+    // box shadow
     let boxShadowValue: Property.BoxShadow | undefined = shadow//boxShadows[shadow]//boxShadows;
     const existingValidBoxShadow = shadow ? Object.entries(boxShadows).find(([key]) => key === shadow)?.[1] : undefined;
     if (existingValidBoxShadow) {
@@ -177,10 +166,6 @@ export default styled(Box)<SoftBoxRootProps>(({ theme, ownerState }) => {
             boxShadowValue = existingValidBoxShadow.indicator;
         }
     }
-
-    // if (validBoxShadows.find((el) => el === shadow)) {
-    //     boxShadowValue = boxShadows[shadow];
-    // }
 
     return {
         opacity,

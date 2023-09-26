@@ -1,7 +1,7 @@
 const routes = [
     {
         path: "/",
-        async lazy () {
+        async lazy() {
             const Layout = (await import("../components/Layout")).default;
             return {
                 element: <Layout />,
@@ -10,7 +10,7 @@ const routes = [
         children: [
             {
                 index: true,
-                async lazy () {
+                async lazy() {
                     const ExerciseList = (await import("./ExerciseList")).default;
                     return {
                         element: <ExerciseList />,
@@ -20,7 +20,7 @@ const routes = [
             // For future, we might have a dashboard on home instead of list of only exercise
             {
                 path: "/exercises",
-                async lazy () {
+                async lazy() {
                     const ExerciseList = (await import("./ExerciseList")).default;
                     return {
                         element: <ExerciseList />,
@@ -29,7 +29,7 @@ const routes = [
             },
             {
                 path: "/exercises/add",
-                async lazy () {
+                async lazy() {
                     const AddExercise = (await import("./AddExercise")).default;
                     return {
                         element: <AddExercise />,
@@ -38,7 +38,7 @@ const routes = [
             },
             {
                 path: "/exercises/:id",
-                async lazy () {
+                async lazy() {
                     const Exercise = (await import("./Exercise")).default;
                     return {
                         element: <Exercise />,
@@ -47,10 +47,19 @@ const routes = [
             },
             {
                 path: "/exercises/:id/update",
-                async lazy () {
+                async lazy() {
                     const UpdateExercise = (await import("./UpdateExercise")).default;
                     return {
                         element: <UpdateExercise />,
+                    };
+                },
+            },
+            {
+                path: "/componentsTest",
+                async lazy() {
+                    const ComponentsTest = (await import("./ComponentsTest")).default;
+                    return {
+                        element: <ComponentsTest />,
                     };
                 },
             }
