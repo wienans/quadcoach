@@ -1,16 +1,23 @@
-import React from 'react';
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef } from "react";
 import Collapse from '@mui/material/Collapse';
 import Card from '@mui/material/Card';
 import CardActions from '@mui/material/CardActions';
 import CardContent from '@mui/material/CardContent';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import IconButton from '@mui/material/IconButton';
+import {IconButton,IconButtonProps} from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { Typography } from "@mui/material";
 
-const ExpandMore = styled((props) => {
-    const { expand, ...other } = props;
+
+interface ExpandMoreProps extends IconButtonProps {
+    expand?: boolean;
+}
+export type CollapsibleProps  = {
+    label?: string,
+    children?: string
+}
+const ExpandMore = styled((props: ExpandMoreProps) => {
+    const {expand, ...other } = props;
     return <IconButton {...other} />;
 })(({ theme, expand }) => ({
     transform: !expand ? 'rotate(0deg)' : 'rotate(180deg)',
@@ -20,12 +27,12 @@ const ExpandMore = styled((props) => {
     }),
 }));
 
-const Collapsible = (props) => {
+const Collapsible = (props: CollapsibleProps) => {
     const [open, setOpen] = useState(false);
     const toggle = () => {
         setOpen(!open);
     };
-    const contentRef = useRef();
+    useRef();
     return (
         <div>
             <Card>
