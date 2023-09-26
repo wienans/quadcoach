@@ -1,97 +1,101 @@
 # QuadCoach Client App
 
 ## React functional components
+
 For now we would use following structures and guidance for react functional components:
+
 - each component should be stored in one file
 - each component file should have a default export
 - directories should have index file exporting values needed outside
 - components should be if possible functional components instead of class components
 - functional components without properties should look like:
-   ```typescript
-      const MyComponent = (): JSX.Element => {
-         const a = 1 + 1
-         return (
-            <p>{a}</p>
-         )
-      }
 
-      export default MyComponent
+  ```typescript
+  const MyComponent = (): JSX.Element => {
+    const a = 1 + 1;
+    return <p>{a}</p>;
+  };
 
-      // Also possible if only JSX returned without needed variables inside      
-      const MyComponent = (): JSX.Element => (
-            <p>Hallo</p>
-      )
+  export default MyComponent;
 
-      export default MyComponent
-   ````
+  // Also possible if only JSX returned without needed variables inside
+  const MyComponent = (): JSX.Element => <p>Hallo</p>;
 
-   Hint: if you want to write quick such component, type FuCo and use autocompletion.
+  export default MyComponent;
+  ```
+
+  Hint: if you want to write quick such component, type FuCo and use autocompletion.
+
 - functional components with properties should look like:
-   ```typescript
-      export type MyComponentProps = {
-         myProperty: string
-      }
 
-      const MyComponent = ({myProperty}: MyComponentProps): JSX.Element => {
-         const a = 1 + 1
-         return (
-            <p>{`${a} ${myProperty}`}</p>
-         )
-      }
+  ```typescript
+  export type MyComponentProps = {
+    myProperty: string;
+  };
 
-      export default MyComponent
+  const MyComponent = ({ myProperty }: MyComponentProps): JSX.Element => {
+    const a = 1 + 1;
+    return <p>{`${a} ${myProperty}`}</p>;
+  };
 
-      // Same like for component without properties, we could simplify if possible
-      
-      export type MyComponentProps = {
-         myProperty: string
-      }
+  export default MyComponent;
 
-      const MyComponent = ({myProperty}: MyComponentProps): JSX.Element => (
-            <p>{myProperty}</p>
-         )
+  // Same like for component without properties, we could simplify if possible
 
-      export default MyComponent
-   ```
+  export type MyComponentProps = {
+    myProperty: string;
+  };
 
-   In general if properties is simple we would use type for the Props type. If some extending or else would be possible, we would use interface
+  const MyComponent = ({ myProperty }: MyComponentProps): JSX.Element => (
+    <p>{myProperty}</p>
+  );
 
-   ```typescript
-      export type A = {
-         test: string
-      }
+  export default MyComponent;
+  ```
 
-      export interface B extends A {
-         testTwo: number
-      }
-   ```
+  In general if properties is simple we would use type for the Props type. If some extending or else would be possible, we would use interface
 
-   Hint: if you want to write quick such component, type FuCoProps and use autocompletion.
+  ```typescript
+  export type A = {
+    test: string;
+  };
+
+  export interface B extends A {
+    testTwo: number;
+  }
+  ```
+
+  Hint: if you want to write quick such component, type FuCoProps and use autocompletion.
 
 ## Redux Toolkit
+
 Information about Redux Toolkit could be found [here](https://redux-toolkit.js.org/introduction/getting-started).
 
 For our development we would use following guideline:
+
 - Instead of useSelector from react-redux, we use useAppSelector from ./src/store/hooks, because it is already typed:
-   ```typescript
-   // use this
-   import { useAppSelector } from "./store/hooks";
-   const miniSidenav = useAppSelector(state => state.layout.miniSidenav)
 
-   // and not use this, because it wants to have (state: RootState) else it throws warning "Parameter 'state' implicitly has an 'any' type.ts(7006)" => less typing ;-)
-   import { useSelector } from "react-redux";
-   const test = useSelector(state => state.layout.miniSidenav) 
-   ```
+  ```typescript
+  // use this
+  import { useAppSelector } from "./store/hooks";
+  const miniSidenav = useAppSelector((state) => state.layout.miniSidenav);
+
+  // and not use this, because it wants to have (state: RootState) else it throws warning "Parameter 'state' implicitly has an 'any' type.ts(7006)" => less typing ;-)
+  import { useSelector } from "react-redux";
+  const test = useSelector((state) => state.layout.miniSidenav);
+  ```
+
 - Like for useSelector, we would use useAppDispatch from ./src/store/hooks instead of useDispatch from react-redux. Because it is also typed instead of normal useDispatch.
-   ```typescript
-   // use this
-   import { useAppDispatch } from "../../store/hooks";
-   const dispatch = useAppDispatch();
 
-   // and not use this
-   import { useDispatch } from "react-redux";
-   const dispatch = useDispatch();
-   ```
+  ```typescript
+  // use this
+  import { useAppDispatch } from "../../store/hooks";
+  const dispatch = useAppDispatch();
+
+  // and not use this
+  import { useDispatch } from "react-redux";
+  const dispatch = useDispatch();
+  ```
 
 ## React + TypeScript + Vite
 
@@ -120,3 +124,7 @@ If you are developing a production application, we recommend updating the config
 - Replace `plugin:@typescript-eslint/recommended` to `plugin:@typescript-eslint/recommended-type-checked` or `plugin:@typescript-eslint/strict-type-checked`
 - Optionally add `plugin:@typescript-eslint/stylistic-type-checked`
 - Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and add `plugin:react/recommended` & `plugin:react/jsx-runtime` to the `extends` list
+
+# License
+
+This Front-End is based on the [SoftUI Version 4.0.1](https://github.com/creativetimofficial/soft-ui-dashboard-react/tree/4.0.1) by [Creative Tim under MIT LICENSE](./LICENSE-Creative-Tim.md). The Software was changed, extended and refactored and all Changes are Licensed under the [Repository License](../LICENSE)
