@@ -14,15 +14,28 @@ Coded by www.creative-tim.com
 */
 
 import { forwardRef } from "react";
+import { Property } from "csstype";
 
 // prop-types is a library for typechecking of props
 import PropTypes from "prop-types";
 
 // Custom styles for SoftBox
-import SoftBoxRoot from "./SoftBoxRoot";
+import SoftBoxRoot, { Gradients, SoftBoxColors, Variant } from "./SoftBoxRoot";
+import { BoxProps, SxProps } from "@mui/material";
+import { ValidBoxShadows } from "../../assets/theme/base/boxShadows";
+import { Theme } from "@mui/material/styles";
 
-const SoftBox = forwardRef(
-    ({ variant, bgColor, color, opacity, borderRadius, shadow, ...rest }, ref) => (
+// export interface SoftBoxProps extends BoxProps {
+export interface SoftBoxProps extends BoxProps {
+    bgColor?: Gradients | SoftBoxColors | string;
+    opacity?: number;
+    variant?: Variant;
+    shadow?: ValidBoxShadows | Property.BoxShadow;
+    color?: string;
+}
+
+const SoftBox = forwardRef<HTMLDivElement, SoftBoxProps>(
+    ({ variant = "contained", bgColor = "transparent", color = "dark", opacity = 1, borderRadius = "none", shadow = "none", ...rest }, ref) => (
         <SoftBoxRoot
             {...rest}
             ref={ref}
@@ -42,13 +55,13 @@ SoftBox.defaultProps = {
 };
 
 // Typechecking props for the SoftBox
-SoftBox.propTypes = {
-    variant: PropTypes.oneOf(["contained", "gradient"]),
-    bgColor: PropTypes.string,
-    color: PropTypes.string,
-    opacity: PropTypes.number,
-    borderRadius: PropTypes.string,
-    shadow: PropTypes.string,
-};
+// SoftBox.propTypes = {
+//     variant: PropTypes.oneOf(["contained", "gradient"]),
+//     bgColor: PropTypes.string,
+//     color: PropTypes.string,
+//     opacity: PropTypes.number,
+//     borderRadius: PropTypes.string,
+//     shadow: PropTypes.string,
+// };
 
 export default SoftBox;

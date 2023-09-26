@@ -29,7 +29,15 @@ export type ValidBorderWidth = 0 | 1 | 2 | 3 | 4 | 5
 
 export type BorderWidth = Record<ValidBorderWidth, number | string>
 
-export type ValidBorderRadius = "xs" | "sm" | "md" | "lg" | "xl" | "xxl" | "section"
+export enum ValidBorderRadius {
+  xs = "xs",
+  sm = "sm",
+  md = "md",
+  lg = "lg",
+  xl = "xl",
+  xxl = "xxl",
+  section = "section",
+}
 
 export type BorderRadius = Record<ValidBorderRadius, string>
 

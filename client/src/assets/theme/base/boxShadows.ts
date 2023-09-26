@@ -36,14 +36,28 @@ export type SliderBoxShadow = {
   thumb: string;
 }
 
+export function isSliderBoxShadow<T>(shadow: SliderBoxShadow | T): shadow is SliderBoxShadow {
+  return (shadow as SliderBoxShadow).thumb !== undefined;
+}
+
 export type ButtonBoxShadow = {
   main: string;
   stateOf: string;
   stateOfNotHover: string;
 }
 
+export function isButtonBoxShadow<T>(shadow: ButtonBoxShadow | T): shadow is ButtonBoxShadow {
+  return (shadow as ButtonBoxShadow).main !== undefined &&
+    (shadow as ButtonBoxShadow).stateOf !== undefined &&
+    (shadow as ButtonBoxShadow).stateOfNotHover !== undefined;
+}
+
 export type TabsBoxShadow = {
   indicator: string;
+}
+
+export function isTabsBoxShadow<T>(shadow: TabsBoxShadow | T): shadow is TabsBoxShadow {
+  return (shadow as TabsBoxShadow).indicator !== undefined;
 }
 
 export type BoxShadows = {
