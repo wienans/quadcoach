@@ -4,8 +4,9 @@
   "description": "QuadCoach - The digital assistant coach for Quadball",
   "main": "index.js",
   "scripts": {
-    "start": "node server",
-    "dev": "nodemon server"
+    "start": "node server.js",
+    "dev": "nodemon server.ts",
+    "build": "npx tsc"
   },
   "keywords": [],
   "author": "",
@@ -16,6 +17,10 @@
     "mongoose": "^7.5.0"
   },
   "devDependencies": {
-    "nodemon": "^3.0.1"
+    "@types/cors": "^2.8.14",
+    "@types/express": "^4.17.18",
+    "nodemon": "^3.0.1",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.2.2"
   }
 }
