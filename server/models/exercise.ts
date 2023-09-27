@@ -1,7 +1,21 @@
 import mongoose from "mongoose";
 const Schema = mongoose.Schema;
 
-const exerciseSchema = new Schema({
+interface IExercise {
+    name: string;
+    description: string;
+    video_url?: string;
+    time_min?: number;
+    materials?: string[];
+    beaters?: number;
+    chaser?: number;
+    persons?: number;
+    tags?: string[];
+    coaching_points?: string;
+    creator?: string;
+}
+
+const exerciseSchema = new Schema<IExercise>({
     name: {
         type: String,
         required: true
@@ -39,6 +53,6 @@ const exerciseSchema = new Schema({
     }
 }, { timestamps: true });
 
-const Exercise = mongoose.model('exercises', exerciseSchema);
+const Exercise = mongoose.model<IExercise>('exercises', exerciseSchema);
 
-module.exports = Exercise;
+export default Exercise;

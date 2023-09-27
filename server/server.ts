@@ -1,11 +1,10 @@
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors"
-// const mongoose = require("mongoose")
-// const cors = require("cors")
 
-const Exercise = require("./models/exercise")
-const User = require("./models/user")
+import Exercise from "./models/exercise"
+import User from "./models/user"
+
 // Read out Port or use Default
 const PORT = process.env.PORT || 3001
 
