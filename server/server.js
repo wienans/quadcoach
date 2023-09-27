@@ -15,10 +15,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const mongoose_1 = __importDefault(require("mongoose"));
 const cors_1 = __importDefault(require("cors"));
-// const mongoose = require("mongoose")
-// const cors = require("cors")
-const Exercise = require("./models/exercise");
-const User = require("./models/user");
+const exercise_1 = __importDefault(require("./models/exercise"));
+const user_1 = __importDefault(require("./models/user"));
 // Read out Port or use Default
 const PORT = process.env.PORT || 3001;
 // Start Express
@@ -48,7 +46,7 @@ app.get("/api", (req, res) => {
     res.json({ message: "Hello from server!" });
 });
 app.post("/api/add-exercise", (req, res) => {
-    let exercise = new Exercise(req.body);
+    let exercise = new exercise_1.default(req.body);
     exercise.save()
         .then((result) => {
         res.send(result);
@@ -58,7 +56,7 @@ app.post("/api/add-exercise", (req, res) => {
     });
 });
 app.get("/api/all-exercises", (req, res) => {
-    Exercise.find()
+    exercise_1.default.find()
         .then((result) => {
         res.send(result);
     })
@@ -67,7 +65,7 @@ app.get("/api/all-exercises", (req, res) => {
     });
 });
 app.post("/api/register", (req, res) => {
-    let user = new User(req.body);
+    let user = new user_1.default(req.body);
     user.save()
         .then((result) => {
         res.send(result);
@@ -77,7 +75,7 @@ app.post("/api/register", (req, res) => {
     });
 });
 app.get("/api/exercises", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const exercises = yield Exercise.find();
+    const exercises = yield exercise_1.default.find();
     if (exercises.length > 0) {
         res.send(exercises);
     }
@@ -86,7 +84,7 @@ app.get("/api/exercises", (req, res) => __awaiter(void 0, void 0, void 0, functi
     }
 }));
 app.delete("/api/exercise/:id", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield Exercise.deleteOne({ _id: req.params.id });
+    const result = yield exercise_1.default.deleteOne({ _id: req.params.id });
     if (result) {
         res.send(result);
     }
@@ -95,7 +93,7 @@ app.delete("/api/exercise/:id", (req, res) => __awaiter(void 0, void 0, void 0, 
     }
 }));
 app.get("/api/exercise/:id", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield Exercise.findOne({ _id: req.params.id });
+    const result = yield exercise_1.default.findOne({ _id: req.params.id });
     if (result) {
         res.send(result);
     }
@@ -104,11 +102,11 @@ app.get("/api/exercise/:id", (req, res) => __awaiter(void 0, void 0, void 0, fun
     }
 }));
 app.put("/api/exercise/:id", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield Exercise.updateOne({ _id: req.params.id }, { $set: req.body });
+    const result = yield exercise_1.default.updateOne({ _id: req.params.id }, { $set: req.body });
     res.send(result);
 }));
 app.get("/api/search/:key", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield Exercise.find({
+    const result = yield exercise_1.default.find({
         "$or": [
             {
                 name: { $regex: req.params.key },
