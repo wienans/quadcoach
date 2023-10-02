@@ -17,12 +17,8 @@ const ExerciseList = () => {
 
     useEffect(() => {
         const getExercises = async (searchString) => {
-            // refactor api, normaly we would use same endpoint and just add a queryparameter
-            // /api/exercises => all, api/exercises?search=MySearchValue
-            let searchPath = "/api/exercises"
-            if (searchString && searchString !== "") {
-                searchPath = `/api/search/${searchString}`
-            }
+
+            let searchPath = `/api/exercises?name[regex]=${searchString}&name[options]=i`
 
             let result = await fetch(searchPath)
             result = await result.json()
