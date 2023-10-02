@@ -14,10 +14,42 @@ Coded by www.creative-tim.com
 */
 
 // @mui material components
-import Button from "@mui/material/Button";
-import { styled } from "@mui/material/styles";
+import Button, { ButtonProps, } from "@mui/material/Button";
+import { Palette, PaletteColor, styled } from "@mui/material/styles";
+import { PaletteGradient } from "../../assets/theme/base/paletteTypes";
 
-export default styled(Button)(({ theme, ownerState }) => {
+export type Variant = "contained" | "outlined" | "gradient" | "text";
+
+export enum Color {
+    white = "white",
+    primary = "primary",
+    secondary = "secondary",
+    info = "info",
+    success = "success",
+    warning = "warning",
+    error = "error",
+    light = "light",
+    dark = "dark"
+}
+export type Size = "small" | "medium" | "large"
+
+const getPaletteColor = (color: ButtonProps["color"], palette: Palette): PaletteColor | undefined => Object.entries(palette).find(([key, value]) => key === color && (value as PaletteColor)?.main != null)?.[1]
+
+const getGradientColor = (color: ButtonProps["color"], palette: Palette): PaletteGradient | undefined => Object.entries(palette.gradients).find(([key]) => key === color)?.[1]
+
+export type OwnerState = {
+    color: ButtonProps["color"];
+    variant: ButtonProps["variant"];
+    size: ButtonProps["size"];
+    circular: boolean;
+    iconOnly: boolean;
+}
+
+export interface SoftButtonRootProps extends ButtonProps {
+    ownerState: OwnerState
+}
+
+export default styled(Button)<SoftButtonRootProps>(({ theme, ownerState }) => {
     const { palette, functions, borders } = theme;
     const { color, variant, size, circular, iconOnly } = ownerState;
 
@@ -27,21 +59,21 @@ export default styled(Button)(({ theme, ownerState }) => {
 
     // styles for the button with variant="contained"
     const containedStyles = () => {
+        const colorPalette = getPaletteColor(color, palette);
         // background color value
-        const backgroundValue = palette[color] ? palette[color].main : white.main;
+        const backgroundValue = colorPalette?.main ?? white.main;
 
         // backgroundColor value when button is focused
-        const focusedBackgroundValue = palette[color] ? palette[color].focus : white.focus;
+        const focusedBackgroundValue = colorPalette?.focus ?? white.focus;
 
         // boxShadow value
-        const boxShadowValue = palette[color]
-            ? boxShadow([0, 0], [0, 3.2], palette[color].main, 0.5)
+        const boxShadowValue = colorPalette
+            ? boxShadow([0, 0], [0, 3.2], colorPalette.main, 0.5)
             : boxShadow([0, 0], [0, 3.2], dark.main, 0.5);
 
         // color value
         let colorValue = white.main;
-
-        if (color === "white" || !palette[color]) {
+        if (color === "white" || !colorPalette) {
             colorValue = text.main;
         } else if (color === "light") {
             colorValue = gradients.dark.state;
@@ -78,19 +110,20 @@ export default styled(Button)(({ theme, ownerState }) => {
 
     // styles for the button with variant="outlined"
     const outliedStyles = () => {
+        const colorPalette = getPaletteColor(color, palette);
         // background color value
         const backgroundValue = color === "white" ? rgba(white.main, 0.1) : transparent.main;
 
         // color value
-        const colorValue = palette[color] ? palette[color].main : white.main;
+        const colorValue = colorPalette?.main ?? white.main;
 
         // boxShadow value
-        const boxShadowValue = palette[color]
-            ? boxShadow([0, 0], [0, 3.2], palette[color].main, 0.5)
+        const boxShadowValue = colorPalette
+            ? boxShadow([0, 0], [0, 3.2], colorPalette.main, 0.5)
             : boxShadow([0, 0], [0, 3.2], white.main, 0.5);
 
         // border color value
-        let borderColorValue = palette[color] ? palette[color].main : rgba(white.main, 0.75);
+        let borderColorValue = colorPalette?.main ?? rgba(white.main, 0.75);
 
         if (color === "white") {
             borderColorValue = rgba(white.main, 0.75);
@@ -126,11 +159,12 @@ export default styled(Button)(({ theme, ownerState }) => {
 
     // styles for the button with variant="gradient"
     const gradientStyles = () => {
+        const gradientColor = getGradientColor(color, palette);
         // background value
         const backgroundValue =
-            color === "white" || !gradients[color]
+            color === "white" || !gradientColor
                 ? white.main
-                : linearGradient(gradients[color].main, gradients[color].state);
+                : linearGradient(gradientColor.main, gradientColor.state);
 
         // color value
         let colorValue = white.main;
@@ -158,11 +192,12 @@ export default styled(Button)(({ theme, ownerState }) => {
 
     // styles for the button with variant="text"
     const textStyles = () => {
+        const colorPalette = getPaletteColor(color, palette);
         // color value
-        const colorValue = palette[color] ? palette[color].main : white.main;
+        const colorValue = colorPalette?.main ?? white.main;
 
         // color value when button is focused
-        const focusedColorValue = palette[color] ? palette[color].focus : white.focus;
+        const focusedColorValue = colorPalette?.focus ?? white.focus;
 
         return {
             color: colorValue,
