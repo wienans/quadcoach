@@ -158,6 +158,7 @@ const ExerciseEditForm = ({ initialValues, onSubmit, extraRows, header: Header }
                                 inputProps={{ min: 0, step: "1" }}
                                 error={touched.persons != null && Boolean(errors.persons)}
                                 name="persons"
+                                required
                                 id="outlined-basic"
                                 placeholder="Minutes"
                                 variant="outlined"
