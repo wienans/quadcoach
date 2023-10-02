@@ -1,16 +1,16 @@
-import mongoose from "mongoose";
-const Schema = mongoose.Schema;
+import {Schema,model,Types} from "mongoose";
+
 
 interface IExercise {
     name: string;
     description: string;
     video_url?: string;
     time_min?: number;
-    materials?: string[];
+    materials?: Types.Array<string>;
     beaters?: number;
     chaser?: number;
     persons?: number;
-    tags?: string[];
+    tags?: Types.Array<string>;
     coaching_points?: string;
     creator?: string;
 }
@@ -31,7 +31,7 @@ const exerciseSchema = new Schema<IExercise>({
         type: Number
     },
     materials: {
-        type: Array
+        type: [String]
     },
     beaters: {
         type: Number
@@ -43,7 +43,7 @@ const exerciseSchema = new Schema<IExercise>({
         type: Number
     },
     tags: {
-        type: Array
+        type: [String]
     },
     coaching_points: {
         type: String
@@ -53,6 +53,6 @@ const exerciseSchema = new Schema<IExercise>({
     }
 }, { timestamps: true });
 
-const Exercise = mongoose.model<IExercise>('exercises', exerciseSchema);
+const Exercise = model<IExercise>('exercises', exerciseSchema);
 
 export default Exercise;

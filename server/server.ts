@@ -41,36 +41,30 @@ app.get("/api", (req, res) => {
   res.json({ message: "Hello from server!" })
 })
 
-app.post("/api/add-exercise", (req, res) => {
+app.post("/api/add-exercise", async (req, res)  => {
   let exercise = new Exercise(req.body)
-  exercise.save()
-    .then((result:any) => {
-      res.send(result)
-    })
-    .catch((err:any) => {
-      console.log(err)
-    })
+  const result = await exercise.save()
+  if (!result) {
+    console.error("Couldn't create Exercise")
+  }
+  res.send(result)
 })
 
-app.get("/api/all-exercises", (req, res) => {
-  Exercise.find()
-    .then((result:any) => {
-      res.send(result)
-    })
-    .catch((err:any) => {
-      console.log(err)
-    })
+app.get("/api/all-exercises", async (req, res) => {
+  const result = await Exercise.find()
+  if (!result) {
+    console.error("Couldn't find all exercises")
+  }
+  res.send(result)
 })
 
-app.post("/api/register", (req, res) => {
+app.post("/api/register", async (req, res) => {
   let user = new User(req.body)
-  user.save()
-    .then((result:any) => {
-      res.send(result)
-    })
-    .catch((err:any) => {
-      res.send(err)
-    })
+  const result = await user.save()
+  if (!result) {
+    console.error("Couldn't save User")
+  }
+  res.send(result)
 })
 
 app.get("/api/exercises", async (req, res) => {
