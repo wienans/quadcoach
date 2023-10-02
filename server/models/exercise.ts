@@ -1,19 +1,47 @@
 import {Schema,model,Types} from "mongoose";
 
 
+interface IBlock {
+    video_url?: string;
+    description?: string;
+    coaching_points?: string;
+    tactics_board?: Types.ObjectId;
+    time_min?: number;
+}
+
 interface IExercise {
     name: string;
-    description: string;
-    video_url?: string;
-    time_min?: number;
+    description?: string; // unused for block model only backwards compatible
+    video_url?: string; // unused for block model only backwards compatible
+    time_min?: number; // unused for block model only backwards compatible
     materials?: Types.Array<string>;
     beaters?: number;
     chaser?: number;
     persons?: number;
     tags?: Types.Array<string>;
-    coaching_points?: string;
+    coaching_points?: string; // unused for block model only backwards compatible
     creator?: string;
+    description_blocks?: Types.DocumentArray<IBlock>;
 }
+
+const blockSchema = new Schema<IBlock>({
+    video_url: {
+        type: String
+    },
+    description:{
+        type: String
+    },
+    coaching_points: {
+        type: String
+    },
+    tactics_board: {
+        type: Types.ObjectId,
+        ref: 'exercises'
+    },
+    time_min: {
+        type: Number
+    }
+})
 
 const exerciseSchema = new Schema<IExercise>({
     name: {
@@ -21,8 +49,7 @@ const exerciseSchema = new Schema<IExercise>({
         required: true
     },
     description: {
-        type: String,
-        required: true
+        type: String
     },
     video_url: {
         type: String
@@ -50,6 +77,9 @@ const exerciseSchema = new Schema<IExercise>({
     },
     creator: {
         type: String
+    },
+    description_blocks: {
+        type: [blockSchema]
     }
 }, { timestamps: true });
 
