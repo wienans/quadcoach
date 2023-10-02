@@ -68,12 +68,14 @@ app.post("/api/register", async (req, res) => {
 })
 
 app.get("/api/exercises", async (req, res) => {
-  const exercises = await Exercise.find()
-  if (exercises.length > 0) {
-    res.send(exercises)
-  } else {
-    res.send(exercises)
-  }
+  let queryString:string = JSON.stringify(req.query)
+
+  queryString = queryString.replace(/\b(gte|gt|lte|lt|eq|ne|regex|options|in|nin)\b/g, (match) => `$${match}`)
+
+  const exercises = await Exercise.find(JSON.parse(queryString))
+
+  res.send(exercises)
+
 })
 
 app.delete("/api/exercise/:id", async (req, res) => {
