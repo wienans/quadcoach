@@ -1,7 +1,13 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 const Schema = mongoose.Schema;
 
-const userSchema = new Schema({
+interface IUser {
+    name: string;
+    email: string;
+    password: string;
+}
+
+const userSchema = new Schema<IUser>({
     name: {
         type: String,
         required: true
@@ -16,6 +22,6 @@ const userSchema = new Schema({
     }
 });
 
-const Exercise = mongoose.model('users', userSchema);
+const User = mongoose.model<IUser>('users', userSchema);
 
-module.exports = Exercise;
+export default User;

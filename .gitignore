@@ -106,3 +106,6 @@ dist
 .tern-port
 
 server/env_secrets.sh
+
+*.js
+!mongo-init.js
