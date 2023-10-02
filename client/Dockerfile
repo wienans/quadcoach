@@ -3,8 +3,10 @@ VOLUME [ "/client" ]
 WORKDIR /client
 COPY ./package.json ./package.json
 COPY ./index.html ./index.html
-COPY ./vite.config.js ./vite.config.js
+COPY ./vite.config.ts ./vite.config.ts
 COPY ./.eslintrc.cjs ./.eslintrc.cjs
+COPY ./tsconfig.json ./tsconfig.json
+COPY ./tsconfig.node.json ./tsconfig.node.json
 COPY ./public ./public
 COPY ./src ./src
 RUN npm install

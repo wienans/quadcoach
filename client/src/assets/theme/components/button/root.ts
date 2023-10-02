@@ -1,0 +1,64 @@
+/**
+=========================================================
+* Soft UI Dashboard React - v3.1.0
+=========================================================
+
+* Product Page: https://www.creative-tim.com/product/soft-ui-dashboard-pro-react
+* Copyright 2022 Creative Tim (https://www.creative-tim.com)
+
+Coded by www.creative-tim.com
+
+ =========================================================
+
+* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+*/
+
+// Soft UI Dashboard React Base Styles
+import typography from "../../base/typography";
+import borders from "../../base/borders";
+
+// Soft UI Dashboard React Helper Functions
+import pxToRem from "../../functions/pxToRem";
+import { ButtonProps, CSSInterpolation } from "@mui/material";
+import { Theme } from "@mui/system";
+
+const { fontWeightBold, size } = typography;
+const { borderRadius } = borders;
+
+const root: CSSInterpolation
+  | ((
+    // Record<string, unknown> is for other props that the slot receive internally
+    // Documenting all ownerStates could be a huge work, let's wait until we have a real needs from developers.
+    props: ({ ownerState: ButtonProps & Record<string, unknown> }) & { theme: Theme } & Record<string, unknown>,
+  ) => CSSInterpolation) = {
+  display: "inline-flex",
+  justifyContent: "center",
+  alignItems: "center",
+  fontSize: size!.xs,
+  fontWeight: fontWeightBold,
+  borderRadius: borderRadius.md,
+  padding: `${pxToRem(12)} ${pxToRem(24)}`,
+  lineHeight: 1.4,
+  textAlign: "center",
+  textTransform: "uppercase",
+  userSelect: "none",
+  backgroundSize: "150% !important",
+  backgroundPositionX: "25% !important",
+  transition: `all 150ms ease-in`,
+
+  "&:hover": {
+    transform: "scale(1.02)",
+  },
+
+  "&:disabled": {
+    pointerEvent: "none",
+    opacity: 0.65,
+  },
+
+  "& .material-icons": {
+    fontSize: pxToRem(15),
+    marginTop: pxToRem(-2),
+  },
+};
+
+export default root;

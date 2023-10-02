@@ -29,5 +29,81 @@
       "export default ${1:$TM_FILENAME_BASE};"
     ],
     "description": "Creates a FunctionComponent with props"
-  }
+  },
+  "DefaultDomain": {
+    "scope": "typescript",
+    "prefix": "deDo",
+    "body": ["type ${1:$TM_FILENAME_BASE} = {", "$0", "};", "", "export default ${1:$TM_FILENAME_BASE};"],
+    "description": "Creates default structure for a domain type"
+  },
+  // typescriptreact
+  "FunctionComponent": {
+    "scope": "typescriptreact",
+    "prefix": "FuCo",
+    "body": [
+      "const ${1:$TM_FILENAME_BASE} = (): JSX.Element => {",
+      "",
+      "return (",
+      "${0:<p></p>}",
+      ");",
+      "}",
+      "",
+      "export default ${1:$TM_FILENAME_BASE};"
+    ],
+    "description": "Creates a FunctionComponent without props"
+  },
+  "FunctionComponentWithProps": {
+    "scope": "typescriptreact",
+    "prefix": "FuCoProps",
+    "body": [
+      "export type ${1:$TM_FILENAME_BASE}Props = {",
+      "$0",
+      "}",
+      "",
+      "const ${1:$TM_FILENAME_BASE} = ({}:${1:$TM_FILENAME_BASE}Props): JSX.Element => {",
+      "",
+      "return (",
+      "<p>${1:$TM_FILENAME_BASE}</p>",
+      ");",
+      "}",
+      "",
+      "export default ${1:$TM_FILENAME_BASE};"
+    ],
+    "description": "Creates a FunctionComponent with props"
+  },  
+  "Redux-Toolkit Slice": {
+    "scope": "typescript",
+    "prefix": "sliceStructure",
+    "body": [
+      "import { createSlice } from \"@reduxjs/toolkit\"",
+      "import type { PayloadAction } from \"@reduxjs/toolkit\"",
+      "",
+      "// Define a type for the slice state",
+      "interface ${1}State {"
+      "",
+      "}",
+      "",
+      "// Define the initial state using that type"
+      "const initialState: ${1}State = {",
+      "",
+      "}"
+      "",
+      "// Implement the slice",
+      "export const ${2}Slice = createSlice({",
+      "   name: \"${2}\",",
+      "   // `createSlice` will infer the state type from the `initialState` argument",
+      "  initialState,",
+      "  reducers: {",
+      "    ${3}: (state, action: PayloadAction<${4}>) => {",
+      "      $0",
+      "  },",
+      " }",
+      "})",
+      "",
+      "export const { } = ${2}Slice.actions",
+      "",
+      "export default ${2}Slice.reducer"
+    ],
+    "description": "Creates basic structure for a redux-toolkit slice"
+  },
 }
