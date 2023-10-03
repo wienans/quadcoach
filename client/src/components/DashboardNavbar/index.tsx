@@ -182,14 +182,14 @@ function DashboardNavbar({ absolute, light, isMini }) {
                                     {miniSidenav ? "menu_open" : "menu"}
                                 </Icon>
                             </IconButton>
-                            <IconButton
+                            {/* <IconButton
                                 size="small"
                                 color="inherit"
                                 sx={navbarIconButton}
                                 onClick={handleConfiguratorOpen}
                             >
                                 <Icon>settings</Icon>
-                            </IconButton>
+                            </IconButton> */}
                             {/* <IconButton
                                 size="small"
                                 color="inherit"
