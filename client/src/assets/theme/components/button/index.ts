@@ -48,4 +48,16 @@ const button: {
   },
 };
 
+declare module "@mui/material/Button" {
+  interface ButtonPropsColorOverrides {
+    white: true;
+    dark: true;
+    light: true;
+  }
+
+  interface ButtonPropsVariantOverrides{
+    gradient: true;
+  }
+}
+
 export default button;

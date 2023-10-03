@@ -80,7 +80,7 @@ export type ThemeFunctions = {
   boxShadow: (offset: number[], radius: number[], color: string | number | chroma.Color, opacity: number, inset?: string) => string;
   hexToRgb: (color: string | number | chroma.Color) => string;
   linearGradient: (color: string, colorState: string, angle?: number) => string;
-  pxToRem: (number: number, baseNumber: number | undefined) => string;
+  pxToRem: (number: number, baseNumber?: number | undefined) => string;
   rgba: (color: string | number | chroma.Color, opacity: number) => string;
 }
 
