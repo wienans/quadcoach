@@ -40,9 +40,12 @@ const Collapsible = (props: CollapsibleProps) => {
                 variant="contained"
                 borderRadius="lg"
                 shadow="lg"
+                opacity={1}
+                p={1}
+                my={2}
                 >
                 <CardActions disableSpacing>
-                    <SoftTypography variant="h6">{props.label}</SoftTypography>
+                    <SoftTypography>{props.label}</SoftTypography>
                     <ExpandMore
                         expand={open}
                         onClick={toggle}

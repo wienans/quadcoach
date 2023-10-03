@@ -1,4 +1,4 @@
-import { SoftBox, SoftButton } from "../../components";
+import { Collapsible, SoftBox, SoftButton } from "../../components";
 import { Gradients, GreyColors, NormalColors } from "../../components/SoftBox/SoftBoxRoot";
 
 const ComponentsTest = (): JSX.Element => {
@@ -66,6 +66,10 @@ const ComponentsTest = (): JSX.Element => {
                 Box
             </SoftBox>
             <SoftButton variant="gradient" color="info">Button</SoftButton>
+            <Collapsible
+                label="Collapsible">
+                Test
+            </Collapsible>
         </>
     );
 }
