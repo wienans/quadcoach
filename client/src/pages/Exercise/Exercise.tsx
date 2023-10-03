@@ -6,26 +6,10 @@ import Link from '@mui/material/Link';
 import { Card, Grid, } from "@mui/material";
 import { SoftBox, SoftButton, SoftTypography } from "../../components";
 import { useUpdateBreadcrumbs } from "../../components/Layout/hooks";
+import { Chip } from "@mui/material"
+import CopyrightIcon from '@mui/icons-material/Copyright';
 
 const values = [
-    {
-        label: "Description:",
-        getElement: exercise => (
-            <SoftTypography variant="button" fontWeight="regular" color="text">{exercise.description}</SoftTypography>
-        )
-    },
-    {
-        label: "Video URL:",
-        getElement: exercise => exercise.videoUrl && exercise.videoUrl !== ""
-            ? <Link variant="button" fontWeight="regular" href={exercise.videoUrl} target="_blank">{exercise.videoUrl}</Link>
-            : <SoftTypography variant="button" fontWeight="regular" color="text">-</SoftTypography>
-    },
-    {
-        label: "Suggested Time (minutes):",
-        getElement: exercise => (
-            <SoftTypography variant="button" fontWeight="regular" color="text">{exercise.timeMin}</SoftTypography>
-        )
-    },
     {
         label: "Person Number:",
         getElement: exercise => (
@@ -33,15 +17,15 @@ const values = [
         )
     },
     {
-        label: "Material:",
+        label: "Beater Number:",
         getElement: exercise => (
-            <SoftTypography variant="button" fontWeight="regular" color="text">{exercise.materialsString}</SoftTypography>
+            <SoftTypography variant="button" fontWeight="regular" color="text">{exercise.beaters}</SoftTypography>
         )
     },
     {
-        label: "Tags:",
+        label: "Chaser Number:",
         getElement: exercise => (
-            <SoftTypography variant="button" fontWeight="regular" color="text">{exercise.tagsString}</SoftTypography>
+            <SoftTypography variant="button" fontWeight="regular" color="text">{exercise.chasers}</SoftTypography>
         )
     },
 ]
@@ -54,8 +38,13 @@ const Exercise = () => {
         videoUrl: "",
         timeMin: 0,
         persons: 0,
-        materialsString: "",
-        tagsString: "",
+        beaters: 0,
+        chasers: 0,
+        materials: [],
+        tags: [],
+        descriptionBlocks: [],
+        relatedTo:[],
+        creator: ""
     })
 
     useUpdateBreadcrumbs(name ? `Exercise ${name}` : "View exercise", [{ title: "Exercises", to: "exercises" }])
@@ -79,8 +68,13 @@ const Exercise = () => {
             videoUrl: result.video_url,
             timeMin: result.time_min,
             persons: result.persons,
-            materialsString: result.materials.toString(),
-            tagsString: result.tags.toString(),
+            beaters: result.beaters,
+            chasers: result.chasers,
+            materials: result.materials,
+            tags: result.tags,
+            descriptionBlocks: result.description_blocks,
+            relatedTo: result.related_to,
+            creator: result.creator,
         })
     }
 
@@ -101,71 +95,114 @@ const Exercise = () => {
         }
     }
 
+    const handleChipClick = (id) => {
+        // TODO: SOMEHOW DOES NOT LOAD THE NEW PAGE
+        navigate(`/exercises/${id}`)
+    };
+
     return (
-        <>
-            <Card
-                sx={{
-                    backdropFilter: `saturate(200%) blur(30px)`,
-                    backgroundColor: ({ functions: { rgba }, palette: { white } }) => rgba(white.main, 0.8),
-                    boxShadow: ({ boxShadows: { navbarBoxShadow } }) => navbarBoxShadow,
-                    position: "relative",
-                    py: 2,
-                    px: 2,
-                }}
-            >
-                <Grid container spacing={3} alignItems="center">
-                    <Grid item>
-                        <SoftBox height="100%" mt={0.5} lineHeight={1}>
-                            <SoftTypography variant="h5" fontWeight="medium">
-                                {exercise.name}
-                            </SoftTypography>
-                            <SoftTypography variant="button" color="text" fontWeight="medium">
-                                Exercise
-                            </SoftTypography>
-                        </SoftBox>
-                    </Grid>
-                    <Grid item sx={{ ml: "auto" }}>
-                        <SoftButton
-                            onClick={update}
-                            color="primary"
-                            sx={{ marginRight: 1 }}
-                        >
-                            Update Exercise
-                        </SoftButton>
-                        <SoftButton
-                            onClick={deleteExercise}
-                            color="error"
-                        >
-                            Delete Exercise
-                        </SoftButton>
-                    </Grid>
-                </Grid>
-            </Card>
-            <SoftBox mt={5} mb={3}>
-                <Grid container spacing={3}>
-                    <Grid item xs={12}>
-                        <Card sx={{ height: "100%" }}>
-                            <SoftBox p={2}>
-                                <SoftBox>
-                                    <Grid container spacing={2}>
-                                        {values.map(({ label, getElement }) => (
-                                            <Grid item xs={4} key={label}>
-                                                <SoftBox key={label} display="flex" py={1} pr={2}>
-                                                    <SoftTypography variant="button" fontWeight="bold" textTransform="capitalize" mr={2}>
-                                                        {label}
-                                                    </SoftTypography>
-                                                    {getElement(exercise)}
-                                                </SoftBox>
-                                            </Grid>
-                                        ))}
-                                    </Grid>
-                                </SoftBox>
-                            </SoftBox>
-                        </Card>
-                    </Grid>
-                </Grid>
-            </SoftBox>
-        </>
+        <> 
+        <Card 
+            sx={{ 
+                backdropFilter: `saturate(200%) blur(30px)`, 
+                backgroundColor: ({ functions: { rgba }, palette: { white } }) => rgba(white.main, 0.8), 
+                boxShadow: ({ boxShadows: { navbarBoxShadow } }) => navbarBoxShadow, 
+                position: "relative", 
+                py: 2, 
+                px: 2, 
+            }} 
+        > 
+            <Grid container spacing={3} alignItems="center"> 
+                <Grid item> 
+                    <SoftBox height="100%" mt={0.5} lineHeight={1}> 
+                        <SoftTypography variant="h5" fontWeight="medium"> 
+                            {exercise.name} 
+                        </SoftTypography> 
+                    </SoftBox> 
+                </Grid> 
+                <Grid item sx={{ ml: "auto" }}> 
+                    <SoftButton 
+                        onClick={update} 
+                        color="primary" 
+                        sx={{ marginRight: 1 }} 
+                    > 
+                        Update Exercise 
+                    </SoftButton> 
+                    <SoftButton 
+                        onClick={deleteExercise} 
+                        color="error" 
+                    > 
+                        Delete Exercise 
+                    </SoftButton> 
+                </Grid> 
+            </Grid> 
+        </Card> 
+        <SoftBox mt={5} mb={3}> 
+            <Card sx={{ height: "100%" }}> 
+                <SoftBox p={2}> 
+                    <SoftTypography variant="h6" fontWeight="medium" textTransform="uppercase"> 
+                        Info
+                    </SoftTypography> 
+                    <SoftBox> 
+                        <Grid container spacing={2}> 
+                            {values.map(({ label, getElement }) => ( 
+                                <Grid item xs={4} key={label}> 
+                                    <SoftBox key={label} display="flex" py={1} pr={2}> 
+                                        <SoftTypography variant="button" fontWeight="bold" textTransform="capitalize" mr={2}> 
+                                            {label} 
+                                        </SoftTypography> 
+                                        {getElement(exercise)} 
+                                    </SoftBox> 
+                                </Grid> 
+                            ))} 
+                        </Grid> 
+                    </SoftBox> 
+                    <SoftBox > 
+                        <SoftTypography variant="button" fontWeight="bold" textTransform="capitalize" mr={2}> 
+                            Materials: 
+                        </SoftTypography> 
+                        {exercise.materials.map((el) => 
+                            {return <Chip size="small" label={el} sx={{margin: "2px"}} variant={"outlined"} />;}
+                        )}
+                    </SoftBox>
+                    <SoftBox> 
+                        <SoftTypography variant="button" fontWeight="bold" textTransform="capitalize" mr={2}> 
+                            Tags:
+                        </SoftTypography> 
+                        {exercise.tags.map((el) => 
+                            {return <Chip size="small" label={el} sx={{margin: "2px"}} variant={"outlined"} />;}
+                        )}
+                    </SoftBox>  
+                    <SoftBox> 
+                        <SoftTypography variant="button" fontWeight="bold" textTransform="capitalize" mr={2}> 
+                            Related To:
+                        </SoftTypography> 
+                        {exercise.relatedTo.map((el) => 
+                            {return <Chip size="small" label={el} sx={{margin: "2px"}} variant={"outlined"} onClick={()=>{handleChipClick(el)}}/>;}
+                        )}
+                    </SoftBox> 
+                    <SoftBox textAlign={"right"}> 
+                        <SoftTypography variant="button" fontWeight="regular" textTransform="capitalize" mr={2} align = {"right"}> 
+                           <CopyrightIcon/> {exercise.creator}
+                        </SoftTypography> 
+                    </SoftBox> 
+                </SoftBox> 
+            </Card> 
+        </SoftBox> 
+        {exercise.descriptionBlocks.map((el) => 
+            {return (
+                <SoftBox mt={3} mb={3}> 
+                    <Card sx={{ height: "100%" }}> 
+                        <SoftBox p={2}> 
+                            <SoftTypography variant="button" fontWeight="bold" textTransform="capitalize" mr={2} > 
+                                {el.description}
+                            </SoftTypography> 
+                        </SoftBox> 
+                    </Card> 
+                </SoftBox> 
+            )}
+        )}
+    </> 
     )
 }
 

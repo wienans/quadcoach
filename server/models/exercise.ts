@@ -16,7 +16,7 @@ interface IExercise {
     time_min?: number; // unused for block model only backwards compatible
     materials?: Types.Array<string>;
     beaters?: number;
-    chaser?: number;
+    chasers?: number;
     persons: number;
     tags?: Types.Array<string>;
     coaching_points?: string; // unused for block model only backwards compatible
@@ -64,7 +64,7 @@ const exerciseSchema = new Schema<IExercise>({
     beaters: {
         type: Number
     },
-    chaser: {
+    chasers: {
         type: Number
     },
     persons: {
