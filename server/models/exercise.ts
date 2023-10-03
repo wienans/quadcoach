@@ -22,6 +22,7 @@ interface IExercise {
     coaching_points?: string; // unused for block model only backwards compatible
     creator?: string;
     description_blocks?: Types.DocumentArray<IBlock>;
+    related_to?: Types.Array<Types.ObjectId>;
 }
 
 const blockSchema = new Schema<IBlock>({
@@ -36,7 +37,7 @@ const blockSchema = new Schema<IBlock>({
     },
     tactics_board: {
         type: Types.ObjectId,
-        ref: 'exercises'
+        ref: 'tacticBoards'
     },
     time_min: {
         type: Number
@@ -81,7 +82,11 @@ const exerciseSchema = new Schema<IExercise>({
     },
     description_blocks: {
         type: [blockSchema]
-    }
+    },
+    related_to: {
+        type: [Types.ObjectId],
+        ref: 'exercises'
+    },
 }, { timestamps: true });
 
 const Exercise = model<IExercise>('exercises', exerciseSchema);
