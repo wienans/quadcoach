@@ -9,6 +9,7 @@ import { DashboardLayout } from "../LayoutContainers";
 import DashboardNavbar from "../DashboardNavbar";
 import SettingsMenu from "../SettingsMenu";
 import { Container } from "@mui/material";
+import GitHubIcon from '@mui/icons-material/GitHub';
 
 const sidebarNavRoutes = [
     {
@@ -40,6 +41,16 @@ const sidebarNavRoutes = [
         noCollapse: true,
         protected: true,
         regExp: new RegExp("\\/exercises\\/add$"),
+    },
+    {
+        type: "divider",
+    },
+    {
+        type: "collapse",
+        name: "GitHub Repository",
+        key: "githubRepo",
+        href: "https://github.com/wienans/quadcoach",
+        icon:<GitHubIcon />,
     },
 ]
 
