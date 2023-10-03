@@ -7,6 +7,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { IconButton, IconButtonProps} from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { Typography } from "@mui/material";
+import { SoftBox, SoftTypography } from "..";
 
 
 interface ExpandMoreProps extends IconButtonProps {
@@ -35,9 +36,13 @@ const Collapsible = (props: CollapsibleProps) => {
 
     return (
         <div>
-            <Card>
+            <SoftBox                 
+                variant="contained"
+                borderRadius="lg"
+                shadow="lg"
+                >
                 <CardActions disableSpacing>
-                    <Typography>{props.label}</Typography>
+                    <SoftTypography variant="h6">{props.label}</SoftTypography>
                     <ExpandMore
                         expand={open}
                         onClick={toggle}
@@ -49,12 +54,10 @@ const Collapsible = (props: CollapsibleProps) => {
                 </CardActions>
                 <Collapse in={open} timeout="auto" unmountOnExit>
                     <CardContent>
-                        <Typography>
                             {props.children}
-                        </Typography>
                     </CardContent>
                 </Collapse>
-            </Card>
+            </SoftBox>
         </div>
     );
 }

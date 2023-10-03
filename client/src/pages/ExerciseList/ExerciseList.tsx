@@ -17,7 +17,7 @@ const ExerciseList = () => {
     const [filterMaxPersons, setFilterMaxPersons] = useState(999)
     const [filterTagString, setFilterTagString] = useState("")
 
-    useUpdateBreadcrumbs(isDashboard ? "Dashboard" : "Übungen", [])
+    useUpdateBreadcrumbs(isDashboard ? "Dashboard" : "Exercises", [])
     
     const getExercises = async (searchString) => {
 
@@ -70,7 +70,7 @@ const ExerciseList = () => {
         <Container fixed>
             <Grid container spacing={2}>
                 <Grid item xs={12}>
-                    <Typography variant="h3">Exercise List</Typography>
+                    <SoftTypography variant="h3">Exercise List</SoftTypography>
                 </Grid>
                 <Grid item xs={12}>
                     <SoftInput
