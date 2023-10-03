@@ -8,6 +8,7 @@ import ListIcon from '@mui/icons-material/List';
 import { DashboardLayout } from "../LayoutContainers";
 import DashboardNavbar from "../DashboardNavbar";
 import SettingsMenu from "../SettingsMenu";
+import { Container } from "@mui/material";
 
 const sidebarNavRoutes = [
     {
@@ -54,7 +55,9 @@ const Layout = () => {
             <DashboardLayout>
                 <DashboardNavbar />
                 <SettingsMenu />
-                <Outlet />
+                <Container fixed> 
+                    <Outlet />
+                </Container>
             </DashboardLayout>
         </>
     )

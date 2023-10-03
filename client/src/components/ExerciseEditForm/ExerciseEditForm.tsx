@@ -73,140 +73,138 @@ const ExerciseEditForm = ({ initialValues, onSubmit, extraRows, header: Header }
             handleSubmit()
             return false
         }}>
-            <Container fixed>
-                <Grid container spacing={2}>
-                    {Header && <Grid item xs={12}>
-                        {Header}
-                    </Grid>}
-                    <Grid item xs={12}>
-                        <FormGroup>
-                            <SoftTypography variant="body2">Name</SoftTypography>
-                            <SoftInput
-                                error={touched.name && Boolean(errors.name)}
-                                name="name"
-                                required
-                                id="outlined-basic"
-                                placeholder="Name"
-                                variant="outlined"
-                                value={values.name}
-                                onChange={handleChange}
-                                fullWidth
-                                onBlur={handleBlur}
-                            />
-                            {touched.name && Boolean(errors.name) && <FormHelperText error>{errors.name}</FormHelperText>}
-                        </FormGroup>
-                    </Grid>
-                    <Grid item xs={12}>
-                        <FormGroup>
-                            <SoftTypography variant="body2">Description</SoftTypography>
-                            <SoftInput
-                                error={touched.description && Boolean(errors.description)}
-                                name="description"
-                                required
-                                id="outlined-basic"
-                                placeholder="Description"
-                                variant="outlined"
-                                value={values.description}
-                                onChange={handleChange}
-                                fullWidth
-                                onBlur={handleBlur}
-                            />
-                            {touched.description && Boolean(errors.description) && <FormHelperText error>{errors.description}</FormHelperText>}
-                        </FormGroup>
-                    </Grid>
-                    <Grid item xs={12}>
-                        <FormGroup>
-                            <SoftTypography variant="body2">Video URL</SoftTypography>
-                            <SoftInput
-                                error={touched.videoUrl && Boolean(errors.videoUrl)}
-                                name="videoUrl"
-                                id="outlined-basic"
-                                placeholder="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
-                                variant="outlined"
-                                value={values.videoUrl}
-                                onChange={handleChange}
-                                fullWidth
-                                onBlur={handleBlur}
-                            />
-                            {touched.videoUrl && Boolean(errors.videoUrl) && <FormHelperText error>{errors.videoUrl}</FormHelperText>}
-                        </FormGroup>
-                    </Grid>
-                    <Grid item xs={12}>
-                        <FormGroup>
-                            <SoftTypography variant="body2">Suggested Time (Minutes)</SoftTypography>
-                            <SoftInput
-                                type="number"
-                                inputProps={{ min: 0, step: "1" }}
-                                error={touched.timeMin != null && Boolean(errors.timeMin)}
-                                name="timeMin"
-                                id="outlined-basic"
-                                placeholder="Minutes"
-                                variant="outlined"
-                                value={values.timeMin}
-                                onChange={handleChange}
-                                fullWidth
-                                onBlur={handleBlur}
-                            />
-                            {touched.timeMin && Boolean(errors.timeMin) && <FormHelperText error>{errors.timeMin}</FormHelperText>}
-                        </FormGroup>
-                    </Grid>
-                    <Grid item xs={12}>
-                        <FormGroup>
-                            <SoftTypography variant="body2">Person amount</SoftTypography>
-                            <SoftInput
-                                type="number"
-                                inputProps={{ min: 0, step: "1" }}
-                                error={touched.persons != null && Boolean(errors.persons)}
-                                name="persons"
-                                required
-                                id="outlined-basic"
-                                placeholder="Minutes"
-                                variant="outlined"
-                                value={values.persons}
-                                onChange={handleChange}
-                                fullWidth
-                                onBlur={handleBlur}
-                            />
-                            {touched.persons != null && Boolean(errors.persons) && <FormHelperText error>{errors.persons}</FormHelperText>}
-                        </FormGroup>
-                    </Grid>
-                    <Grid item xs={12}>
-                        <FormGroup>
-                            <SoftTypography variant="body2">Material</SoftTypography>
-                            <SoftInput
-                                error={touched.materialsString != null && Boolean(errors.materialsString)}
-                                name="materialsString"
-                                id="outlined-basic"
-                                placeholder="Needed material"
-                                variant="outlined"
-                                value={values.materialsString}
-                                onChange={handleChange}
-                                fullWidth
-                                onBlur={handleBlur}
-                            />
-                            {touched.materialsString && Boolean(errors.materialsString) && <FormHelperText error>{errors.materialsString}</FormHelperText>}
-                        </FormGroup>
-                    </Grid>
-                    <Grid item xs={12}>
-                        <FormGroup>
-                            <SoftTypography variant="body2">Tags</SoftTypography>
-                            <SoftInput
-                                error={touched.tagsString != null && Boolean(errors.tagsString)}
-                                name="tagsString"
-                                id="outlined-basic"
-                                placeholder="Tags for easy search"
-                                variant="outlined"
-                                value={values.tagsString}
-                                onChange={handleChange}
-                                fullWidth
-                                onBlur={handleBlur}
-                            />
-                            {touched.tagsString && Boolean(errors.tagsString) && <FormHelperText error>{errors.tagsString}</FormHelperText>}
-                        </FormGroup>
-                    </Grid>
-                    {extraRows(isValid)}
+            <Grid container spacing={2}>
+                {Header && <Grid item xs={12}>
+                    {Header}
+                </Grid>}
+                <Grid item xs={12}>
+                    <FormGroup>
+                        <SoftTypography variant="body2">Name</SoftTypography>
+                        <SoftInput
+                            error={touched.name && Boolean(errors.name)}
+                            name="name"
+                            required
+                            id="outlined-basic"
+                            placeholder="Name"
+                            variant="outlined"
+                            value={values.name}
+                            onChange={handleChange}
+                            fullWidth
+                            onBlur={handleBlur}
+                        />
+                        {touched.name && Boolean(errors.name) && <FormHelperText error>{errors.name}</FormHelperText>}
+                    </FormGroup>
                 </Grid>
-            </Container>
+                <Grid item xs={12}>
+                    <FormGroup>
+                        <SoftTypography variant="body2">Description</SoftTypography>
+                        <SoftInput
+                            error={touched.description && Boolean(errors.description)}
+                            name="description"
+                            required
+                            id="outlined-basic"
+                            placeholder="Description"
+                            variant="outlined"
+                            value={values.description}
+                            onChange={handleChange}
+                            fullWidth
+                            onBlur={handleBlur}
+                        />
+                        {touched.description && Boolean(errors.description) && <FormHelperText error>{errors.description}</FormHelperText>}
+                    </FormGroup>
+                </Grid>
+                <Grid item xs={12}>
+                    <FormGroup>
+                        <SoftTypography variant="body2">Video URL</SoftTypography>
+                        <SoftInput
+                            error={touched.videoUrl && Boolean(errors.videoUrl)}
+                            name="videoUrl"
+                            id="outlined-basic"
+                            placeholder="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+                            variant="outlined"
+                            value={values.videoUrl}
+                            onChange={handleChange}
+                            fullWidth
+                            onBlur={handleBlur}
+                        />
+                        {touched.videoUrl && Boolean(errors.videoUrl) && <FormHelperText error>{errors.videoUrl}</FormHelperText>}
+                    </FormGroup>
+                </Grid>
+                <Grid item xs={12}>
+                    <FormGroup>
+                        <SoftTypography variant="body2">Suggested Time (Minutes)</SoftTypography>
+                        <SoftInput
+                            type="number"
+                            inputProps={{ min: 0, step: "1" }}
+                            error={touched.timeMin != null && Boolean(errors.timeMin)}
+                            name="timeMin"
+                            id="outlined-basic"
+                            placeholder="Minutes"
+                            variant="outlined"
+                            value={values.timeMin}
+                            onChange={handleChange}
+                            fullWidth
+                            onBlur={handleBlur}
+                        />
+                        {touched.timeMin && Boolean(errors.timeMin) && <FormHelperText error>{errors.timeMin}</FormHelperText>}
+                    </FormGroup>
+                </Grid>
+                <Grid item xs={12}>
+                    <FormGroup>
+                        <SoftTypography variant="body2">Person amount</SoftTypography>
+                        <SoftInput
+                            type="number"
+                            inputProps={{ min: 0, step: "1" }}
+                            error={touched.persons != null && Boolean(errors.persons)}
+                            name="persons"
+                            required
+                            id="outlined-basic"
+                            placeholder="Minutes"
+                            variant="outlined"
+                            value={values.persons}
+                            onChange={handleChange}
+                            fullWidth
+                            onBlur={handleBlur}
+                        />
+                        {touched.persons != null && Boolean(errors.persons) && <FormHelperText error>{errors.persons}</FormHelperText>}
+                    </FormGroup>
+                </Grid>
+                <Grid item xs={12}>
+                    <FormGroup>
+                        <SoftTypography variant="body2">Material</SoftTypography>
+                        <SoftInput
+                            error={touched.materialsString != null && Boolean(errors.materialsString)}
+                            name="materialsString"
+                            id="outlined-basic"
+                            placeholder="Needed material"
+                            variant="outlined"
+                            value={values.materialsString}
+                            onChange={handleChange}
+                            fullWidth
+                            onBlur={handleBlur}
+                        />
+                        {touched.materialsString && Boolean(errors.materialsString) && <FormHelperText error>{errors.materialsString}</FormHelperText>}
+                    </FormGroup>
+                </Grid>
+                <Grid item xs={12}>
+                    <FormGroup>
+                        <SoftTypography variant="body2">Tags</SoftTypography>
+                        <SoftInput
+                            error={touched.tagsString != null && Boolean(errors.tagsString)}
+                            name="tagsString"
+                            id="outlined-basic"
+                            placeholder="Tags for easy search"
+                            variant="outlined"
+                            value={values.tagsString}
+                            onChange={handleChange}
+                            fullWidth
+                            onBlur={handleBlur}
+                        />
+                        {touched.tagsString && Boolean(errors.tagsString) && <FormHelperText error>{errors.tagsString}</FormHelperText>}
+                    </FormGroup>
+                </Grid>
+                {extraRows(isValid)}
+            </Grid>
         </form>
     );
 }

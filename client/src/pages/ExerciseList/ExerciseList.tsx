@@ -78,87 +78,85 @@ const ExerciseList = () => {
     ];
 
     return (
-        <Container fixed>
-            <Grid container spacing={2}>
-                <Grid item xs={12}>
-                    <SoftTypography variant="h3">Exercise List</SoftTypography>
-                </Grid>
-                <Grid item xs={12}>
-                    <SoftInput
-                        id="outlined-basic"
-                        placeholder="Search Exercise"
-                        variant="outlined"
-                        value={exerciseSearchValue}
-                        onChange={(event) => setExerciseSearchValue(event.target.value)}
-                        fullWidth
-                    />
-                </Grid>
-                <Grid item xs={12}>
-                    <Collapsible label="Filter">
-                        <Grid container spacing={2}>
-                            <Grid item xs = {6} >
-                                <SoftTypography variant="body2">Persons</SoftTypography>
-                                <SoftInput
-                                    type="number"
-                                    inputProps={{ min: 0, step: "1" }}
-                                    id="outlined-basic"
-                                    placeholder="min"
-                                    variant="outlined"
-                                    value={filterMinPersons}
-                                    onChange={(event) => setFilterMinPersons(event.target.value)}
-
-                                />
-                                <SoftInput
-                                    type="number"
-                                    inputProps={{ min: 0, step: "1" }}
-                                    id="outlined-basic"
-                                    placeholder="max"
-                                    variant="outlined"
-                                    value={filterMaxPersons}
-                                    onChange={(event) => setFilterMaxPersons(event.target.value)}
-                                />
-
-                            </Grid>
-                            <Grid item xs = {6} >
-                                <SoftTypography variant="body2">Tags</SoftTypography>
-                                <SoftInput
-                                    id="outlined-basic"
-                                    placeholder="search Tag"
-                                    variant="outlined"
-                                    value={filterTagString}
-                                    onChange={(event) => setFilterTagString(event.target.value)}
-                                />
-                            </Grid>
-                            <Grid item xs = {6} >
-                                <SoftButton
-                                    onClick={getExercises(exerciseSearchValue)}
-                                    color="primary"
-                                    sx={{ marginRight: 1 }}
-                                >
-                                    Apply Filter
-                                </SoftButton>
-                            </Grid>
-                        </Grid>
-                    </Collapsible>
-                </Grid>
-                <Grid item xs={12} sx={{ height: "400px" }}>
-                    <DataGrid getRowId={(row) => row._id}
-                        rows={exercises}
-                        columns={columns2}
-                        initialState={{
-                            pagination: {
-                                paginationModel: {
-                                    pageSize: 5,
-                                },
-                            },
-                        }}
-                        pageSizeOptions={[5]}
-                        disableRowSelectionOnClick
-                        onRowClick={handleRowClick}
-                    />
-                </Grid>
+        <Grid container spacing={2}>
+            <Grid item xs={12}>
+                <SoftTypography variant="h3">Exercise List</SoftTypography>
             </Grid>
-        </Container>
+            <Grid item xs={12}>
+                <SoftInput
+                    id="outlined-basic"
+                    placeholder="Search Exercise"
+                    variant="outlined"
+                    value={exerciseSearchValue}
+                    onChange={(event) => setExerciseSearchValue(event.target.value)}
+                    fullWidth
+                />
+            </Grid>
+            <Grid item xs={12}>
+                <Collapsible label="Filter">
+                    <Grid container spacing={2}>
+                        <Grid item xs = {6} >
+                            <SoftTypography variant="body2">Persons</SoftTypography>
+                            <SoftInput
+                                type="number"
+                                inputProps={{ min: 0, step: "1" }}
+                                id="outlined-basic"
+                                placeholder="min"
+                                variant="outlined"
+                                value={filterMinPersons}
+                                onChange={(event) => setFilterMinPersons(event.target.value)}
+
+                            />
+                            <SoftInput
+                                type="number"
+                                inputProps={{ min: 0, step: "1" }}
+                                id="outlined-basic"
+                                placeholder="max"
+                                variant="outlined"
+                                value={filterMaxPersons}
+                                onChange={(event) => setFilterMaxPersons(event.target.value)}
+                            />
+
+                        </Grid>
+                        <Grid item xs = {6} >
+                            <SoftTypography variant="body2">Tags</SoftTypography>
+                            <SoftInput
+                                id="outlined-basic"
+                                placeholder="search Tag"
+                                variant="outlined"
+                                value={filterTagString}
+                                onChange={(event) => setFilterTagString(event.target.value)}
+                            />
+                        </Grid>
+                        <Grid item xs = {6} >
+                            <SoftButton
+                                onClick={getExercises(exerciseSearchValue)}
+                                color="primary"
+                                sx={{ marginRight: 1 }}
+                            >
+                                Apply Filter
+                            </SoftButton>
+                        </Grid>
+                    </Grid>
+                </Collapsible>
+            </Grid>
+            <Grid item xs={12} sx={{ height: "400px" }}>
+                <DataGrid getRowId={(row) => row._id}
+                    rows={exercises}
+                    columns={columns2}
+                    initialState={{
+                        pagination: {
+                            paginationModel: {
+                                pageSize: 5,
+                            },
+                        },
+                    }}
+                    pageSizeOptions={[5]}
+                    disableRowSelectionOnClick
+                    onRowClick={handleRowClick}
+                />
+            </Grid>
+        </Grid>
     )
 }
 
