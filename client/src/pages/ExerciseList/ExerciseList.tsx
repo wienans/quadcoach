@@ -8,6 +8,7 @@ import Stack from '@mui/material/Stack';
 import { useUpdateBreadcrumbs } from "../../components/Layout/hooks";
 import { SoftTypography, SoftInput, SoftButton } from "../../components";
 import { Collapsible } from "../../components";
+import { Chip } from "@mui/material"
 const ExerciseList = () => {
     const location = useLocation().pathname;
     const isDashboard = location === "/"
@@ -50,22 +51,32 @@ const ExerciseList = () => {
             headerName: 'Name',
             editable: false,
             hideable: false,
+            flex: 2,
         },
         {
             field: 'persons',
             headerName: 'Persons',
             type: 'number',
             editable: false,
+            flex: 1,
         },
         {
             field: 'tags',
             headerName: 'Tags',
             editable: false,
-
+            flex: 3,
+            renderCell: (params) => {
+                if(params.value.length >0 && params.value[0] != ""){
+                    return(
+                        params.value.map((el) => 
+                            {return <Chip label={el} sx={{margin: "1px"}} variant={"outlined"} />;}
+                        )
+                    )
+                }            
+              }
         },
     ];
 
-    console.log(exercises)
     return (
         <Container fixed>
             <Grid container spacing={2}>
