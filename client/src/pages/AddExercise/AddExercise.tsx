@@ -6,7 +6,7 @@ import { useUpdateBreadcrumbs } from "../../components/Layout/hooks";
 import ExerciseEditForm from "../../components/ExerciseEditForm";
 
 const AddExercise = () => {
-    useUpdateBreadcrumbs("Add Exercise", [{ title: "Übungen", to: "exercises" }])
+    useUpdateBreadcrumbs("Add Exercise", [{ title: "Exercises", to: "exercises" }])
 
     const navigate = useNavigate()
 
