@@ -96,8 +96,9 @@ const Exercise = () => {
     }
 
     const handleChipClick = (id) => {
-        // TODO: SOMEHOW DOES NOT LOAD THE NEW PAGE
         navigate(`/exercises/${id}`)
+        // Workaround because above line does only update the link but page isn't reloaded
+        navigate(0)
     };
 
     return (
