@@ -8,6 +8,7 @@ import { SoftBox, SoftButton, SoftTypography } from "../../components";
 import { useUpdateBreadcrumbs } from "../../components/Layout/hooks";
 import { Chip } from "@mui/material"
 import CopyrightIcon from '@mui/icons-material/Copyright';
+import ReactPlayer from 'react-player'
 
 const values = [
     {
@@ -163,7 +164,11 @@ const Exercise = () => {
                             Materials: 
                         </SoftTypography> 
                         {exercise.materials.map((el) => 
-                            {return <Chip size="small" label={el} sx={{margin: "2px"}} variant={"outlined"} />;}
+                            {
+                                if(el != ""){
+                                    return <Chip size="small" label={el} sx={{margin: "2px"}} variant={"outlined"} />;
+                                }
+                            }
                         )}
                     </SoftBox>
                     <SoftBox> 
@@ -171,7 +176,12 @@ const Exercise = () => {
                             Tags:
                         </SoftTypography> 
                         {exercise.tags.map((el) => 
-                            {return <Chip size="small" label={el} sx={{margin: "2px"}} variant={"outlined"} />;}
+                            {
+                                if(el != ""){
+                                    return <Chip size="small" label={el} sx={{margin: "2px"}} variant={"outlined"} />;
+                                }
+                            }
+                                
                         )}
                     </SoftBox>  
                     <SoftBox> 
@@ -194,9 +204,13 @@ const Exercise = () => {
             {return (
                 <SoftBox mt={3} mb={3}> 
                     <Card sx={{ height: "100%" }}> 
-                        <SoftBox p={2}> 
+                        <SoftBox p={2}>
+                            <SoftBox  sx={{paddingTop: "56.26%", position: "relative"}}>
+                                <ReactPlayer style={{position: "absolute", top:"0px", left:"0px"}} url={el.video_url} width="100%" height="100%" controls={true} light={true}/>
+                            </SoftBox> 
                             <SoftTypography variant="button" fontWeight="bold" textTransform="capitalize" mr={2} > 
                                 {el.description}
+                                
                             </SoftTypography> 
                         </SoftBox> 
                     </Card> 
