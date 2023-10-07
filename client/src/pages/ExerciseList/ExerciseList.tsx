@@ -73,7 +73,7 @@ const ExerciseList = () => {
                 if(params.value.length >0 && params.value[0] != ""){
                     return(
                         params.value.map((el) => 
-                            {return <Chip label={el} sx={{margin: "1px"}} variant={"outlined"} />;}
+                            {return <Chip key={el} label={el} sx={{margin: "1px"}} variant={"outlined"} />;}
                         )
                     )
                 }            
@@ -148,6 +148,7 @@ const ExerciseList = () => {
                 <DataGrid getRowId={(row) => row._id}
                     rows={exercises}
                     columns={columns2}
+                    key={"grid"}
                     initialState={{
                         pagination: {
                             paginationModel: {
