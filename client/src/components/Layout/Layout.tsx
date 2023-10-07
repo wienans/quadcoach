@@ -44,6 +44,7 @@ const sidebarNavRoutes = [
     },
     {
         type: "divider",
+        key: "divider-1"
     },
     {
         type: "collapse",
