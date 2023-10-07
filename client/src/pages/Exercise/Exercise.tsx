@@ -163,10 +163,10 @@ const Exercise = () => {
                         <SoftTypography variant="button" fontWeight="bold" textTransform="capitalize" mr={2}> 
                             Materials: 
                         </SoftTypography> 
-                        {exercise.materials.map((el) => 
+                        {exercise.materials.map((el,index) => 
                             {
                                 if(el != ""){
-                                    return <Chip size="small" label={el} sx={{margin: "2px"}} variant={"outlined"} />;
+                                    return <Chip size="small" key={el+index} label={el} sx={{margin: "2px"}} variant={"outlined"} />;
                                 }
                             }
                         )}
@@ -175,10 +175,10 @@ const Exercise = () => {
                         <SoftTypography variant="button" fontWeight="bold" textTransform="capitalize" mr={2}> 
                             Tags:
                         </SoftTypography> 
-                        {exercise.tags.map((el) => 
+                        {exercise.tags.map((el,index) => 
                             {
                                 if(el != ""){
-                                    return <Chip size="small" label={el} sx={{margin: "2px"}} variant={"outlined"} />;
+                                    return <Chip size="small" key={el+index} label={el} sx={{margin: "2px"}} variant={"outlined"} />;
                                 }
                             }
                                 
@@ -188,8 +188,8 @@ const Exercise = () => {
                         <SoftTypography variant="button" fontWeight="bold" textTransform="capitalize" mr={2}> 
                             Related To:
                         </SoftTypography> 
-                        {exercise.relatedTo.map((el) => 
-                            {return <Chip size="small" label={el} sx={{margin: "2px"}} variant={"outlined"} onClick={()=>{handleChipClick(el)}}/>;}
+                        {exercise.relatedTo.map((el,index) => 
+                            {return <Chip size="small" key={el+index} label={el} sx={{margin: "2px"}} variant={"outlined"} onClick={()=>{handleChipClick(el)}}/>;}
                         )}
                     </SoftBox> 
                     <SoftBox textAlign={"right"}> 
@@ -200,9 +200,9 @@ const Exercise = () => {
                 </SoftBox> 
             </Card> 
         </SoftBox> 
-        {exercise.descriptionBlocks.map((el) => 
+        {exercise.descriptionBlocks.map((el, index) => 
             {return (
-                <SoftBox mt={3} mb={3}> 
+                <SoftBox mt={3} mb={3} key={index}> 
                     <Card sx={{ height: "100%" }}> 
                         <SoftBox p={2}>
                             <SoftBox  sx={{paddingTop: "56.26%", position: "relative"}}>
