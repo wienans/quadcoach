@@ -47,6 +47,7 @@ const Exercise = () => {
         relatedTo:[],
         creator: ""
     })
+    const [related_exercises,setRelatedExercises] = useState([])
 
     useUpdateBreadcrumbs(name ? `Exercise ${name}` : "View exercise", [{ title: "Exercises", to: "exercises" }])
 
@@ -77,6 +78,13 @@ const Exercise = () => {
             relatedTo: result.related_to,
             creator: result.creator,
         })
+        let rel_exercises = []
+        for(let i = 0; i<result.related_to.length; i++){
+            let related_result = await fetch(`/api/exercise/${result.related_to[i]}`)
+            rel_exercises.push(await related_result.json()) 
+        }
+        setRelatedExercises(rel_exercises)
+
     }
 
     const update = async () => {
@@ -189,7 +197,11 @@ const Exercise = () => {
                             Related To:
                         </SoftTypography> 
                         {exercise.relatedTo.map((el,index) => 
-                            {return <Chip size="small" key={el+index} label={el} sx={{margin: "2px"}} variant={"outlined"} onClick={()=>{handleChipClick(el)}}/>;}
+                            {
+                                if(related_exercises.length > 0){
+                                    return <Chip size="small" key={el+index} label={related_exercises[index].name} sx={{margin: "2px"}} variant={"outlined"} onClick={()=>{handleChipClick(el)}}/>;
+                                }
+                            }
                         )}
                     </SoftBox> 
                     <SoftBox textAlign={"right"}> 
