@@ -16,8 +16,15 @@ const UpdateExercise = () => {
         videoUrl: "",
         timeMin: 0,
         persons: 0,
-        materialsString: "",
-        tagsString: "",
+        beaters: 0,
+        chasers: 0,
+        materials: [],
+        tags: [],
+        descriptionBlocks: [],
+        relatedTo:[],
+        creator: "",
+        materialsString: "", // should be replaced with use of the materials array
+        tagsString: "", // should be replaced with use of the tags array
     })
     const [breadcrumbRoutes, setBreadcrumbRoutes] = useState([...defaultEBreadcrumbRoutes])
 
@@ -42,6 +49,13 @@ const UpdateExercise = () => {
                 videoUrl: result.video_url,
                 timeMin: result.time_min,
                 persons: result.persons,
+                beaters: result.beaters,
+                chasers: result.chasers,
+                materials: result.materials,
+                tags: result.tags,
+                descriptionBlocks: result.description_blocks,
+                relatedTo: result.related_to,
+                creator: result.creator,
                 materialsString: result.materials.toString(),
                 tagsString: result.tags.toString(),
             })

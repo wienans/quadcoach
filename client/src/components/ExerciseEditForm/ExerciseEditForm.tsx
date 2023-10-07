@@ -1,9 +1,10 @@
-import { number, shape, string, func, node } from "prop-types";
+import { number, shape, string, func, node, array} from "prop-types";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { Container, FormGroup, FormHelperText, Grid, InputAdornment, TextField } from "@mui/material";
 import SoftTypography from "../SoftTypography";
 import SoftInput from "../SoftInput";
+import { SoftBox } from "..";
 
 const exerciseShape = shape({
     name: string,
@@ -11,8 +12,14 @@ const exerciseShape = shape({
     videoUrl: string,
     timeMin: number,
     persons: number,
-    materialsString: string,
-    tagsString: string,
+    beaters: number,
+    chasers: number,
+    materials: array,
+    tags: array,
+    descriptionBlocks: array,
+    relatedTo: array,
+    materialsString: string, // should be replaced with use of the materials array
+    tagsString: string, // should be replaced with use of the tags array
 })
 
 /**
@@ -35,6 +42,12 @@ const ExerciseEditForm = ({ initialValues, onSubmit, extraRows, header: Header }
             videoUrl: initialValues?.videoUrl ?? "",
             timeMin: initialValues?.timeMin ?? "",
             persons: initialValues?.persons ?? "",
+            beaters: initialValues?.beaters ?? "",
+            chasers: initialValues?.chasers ?? "",
+            materials: initialValues?.materials ?? [],
+            tags: initialValues?.tags ?? [],
+            descriptionBlocks: initialValues?.descriptionBlocks ?? [],
+            relatedTo: initialValues?.relatedTo ?? [],
             materialsString: initialValues?.materialsString ?? "",
             tagsString: initialValues?.tagsString ?? "",
         },
@@ -45,6 +58,17 @@ const ExerciseEditForm = ({ initialValues, onSubmit, extraRows, header: Header }
             videoUrl: Yup.string().url("Please enter a valid url"),
             timeMin: Yup.number(),
             persons: Yup.number(),
+            beaters: Yup.number(),
+            chasers: Yup.number(),
+            materials: Yup.array().of(Yup.string()),
+            tags: Yup.array().of(Yup.string()),
+            descriptionBlocks: Yup.array().of(Yup.object({
+                description: Yup.string().required("Please enter a description"),
+                video_url: Yup.string().url("Please enter a valid url"),
+                coaching_points: Yup.string(),
+                timeMin: Yup.number(),
+            })),
+            relatedTo: Yup.array().of(Yup.string()),
             materialsString: Yup.string(),
             tagsString: Yup.string(),
         }),
@@ -66,6 +90,7 @@ const ExerciseEditForm = ({ initialValues, onSubmit, extraRows, header: Header }
             onSubmit(exercise)
         },
     })
+
     return (
         <form onSubmit={(event) => {
             event.preventDefault()
@@ -203,6 +228,33 @@ const ExerciseEditForm = ({ initialValues, onSubmit, extraRows, header: Header }
                         {touched.tagsString && Boolean(errors.tagsString) && <FormHelperText error>{errors.tagsString}</FormHelperText>}
                     </FormGroup>
                 </Grid>
+                {/* <Grid item xs={12}>
+                    {values.descriptionBlocks.map((el,index)=>{
+                        return(
+                            <SoftBox key={index} variant="contained" shadow="lg" opacity={1} p={1} my={2} borderRadius="lg">
+                                <Grid item xs={12}>
+                                    <FormGroup>
+                                        <SoftTypography variant="body2">Description</SoftTypography>
+                                        <SoftInput
+                                            error={touched.descriptionBlocks != null && Boolean(errors.descriptionBlocks)}
+                                            name="descriptionBlocks"
+                                            id="outlined-basic"
+                                            placeholder="Tags for easy search"
+                                            variant="outlined"
+                                            value={el.description}
+                                            onChange={handleChange}
+                                            fullWidth
+                                            multiline
+                                            onBlur={handleBlur}
+                                        />
+                                        {touched.descriptionBlocks && Boolean(errors.descriptionBlocks) && <FormHelperText error>{errors.descriptionBlocks}</FormHelperText>}
+                                    </FormGroup>
+                                </Grid>
+                            </SoftBox>
+                        )
+                    })}
+
+                </Grid> */}
                 {extraRows(isValid)}
             </Grid>
         </form>
