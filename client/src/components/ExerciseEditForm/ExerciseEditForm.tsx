@@ -77,9 +77,10 @@ const ExerciseEditForm = ({ initialValues, onSubmit, extraRows, header: Header }
 
         onSubmit: (values) => {
             const { materialsString, tagsString, name, description, videoUrl, timeMin, persons, beaters, chasers, relatedToString } = values
-            const materials = materialsString.replace(/\s/g, '').split(',')
-            const tags = tagsString.replace(/\s/g, '').split(',')
-            const related_to = relatedToString.replace(/\s/g, '').split(',')
+            let materials = materialsString.replace(/\s/g, '').split(',')
+            let tags = tagsString.replace(/\s/g, '').split(',')
+            let related_to = relatedToString.replace(/\s/g, '').split(',')
+            related_to = related_to[0]==""?[]:related_to
             const calculate_persons = beaters+chasers
             const exercise = {
                 name,
