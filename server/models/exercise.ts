@@ -74,9 +74,6 @@ const exerciseSchema = new Schema<IExercise>({
     tags: {
         type: [String]
     },
-    coaching_points: {
-        type: String
-    },
     creator: {
         type: String
     },

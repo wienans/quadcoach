@@ -41,7 +41,7 @@ const ExerciseEditForm = ({ initialValues, onSubmit, extraRows, header: Header }
             description: initialValues?.description ?? "",
             videoUrl: initialValues?.videoUrl ?? "",
             timeMin: initialValues?.timeMin ?? "",
-            persons: initialValues?.persons ?? "",
+            persons: initialValues?.persons ?? 0,
             beaters: initialValues?.beaters ?? "",
             chasers: initialValues?.chasers ?? "",
             materials: initialValues?.materials ?? [],
@@ -50,6 +50,7 @@ const ExerciseEditForm = ({ initialValues, onSubmit, extraRows, header: Header }
             relatedTo: initialValues?.relatedTo ?? [],
             materialsString: initialValues?.materialsString ?? "",
             tagsString: initialValues?.tagsString ?? "",
+            relatedToString: initialValues?.relatedToString ?? "",
         },
 
         validationSchema: Yup.object({
@@ -71,21 +72,26 @@ const ExerciseEditForm = ({ initialValues, onSubmit, extraRows, header: Header }
             relatedTo: Yup.array().of(Yup.string()),
             materialsString: Yup.string(),
             tagsString: Yup.string(),
+            relatedToString: Yup.string(),
         }),
 
         onSubmit: (values) => {
-            const { materialsString, tagsString, name, description, videoUrl, timeMin, persons } = values
+            const { materialsString, tagsString, name, description, videoUrl, timeMin, persons, beaters, chasers, relatedToString } = values
             const materials = materialsString.replace(/\s/g, '').split(',')
             const tags = tagsString.replace(/\s/g, '').split(',')
-
+            const related_to = relatedToString.replace(/\s/g, '').split(',')
+            const calculate_persons = beaters+chasers
             const exercise = {
                 name,
                 description,
                 video_url: videoUrl,
                 time_min: timeMin,
-                persons,
+                persons: persons > calculate_persons ? persons : calculate_persons,
+                beaters,
+                chasers,
                 materials,
-                tags
+                tags,
+                related_to
             }
             onSubmit(exercise)
         },
@@ -133,6 +139,8 @@ const ExerciseEditForm = ({ initialValues, onSubmit, extraRows, header: Header }
                             value={values.description}
                             onChange={handleChange}
                             fullWidth
+                            multiline 
+                            minRows={5}
                             onBlur={handleBlur}
                         />
                         {touched.description && Boolean(errors.description) && <FormHelperText error>{errors.description}</FormHelperText>}
@@ -184,7 +192,7 @@ const ExerciseEditForm = ({ initialValues, onSubmit, extraRows, header: Header }
                             name="persons"
                             required
                             id="outlined-basic"
-                            placeholder="Minutes"
+                            placeholder="Persons"
                             variant="outlined"
                             value={values.persons}
                             onChange={handleChange}
@@ -192,6 +200,46 @@ const ExerciseEditForm = ({ initialValues, onSubmit, extraRows, header: Header }
                             onBlur={handleBlur}
                         />
                         {touched.persons != null && Boolean(errors.persons) && <FormHelperText error>{errors.persons}</FormHelperText>}
+                    </FormGroup>
+                </Grid>
+                <Grid item xs={12}>
+                    <FormGroup>
+                        <SoftTypography variant="body2">Chaser amount</SoftTypography>
+                        <SoftInput
+                            type="number"
+                            inputProps={{ min: 0, step: "1" }}
+                            error={touched.chasers != null && Boolean(errors.chasers)}
+                            name="chasers"
+                            required
+                            id="outlined-basic"
+                            placeholder="Chaser"
+                            variant="outlined"
+                            value={values.chasers}
+                            onChange={handleChange}
+                            fullWidth
+                            onBlur={handleBlur}
+                        />
+                        {touched.chasers != null && Boolean(errors.chasers) && <FormHelperText error>{errors.chasers}</FormHelperText>}
+                    </FormGroup>
+                </Grid>
+                <Grid item xs={12}>
+                    <FormGroup>
+                        <SoftTypography variant="body2">Beater amount</SoftTypography>
+                        <SoftInput
+                            type="number"
+                            inputProps={{ min: 0, step: "1" }}
+                            error={touched.beaters != null && Boolean(errors.beaters)}
+                            name="beaters"
+                            required
+                            id="outlined-basic"
+                            placeholder="Beater"
+                            variant="outlined"
+                            value={values.beaters}
+                            onChange={handleChange}
+                            fullWidth
+                            onBlur={handleBlur}
+                        />
+                        {touched.beaters != null && Boolean(errors.beaters) && <FormHelperText error>{errors.beaters}</FormHelperText>}
                     </FormGroup>
                 </Grid>
                 <Grid item xs={12}>
@@ -226,6 +274,23 @@ const ExerciseEditForm = ({ initialValues, onSubmit, extraRows, header: Header }
                             onBlur={handleBlur}
                         />
                         {touched.tagsString && Boolean(errors.tagsString) && <FormHelperText error>{errors.tagsString}</FormHelperText>}
+                    </FormGroup>
+                </Grid>
+                <Grid item xs={12}>
+                    <FormGroup>
+                        <SoftTypography variant="body2">Related To:</SoftTypography>
+                        <SoftInput
+                            error={touched.relatedToString != null && Boolean(errors.relatedToString)}
+                            name="relatedToString"
+                            id="outlined-basic"
+                            placeholder="Related to"
+                            variant="outlined"
+                            value={values.relatedToString}
+                            onChange={handleChange}
+                            fullWidth
+                            onBlur={handleBlur}
+                        />
+                        {touched.relatedToString && Boolean(errors.relatedToString) && <FormHelperText error>{errors.relatedToString}</FormHelperText>}
                     </FormGroup>
                 </Grid>
                 {/* <Grid item xs={12}>
