@@ -117,7 +117,7 @@ const Exercise = () => {
             <Grid container spacing={3} alignItems="center"> 
                 <Grid item> 
                     <SoftBox height="100%" mt={0.5} lineHeight={1}> 
-                        <SoftTypography variant="h5" fontWeight="medium"> 
+                        <SoftTypography variant="h4" fontWeight="bold"> 
                             {exercise.name} 
                         </SoftTypography> 
                     </SoftBox> 
@@ -142,7 +142,7 @@ const Exercise = () => {
         <SoftBox mt={5} mb={3}> 
             <Card sx={{ height: "100%" }}> 
                 <SoftBox p={2}> 
-                    <SoftTypography variant="h6" fontWeight="medium" textTransform="uppercase"> 
+                    <SoftTypography variant="h5" fontWeight="bold" textTransform="uppercase"> 
                         Info
                     </SoftTypography> 
                     <SoftBox> 
@@ -203,14 +203,32 @@ const Exercise = () => {
         {exercise.descriptionBlocks.map((el, index) => 
             {return (
                 <SoftBox mt={3} mb={3} key={index}> 
-                    <Card sx={{ height: "100%" }}> 
-                        <SoftBox p={2}>
-                            <SoftBox  sx={{paddingTop: "56.26%", position: "relative"}}>
-                                <ReactPlayer style={{position: "absolute", top:"0px", left:"0px"}} url={el.video_url} width="100%" height="100%" controls={true} light={true}/>
-                            </SoftBox> 
-                            <SoftTypography variant="button" fontWeight="bold" textTransform="capitalize" mr={2} > 
+                    <Card sx={{ height: "100%", padding: 2 }}> 
+                        <SoftBox mb={2}>
+                            <SoftTypography variant="h5" fontWeight="bold" textTransform="uppercase" > 
+                                Block {index+1}
+                            </SoftTypography> 
+                            <SoftTypography variant="button"  textTransform="capitalize" mr={2} > 
+                                Time: {el.time_min} minutes
+                            </SoftTypography> 
+                        </SoftBox>
+                        <SoftBox  sx={{paddingTop: "56.26%", position: "relative"}}>
+                            <ReactPlayer style={{position: "absolute", top:"0px", left:"0px"}} url={el.video_url} width="100%" height="100%" controls={true} light={true}/>
+                        </SoftBox> 
+                        <SoftBox mt={3}>
+                            <SoftTypography variant="h5" fontWeight="bold" textTransform="uppercase" > 
+                                Description
+                            </SoftTypography> 
+                            <SoftTypography variant="body2" textTransform="capitalize" mr={2} > 
                                 {el.description}
-                                
+                            </SoftTypography> 
+                        </SoftBox> 
+                        <SoftBox mt={3}> 
+                            <SoftTypography variant="h5" fontWeight="bold" textTransform="uppercase"> 
+                                Coaching Points
+                            </SoftTypography> 
+                            <SoftTypography variant="body2"  textTransform="capitalize" mr={2} > 
+                                {el.coaching_points}
                             </SoftTypography> 
                         </SoftBox> 
                     </Card> 
