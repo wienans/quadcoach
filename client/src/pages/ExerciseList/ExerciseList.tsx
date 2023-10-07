@@ -38,6 +38,10 @@ const ExerciseList = () => {
     }, [exerciseSearchValue])
     const navigate = useNavigate()
 
+    const handleApplyFilterClick = () =>{
+        getExercises(exerciseSearchValue)
+    }
+
     const handleRowClick = (
         params, // GridRowParams
         event, // MuiEvent<React.MouseEvent<HTMLElement>>
@@ -130,7 +134,7 @@ const ExerciseList = () => {
                         </Grid>
                         <Grid item xs = {6} >
                             <SoftButton
-                                onClick={getExercises(exerciseSearchValue)}
+                                onClick={handleApplyFilterClick}
                                 color="primary"
                                 sx={{ marginRight: 1 }}
                             >
