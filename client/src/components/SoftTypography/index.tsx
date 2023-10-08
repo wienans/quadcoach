@@ -13,15 +13,15 @@ Coded by www.creative-tim.com
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 */
 
-import { forwardRef } from "react";
+import { ReactNode, forwardRef } from "react";
+import SoftTypographyRoot, { TypographyOwnerState } from "./SoftTypographyRoot";
+import { TypographyProps } from "@mui/material";
 
-// prop-types is a library for typechecking of props
-import PropTypes from "prop-types";
+export interface SoftTypographyProps extends TypographyOwnerState, Omit<TypographyProps, "color" | "textTransform" | "fontWeight" | "verticalAlign"> {
+    children: ReactNode;
+}
 
-// Custom styles for SoftTypography
-import SoftTypographyRoot from "./SoftTypographyRoot";
-
-const SoftTypography = forwardRef(
+const SoftTypography = forwardRef<HTMLElement, SoftTypographyProps>(
     (
         { color, fontWeight, textTransform, verticalAlign, textGradient, opacity, children, ...rest },
         ref
@@ -44,39 +44,6 @@ SoftTypography.defaultProps = {
     verticalAlign: "unset",
     textGradient: false,
     opacity: 1,
-};
-
-// Typechecking props for the SoftTypography
-SoftTypography.propTypes = {
-    color: PropTypes.oneOf([
-        "inherit",
-        "primary",
-        "secondary",
-        "info",
-        "success",
-        "warning",
-        "error",
-        "light",
-        "dark",
-        "text",
-        "white",
-    ]),
-    fontWeight: PropTypes.oneOf([false, "light", "regular", "medium", "bold"]),
-    textTransform: PropTypes.oneOf(["none", "capitalize", "uppercase", "lowercase"]),
-    verticalAlign: PropTypes.oneOf([
-        "unset",
-        "baseline",
-        "sub",
-        "super",
-        "text-top",
-        "text-bottom",
-        "middle",
-        "top",
-        "bottom",
-    ]),
-    textGradient: PropTypes.bool,
-    children: PropTypes.node.isRequired,
-    opacity: PropTypes.number,
 };
 
 export default SoftTypography;

@@ -13,8 +13,9 @@ Coded by www.creative-tim.com
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 */
 
-import { PaletteOptions, SimplePaletteColorOptions } from "@mui/material";
+import { Palette, PaletteColor, PaletteOptions, SimplePaletteColorOptions } from "@mui/material";
 import "./paletteTypes"
+import { PaletteGradient } from "./paletteTypes";
 
 /**
  * The base colors for the Soft UI Dashboard React.
@@ -318,3 +319,7 @@ const colors: PaletteOptions = {
 };
 
 export default colors;
+
+export const getPaletteColor = (color: string, palette: Palette): PaletteColor | undefined => Object.entries(palette).find(([key, value]) => key === color && (value as PaletteColor)?.main != null)?.[1]
+
+export const getGradientColor = (color: string, palette: Palette): PaletteGradient | undefined => Object.entries(palette.gradients).find(([key]) => key === color)?.[1]
