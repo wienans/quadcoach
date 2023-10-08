@@ -35,9 +35,6 @@ const Exercise = () => {
     const [exercise, setExercise] = useState({
         id: null,
         name: "",
-        description: "",
-        videoUrl: "",
-        timeMin: 0,
         persons: 0,
         beaters: 0,
         chasers: 0,
@@ -66,9 +63,6 @@ const Exercise = () => {
         setExercise({
             id: result._id,
             name: result.name,
-            description: result.description,
-            videoUrl: result.video_url,
-            timeMin: result.time_min,
             persons: result.persons,
             beaters: result.beaters,
             chasers: result.chasers,

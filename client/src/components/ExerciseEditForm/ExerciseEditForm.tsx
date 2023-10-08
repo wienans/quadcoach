@@ -16,9 +16,6 @@ type descriptionBlockType = {
 
 type exerciseType = {
     name: string,
-    description: string,
-    videoUrl: string,
-    timeMin: number,
     persons: number,
     beaters: number,
     chasers: number,
@@ -34,9 +31,6 @@ type exerciseType = {
 
 const exerciseShape = shape({
     name: string,
-    description: string,
-    videoUrl: string,
-    timeMin: number,
     persons: number,
     beaters: number,
     chasers: number,
@@ -72,9 +66,6 @@ const ExerciseEditForm = ({ initialValues, onSubmit, extraRows, header: Header }
 
         initialValues: {
             name: initialValues?.name ?? "",
-            description: initialValues?.description ?? "",
-            videoUrl: initialValues?.videoUrl ?? "",
-            timeMin: initialValues?.timeMin ?? "",
             persons: initialValues?.persons ?? 0,
             beaters: initialValues?.beaters ?? "",
             chasers: initialValues?.chasers ?? "",
@@ -89,12 +80,9 @@ const ExerciseEditForm = ({ initialValues, onSubmit, extraRows, header: Header }
 
         validationSchema: Yup.object({
             name: Yup.string().required("Please enter a name"),
-            description: Yup.string(),
-            videoUrl: Yup.string().url("Please enter a valid url"),
-            timeMin: Yup.number(),
-            persons: Yup.number(),
-            beaters: Yup.number(),
-            chasers: Yup.number(),
+            persons: Yup.number().min(0),
+            beaters: Yup.number().min(0).required("Please enter number of Beaters"),
+            chasers: Yup.number().min(0).required("Please enter number of Chasers"),
             materials: Yup.array().of(Yup.string()),
             tags: Yup.array().of(Yup.string()),
             descriptionBlocks: Yup.array().of(Yup.object({
@@ -118,9 +106,6 @@ const ExerciseEditForm = ({ initialValues, onSubmit, extraRows, header: Header }
             const calculate_persons = beaters+chasers
             const exercise = {
                 name,
-                description,
-                video_url: videoUrl,
-                time_min: timeMin,
                 persons: persons > calculate_persons ? persons : calculate_persons,
                 beaters,
                 chasers,

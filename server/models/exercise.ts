@@ -11,9 +11,6 @@ interface IBlock {
 
 interface IExercise {
     name: string;
-    description?: string; // unused for block model only backwards compatible
-    video_url?: string; // unused for block model only backwards compatible
-    time_min?: number; // unused for block model only backwards compatible
     materials?: Types.Array<string>;
     beaters?: number;
     chasers?: number;
@@ -48,15 +45,6 @@ const exerciseSchema = new Schema<IExercise>({
     name: {
         type: String,
         required: true
-    },
-    description: {
-        type: String
-    },
-    video_url: {
-        type: String
-    },
-    time_min: {
-        type: Number
     },
     materials: {
         type: [String]
