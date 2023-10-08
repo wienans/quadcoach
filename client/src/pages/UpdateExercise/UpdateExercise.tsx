@@ -16,8 +16,13 @@ const UpdateExercise = () => {
         videoUrl: "",
         timeMin: 0,
         persons: 0,
-        materialsString: "",
-        tagsString: "",
+        beaters: 0,
+        chasers: 0,
+        materials: [],
+        tags: [],
+        descriptionBlocks: [],
+        relatedTo:[],
+        creator: "",
     })
     const [breadcrumbRoutes, setBreadcrumbRoutes] = useState([...defaultEBreadcrumbRoutes])
 
@@ -42,8 +47,13 @@ const UpdateExercise = () => {
                 videoUrl: result.video_url,
                 timeMin: result.time_min,
                 persons: result.persons,
-                materialsString: result.materials.toString(),
-                tagsString: result.tags.toString(),
+                beaters: result.beaters,
+                chasers: result.chasers,
+                materials: result.materials,
+                tags: result.tags,
+                descriptionBlocks: result.description_blocks,
+                relatedTo: result.related_to,
+                creator: result.creator,
             })
         }
 
@@ -73,7 +83,7 @@ const UpdateExercise = () => {
         result = await result.json()
 
         if (result) {
-            navigate("/")
+            navigate(`/exercises/${params.id}`)
         }
 
     }

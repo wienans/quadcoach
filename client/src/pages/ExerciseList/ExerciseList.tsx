@@ -22,9 +22,12 @@ const ExerciseList = () => {
     
     const getExercises = async (searchString) => {
 
-        let searchPath = `/api/exercises?name[regex]=${searchString}&name[options]=i&persons[gte]=${filterMinPersons}&persons[lte]=${filterMaxPersons}&tags[regex]=${filterTagString}`
-        // let searchPath = `/api/exercises?name[regex]=${searchString}`
-
+        let searchPath = ""
+        if(filterTagString ==""){
+            searchPath = `/api/exercises?name[regex]=${searchString}&name[options]=i&persons[gte]=${filterMinPersons}&persons[lte]=${filterMaxPersons}`
+        }else{
+            searchPath = `/api/exercises?name[regex]=${searchString}&name[options]=i&persons[gte]=${filterMinPersons}&persons[lte]=${filterMaxPersons}&tags[regex]=${filterTagString}`
+        }
         let result = await fetch(searchPath)
         result = await result.json()
 
@@ -37,6 +40,10 @@ const ExerciseList = () => {
         getExercises(exerciseSearchValue)
     }, [exerciseSearchValue])
     const navigate = useNavigate()
+
+    const handleApplyFilterClick = () =>{
+        getExercises(exerciseSearchValue)
+    }
 
     const handleRowClick = (
         params, // GridRowParams
@@ -69,7 +76,7 @@ const ExerciseList = () => {
                 if(params.value.length >0 && params.value[0] != ""){
                     return(
                         params.value.map((el) => 
-                            {return <Chip label={el} sx={{margin: "1px"}} variant={"outlined"} />;}
+                            {return <Chip key={el} label={el} sx={{margin: "1px"}} variant={"outlined"} />;}
                         )
                     )
                 }            
@@ -130,7 +137,7 @@ const ExerciseList = () => {
                         </Grid>
                         <Grid item xs = {6} >
                             <SoftButton
-                                onClick={getExercises(exerciseSearchValue)}
+                                onClick={handleApplyFilterClick}
                                 color="primary"
                                 sx={{ marginRight: 1 }}
                             >
@@ -144,6 +151,7 @@ const ExerciseList = () => {
                 <DataGrid getRowId={(row) => row._id}
                     rows={exercises}
                     columns={columns2}
+                    key={"grid"}
                     initialState={{
                         pagination: {
                             paginationModel: {
