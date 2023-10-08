@@ -1,11 +1,12 @@
 import { number, shape, string, func, node, array} from "prop-types";
+import * as React from 'react';
 import { FieldArray, FormikProvider, useFormik } from "formik";
 import * as Yup from "yup";
-import { Container, FormGroup, FormHelperText, Grid, InputAdornment, TextField } from "@mui/material";
+import { Dialog, DialogActions, DialogContent, DialogTitle,
+    Chip, FormGroup, FormHelperText, Grid, TextField, Autocomplete } from "@mui/material";
 import SoftTypography from "../SoftTypography";
 import SoftInput from "../SoftInput";
 import { SoftBox, SoftButton } from "..";
-import { FlaskEmptyPlus } from "mdi-material-ui";
 
 type descriptionBlockType = {
     description: string,
@@ -24,9 +25,6 @@ type exerciseType = {
     tags: [string],
     descriptionBlocks: [descriptionBlockType],
     relatedTo: [string],
-    materialsString: string, // should be replaced with use of the materials array
-    tagsString: string, // should be replaced with use of the tags array
-    relatedToString: string // should be replaced with use of the relatedTo array
 }
 
 
@@ -40,9 +38,6 @@ const exerciseShape = shape({
     tags: array,
     descriptionBlocks: array,
     relatedTo: array,
-    materialsString: string, // should be replaced with use of the materials array
-    tagsString: string, // should be replaced with use of the tags array
-    relatedToString: string, // should be replaced with use of the relatedTo array
 })
 
 const emptyDescriptionBlock = {
@@ -51,6 +46,8 @@ const emptyDescriptionBlock = {
     coaching_points:"",
     time_min:0
 }
+
+
 
 /**
  * 
@@ -62,6 +59,37 @@ const emptyDescriptionBlock = {
  * @returns 
  */
 const ExerciseEditForm = ({ initialValues, onSubmit, extraRows, header: Header }) => {
+    const [openTagDialog, setOpenTagDialog] = React.useState(false);
+    const [newTag, setNewTag] = React.useState("");
+    const [openMaterialDialog, setOpenMaterialDialog] = React.useState(false);
+    const [newMaterial, setNewMaterial] = React.useState("");
+    const [openRelatedDialog, setOpenRelatedDialog] = React.useState(false);
+    const [newRelatedEx, setNewRelatedEx] = React.useState("");
+    const [exercises, setExercises] = React.useState([])
+    const getExercises = async () => {
+
+        let result = await fetch("/api/exercises")
+        result = await result.json()
+    
+        setExercises(result ? result : [])
+    }
+    const handleAddRelatedExercise = (arrayHelpers) =>{
+        if(newRelatedEx!=="")
+        {
+            let foundEx = exercises.find((el) => {
+                return el.name == newRelatedEx
+            })
+            if(foundEx != null){
+                arrayHelpers.push(foundEx._id)
+            }else
+            {
+                console.log("Didn't Found Exercise")
+            }
+            
+        }
+        
+    }
+    getExercises()
     const formik = useFormik<exerciseType>({
         // enableReinitialize : use this flag when initial values needs to be changed
         enableReinitialize: true,
@@ -76,9 +104,6 @@ const ExerciseEditForm = ({ initialValues, onSubmit, extraRows, header: Header }
             tags: initialValues?.tags ?? [],
             descriptionBlocks: initialValues?.descriptionBlocks ?? [],
             relatedTo: initialValues?.relatedTo ?? [],
-            materialsString: initialValues?.materialsString ?? "",
-            tagsString: initialValues?.tagsString ?? "",
-            relatedToString: initialValues?.relatedToString ?? "",
         },
 
         validationSchema: Yup.object({
@@ -95,17 +120,10 @@ const ExerciseEditForm = ({ initialValues, onSubmit, extraRows, header: Header }
                 timeMin: Yup.number(),
             })),
             relatedTo: Yup.array().of(Yup.string()),
-            materialsString: Yup.string(),
-            tagsString: Yup.string(),
-            relatedToString: Yup.string(),
         }),
 
         onSubmit: (values) => {
-            const { materialsString, tagsString, name, persons, beaters, chasers, relatedToString, descriptionBlocks } = values
-            let materials = materialsString.replace(/\s/g, '').split(',')
-            let tags = tagsString.replace(/\s/g, '').split(',')
-            let related_to = relatedToString.replace(/\s/g, '').split(',')
-            related_to = related_to[0]==""?[]:related_to
+            const { materials, tags, name, persons, beaters, chasers, descriptionBlocks,relatedTo } = values
             const calculate_persons = beaters+chasers
             let calculate_time = 0
             descriptionBlocks.forEach((value)=>{
@@ -119,7 +137,7 @@ const ExerciseEditForm = ({ initialValues, onSubmit, extraRows, header: Header }
                 chasers,
                 materials,
                 tags,
-                related_to,
+                related_to: relatedTo,
                 description_blocks: descriptionBlocks
             }
             onSubmit(exercise)
@@ -221,53 +239,155 @@ const ExerciseEditForm = ({ initialValues, onSubmit, extraRows, header: Header }
                                 </Grid>
                                 <Grid item xs={12} p={1}>
                                     <FormGroup>
-                                        <SoftTypography variant="body2">Material</SoftTypography>
-                                        <SoftInput
-                                            error={formik.touched.materialsString != null && Boolean(formik.errors.materialsString)}
-                                            name="materialsString"
-                                            id="outlined-basic"
-                                            placeholder="Needed material"
-                                            variant="outlined"
-                                            value={formik.values.materialsString}
-                                            onChange={formik.handleChange}
-                                            fullWidth
-                                            onBlur={formik.handleBlur}
+                                        <SoftTypography variant="body2">Materials</SoftTypography>
+                                        <FieldArray
+                                            name="materials"
+                                            render={ (arrayHelpers) => {
+                                                return(
+                                                    <div>
+                                                        {formik.values.materials.map((el,index) => 
+                                                            {
+                                                                if(el != ""){
+                                                                    return <Chip size="small" key={el+index} label={el} sx={{margin: "2px"}} variant={"outlined"} onDelete={() => {
+                                                                        arrayHelpers.remove(index)
+                                                                    }} />;
+                                                                }
+                                                            }
+                                                                
+                                                        )}
+                                                        <Chip size="small"  label="+" sx={{margin: "2px"}} color="info" onClick={()=>{setOpenMaterialDialog(true); setNewMaterial("")}} />
+                                                        <Dialog open={openMaterialDialog} onClose={()=>{setOpenMaterialDialog(false)}}>
+                                                            <DialogTitle>Add Material</DialogTitle>
+                                                            <DialogContent>
+                                                                <Autocomplete
+                                                                    id="material-text"
+                                                                    freeSolo
+                                                                    options = {["Cones","Hoops"]}
+                                                                    renderInput={(params) =>
+                                                                        <TextField
+                                                                            {...params}
+                                                                            autoFocus
+                                                                            id="name"
+                                                                            fullWidth
+                                                                            value={newMaterial}
+                                                                            onChange={(e)=>{setNewMaterial(e.target.value)}}
+                                                                            onBlur={(e)=>{setNewMaterial(e.target.value)}}
+                                                                        />
+                                                                    }
+                                                                />
+                                                            </DialogContent>
+                                                            <DialogActions>
+                                                                <SoftButton color="error" onClick={()=>{setOpenMaterialDialog(false)}}>Cancel</SoftButton>
+                                                                <SoftButton color="success" onClick={() => {arrayHelpers.push(newMaterial); setOpenMaterialDialog(false)}}>Add</SoftButton>
+                                                            </DialogActions>
+                                                        </Dialog>
+                                                    </div>
+                                                )
+                                            }}
                                         />
-                                        {formik.touched.materialsString && Boolean(formik.errors.materialsString) && <FormHelperText error>{formik.errors.materialsString}</FormHelperText>}
                                     </FormGroup>
                                 </Grid>
                                 <Grid item xs={12} p={1}>
                                     <FormGroup>
                                         <SoftTypography variant="body2">Tags</SoftTypography>
-                                        <SoftInput
-                                            error={formik.touched.tagsString != null && Boolean(formik.errors.tagsString)}
-                                            name="tagsString"
-                                            id="outlined-basic"
-                                            placeholder="Tags for easy search"
-                                            variant="outlined"
-                                            value={formik.values.tagsString}
-                                            onChange={formik.handleChange}
-                                            fullWidth
-                                            onBlur={formik.handleBlur}
+                                        <FieldArray
+                                            name="tags"
+                                            render={ (arrayHelpers) => {
+                                                return(
+                                                    <div>
+                                                        {formik.values.tags.map((el,index) => 
+                                                            {
+                                                                if(el != ""){
+                                                                    return <Chip size="small" key={el+index} label={el} sx={{margin: "2px"}} variant={"outlined"} onDelete={() => {
+                                                                        arrayHelpers.remove(index)
+                                                                    }} />;
+                                                                }
+                                                            }
+                                                                
+                                                        )}
+                                                        <Chip size="small"  label="+" sx={{margin: "2px"}} color="info" onClick={()=>{setOpenTagDialog(true); setNewTag("")}} />
+                                                        <Dialog open={openTagDialog} onClose={()=>{setOpenTagDialog(false)}}>
+                                                            <DialogTitle>Add Tag</DialogTitle>
+                                                            <DialogContent>
+                                                                <Autocomplete
+                                                                    id="tag-text"
+                                                                    freeSolo
+                                                                    options = {["Beater","Chaser","Keeper","Warm-Up"]}
+                                                                    renderInput={(params) =>
+                                                                        <TextField
+                                                                            {...params}
+                                                                            autoFocus
+                                                                            id="name"
+                                                                            fullWidth
+                                                                            value={newTag}
+                                                                            onChange={(e)=>{setNewTag(e.target.value)}}
+                                                                            onBlur={(e)=>{setNewTag(e.target.value)}}
+                                                                        />
+                                                                    }
+                                                                />
+                                                            </DialogContent>
+                                                            <DialogActions>
+                                                                <SoftButton color="error" onClick={()=>{setOpenTagDialog(false)}}>Cancel</SoftButton>
+                                                                <SoftButton color="success" onClick={() => {arrayHelpers.push(newTag); setOpenTagDialog(false)}}>Add</SoftButton>
+                                                            </DialogActions>
+                                                        </Dialog>
+                                                    </div>
+                                                )
+                                            }}
                                         />
-                                        {formik.touched.tagsString && Boolean(formik.errors.tagsString) && <FormHelperText error>{formik.errors.tagsString}</FormHelperText>}
                                     </FormGroup>
                                 </Grid>
+                                
                                 <Grid item xs={12} p={1}>
                                     <FormGroup>
                                         <SoftTypography variant="body2">Related To:</SoftTypography>
-                                        <SoftInput
-                                            error={formik.touched.relatedToString != null && Boolean(formik.errors.relatedToString)}
-                                            name="relatedToString"
-                                            id="outlined-basic"
-                                            placeholder="Related to"
-                                            variant="outlined"
-                                            value={formik.values.relatedToString}
-                                            onChange={formik.handleChange}
-                                            fullWidth
-                                            onBlur={formik.handleBlur}
+                                        <FieldArray
+                                            name="relatedTo"
+                                            render={ (arrayHelpers) => {
+                                                return(
+                                                    <div>
+                                                        {formik.values.relatedTo.map((el,index) => 
+                                                            {
+                                                                let foundEx = exercises.find((ex) => {
+                                                                    return ex._id == el
+                                                                })
+                                                                if(foundEx != null){
+                                                                    return <Chip size="small" key={el+index} label={foundEx.name} sx={{margin: "2px"}} variant={"outlined"} onDelete={() => {
+                                                                        arrayHelpers.remove(index)
+                                                                    }} />;
+                                                                }
+                                                            }
+                                                                
+                                                        )}
+                                                        <Chip size="small"  label="+" sx={{margin: "2px"}} color="info" onClick={()=>{setOpenRelatedDialog(true); setNewRelatedEx("")}} />
+                                                        <Dialog open={openRelatedDialog} onClose={()=>{setOpenRelatedDialog(false)}}>
+                                                            <DialogTitle>Add Related Exercise</DialogTitle>
+                                                            <DialogContent>
+                                                                <Autocomplete
+                                                                    id="related-text"
+                                                                    options = {exercises.map((el) => el.name)}
+                                                                    renderInput={(params) =>
+                                                                        <TextField
+                                                                            {...params}
+                                                                            autoFocus
+                                                                            id="name"
+                                                                            fullWidth
+                                                                            value={newRelatedEx}
+                                                                            onChange={(e)=>{setNewRelatedEx(e.target.value)}}
+                                                                            onBlur={(e)=>{setNewRelatedEx(e.target.value)}}
+                                                                        />
+                                                                    }
+                                                                />
+                                                            </DialogContent>
+                                                            <DialogActions>
+                                                                <SoftButton color="error" onClick={()=>{setOpenRelatedDialog(false)}}>Cancel</SoftButton>
+                                                                <SoftButton color="success" onClick={() => {handleAddRelatedExercise(arrayHelpers); setOpenRelatedDialog(false)}}>Add</SoftButton>
+                                                            </DialogActions>
+                                                        </Dialog>
+                                                    </div>
+                                                )
+                                            }}
                                         />
-                                        {formik.touched.relatedToString && Boolean(formik.errors.relatedToString) && <FormHelperText error>{formik.errors.relatedToString}</FormHelperText>}
                                     </FormGroup>
                                 </Grid>
                             </SoftBox>
@@ -276,101 +396,102 @@ const ExerciseEditForm = ({ initialValues, onSubmit, extraRows, header: Header }
                         <FieldArray
                             name="descriptionBlocks"
                             render={ (arrayHelpers) => {
-                            return(
-                                <div> 
-                                    {formik.values.descriptionBlocks.map((_,index)=>{
-                                        return(
-                                            <SoftBox key={index} variant="contained" shadow="lg" opacity={1} p={1} my={2} borderRadius="lg">
-                                                <SoftTypography variant="h5" fontWeight="bold" textTransform="uppercase">Block {index+1}</SoftTypography>
-                                                <Grid item xs={12} p={1}>
-                                                    <FormGroup>
-                                                        <SoftTypography variant="body2">Video URL</SoftTypography>
-                                                        <SoftInput
-                                                            error={formik.touched.descriptionBlocks != null && formik.touched.descriptionBlocks[index] != null && formik.touched.descriptionBlocks[index].video_url != null && formik.errors.descriptionBlocks != null && formik.errors.descriptionBlocks[index] != null && Boolean(formik.errors.descriptionBlocks[index].video_url)}
-                                                            name={`descriptionBlocks[${index}].video_url`}
-                                                            id="outlined-basic"
-                                                            placeholder="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
-                                                            variant="outlined"
-                                                            value={formik.values.descriptionBlocks[index].video_url}
-                                                            onChange={formik.handleChange}
-                                                            fullWidth
-                                                            multiline
-                                                            onBlur={formik.handleBlur}
-                                                        />
-                                                        {formik.touched.descriptionBlocks && formik.touched.descriptionBlocks[index] != null && formik.touched.descriptionBlocks[index].video_url && formik.errors.descriptionBlocks != null && formik.errors.descriptionBlocks[index] != null && Boolean(formik.errors.descriptionBlocks[index].video_url) && <FormHelperText error>{formik.errors.descriptionBlocks[index].video_url}</FormHelperText>}
-                                                    </FormGroup>
-                                                </Grid>
-                                                <Grid item xs={12} p={1}>
-                                                    <FormGroup>
-                                                        <SoftTypography variant="body2">Description</SoftTypography>
-                                                        <SoftInput
-                                                            error={formik.touched.descriptionBlocks != null && formik.touched.descriptionBlocks[index] != null && formik.touched.descriptionBlocks[index].description != null && formik.errors.descriptionBlocks != null && formik.errors.descriptionBlocks[index] != null && Boolean(formik.errors.descriptionBlocks[index].description)}
-                                                            name={`descriptionBlocks[${index}].description`}
-                                                            id="outlined-basic"
-                                                            placeholder="Description"
-                                                            variant="outlined"
-                                                            value={formik.values.descriptionBlocks[index].description}
-                                                            onChange={formik.handleChange}
-                                                            fullWidth
-                                                            multiline 
-                                                            minRows={5}
-                                                            onBlur={formik.handleBlur}
-                                                        />
-                                                        {formik.touched.descriptionBlocks && formik.touched.descriptionBlocks[index] != null && formik.touched.descriptionBlocks[index].description && formik.errors.descriptionBlocks != null && formik.errors.descriptionBlocks[index] != null && Boolean(formik.errors.descriptionBlocks[index].description) && <FormHelperText error>{formik.errors.descriptionBlocks[index].description}</FormHelperText>}
-                                                    </FormGroup>
-                                                </Grid>
-                                                <Grid item xs={12} p={1}>
-                                                    <FormGroup>
-                                                        <SoftTypography variant="body2">Coaching Points</SoftTypography>
-                                                        <SoftInput
-                                                            error={formik.touched.descriptionBlocks != null && formik.touched.descriptionBlocks[index] != null && formik.touched.descriptionBlocks[index].coaching_points != null && formik.errors.descriptionBlocks != null && formik.errors.descriptionBlocks[index] != null && Boolean(formik.errors.descriptionBlocks[index].coaching_points)}
-                                                            name={`descriptionBlocks[${index}].coaching_points`}
-                                                            id="outlined-basic"
-                                                            placeholder="Coaching Points"
-                                                            variant="outlined"
-                                                            value={formik.values.descriptionBlocks[index].coaching_points}
-                                                            onChange={formik.handleChange}
-                                                            fullWidth
-                                                            multiline 
-                                                            minRows={5}
-                                                            onBlur={formik.handleBlur}
-                                                        />
-                                                        {formik.touched.descriptionBlocks && formik.touched.descriptionBlocks[index] != null && formik.touched.descriptionBlocks[index].coaching_points && formik.errors.descriptionBlocks != null && formik.errors.descriptionBlocks[index] != null && Boolean(formik.errors.descriptionBlocks[index].coaching_points) && <FormHelperText error>{formik.errors.descriptionBlocks[index].coaching_points}</FormHelperText>}
-                                                    </FormGroup>
-                                                </Grid>
-                                                <Grid item xs={12} p={1}>
-                                                    <FormGroup>
-                                                        <SoftTypography variant="body2">Suggested Time (Minutes)</SoftTypography>
-                                                        <SoftInput
-                                                            type="number"
-                                                            inputProps={{ min: 0, step: "1" }}
-                                                            error={formik.touched.descriptionBlocks != null && formik.touched.descriptionBlocks[index] != null &&formik.touched.descriptionBlocks[index].time_min != null && formik.errors.descriptionBlocks != null && formik.errors.descriptionBlocks[index] != null && Boolean(formik.errors.descriptionBlocks[index].time_min)}
-                                                            name={`descriptionBlocks[${index}].time_min`}
-                                                            id="outlined-basic"
-                                                            placeholder="Minutes"
-                                                            variant="outlined"
-                                                            value={formik.values.descriptionBlocks[index].time_min}
-                                                            onChange={formik.handleChange}
-                                                            fullWidth
-                                                            onBlur={formik.handleBlur}
-                                                        />
-                                                        {formik.touched.descriptionBlocks != null && formik.touched.descriptionBlocks[index] != null && formik.touched.descriptionBlocks[index].time_min && formik.errors.descriptionBlocks != null && formik.errors.descriptionBlocks[index] != null && Boolean(formik.errors.descriptionBlocks[index].time_min) && <FormHelperText error>{formik.errors.descriptionBlocks[index].time_min}</FormHelperText>}
-                                                    </FormGroup>
-                                                </Grid>
-                                                <SoftButton  color="error" onClick={() => {
-                                                    arrayHelpers.remove(index)
-                                                }}> 
-                                                    Remove Block
-                                                </SoftButton>
-                                            </SoftBox>
-                                        )
-                                    })}
-                                    <SoftButton  color="info" onClick={() => {
-                                        arrayHelpers.push(emptyDescriptionBlock)
-                                    }}> 
-                                        Add Description Block
-                                    </SoftButton>
-                                </div>)    
+                                return(
+                                    <div> 
+                                        {formik.values.descriptionBlocks.map((_,index)=>{
+                                            return(
+                                                <SoftBox key={index} variant="contained" shadow="lg" opacity={1} p={1} my={2} borderRadius="lg">
+                                                    <SoftTypography variant="h5" fontWeight="bold" textTransform="uppercase">Block {index+1}</SoftTypography>
+                                                    <Grid item xs={12} p={1}>
+                                                        <FormGroup>
+                                                            <SoftTypography variant="body2">Video URL</SoftTypography>
+                                                            <SoftInput
+                                                                error={formik.touched.descriptionBlocks != null && formik.touched.descriptionBlocks[index] != null && formik.touched.descriptionBlocks[index].video_url != null && formik.errors.descriptionBlocks != null && formik.errors.descriptionBlocks[index] != null && Boolean(formik.errors.descriptionBlocks[index].video_url)}
+                                                                name={`descriptionBlocks[${index}].video_url`}
+                                                                id="outlined-basic"
+                                                                placeholder="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+                                                                variant="outlined"
+                                                                value={formik.values.descriptionBlocks[index].video_url}
+                                                                onChange={formik.handleChange}
+                                                                fullWidth
+                                                                multiline
+                                                                onBlur={formik.handleBlur}
+                                                            />
+                                                            {formik.touched.descriptionBlocks && formik.touched.descriptionBlocks[index] != null && formik.touched.descriptionBlocks[index].video_url && formik.errors.descriptionBlocks != null && formik.errors.descriptionBlocks[index] != null && Boolean(formik.errors.descriptionBlocks[index].video_url) && <FormHelperText error>{formik.errors.descriptionBlocks[index].video_url}</FormHelperText>}
+                                                        </FormGroup>
+                                                    </Grid>
+                                                    <Grid item xs={12} p={1}>
+                                                        <FormGroup>
+                                                            <SoftTypography variant="body2">Description</SoftTypography>
+                                                            <SoftInput
+                                                                error={formik.touched.descriptionBlocks != null && formik.touched.descriptionBlocks[index] != null && formik.touched.descriptionBlocks[index].description != null && formik.errors.descriptionBlocks != null && formik.errors.descriptionBlocks[index] != null && Boolean(formik.errors.descriptionBlocks[index].description)}
+                                                                name={`descriptionBlocks[${index}].description`}
+                                                                id="outlined-basic"
+                                                                placeholder="Description"
+                                                                variant="outlined"
+                                                                value={formik.values.descriptionBlocks[index].description}
+                                                                onChange={formik.handleChange}
+                                                                fullWidth
+                                                                multiline 
+                                                                minRows={5}
+                                                                onBlur={formik.handleBlur}
+                                                            />
+                                                            {formik.touched.descriptionBlocks && formik.touched.descriptionBlocks[index] != null && formik.touched.descriptionBlocks[index].description && formik.errors.descriptionBlocks != null && formik.errors.descriptionBlocks[index] != null && Boolean(formik.errors.descriptionBlocks[index].description) && <FormHelperText error>{formik.errors.descriptionBlocks[index].description}</FormHelperText>}
+                                                        </FormGroup>
+                                                    </Grid>
+                                                    <Grid item xs={12} p={1}>
+                                                        <FormGroup>
+                                                            <SoftTypography variant="body2">Coaching Points</SoftTypography>
+                                                            <SoftInput
+                                                                error={formik.touched.descriptionBlocks != null && formik.touched.descriptionBlocks[index] != null && formik.touched.descriptionBlocks[index].coaching_points != null && formik.errors.descriptionBlocks != null && formik.errors.descriptionBlocks[index] != null && Boolean(formik.errors.descriptionBlocks[index].coaching_points)}
+                                                                name={`descriptionBlocks[${index}].coaching_points`}
+                                                                id="outlined-basic"
+                                                                placeholder="Coaching Points"
+                                                                variant="outlined"
+                                                                value={formik.values.descriptionBlocks[index].coaching_points}
+                                                                onChange={formik.handleChange}
+                                                                fullWidth
+                                                                multiline 
+                                                                minRows={5}
+                                                                onBlur={formik.handleBlur}
+                                                            />
+                                                            {formik.touched.descriptionBlocks && formik.touched.descriptionBlocks[index] != null && formik.touched.descriptionBlocks[index].coaching_points && formik.errors.descriptionBlocks != null && formik.errors.descriptionBlocks[index] != null && Boolean(formik.errors.descriptionBlocks[index].coaching_points) && <FormHelperText error>{formik.errors.descriptionBlocks[index].coaching_points}</FormHelperText>}
+                                                        </FormGroup>
+                                                    </Grid>
+                                                    <Grid item xs={12} p={1}>
+                                                        <FormGroup>
+                                                            <SoftTypography variant="body2">Suggested Time (Minutes)</SoftTypography>
+                                                            <SoftInput
+                                                                type="number"
+                                                                inputProps={{ min: 0, step: "1" }}
+                                                                error={formik.touched.descriptionBlocks != null && formik.touched.descriptionBlocks[index] != null &&formik.touched.descriptionBlocks[index].time_min != null && formik.errors.descriptionBlocks != null && formik.errors.descriptionBlocks[index] != null && Boolean(formik.errors.descriptionBlocks[index].time_min)}
+                                                                name={`descriptionBlocks[${index}].time_min`}
+                                                                id="outlined-basic"
+                                                                placeholder="Minutes"
+                                                                variant="outlined"
+                                                                value={formik.values.descriptionBlocks[index].time_min}
+                                                                onChange={formik.handleChange}
+                                                                fullWidth
+                                                                onBlur={formik.handleBlur}
+                                                            />
+                                                            {formik.touched.descriptionBlocks != null && formik.touched.descriptionBlocks[index] != null && formik.touched.descriptionBlocks[index].time_min && formik.errors.descriptionBlocks != null && formik.errors.descriptionBlocks[index] != null && Boolean(formik.errors.descriptionBlocks[index].time_min) && <FormHelperText error>{formik.errors.descriptionBlocks[index].time_min}</FormHelperText>}
+                                                        </FormGroup>
+                                                    </Grid>
+                                                    <SoftButton  color="error" onClick={() => {
+                                                        arrayHelpers.remove(index)
+                                                    }}> 
+                                                        Remove Block
+                                                    </SoftButton>
+                                                </SoftBox>
+                                            )
+                                        })}
+                                        <SoftButton  color="info" onClick={() => {
+                                            arrayHelpers.push(emptyDescriptionBlock)
+                                        }}> 
+                                            Add Description Block
+                                        </SoftButton>
+                                    </div>
+                                )    
                             }}
                         />
                     </Grid>

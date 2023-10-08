@@ -22,9 +22,12 @@ const ExerciseList = () => {
     
     const getExercises = async (searchString) => {
 
-        let searchPath = `/api/exercises?name[regex]=${searchString}&name[options]=i&persons[gte]=${filterMinPersons}&persons[lte]=${filterMaxPersons}&tags[regex]=${filterTagString}`
-        // let searchPath = `/api/exercises?name[regex]=${searchString}`
-
+        let searchPath = ""
+        if(filterTagString ==""){
+            searchPath = `/api/exercises?name[regex]=${searchString}&name[options]=i&persons[gte]=${filterMinPersons}&persons[lte]=${filterMaxPersons}`
+        }else{
+            searchPath = `/api/exercises?name[regex]=${searchString}&name[options]=i&persons[gte]=${filterMinPersons}&persons[lte]=${filterMaxPersons}&tags[regex]=${filterTagString}`
+        }
         let result = await fetch(searchPath)
         result = await result.json()
 

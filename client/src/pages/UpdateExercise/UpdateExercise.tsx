@@ -23,9 +23,6 @@ const UpdateExercise = () => {
         descriptionBlocks: [],
         relatedTo:[],
         creator: "",
-        materialsString: "", // should be replaced with use of the materials array
-        tagsString: "", // should be replaced with use of the tags array
-        relatedToString: "", // should be replaced with use of the relatedTo array
     })
     const [breadcrumbRoutes, setBreadcrumbRoutes] = useState([...defaultEBreadcrumbRoutes])
 
@@ -57,9 +54,6 @@ const UpdateExercise = () => {
                 descriptionBlocks: result.description_blocks,
                 relatedTo: result.related_to,
                 creator: result.creator,
-                materialsString: result.materials.toString(),
-                tagsString: result.tags.toString(),
-                relatedToString: result.related_to.toString(),
             })
         }
 

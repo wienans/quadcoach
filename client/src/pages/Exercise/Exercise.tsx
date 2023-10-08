@@ -158,7 +158,7 @@ const Exercise = () => {
                     <SoftBox> 
                         <Grid container spacing={2}> 
                             {values.map(({ label, getElement }) => ( 
-                                <Grid item xs={3} key={label}> 
+                                <Grid item xs={6} sm={3} key={label}> 
                                     <SoftBox key={label} display="flex" py={1} pr={2}> 
                                         <SoftTypography variant="button" fontWeight="bold" textTransform="capitalize" mr={2}> 
                                             {label} 
@@ -226,7 +226,7 @@ const Exercise = () => {
                                 Time: {el.time_min} minutes
                             </SoftTypography> 
                         </SoftBox>
-                        <SoftBox  sx={{paddingTop: "56.26%", position: "relative"}}>
+                        <SoftBox display={el.video_url!=""?'block':'none'} sx={{paddingTop: "56.26%", position: "relative"}}>
                             <ReactPlayer style={{position: "absolute", top:"0px", left:"0px"}} url={el.video_url} width="100%" height="100%" controls={true} light={true}/>
                         </SoftBox> 
                         <SoftBox mt={3}>
