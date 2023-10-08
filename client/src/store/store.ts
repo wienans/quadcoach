@@ -1,12 +1,14 @@
 import { configureStore } from "@reduxjs/toolkit";
 import logger from "redux-logger";
 import { LayoutReducer } from "../components/Layout";
+import { quadcoachApi } from "../api"
 
-const middleware = [logger];
+const middleware = [logger, quadcoachApi.middleware];
 
 export const store = configureStore({
     reducer: {
-        layout: LayoutReducer
+        layout: LayoutReducer,
+        [quadcoachApi.reducerPath]: quadcoachApi.reducer,
     },
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware({
