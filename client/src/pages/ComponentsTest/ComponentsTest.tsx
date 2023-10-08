@@ -1,4 +1,4 @@
-import { Accordion, AccordionDetails, AccordionSummary } from "@mui/material";
+import { Collapsible, Accordion, AccordionDetails, AccordionSummary } from "@mui/material";
 import { SoftBox, SoftButton, SoftTypography } from "../../components";
 import { Gradients, GreyColors, NormalColors } from "../../components/SoftBox/SoftBoxRoot";
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -117,6 +117,21 @@ const ComponentsTest = (): JSX.Element => {
                         <SoftTypography variant="overline">Overline</SoftTypography>
                         <SoftTypography variant="inherit">Inherit</SoftTypography>
                     </SoftBox>
+                </AccordionDetails>
+            </Accordion>
+            <Accordion>
+                <AccordionSummary
+                    expandIcon={<ExpandMoreIcon />}
+                    aria-controls="collapsible-examples"
+                    id="collapsible"
+                >
+                    <SoftTypography variant="h2">Collapsible</SoftTypography>
+                </AccordionSummary>
+                <AccordionDetails>
+                    <Collapsible
+                        label="Collapsible">
+                        Test
+                    </Collapsible>
                 </AccordionDetails>
             </Accordion>
         </>

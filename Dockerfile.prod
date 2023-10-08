@@ -3,7 +3,8 @@ WORKDIR /server
 COPY ./client/dist ./dist
 COPY ./server/package.json ./package.json
 COPY ./server/models ./models
-COPY ./server/server.js ./server.js
+COPY ./server/server.ts ./server.ts
+COPY ./tsconfig.json ./tsconfig.json
 RUN npm install
 EXPOSE 3001
 CMD ["npm", "start"]
