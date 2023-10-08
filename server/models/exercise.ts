@@ -12,6 +12,7 @@ interface IBlock {
 interface IExercise {
     name: string;
     materials?: Types.Array<string>;
+    time_min: number;
     beaters?: number;
     chasers?: number;
     persons: number;
@@ -48,6 +49,9 @@ const exerciseSchema = new Schema<IExercise>({
     },
     materials: {
         type: [String]
+    },
+    time_min:{
+        type: Number
     },
     beaters: {
         type: Number

@@ -29,12 +29,19 @@ const values = [
             <SoftTypography variant="button" fontWeight="regular" color="text">{exercise.chasers}</SoftTypography>
         )
     },
+    {
+        label: "Time:",
+        getElement: exercise => (
+            <SoftTypography variant="button" fontWeight="regular" color="text">{exercise.time_min} Min</SoftTypography>
+        )
+    },
 ]
 
 const Exercise = () => {
     const [exercise, setExercise] = useState({
         id: null,
         name: "",
+        time_min: 0,
         persons: 0,
         beaters: 0,
         chasers: 0,
@@ -63,6 +70,7 @@ const Exercise = () => {
         setExercise({
             id: result._id,
             name: result.name,
+            time_min: result.time_min,
             persons: result.persons,
             beaters: result.beaters,
             chasers: result.chasers,
@@ -150,7 +158,7 @@ const Exercise = () => {
                     <SoftBox> 
                         <Grid container spacing={2}> 
                             {values.map(({ label, getElement }) => ( 
-                                <Grid item xs={4} key={label}> 
+                                <Grid item xs={3} key={label}> 
                                     <SoftBox key={label} display="flex" py={1} pr={2}> 
                                         <SoftTypography variant="button" fontWeight="bold" textTransform="capitalize" mr={2}> 
                                             {label} 

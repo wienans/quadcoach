@@ -89,7 +89,7 @@ const UpdateExercise = () => {
         result = await result.json()
 
         if (result) {
-            navigate("/")
+            navigate(`/exercises/${params.id}`)
         }
 
     }

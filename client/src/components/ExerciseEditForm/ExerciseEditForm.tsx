@@ -16,6 +16,7 @@ type descriptionBlockType = {
 
 type exerciseType = {
     name: string,
+    time_min: number,
     persons: number,
     beaters: number,
     chasers: number,
@@ -31,6 +32,7 @@ type exerciseType = {
 
 const exerciseShape = shape({
     name: string,
+    time_min: number,
     persons: number,
     beaters: number,
     chasers: number,
@@ -67,6 +69,7 @@ const ExerciseEditForm = ({ initialValues, onSubmit, extraRows, header: Header }
         initialValues: {
             name: initialValues?.name ?? "",
             persons: initialValues?.persons ?? 0,
+            time_min: initialValues?.time_min ?? 0,
             beaters: initialValues?.beaters ?? "",
             chasers: initialValues?.chasers ?? "",
             materials: initialValues?.materials ?? [],
@@ -98,15 +101,20 @@ const ExerciseEditForm = ({ initialValues, onSubmit, extraRows, header: Header }
         }),
 
         onSubmit: (values) => {
-            const { materialsString, tagsString, name, description, videoUrl, timeMin, persons, beaters, chasers, relatedToString, descriptionBlocks } = values
+            const { materialsString, tagsString, name, persons, beaters, chasers, relatedToString, descriptionBlocks } = values
             let materials = materialsString.replace(/\s/g, '').split(',')
             let tags = tagsString.replace(/\s/g, '').split(',')
             let related_to = relatedToString.replace(/\s/g, '').split(',')
             related_to = related_to[0]==""?[]:related_to
             const calculate_persons = beaters+chasers
+            let calculate_time = 0
+            descriptionBlocks.forEach((value)=>{
+                calculate_time = calculate_time +value.time_min
+            })
             const exercise = {
                 name,
                 persons: persons > calculate_persons ? persons : calculate_persons,
+                time_min: calculate_time,
                 beaters,
                 chasers,
                 materials,
