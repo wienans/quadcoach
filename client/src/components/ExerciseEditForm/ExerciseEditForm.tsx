@@ -4,7 +4,33 @@ import * as Yup from "yup";
 import { Container, FormGroup, FormHelperText, Grid, InputAdornment, TextField } from "@mui/material";
 import SoftTypography from "../SoftTypography";
 import SoftInput from "../SoftInput";
-import { SoftBox } from "..";
+import { SoftBox, SoftButton } from "..";
+import { FlaskEmptyPlus } from "mdi-material-ui";
+
+type descriptionBlockType = {
+    description: string,
+    video_url:string,
+    coaching_points:string,
+    time_min:number
+}
+
+type exerciseType = {
+    name: string,
+    description: string,
+    videoUrl: string,
+    timeMin: number,
+    persons: number,
+    beaters: number,
+    chasers: number,
+    materials: [string],
+    tags: [string],
+    descriptionBlocks: [descriptionBlockType],
+    relatedTo: [string],
+    materialsString: string, // should be replaced with use of the materials array
+    tagsString: string, // should be replaced with use of the tags array
+    relatedToString: string // should be replaced with use of the relatedTo array
+}
+
 
 const exerciseShape = shape({
     name: string,
@@ -20,6 +46,7 @@ const exerciseShape = shape({
     relatedTo: array,
     materialsString: string, // should be replaced with use of the materials array
     tagsString: string, // should be replaced with use of the tags array
+    relatedToString: string, // should be replaced with use of the relatedTo array
 })
 
 /**
@@ -32,7 +59,7 @@ const exerciseShape = shape({
  * @returns 
  */
 const ExerciseEditForm = ({ initialValues, onSubmit, extraRows, header: Header }) => {
-    const { handleSubmit, errors, touched, handleBlur, handleChange, values, isValid } = useFormik({
+    const { handleSubmit, errors, touched, handleBlur, handleChange, values, isValid } = useFormik<exerciseType>({
         // enableReinitialize : use this flag when initial values needs to be changed
         enableReinitialize: true,
 
@@ -76,7 +103,7 @@ const ExerciseEditForm = ({ initialValues, onSubmit, extraRows, header: Header }
         }),
 
         onSubmit: (values) => {
-            const { materialsString, tagsString, name, description, videoUrl, timeMin, persons, beaters, chasers, relatedToString } = values
+            const { materialsString, tagsString, name, description, videoUrl, timeMin, persons, beaters, chasers, relatedToString, descriptionBlocks } = values
             let materials = materialsString.replace(/\s/g, '').split(',')
             let tags = tagsString.replace(/\s/g, '').split(',')
             let related_to = relatedToString.replace(/\s/g, '').split(',')
@@ -92,7 +119,8 @@ const ExerciseEditForm = ({ initialValues, onSubmit, extraRows, header: Header }
                 chasers,
                 materials,
                 tags,
-                related_to
+                related_to,
+                description_blocks: descriptionBlocks
             }
             onSubmit(exercise)
         },
@@ -294,33 +322,95 @@ const ExerciseEditForm = ({ initialValues, onSubmit, extraRows, header: Header }
                         {touched.relatedToString && Boolean(errors.relatedToString) && <FormHelperText error>{errors.relatedToString}</FormHelperText>}
                     </FormGroup>
                 </Grid>
-                {/* <Grid item xs={12}>
-                    {values.descriptionBlocks.map((el,index)=>{
+                <Grid item xs={12}>
+                    {values.descriptionBlocks.map((_,index)=>{
                         return(
                             <SoftBox key={index} variant="contained" shadow="lg" opacity={1} p={1} my={2} borderRadius="lg">
-                                <Grid item xs={12}>
+                                <SoftTypography variant="h5" fontWeight="bold" textTransform="uppercase">Block {index+1}</SoftTypography>
+                                <Grid item xs={12} p={1}>
                                     <FormGroup>
-                                        <SoftTypography variant="body2">Description</SoftTypography>
+                                        <SoftTypography variant="body2">Video URL</SoftTypography>
                                         <SoftInput
-                                            error={touched.descriptionBlocks != null && Boolean(errors.descriptionBlocks)}
-                                            name="descriptionBlocks"
+                                            error={touched.descriptionBlocks != null && touched.descriptionBlocks[index].video_url != null && errors.descriptionBlocks != null && Boolean(errors.descriptionBlocks[index].video_url)}
+                                            name={`descriptionBlocks[${index}].video_url`}
                                             id="outlined-basic"
-                                            placeholder="Tags for easy search"
+                                            placeholder="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
                                             variant="outlined"
-                                            value={el.description}
+                                            value={values.descriptionBlocks[index].video_url}
                                             onChange={handleChange}
                                             fullWidth
                                             multiline
                                             onBlur={handleBlur}
                                         />
-                                        {touched.descriptionBlocks && Boolean(errors.descriptionBlocks) && <FormHelperText error>{errors.descriptionBlocks}</FormHelperText>}
+                                        {touched.descriptionBlocks && touched.descriptionBlocks[index].video_url && errors.descriptionBlocks != null && Boolean(errors.descriptionBlocks[index].video_url) && <FormHelperText error>{errors.descriptionBlocks[index].video_url}</FormHelperText>}
+                                    </FormGroup>
+                                </Grid>
+                                <Grid item xs={12} p={1}>
+                                    <FormGroup>
+                                        <SoftTypography variant="body2">Description</SoftTypography>
+                                        <SoftInput
+                                            error={touched.descriptionBlocks != null && touched.descriptionBlocks[index].description != null && errors.descriptionBlocks != null && Boolean(errors.descriptionBlocks[index].description)}
+                                            name={`descriptionBlocks[${index}].description`}
+                                            id="outlined-basic"
+                                            placeholder="Description"
+                                            variant="outlined"
+                                            value={values.descriptionBlocks[index].description}
+                                            onChange={handleChange}
+                                            fullWidth
+                                            multiline 
+                                            minRows={5}
+                                            onBlur={handleBlur}
+                                        />
+                                        {touched.descriptionBlocks && touched.descriptionBlocks[index].description && errors.descriptionBlocks != null && Boolean(errors.descriptionBlocks[index].description) && <FormHelperText error>{errors.descriptionBlocks[index].description}</FormHelperText>}
+                                    </FormGroup>
+                                </Grid>
+                                <Grid item xs={12} p={1}>
+                                    <FormGroup>
+                                        <SoftTypography variant="body2">Coaching Points</SoftTypography>
+                                        <SoftInput
+                                            error={touched.descriptionBlocks != null && touched.descriptionBlocks[index].coaching_points != null && errors.descriptionBlocks != null && Boolean(errors.descriptionBlocks[index].coaching_points)}
+                                            name={`descriptionBlocks[${index}].coaching_points`}
+                                            id="outlined-basic"
+                                            placeholder="Coaching Points"
+                                            variant="outlined"
+                                            value={values.descriptionBlocks[index].coaching_points}
+                                            onChange={handleChange}
+                                            fullWidth
+                                            multiline 
+                                            minRows={5}
+                                            onBlur={handleBlur}
+                                        />
+                                        {touched.descriptionBlocks && touched.descriptionBlocks[index].coaching_points && errors.descriptionBlocks != null && Boolean(errors.descriptionBlocks[index].coaching_points) && <FormHelperText error>{errors.descriptionBlocks[index].coaching_points}</FormHelperText>}
+                                    </FormGroup>
+                                </Grid>
+                                <Grid item xs={12} p={1}>
+                                    <FormGroup>
+                                        <SoftTypography variant="body2">Suggested Time (Minutes)</SoftTypography>
+                                        <SoftInput
+                                            type="number"
+                                            inputProps={{ min: 0, step: "1" }}
+                                            error={touched.descriptionBlocks != null && touched.descriptionBlocks[index].time_min != null && errors.descriptionBlocks != null && Boolean(errors.descriptionBlocks[index].time_min)}
+                                            name={`descriptionBlocks[${index}].time_min`}
+                                            id="outlined-basic"
+                                            placeholder="Minutes"
+                                            variant="outlined"
+                                            value={values.descriptionBlocks[index].time_min}
+                                            onChange={handleChange}
+                                            fullWidth
+                                            onBlur={handleBlur}
+                                        />
+                                        {touched.descriptionBlocks && touched.descriptionBlocks[index].time_min && errors.descriptionBlocks != null && Boolean(errors.descriptionBlocks[index].time_min) && <FormHelperText error>{errors.descriptionBlocks[index].time_min}</FormHelperText>}
                                     </FormGroup>
                                 </Grid>
                             </SoftBox>
                         )
                     })}
-
-                </Grid> */}
+                    <SoftButton  color="info" onClick={(event) => {
+                        values.descriptionBlocks.push({} as descriptionBlockType)
+                    }}> 
+                        Add Description Block
+                    </SoftButton>
+                </Grid>
                 {extraRows(isValid)}
             </Grid>
         </form>
