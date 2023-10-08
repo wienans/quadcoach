@@ -41,7 +41,7 @@ app.get("/api", (req, res) => {
   res.json({ message: "Hello from server!" })
 })
 
-app.post("/api/add-exercise", async (req, res)  => {
+app.post("/api/add-exercise", async (req, res) => {
   let exercise = new Exercise(req.body)
   const result = await exercise.save()
   if (!result) {
@@ -68,7 +68,7 @@ app.post("/api/register", async (req, res) => {
 })
 
 app.get("/api/exercises", async (req, res) => {
-  let queryString:string = JSON.stringify(req.query)
+  let queryString: string = JSON.stringify(req.query)
 
   queryString = queryString.replace(/\b(gte|gt|lte|lt|eq|ne|regex|options|in|nin)\b/g, (match) => `$${match}`)
 
@@ -89,6 +89,26 @@ app.delete("/api/exercise/:id", async (req, res) => {
 
 app.get("/api/exercise/:id", async (req, res) => {
   const result = await Exercise.findOne({ _id: req.params.id })
+  if (result) {
+    res.send(result)
+  } else {
+    res.send({ "result": "No Record Found" })
+  }
+})
+
+app.get("/api/exercise/:id/relatedExercises", async (req, res) => {
+  const exerciseToGetRealted = await Exercise.findOne({ _id: req.params.id }).exec();
+  if (!exerciseToGetRealted) {
+    res.send({ "result": "No Record Found" })
+    return
+  }
+
+  if (!exerciseToGetRealted.related_to || exerciseToGetRealted.related_to.length === 0) {
+    res.send([])
+    return;
+  }
+
+  const result = await Exercise.find({ "$or": exerciseToGetRealted.related_to.map(r => ({ _id: r._id })) })
   if (result) {
     res.send(result)
   } else {

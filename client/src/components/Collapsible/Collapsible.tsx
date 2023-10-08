@@ -1,24 +1,22 @@
-import { useState } from "react";
+import { ReactNode, useState } from "react";
 import Collapse from '@mui/material/Collapse';
-import Card from '@mui/material/Card';
 import CardActions from '@mui/material/CardActions';
 import CardContent from '@mui/material/CardContent';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { IconButton, IconButtonProps} from '@mui/material';
+import { IconButton, IconButtonProps } from '@mui/material';
 import { styled } from '@mui/material/styles';
-import { Typography } from "@mui/material";
 import { SoftBox, SoftTypography } from "..";
 
 
 interface ExpandMoreProps extends IconButtonProps {
     expand: boolean;
 }
-export type CollapsibleProps  = {
+export type CollapsibleProps = {
     label: string,
-    children: string
+    children: ReactNode
 }
 const ExpandMore = styled((props: ExpandMoreProps) => {
-    const {expand, ...other } = props;
+    const { expand, ...other } = props;
     return <IconButton {...other} />;
 })(({ theme, expand }) => ({
     transform: !expand ? 'rotate(0deg)' : 'rotate(180deg)',
@@ -36,14 +34,14 @@ const Collapsible = (props: CollapsibleProps) => {
 
     return (
         <div>
-            <SoftBox                 
+            <SoftBox
                 variant="contained"
                 borderRadius="lg"
                 shadow="lg"
                 opacity={1}
                 p={1}
                 my={2}
-                >
+            >
                 <CardActions disableSpacing>
                     <SoftTypography>{props.label}</SoftTypography>
                     <ExpandMore
@@ -57,7 +55,7 @@ const Collapsible = (props: CollapsibleProps) => {
                 </CardActions>
                 <Collapse in={open} timeout="auto" unmountOnExit>
                     <CardContent>
-                            {props.children}
+                        {props.children}
                     </CardContent>
                 </Collapse>
             </SoftBox>
