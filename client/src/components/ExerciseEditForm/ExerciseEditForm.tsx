@@ -1,5 +1,5 @@
 import { number, shape, string, func, node, array} from "prop-types";
-import { useFormik } from "formik";
+import { FieldArray, FormikProvider, useFormik } from "formik";
 import * as Yup from "yup";
 import { Container, FormGroup, FormHelperText, Grid, InputAdornment, TextField } from "@mui/material";
 import SoftTypography from "../SoftTypography";
@@ -49,6 +49,13 @@ const exerciseShape = shape({
     relatedToString: string, // should be replaced with use of the relatedTo array
 })
 
+const emptyDescriptionBlock = {
+    description: "",
+    video_url:"",
+    coaching_points:"",
+    time_min:0
+}
+
 /**
  * 
  * @param {
@@ -59,7 +66,7 @@ const exerciseShape = shape({
  * @returns 
  */
 const ExerciseEditForm = ({ initialValues, onSubmit, extraRows, header: Header }) => {
-    const { handleSubmit, errors, touched, handleBlur, handleChange, values, isValid } = useFormik<exerciseType>({
+    const formik = useFormik<exerciseType>({
         // enableReinitialize : use this flag when initial values needs to be changed
         enableReinitialize: true,
 
@@ -127,293 +134,308 @@ const ExerciseEditForm = ({ initialValues, onSubmit, extraRows, header: Header }
     })
 
     return (
-        <form onSubmit={(event) => {
-            event.preventDefault()
-            event.stopPropagation()
-            handleSubmit()
-            return false
-        }}>
-            <Grid container spacing={2}>
-                {Header && <Grid item xs={12}>
-                    {Header}
-                </Grid>}
-                <Grid item xs={12}>
-                    <FormGroup>
-                        <SoftTypography variant="body2">Name</SoftTypography>
-                        <SoftInput
-                            error={touched.name && Boolean(errors.name)}
-                            name="name"
-                            required
-                            id="outlined-basic"
-                            placeholder="Name"
-                            variant="outlined"
-                            value={values.name}
-                            onChange={handleChange}
-                            fullWidth
-                            onBlur={handleBlur}
+        <FormikProvider value={formik}>
+            <form onSubmit={(event) => {
+                event.preventDefault()
+                event.stopPropagation()
+                formik.handleSubmit()
+                return false
+            }}>
+                <Grid container spacing={2}>
+                    {Header && <Grid item xs={12}>
+                        {Header}
+                    </Grid>}
+                    <Grid item xs={12}>
+                        <FormGroup>
+                            <SoftTypography variant="body2">Name</SoftTypography>
+                            <SoftInput
+                                error={formik.touched.name && Boolean(formik.errors.name)}
+                                name="name"
+                                required
+                                id="outlined-basic"
+                                placeholder="Name"
+                                variant="outlined"
+                                value={formik.values.name}
+                                onChange={formik.handleChange}
+                                fullWidth
+                                onBlur={formik.handleBlur}
+                            />
+                            {formik.touched.name && Boolean(formik.errors.name) && <FormHelperText error>{formik.errors.name}</FormHelperText>}
+                        </FormGroup>
+                    </Grid>
+                    <Grid item xs={12}>
+                        <FormGroup>
+                            <SoftTypography variant="body2">Description</SoftTypography>
+                            <SoftInput
+                                error={formik.touched.description && Boolean(formik.errors.description)}
+                                name="description"
+                                required
+                                id="outlined-basic"
+                                placeholder="Description"
+                                variant="outlined"
+                                value={formik.values.description}
+                                onChange={formik.handleChange}
+                                fullWidth
+                                multiline 
+                                minRows={5}
+                                onBlur={formik.handleBlur}
+                            />
+                            {formik.touched.description && Boolean(formik.errors.description) && <FormHelperText error>{formik.errors.description}</FormHelperText>}
+                        </FormGroup>
+                    </Grid>
+                    <Grid item xs={12}>
+                        <FormGroup>
+                            <SoftTypography variant="body2">Video URL</SoftTypography>
+                            <SoftInput
+                                error={formik.touched.videoUrl && Boolean(formik.errors.videoUrl)}
+                                name="videoUrl"
+                                id="outlined-basic"
+                                placeholder="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+                                variant="outlined"
+                                value={formik.values.videoUrl}
+                                onChange={formik.handleChange}
+                                fullWidth
+                                onBlur={formik.handleBlur}
+                            />
+                            {formik.touched.videoUrl && Boolean(formik.errors.videoUrl) && <FormHelperText error>{formik.errors.videoUrl}</FormHelperText>}
+                        </FormGroup>
+                    </Grid>
+                    <Grid item xs={12}>
+                        <FormGroup>
+                            <SoftTypography variant="body2">Suggested Time (Minutes)</SoftTypography>
+                            <SoftInput
+                                type="number"
+                                inputProps={{ min: 0, step: "1" }}
+                                error={formik.touched.timeMin != null && Boolean(formik.errors.timeMin)}
+                                name="timeMin"
+                                id="outlined-basic"
+                                placeholder="Minutes"
+                                variant="outlined"
+                                value={formik.values.timeMin}
+                                onChange={formik.handleChange}
+                                fullWidth
+                                onBlur={formik.handleBlur}
+                            />
+                            {formik.touched.timeMin && Boolean(formik.errors.timeMin) && <FormHelperText error>{formik.errors.timeMin}</FormHelperText>}
+                        </FormGroup>
+                    </Grid>
+                    <Grid item xs={12}>
+                        <FormGroup>
+                            <SoftTypography variant="body2">Person amount</SoftTypography>
+                            <SoftInput
+                                type="number"
+                                inputProps={{ min: 0, step: "1" }}
+                                error={formik.touched.persons != null && Boolean(formik.errors.persons)}
+                                name="persons"
+                                required
+                                id="outlined-basic"
+                                placeholder="Persons"
+                                variant="outlined"
+                                value={formik.values.persons}
+                                onChange={formik.handleChange}
+                                fullWidth
+                                onBlur={formik.handleBlur}
+                            />
+                            {formik.touched.persons != null && Boolean(formik.errors.persons) && <FormHelperText error>{formik.errors.persons}</FormHelperText>}
+                        </FormGroup>
+                    </Grid>
+                    <Grid item xs={12}>
+                        <FormGroup>
+                            <SoftTypography variant="body2">Chaser amount</SoftTypography>
+                            <SoftInput
+                                type="number"
+                                inputProps={{ min: 0, step: "1" }}
+                                error={formik.touched.chasers != null && Boolean(formik.errors.chasers)}
+                                name="chasers"
+                                required
+                                id="outlined-basic"
+                                placeholder="Chaser"
+                                variant="outlined"
+                                value={formik.values.chasers}
+                                onChange={formik.handleChange}
+                                fullWidth
+                                onBlur={formik.handleBlur}
+                            />
+                            {formik.touched.chasers != null && Boolean(formik.errors.chasers) && <FormHelperText error>{formik.errors.chasers}</FormHelperText>}
+                        </FormGroup>
+                    </Grid>
+                    <Grid item xs={12}>
+                        <FormGroup>
+                            <SoftTypography variant="body2">Beater amount</SoftTypography>
+                            <SoftInput
+                                type="number"
+                                inputProps={{ min: 0, step: "1" }}
+                                error={formik.touched.beaters != null && Boolean(formik.errors.beaters)}
+                                name="beaters"
+                                required
+                                id="outlined-basic"
+                                placeholder="Beater"
+                                variant="outlined"
+                                value={formik.values.beaters}
+                                onChange={formik.handleChange}
+                                fullWidth
+                                onBlur={formik.handleBlur}
+                            />
+                            {formik.touched.beaters != null && Boolean(formik.errors.beaters) && <FormHelperText error>{formik.errors.beaters}</FormHelperText>}
+                        </FormGroup>
+                    </Grid>
+                    <Grid item xs={12}>
+                        <FormGroup>
+                            <SoftTypography variant="body2">Material</SoftTypography>
+                            <SoftInput
+                                error={formik.touched.materialsString != null && Boolean(formik.errors.materialsString)}
+                                name="materialsString"
+                                id="outlined-basic"
+                                placeholder="Needed material"
+                                variant="outlined"
+                                value={formik.values.materialsString}
+                                onChange={formik.handleChange}
+                                fullWidth
+                                onBlur={formik.handleBlur}
+                            />
+                            {formik.touched.materialsString && Boolean(formik.errors.materialsString) && <FormHelperText error>{formik.errors.materialsString}</FormHelperText>}
+                        </FormGroup>
+                    </Grid>
+                    <Grid item xs={12}>
+                        <FormGroup>
+                            <SoftTypography variant="body2">Tags</SoftTypography>
+                            <SoftInput
+                                error={formik.touched.tagsString != null && Boolean(formik.errors.tagsString)}
+                                name="tagsString"
+                                id="outlined-basic"
+                                placeholder="Tags for easy search"
+                                variant="outlined"
+                                value={formik.values.tagsString}
+                                onChange={formik.handleChange}
+                                fullWidth
+                                onBlur={formik.handleBlur}
+                            />
+                            {formik.touched.tagsString && Boolean(formik.errors.tagsString) && <FormHelperText error>{formik.errors.tagsString}</FormHelperText>}
+                        </FormGroup>
+                    </Grid>
+                    <Grid item xs={12}>
+                        <FormGroup>
+                            <SoftTypography variant="body2">Related To:</SoftTypography>
+                            <SoftInput
+                                error={formik.touched.relatedToString != null && Boolean(formik.errors.relatedToString)}
+                                name="relatedToString"
+                                id="outlined-basic"
+                                placeholder="Related to"
+                                variant="outlined"
+                                value={formik.values.relatedToString}
+                                onChange={formik.handleChange}
+                                fullWidth
+                                onBlur={formik.handleBlur}
+                            />
+                            {formik.touched.relatedToString && Boolean(formik.errors.relatedToString) && <FormHelperText error>{formik.errors.relatedToString}</FormHelperText>}
+                        </FormGroup>
+                    </Grid>
+                    <Grid item xs={12}>
+                        <FieldArray
+                            name="descriptionBlocks"
+                            render={ (arrayHelpers) => {
+                            return(
+                                <div> 
+                                    {formik.values.descriptionBlocks.map((_,index)=>{
+                                        return(
+                                            <SoftBox key={index} variant="contained" shadow="lg" opacity={1} p={1} my={2} borderRadius="lg">
+                                                <SoftTypography variant="h5" fontWeight="bold" textTransform="uppercase">Block {index+1}</SoftTypography>
+                                                <Grid item xs={12} p={1}>
+                                                    <FormGroup>
+                                                        <SoftTypography variant="body2">Video URL</SoftTypography>
+                                                        <SoftInput
+                                                            error={formik.touched.descriptionBlocks != null && formik.touched.descriptionBlocks[index] != null && formik.touched.descriptionBlocks[index].video_url != null && formik.errors.descriptionBlocks != null && formik.errors.descriptionBlocks[index] != null && Boolean(formik.errors.descriptionBlocks[index].video_url)}
+                                                            name={`descriptionBlocks[${index}].video_url`}
+                                                            id="outlined-basic"
+                                                            placeholder="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+                                                            variant="outlined"
+                                                            value={formik.values.descriptionBlocks[index].video_url}
+                                                            onChange={formik.handleChange}
+                                                            fullWidth
+                                                            multiline
+                                                            onBlur={formik.handleBlur}
+                                                        />
+                                                        {formik.touched.descriptionBlocks && formik.touched.descriptionBlocks[index] != null && formik.touched.descriptionBlocks[index].video_url && formik.errors.descriptionBlocks != null && formik.errors.descriptionBlocks[index] != null && Boolean(formik.errors.descriptionBlocks[index].video_url) && <FormHelperText error>{formik.errors.descriptionBlocks[index].video_url}</FormHelperText>}
+                                                    </FormGroup>
+                                                </Grid>
+                                                <Grid item xs={12} p={1}>
+                                                    <FormGroup>
+                                                        <SoftTypography variant="body2">Description</SoftTypography>
+                                                        <SoftInput
+                                                            error={formik.touched.descriptionBlocks != null && formik.touched.descriptionBlocks[index] != null && formik.touched.descriptionBlocks[index].description != null && formik.errors.descriptionBlocks != null && formik.errors.descriptionBlocks[index] != null && Boolean(formik.errors.descriptionBlocks[index].description)}
+                                                            name={`descriptionBlocks[${index}].description`}
+                                                            id="outlined-basic"
+                                                            placeholder="Description"
+                                                            variant="outlined"
+                                                            value={formik.values.descriptionBlocks[index].description}
+                                                            onChange={formik.handleChange}
+                                                            fullWidth
+                                                            multiline 
+                                                            minRows={5}
+                                                            onBlur={formik.handleBlur}
+                                                        />
+                                                        {formik.touched.descriptionBlocks && formik.touched.descriptionBlocks[index] != null && formik.touched.descriptionBlocks[index].description && formik.errors.descriptionBlocks != null && formik.errors.descriptionBlocks[index] != null && Boolean(formik.errors.descriptionBlocks[index].description) && <FormHelperText error>{formik.errors.descriptionBlocks[index].description}</FormHelperText>}
+                                                    </FormGroup>
+                                                </Grid>
+                                                <Grid item xs={12} p={1}>
+                                                    <FormGroup>
+                                                        <SoftTypography variant="body2">Coaching Points</SoftTypography>
+                                                        <SoftInput
+                                                            error={formik.touched.descriptionBlocks != null && formik.touched.descriptionBlocks[index] != null && formik.touched.descriptionBlocks[index].coaching_points != null && formik.errors.descriptionBlocks != null && formik.errors.descriptionBlocks[index] != null && Boolean(formik.errors.descriptionBlocks[index].coaching_points)}
+                                                            name={`descriptionBlocks[${index}].coaching_points`}
+                                                            id="outlined-basic"
+                                                            placeholder="Coaching Points"
+                                                            variant="outlined"
+                                                            value={formik.values.descriptionBlocks[index].coaching_points}
+                                                            onChange={formik.handleChange}
+                                                            fullWidth
+                                                            multiline 
+                                                            minRows={5}
+                                                            onBlur={formik.handleBlur}
+                                                        />
+                                                        {formik.touched.descriptionBlocks && formik.touched.descriptionBlocks[index] != null && formik.touched.descriptionBlocks[index].coaching_points && formik.errors.descriptionBlocks != null && formik.errors.descriptionBlocks[index] != null && Boolean(formik.errors.descriptionBlocks[index].coaching_points) && <FormHelperText error>{formik.errors.descriptionBlocks[index].coaching_points}</FormHelperText>}
+                                                    </FormGroup>
+                                                </Grid>
+                                                <Grid item xs={12} p={1}>
+                                                    <FormGroup>
+                                                        <SoftTypography variant="body2">Suggested Time (Minutes)</SoftTypography>
+                                                        <SoftInput
+                                                            type="number"
+                                                            inputProps={{ min: 0, step: "1" }}
+                                                            error={formik.touched.descriptionBlocks != null && formik.touched.descriptionBlocks[index] != null &&formik.touched.descriptionBlocks[index].time_min != null && formik.errors.descriptionBlocks != null && formik.errors.descriptionBlocks[index] != null && Boolean(formik.errors.descriptionBlocks[index].time_min)}
+                                                            name={`descriptionBlocks[${index}].time_min`}
+                                                            id="outlined-basic"
+                                                            placeholder="Minutes"
+                                                            variant="outlined"
+                                                            value={formik.values.descriptionBlocks[index].time_min}
+                                                            onChange={formik.handleChange}
+                                                            fullWidth
+                                                            onBlur={formik.handleBlur}
+                                                        />
+                                                        {formik.touched.descriptionBlocks != null && formik.touched.descriptionBlocks[index] != null && formik.touched.descriptionBlocks[index].time_min && formik.errors.descriptionBlocks != null && formik.errors.descriptionBlocks[index] != null && Boolean(formik.errors.descriptionBlocks[index].time_min) && <FormHelperText error>{formik.errors.descriptionBlocks[index].time_min}</FormHelperText>}
+                                                    </FormGroup>
+                                                </Grid>
+                                                <SoftButton  color="error" onClick={() => {
+                                                    arrayHelpers.remove(index)
+                                                }}> 
+                                                    Remove Block
+                                                </SoftButton>
+                                            </SoftBox>
+                                        )
+                                    })}
+                                    <SoftButton  color="info" onClick={() => {
+                                        arrayHelpers.push(emptyDescriptionBlock)
+                                    }}> 
+                                        Add Description Block
+                                    </SoftButton>
+                                </div>)    
+                            }}
                         />
-                        {touched.name && Boolean(errors.name) && <FormHelperText error>{errors.name}</FormHelperText>}
-                    </FormGroup>
+                    </Grid>
+                    {extraRows(formik.isValid)}
                 </Grid>
-                <Grid item xs={12}>
-                    <FormGroup>
-                        <SoftTypography variant="body2">Description</SoftTypography>
-                        <SoftInput
-                            error={touched.description && Boolean(errors.description)}
-                            name="description"
-                            required
-                            id="outlined-basic"
-                            placeholder="Description"
-                            variant="outlined"
-                            value={values.description}
-                            onChange={handleChange}
-                            fullWidth
-                            multiline 
-                            minRows={5}
-                            onBlur={handleBlur}
-                        />
-                        {touched.description && Boolean(errors.description) && <FormHelperText error>{errors.description}</FormHelperText>}
-                    </FormGroup>
-                </Grid>
-                <Grid item xs={12}>
-                    <FormGroup>
-                        <SoftTypography variant="body2">Video URL</SoftTypography>
-                        <SoftInput
-                            error={touched.videoUrl && Boolean(errors.videoUrl)}
-                            name="videoUrl"
-                            id="outlined-basic"
-                            placeholder="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
-                            variant="outlined"
-                            value={values.videoUrl}
-                            onChange={handleChange}
-                            fullWidth
-                            onBlur={handleBlur}
-                        />
-                        {touched.videoUrl && Boolean(errors.videoUrl) && <FormHelperText error>{errors.videoUrl}</FormHelperText>}
-                    </FormGroup>
-                </Grid>
-                <Grid item xs={12}>
-                    <FormGroup>
-                        <SoftTypography variant="body2">Suggested Time (Minutes)</SoftTypography>
-                        <SoftInput
-                            type="number"
-                            inputProps={{ min: 0, step: "1" }}
-                            error={touched.timeMin != null && Boolean(errors.timeMin)}
-                            name="timeMin"
-                            id="outlined-basic"
-                            placeholder="Minutes"
-                            variant="outlined"
-                            value={values.timeMin}
-                            onChange={handleChange}
-                            fullWidth
-                            onBlur={handleBlur}
-                        />
-                        {touched.timeMin && Boolean(errors.timeMin) && <FormHelperText error>{errors.timeMin}</FormHelperText>}
-                    </FormGroup>
-                </Grid>
-                <Grid item xs={12}>
-                    <FormGroup>
-                        <SoftTypography variant="body2">Person amount</SoftTypography>
-                        <SoftInput
-                            type="number"
-                            inputProps={{ min: 0, step: "1" }}
-                            error={touched.persons != null && Boolean(errors.persons)}
-                            name="persons"
-                            required
-                            id="outlined-basic"
-                            placeholder="Persons"
-                            variant="outlined"
-                            value={values.persons}
-                            onChange={handleChange}
-                            fullWidth
-                            onBlur={handleBlur}
-                        />
-                        {touched.persons != null && Boolean(errors.persons) && <FormHelperText error>{errors.persons}</FormHelperText>}
-                    </FormGroup>
-                </Grid>
-                <Grid item xs={12}>
-                    <FormGroup>
-                        <SoftTypography variant="body2">Chaser amount</SoftTypography>
-                        <SoftInput
-                            type="number"
-                            inputProps={{ min: 0, step: "1" }}
-                            error={touched.chasers != null && Boolean(errors.chasers)}
-                            name="chasers"
-                            required
-                            id="outlined-basic"
-                            placeholder="Chaser"
-                            variant="outlined"
-                            value={values.chasers}
-                            onChange={handleChange}
-                            fullWidth
-                            onBlur={handleBlur}
-                        />
-                        {touched.chasers != null && Boolean(errors.chasers) && <FormHelperText error>{errors.chasers}</FormHelperText>}
-                    </FormGroup>
-                </Grid>
-                <Grid item xs={12}>
-                    <FormGroup>
-                        <SoftTypography variant="body2">Beater amount</SoftTypography>
-                        <SoftInput
-                            type="number"
-                            inputProps={{ min: 0, step: "1" }}
-                            error={touched.beaters != null && Boolean(errors.beaters)}
-                            name="beaters"
-                            required
-                            id="outlined-basic"
-                            placeholder="Beater"
-                            variant="outlined"
-                            value={values.beaters}
-                            onChange={handleChange}
-                            fullWidth
-                            onBlur={handleBlur}
-                        />
-                        {touched.beaters != null && Boolean(errors.beaters) && <FormHelperText error>{errors.beaters}</FormHelperText>}
-                    </FormGroup>
-                </Grid>
-                <Grid item xs={12}>
-                    <FormGroup>
-                        <SoftTypography variant="body2">Material</SoftTypography>
-                        <SoftInput
-                            error={touched.materialsString != null && Boolean(errors.materialsString)}
-                            name="materialsString"
-                            id="outlined-basic"
-                            placeholder="Needed material"
-                            variant="outlined"
-                            value={values.materialsString}
-                            onChange={handleChange}
-                            fullWidth
-                            onBlur={handleBlur}
-                        />
-                        {touched.materialsString && Boolean(errors.materialsString) && <FormHelperText error>{errors.materialsString}</FormHelperText>}
-                    </FormGroup>
-                </Grid>
-                <Grid item xs={12}>
-                    <FormGroup>
-                        <SoftTypography variant="body2">Tags</SoftTypography>
-                        <SoftInput
-                            error={touched.tagsString != null && Boolean(errors.tagsString)}
-                            name="tagsString"
-                            id="outlined-basic"
-                            placeholder="Tags for easy search"
-                            variant="outlined"
-                            value={values.tagsString}
-                            onChange={handleChange}
-                            fullWidth
-                            onBlur={handleBlur}
-                        />
-                        {touched.tagsString && Boolean(errors.tagsString) && <FormHelperText error>{errors.tagsString}</FormHelperText>}
-                    </FormGroup>
-                </Grid>
-                <Grid item xs={12}>
-                    <FormGroup>
-                        <SoftTypography variant="body2">Related To:</SoftTypography>
-                        <SoftInput
-                            error={touched.relatedToString != null && Boolean(errors.relatedToString)}
-                            name="relatedToString"
-                            id="outlined-basic"
-                            placeholder="Related to"
-                            variant="outlined"
-                            value={values.relatedToString}
-                            onChange={handleChange}
-                            fullWidth
-                            onBlur={handleBlur}
-                        />
-                        {touched.relatedToString && Boolean(errors.relatedToString) && <FormHelperText error>{errors.relatedToString}</FormHelperText>}
-                    </FormGroup>
-                </Grid>
-                <Grid item xs={12}>
-                    {values.descriptionBlocks.map((_,index)=>{
-                        return(
-                            <SoftBox key={index} variant="contained" shadow="lg" opacity={1} p={1} my={2} borderRadius="lg">
-                                <SoftTypography variant="h5" fontWeight="bold" textTransform="uppercase">Block {index+1}</SoftTypography>
-                                <Grid item xs={12} p={1}>
-                                    <FormGroup>
-                                        <SoftTypography variant="body2">Video URL</SoftTypography>
-                                        <SoftInput
-                                            error={touched.descriptionBlocks != null && touched.descriptionBlocks[index].video_url != null && errors.descriptionBlocks != null && Boolean(errors.descriptionBlocks[index].video_url)}
-                                            name={`descriptionBlocks[${index}].video_url`}
-                                            id="outlined-basic"
-                                            placeholder="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
-                                            variant="outlined"
-                                            value={values.descriptionBlocks[index].video_url}
-                                            onChange={handleChange}
-                                            fullWidth
-                                            multiline
-                                            onBlur={handleBlur}
-                                        />
-                                        {touched.descriptionBlocks && touched.descriptionBlocks[index].video_url && errors.descriptionBlocks != null && Boolean(errors.descriptionBlocks[index].video_url) && <FormHelperText error>{errors.descriptionBlocks[index].video_url}</FormHelperText>}
-                                    </FormGroup>
-                                </Grid>
-                                <Grid item xs={12} p={1}>
-                                    <FormGroup>
-                                        <SoftTypography variant="body2">Description</SoftTypography>
-                                        <SoftInput
-                                            error={touched.descriptionBlocks != null && touched.descriptionBlocks[index].description != null && errors.descriptionBlocks != null && Boolean(errors.descriptionBlocks[index].description)}
-                                            name={`descriptionBlocks[${index}].description`}
-                                            id="outlined-basic"
-                                            placeholder="Description"
-                                            variant="outlined"
-                                            value={values.descriptionBlocks[index].description}
-                                            onChange={handleChange}
-                                            fullWidth
-                                            multiline 
-                                            minRows={5}
-                                            onBlur={handleBlur}
-                                        />
-                                        {touched.descriptionBlocks && touched.descriptionBlocks[index].description && errors.descriptionBlocks != null && Boolean(errors.descriptionBlocks[index].description) && <FormHelperText error>{errors.descriptionBlocks[index].description}</FormHelperText>}
-                                    </FormGroup>
-                                </Grid>
-                                <Grid item xs={12} p={1}>
-                                    <FormGroup>
-                                        <SoftTypography variant="body2">Coaching Points</SoftTypography>
-                                        <SoftInput
-                                            error={touched.descriptionBlocks != null && touched.descriptionBlocks[index].coaching_points != null && errors.descriptionBlocks != null && Boolean(errors.descriptionBlocks[index].coaching_points)}
-                                            name={`descriptionBlocks[${index}].coaching_points`}
-                                            id="outlined-basic"
-                                            placeholder="Coaching Points"
-                                            variant="outlined"
-                                            value={values.descriptionBlocks[index].coaching_points}
-                                            onChange={handleChange}
-                                            fullWidth
-                                            multiline 
-                                            minRows={5}
-                                            onBlur={handleBlur}
-                                        />
-                                        {touched.descriptionBlocks && touched.descriptionBlocks[index].coaching_points && errors.descriptionBlocks != null && Boolean(errors.descriptionBlocks[index].coaching_points) && <FormHelperText error>{errors.descriptionBlocks[index].coaching_points}</FormHelperText>}
-                                    </FormGroup>
-                                </Grid>
-                                <Grid item xs={12} p={1}>
-                                    <FormGroup>
-                                        <SoftTypography variant="body2">Suggested Time (Minutes)</SoftTypography>
-                                        <SoftInput
-                                            type="number"
-                                            inputProps={{ min: 0, step: "1" }}
-                                            error={touched.descriptionBlocks != null && touched.descriptionBlocks[index].time_min != null && errors.descriptionBlocks != null && Boolean(errors.descriptionBlocks[index].time_min)}
-                                            name={`descriptionBlocks[${index}].time_min`}
-                                            id="outlined-basic"
-                                            placeholder="Minutes"
-                                            variant="outlined"
-                                            value={values.descriptionBlocks[index].time_min}
-                                            onChange={handleChange}
-                                            fullWidth
-                                            onBlur={handleBlur}
-                                        />
-                                        {touched.descriptionBlocks && touched.descriptionBlocks[index].time_min && errors.descriptionBlocks != null && Boolean(errors.descriptionBlocks[index].time_min) && <FormHelperText error>{errors.descriptionBlocks[index].time_min}</FormHelperText>}
-                                    </FormGroup>
-                                </Grid>
-                            </SoftBox>
-                        )
-                    })}
-                    <SoftButton  color="info" onClick={(event) => {
-                        values.descriptionBlocks.push({} as descriptionBlockType)
-                    }}> 
-                        Add Description Block
-                    </SoftButton>
-                </Grid>
-                {extraRows(isValid)}
-            </Grid>
-        </form>
+            </form>
+        </FormikProvider>
     );
 }
 
