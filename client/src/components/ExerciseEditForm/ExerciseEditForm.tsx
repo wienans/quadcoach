@@ -10,6 +10,8 @@ import SoftTypography from "../SoftTypography";
 import SoftInput from "../SoftInput";
 import { SoftBox, SoftButton } from "..";
 import { Block, Exercise, ExerciseWithOutId } from "../../api/quadcoachApi/domain";
+import { useGetExercisesQuery } from "../../pages/exerciseApi";
+import ExerciseAutocomplete from "../ExerciseAutocomplete/ExerciseAutocomplete";
 
 const exerciseShape = shape({
     name: string,
@@ -371,7 +373,8 @@ const ExerciseEditForm = ({ initialValues, onSubmit, extraRows, header: Header, 
                                                                 <Dialog open={openRelatedDialog} onClose={() => { setOpenRelatedDialog(false) }}>
                                                                     <DialogTitle>Add Related Exercise</DialogTitle>
                                                                     <DialogContent>
-                                                                        <Autocomplete
+                                                                        <ExerciseAutocomplete />
+                                                                        {/* <Autocomplete
                                                                             id="related-text"
                                                                             options={exercises.map((el) => el.name)}
                                                                             renderInput={(params) =>
@@ -385,7 +388,7 @@ const ExerciseEditForm = ({ initialValues, onSubmit, extraRows, header: Header, 
                                                                                     onBlur={(e) => { setNewRelatedEx(e.target.value) }}
                                                                                 />
                                                                             }
-                                                                        />
+                                                                        /> */}
                                                                     </DialogContent>
                                                                     <DialogActions>
                                                                         <SoftButton color="error" onClick={() => { setOpenRelatedDialog(false) }}>Cancel</SoftButton>
