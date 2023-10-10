@@ -1,5 +1,5 @@
-import { Collapsible, Accordion, AccordionDetails, AccordionSummary } from "@mui/material";
-import { SoftBox, SoftButton, SoftTypography } from "../../components";
+import { Accordion, AccordionDetails, AccordionSummary } from "@mui/material";
+import { SoftBox, SoftButton, SoftTypography, Collapsible } from "../../components";
 import { Gradients, GreyColors, NormalColors } from "../../components/SoftBox/SoftBoxRoot";
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 

@@ -6,7 +6,7 @@ const quadcoachApi = createApi({
   reducerPath: "quadcoachApi",
   baseQuery: axiosBaseQuery({
     // Fill in your own server starting URL here
-    baseUrl: "http://localhost:5173",
+    baseUrl: "",
   }),
   endpoints: () => ({}),
   tagTypes: Object.values(TagType),
