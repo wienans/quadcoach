@@ -1,15 +1,16 @@
 import { Autocomplete, CircularProgress, TextField } from "@mui/material";
 import { useState } from "react";
-import { useGetExercisesQuery } from "../../pages/exerciseApi";
-import { Exercise } from "../../api/quadcoachApi/domain";
+import { useGetExercisesQuery } from "../../../pages/exerciseApi";
+import { Exercise } from "../../../api/quadcoachApi/domain";
 
 export type ExerciseAutocompleteProps = {
-    onExercisesSelectedChange: (newSelectedExercises: Exercise[]) => void;
+    selectedExercises: Exercise[];
+    onExercisesSelectedChange: (selectedExercises: Exercise[]) => void;
+    alreadyAddedExercises: Exercise[];
 }
 
-const ExerciseAutocomplete = ({ onExercisesSelectedChange }: ExerciseAutocompleteProps): JSX.Element => {
+const ExerciseAutocomplete = ({ selectedExercises, onExercisesSelectedChange, alreadyAddedExercises }: ExerciseAutocompleteProps): JSX.Element => {
     const [searchValue, setSearchValue] = useState<string>("");
-    const [selectedExercises, setSelectedExercises] = useState<Exercise[]>([])
     const { data: exercises, isLoading: isExercisesLoading, } = useGetExercisesQuery({
         nameRegex: searchValue !== "" ? searchValue : undefined,
     })
@@ -18,13 +19,13 @@ const ExerciseAutocomplete = ({ onExercisesSelectedChange }: ExerciseAutocomplet
         <Autocomplete
             id="related-text"
             multiple
-            options={exercises ?? []}
+            options={exercises?.filter(ex => !alreadyAddedExercises.some(al => al._id === ex._id)) ?? []}
             getOptionLabel={exercise => exercise.name}
             isOptionEqualToValue={(option, value) => option._id === value._id}
             inputValue={searchValue}
             onInputChange={(_event, newValue) => setSearchValue(newValue)}
             value={selectedExercises}
-            onChange={(_event, newValue) => { setSelectedExercises(newValue); onExercisesSelectedChange(newValue) }}
+            onChange={(_event, newValue) => onExercisesSelectedChange(newValue)}
             loading={isExercisesLoading}
             renderInput={(params) =>
                 <TextField

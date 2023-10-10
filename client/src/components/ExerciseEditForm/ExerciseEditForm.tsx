@@ -1,17 +1,17 @@
 import { number, shape, string, func, node, array } from "prop-types";
-import { ReactNode, useEffect, useState } from 'react';
+import { ReactNode, useState } from 'react';
 import { FieldArray, FieldArrayRenderProps, FormikProvider, useFormik } from "formik";
 import * as Yup from "yup";
 import {
     Dialog, DialogActions, DialogContent, DialogTitle,
-    Chip, FormGroup, FormHelperText, Grid, TextField, Autocomplete, Skeleton, Box
+    Chip, FormGroup, FormHelperText, Grid, TextField, Autocomplete, Skeleton
 } from "@mui/material";
 import SoftTypography from "../SoftTypography";
 import SoftInput from "../SoftInput";
 import { SoftBox, SoftButton } from "..";
-import { Block, Exercise, ExerciseWithOutId } from "../../api/quadcoachApi/domain";
-import { useGetExercisesQuery } from "../../pages/exerciseApi";
-import ExerciseAutocomplete from "../ExerciseAutocomplete/ExerciseAutocomplete";
+import { Block, Exercise, ExercisePartialId } from "../../api/quadcoachApi/domain";
+import AddRelatedExercisesDialog from "./AddRelatedExercisesDialog";
+import { uniqBy } from "lodash"
 
 const exerciseShape = shape({
     name: string,
@@ -32,9 +32,13 @@ const emptyDescriptionBlock = {
     time_min: 0
 }
 
+export interface ExerciseExtendWithRelatedExercises extends ExercisePartialId {
+    relatedToExercises?: Exercise[]
+}
+
 export type ExerciseEditFormProps = {
-    initialValues?: Exercise;
-    onSubmit: (exercise: ExerciseWithOutId) => void;
+    initialValues?: ExerciseExtendWithRelatedExercises;
+    onSubmit: (exercise: ExercisePartialId) => void;
     extraRows?: (isValid: boolean) => JSX.Element;
     header?: ReactNode;
     isLoadingInitialValues?: boolean;
@@ -55,33 +59,8 @@ const ExerciseEditForm = ({ initialValues, onSubmit, extraRows, header: Header, 
     const [openMaterialDialog, setOpenMaterialDialog] = useState<boolean>(false);
     const [newMaterial, setNewMaterial] = useState<string>("");
     const [openRelatedDialog, setOpenRelatedDialog] = useState<boolean>(false);
-    const [newRelatedEx, setNewRelatedEx] = useState<string>("");
-    const [exercises, setExercises] = useState<Exercise[]>([])
 
-    const handleAddRelatedExercise = (arrayHelpers: FieldArrayRenderProps) => {
-        if (newRelatedEx !== "") {
-            let foundEx = exercises.find((el) => {
-                return el.name == newRelatedEx
-            })
-            if (foundEx != null) {
-                arrayHelpers.push(foundEx._id)
-            } else {
-                console.log("Didn't Found Exercise")
-            }
-
-        }
-    }
-
-    useEffect(() => {
-        const getExercises = async () => {
-            const result: Exercise[] | undefined = (await (await fetch("/api/exercises")).json())
-            setExercises(result ? result : [])
-        }
-
-        getExercises()
-    }, [])
-
-    const formik = useFormik<ExerciseWithOutId>({
+    const formik = useFormik<ExerciseExtendWithRelatedExercises>({
         // enableReinitialize : use this flag when initial values needs to be changed
         enableReinitialize: true,
 
@@ -94,7 +73,7 @@ const ExerciseEditForm = ({ initialValues, onSubmit, extraRows, header: Header, 
             materials: initialValues?.materials ?? [],
             tags: initialValues?.tags ?? [],
             description_blocks: initialValues?.description_blocks ?? [],
-            related_to: initialValues?.related_to ?? [],
+            relatedToExercises: initialValues?.relatedToExercises ?? [],
         },
 
         validationSchema: Yup.object({
@@ -110,14 +89,15 @@ const ExerciseEditForm = ({ initialValues, onSubmit, extraRows, header: Header, 
                 coaching_points: Yup.string(),
                 timeMin: Yup.number(),
             })),
-            related_to: Yup.array().of(Yup.string()),
+            relatedToExercises: Yup.array().of(Yup.object()),
         }),
 
         onSubmit: (values) => {
-            const { materials, tags, name, persons, beaters, chasers, description_blocks, related_to } = values
+            const { materials, tags, name, persons, beaters, chasers, description_blocks, relatedToExercises } = values
             const calculate_persons = beaters + chasers
             const calculate_time = description_blocks.reduce((partialSum, current) => partialSum + current.time_min, 0)
-            const exercise: ExerciseWithOutId = {
+            const related_to = relatedToExercises?.map(r => r._id)
+            const exercise: ExercisePartialId = {
                 name,
                 persons: persons > calculate_persons ? persons : calculate_persons,
                 time_min: calculate_time,
@@ -131,6 +111,24 @@ const ExerciseEditForm = ({ initialValues, onSubmit, extraRows, header: Header, 
             onSubmit(exercise)
         },
     })
+
+    const handleAddRelatedExerciseConfirm = (arrayHelpers: FieldArrayRenderProps, selectedExercisesToAdd?: Exercise[]) => {
+        if (selectedExercisesToAdd?.length) {
+            const notAddedExercises = uniqBy(selectedExercisesToAdd.filter(
+                newEx => !formik.values.relatedToExercises ||
+                    !formik.values.relatedToExercises.some(
+                        rel => rel._id == newEx._id
+                    )
+            ), "_id")
+            notAddedExercises.forEach(newEx => arrayHelpers.push(newEx))
+        }
+
+        setOpenRelatedDialog(false)
+    }
+
+    const handleDeleteRelatedExercise = (arrayHelpers: FieldArrayRenderProps, index: number) => (): void => {
+        arrayHelpers.remove(index)
+    }
 
     const getDescriptionBlockFormikError = (descriptionBlockIndex: number, field: keyof Block): string | undefined => {
         if (!formik.touched?.description_blocks?.[descriptionBlockIndex] || !formik.errors.description_blocks) return;
@@ -353,48 +351,22 @@ const ExerciseEditForm = ({ initialValues, onSubmit, extraRows, header: Header, 
                                             <FormGroup>
                                                 <SoftTypography variant="body2">Related To:</SoftTypography>
                                                 <FieldArray
-                                                    name="related_to"
+                                                    name="relatedToExercises"
                                                     render={(arrayHelpers) => {
                                                         return (
                                                             <div>
-                                                                {formik.values.related_to?.map((el, index) => {
-                                                                    let foundEx = exercises.find((ex) => {
-                                                                        return ex._id == el
-                                                                    })
-                                                                    if (foundEx != null) {
-                                                                        return <Chip size="small" key={el + index} label={foundEx.name} sx={{ margin: "2px" }} variant={"outlined"} onDelete={() => {
-                                                                            arrayHelpers.remove(index)
-                                                                        }} />;
-                                                                    }
-                                                                }
-
-                                                                )}
-                                                                <Chip size="small" label="+" sx={{ margin: "2px" }} color="info" onClick={() => { setOpenRelatedDialog(true); setNewRelatedEx("") }} />
-                                                                <Dialog open={openRelatedDialog} onClose={() => { setOpenRelatedDialog(false) }}>
-                                                                    <DialogTitle>Add Related Exercise</DialogTitle>
-                                                                    <DialogContent>
-                                                                        <ExerciseAutocomplete />
-                                                                        {/* <Autocomplete
-                                                                            id="related-text"
-                                                                            options={exercises.map((el) => el.name)}
-                                                                            renderInput={(params) =>
-                                                                                <TextField
-                                                                                    {...params}
-                                                                                    autoFocus
-                                                                                    id="name"
-                                                                                    fullWidth
-                                                                                    value={newRelatedEx}
-                                                                                    onChange={(e) => { setNewRelatedEx(e.target.value) }}
-                                                                                    onBlur={(e) => { setNewRelatedEx(e.target.value) }}
-                                                                                />
-                                                                            }
-                                                                        /> */}
-                                                                    </DialogContent>
-                                                                    <DialogActions>
-                                                                        <SoftButton color="error" onClick={() => { setOpenRelatedDialog(false) }}>Cancel</SoftButton>
-                                                                        <SoftButton color="success" onClick={() => { handleAddRelatedExercise(arrayHelpers); setOpenRelatedDialog(false) }}>Add</SoftButton>
-                                                                    </DialogActions>
-                                                                </Dialog>
+                                                                {formik.values.relatedToExercises?.map((ex, index) => (
+                                                                    <Chip size="small" key={ex._id} label={ex.name} sx={{ margin: "2px" }} variant={"outlined"} onDelete={handleDeleteRelatedExercise(arrayHelpers, index)} />
+                                                                ))}
+                                                                <Chip size="small" label="+" sx={{ margin: "2px" }} color="info" onClick={() => setOpenRelatedDialog(true)} />
+                                                                <AddRelatedExercisesDialog
+                                                                    isOpen={openRelatedDialog}
+                                                                    onConfirm={(selectedExercises) => handleAddRelatedExerciseConfirm(arrayHelpers, selectedExercises)}
+                                                                    alreadyAddedExercises={[
+                                                                        ...(formik.values.relatedToExercises ? formik.values.relatedToExercises : []),
+                                                                        ...(initialValues?._id != null ? [initialValues as Exercise] : [])
+                                                                    ]}
+                                                                />
                                                             </div>
                                                         )
                                                     }}

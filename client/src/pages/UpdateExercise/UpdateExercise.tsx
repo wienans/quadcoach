@@ -5,7 +5,8 @@ import { SoftButton, SoftTypography } from "../../components";
 import { useUpdateBreadcrumbs } from "../../components/Layout/hooks";
 import ExerciseEditForm from "../../components/ExerciseEditForm";
 import { ExerciseWithOutId } from "../../api/quadcoachApi/domain";
-import { useDeleteExerciseMutation, useGetExerciseQuery, useUpdateExerciseMutation } from "../exerciseApi";
+import { useDeleteExerciseMutation, useGetExerciseQuery, useGetRelatedExercisesQuery, useUpdateExerciseMutation } from "../exerciseApi";
+import { ExerciseExtendWithRelatedExercises } from "../../components/ExerciseEditForm/ExerciseEditForm";
 
 const defaultEBreadcrumbRoutes = [{ title: "Exercises", to: "exercises" }]
 
@@ -21,6 +22,9 @@ const UpdateExercise = () => {
     )
 
     const { data: exercise, isError: isExerciseError, isLoading: isExerciseLoading } = useGetExerciseQuery(exerciseId || "", {
+        skip: exerciseId == null
+    })
+    const { data: relatedToExercises, isError: isRelatedToExercisesError, isLoading: isRelatedToExercisesLoading } = useGetRelatedExercisesQuery(exerciseId || "", {
         skip: exerciseId == null
     })
 
@@ -58,6 +62,13 @@ const UpdateExercise = () => {
         })
     }
 
+    const combinedExercise: ExerciseExtendWithRelatedExercises | undefined = exercise
+        ? {
+            ...exercise,
+            relatedToExercises: relatedToExercises
+        }
+        : undefined
+
     return (
         <ExerciseEditForm
             extraRows={(isValid) => (
@@ -70,6 +81,9 @@ const UpdateExercise = () => {
                     </Grid>}
                     {isDeleteExerciseError && <Grid item xs={12} justifyContent="center" display="flex">
                         <Alert color="error">Some error occurred while deleting exercise</Alert>
+                    </Grid>}
+                    {isRelatedToExercisesError && <Grid item xs={12} justifyContent="center" display="flex">
+                        <Alert color="error">Some error occurred while loading realted exercises</Alert>
                     </Grid>}
                     <Grid item xs={12} justifyContent="center" display="flex">
                         <SoftButton
@@ -91,9 +105,9 @@ const UpdateExercise = () => {
                     </Grid>
                 </>)}
             header={<SoftTypography variant="h3">Update Exercise</SoftTypography>}
-            initialValues={exercise}
+            initialValues={combinedExercise}
             onSubmit={onSubmit}
-            isLoadingInitialValues={isExerciseLoading}
+            isLoadingInitialValues={isExerciseLoading || isRelatedToExercisesLoading}
         />
     )
 }
