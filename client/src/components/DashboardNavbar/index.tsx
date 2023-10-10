@@ -15,9 +15,6 @@ Coded by www.creative-tim.com
 
 import { useState, useEffect } from "react";
 
-// react-router components
-import { useLocation, Link } from "react-router-dom";
-
 // prop-types is a library for typechecking of props.
 import PropTypes from "prop-types";
 
@@ -29,7 +26,7 @@ import Menu from "@mui/material/Menu";
 import Icon from "@mui/material/Icon";
 
 // Soft UI Dashboard React components
-import { SoftBox, SoftTypography, SoftInput, Breadcrumbs, NotificationItem } from ".."
+import { SoftBox, SoftInput, Breadcrumbs, NotificationItem } from ".."
 
 // import { useAuth } from "../../../auth-context/auth.context";
 
@@ -39,7 +36,6 @@ import {
     navbarContainer,
     navbarRow,
     navbarIconButton,
-    navbarMobileMenu,
 } from "./styles";
 
 // Images
@@ -73,12 +69,18 @@ const dashboardNavbarSelector = createSelector(
     })
 )
 
-function DashboardNavbar({ absolute, light, isMini }) {
+export type DashboardNavbarProps = {
+    absolute: boolean;
+    light: boolean;
+    isMini: boolean;
+}
+
+const DashboardNavbar = ({ absolute, light, isMini }: DashboardNavbarProps) => {
     const dispatch = useAppDispatch();
-    const [navbarType, setNavbarType] = useState();
+    const [navbarType, setNavbarType] = useState<'fixed' | 'absolute' | 'sticky' | 'static' | 'relative' | undefined>();
     const { miniSidenav, transparentNavbar, fixedNavbar, openSettingsMenu, breadcrumbs } = useAppSelector(dashboardNavbarSelector)
 
-    const [openMenu, setOpenMenu] = useState(false);
+    const [openMenu, setOpenMenu] = useState<HTMLButtonElement | undefined>();
 
     useEffect(() => {
         // Setting the navbar type
@@ -108,14 +110,14 @@ function DashboardNavbar({ absolute, light, isMini }) {
 
     const handleMiniSidenav = () => { dispatch(setMiniSideNav(!miniSidenav)) }
     const handleConfiguratorOpen = () => { dispatch(setOpenSettingsMenu(!openSettingsMenu)) }
-    const handleOpenMenu = (event) => setOpenMenu(event.currentTarget);
-    const handleCloseMenu = () => setOpenMenu(false);
+    // const handleOpenMenu = (event: MouseEvent<HTMLButtonElement>) => setOpenMenu(event.currentTarget);
+    const handleCloseMenu = () => setOpenMenu(undefined);
 
     // Render the notifications menu
     const renderMenu = () => (
         <Menu
             anchorEl={openMenu}
-            anchorReference={null}
+            anchorReference={undefined}
             anchorOrigin={{
                 vertical: "bottom",
                 horizontal: "left",
@@ -196,7 +198,6 @@ function DashboardNavbar({ absolute, light, isMini }) {
                                 sx={navbarIconButton}
                                 aria-controls="notification-menu"
                                 aria-haspopup="true"
-                                variant="contained"
                                 onClick={handleOpenMenu}
                             >
                                 <Icon className={light ? "text-white" : "text-dark"}>notifications</Icon>

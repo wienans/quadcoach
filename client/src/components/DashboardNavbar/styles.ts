@@ -1,3 +1,5 @@
+import { Theme } from "@mui/material/styles";
+
 /**
 =========================================================
 * Soft UI Dashboard React - v4.0.0
@@ -12,7 +14,14 @@ Coded by www.creative-tim.com
 
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 */
-function navbar (theme, ownerState) {
+
+export type OwnerState = {
+    transparentNavbar: boolean;
+    absolute: boolean;
+    light: boolean;
+}
+
+function navbar(theme: Theme, ownerState: OwnerState) {
     const { palette, boxShadows, functions, transitions, breakpoints, borders } = theme;
     const { transparentNavbar, absolute, light } = ownerState;
 
@@ -70,7 +79,7 @@ function navbar (theme, ownerState) {
     };
 }
 
-const navbarContainer = ({ breakpoints }) => ({
+const navbarContainer = ({ breakpoints }: Theme) => ({
     flexDirection: "column",
     alignItems: "flex-start",
     justifyContent: "space-between",
@@ -85,7 +94,11 @@ const navbarContainer = ({ breakpoints }) => ({
     },
 });
 
-const navbarRow = ({ breakpoints }, { isMini }) => ({
+export type NavbarRowProps = {
+    isMini: boolean;
+}
+
+const navbarRow = ({ breakpoints }: Theme, { isMini }: NavbarRowProps) => ({
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
@@ -102,7 +115,7 @@ const navbarRow = ({ breakpoints }, { isMini }) => ({
     },
 });
 
-const navbarIconButton = ({ typography: { size }, breakpoints }) => ({
+const navbarIconButton = ({ typography: { size }, breakpoints }: Theme) => ({
     px: 0.75,
 
     "& .material-icons, .material-icons-round": {
@@ -120,7 +133,7 @@ const navbarIconButton = ({ typography: { size }, breakpoints }) => ({
     },
 });
 
-const navbarMobileMenu = ({ breakpoints }) => ({
+const navbarMobileMenu = ({ breakpoints }: Theme) => ({
     display: "inline-block",
     lineHeight: 0,
 

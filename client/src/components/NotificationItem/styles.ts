@@ -1,4 +1,7 @@
-function menuItem (theme) {
+import { Theme } from "@mui/material/styles";
+import { PaletteGradients } from "../../assets/theme/base/paletteTypes";
+
+function menuItem(theme: Theme) {
     const { palette, borders, transitions } = theme;
 
     const { secondary, light } = palette;
@@ -27,7 +30,11 @@ function menuItem (theme) {
     };
 }
 
-function menuImage (theme, ownerState) {
+export type MenuImageOwnerState = {
+    color?: keyof PaletteGradients
+}
+
+function menuImage(theme: Theme, ownerState: MenuImageOwnerState) {
     const { functions, palette, borders } = theme;
     const { color } = ownerState;
 
@@ -38,7 +45,7 @@ function menuImage (theme, ownerState) {
     return {
         display: "grid",
         placeItems: "center",
-        backgroundImage: gradients[color]
+        backgroundImage: color && gradients[color]
             ? linearGradient(gradients[color].main, gradients[color].state)
             : linearGradient(gradients.dark.main, gradients.dark.state),
 
