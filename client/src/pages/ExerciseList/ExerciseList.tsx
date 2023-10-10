@@ -1,58 +1,83 @@
-import React, { useEffect, useState } from "react";
-import Box from '@mui/material/Box';
-import { DataGrid } from '@mui/x-data-grid';
-import { Container, Grid, Typography } from "@mui/material";
+import { ChangeEvent, useEffect, useMemo, useState } from "react";
+import { DataGrid, GridCallbackDetails, GridColDef, GridEventLookup, MuiBaseEvent } from '@mui/x-data-grid';
+import { Alert, Grid, LinearProgress, } from "@mui/material";
 import { useLocation, useNavigate } from "react-router-dom"
-import TextField from '@mui/material/TextField'
-import Stack from '@mui/material/Stack';
 import { useUpdateBreadcrumbs } from "../../components/Layout/hooks";
 import { SoftTypography, SoftInput, SoftButton } from "../../components";
 import { Collapsible } from "../../components";
 import { Chip } from "@mui/material"
+import { useLazyGetExercisesQuery } from "../exerciseApi";
+import { Exercise } from "../../api/quadcoachApi/domain";
+
+type ExerciseFilter = {
+    searchValue: string;
+    minPersons: number;
+    maxPersons: number;
+    tagString: string;
+}
+
+const defaultExerciseFilter: ExerciseFilter = {
+    maxPersons: 999,
+    minPersons: 0,
+    searchValue: "",
+    tagString: "",
+};
+
 const ExerciseList = () => {
     const location = useLocation().pathname;
-    const isDashboard = location === "/"
-    const [exercises, setExercises] = useState([])
-    const [exerciseSearchValue, setExerciseSearchValue] = useState("")
-    const [filterMinPersons, setFilterMinPersons] = useState(0)
-    const [filterMaxPersons, setFilterMaxPersons] = useState(999)
-    const [filterTagString, setFilterTagString] = useState("")
-
-    useUpdateBreadcrumbs(isDashboard ? "Dashboard" : "Exercises", [])
-    
-    const getExercises = async (searchString) => {
-
-        let searchPath = ""
-        if(filterTagString ==""){
-            searchPath = `/api/exercises?name[regex]=${searchString}&name[options]=i&persons[gte]=${filterMinPersons}&persons[lte]=${filterMaxPersons}`
-        }else{
-            searchPath = `/api/exercises?name[regex]=${searchString}&name[options]=i&persons[gte]=${filterMinPersons}&persons[lte]=${filterMaxPersons}&tags[regex]=${filterTagString}`
-        }
-        let result = await fetch(searchPath)
-        result = await result.json()
-
-        setExercises(result ? result : [])
-    }
-
-    useEffect(() => {
-        
-
-        getExercises(exerciseSearchValue)
-    }, [exerciseSearchValue])
     const navigate = useNavigate()
 
-    const handleApplyFilterClick = () =>{
-        getExercises(exerciseSearchValue)
+    const isDashboard = location === "/"
+
+    const [exerciseFilter, setExerciseFilter] = useState<ExerciseFilter>(defaultExerciseFilter)
+
+    const onExerciseFilterValueChange = (exerciseFilterProperty: keyof ExerciseFilter) => (event: ChangeEvent<HTMLInputElement>) => {
+        setExerciseFilter({
+            ...exerciseFilter,
+            [exerciseFilterProperty]: event.target.value
+        })
+    }
+
+    useUpdateBreadcrumbs(isDashboard ? "Dashboard" : "Exercises", [])
+
+    const [getExercises, { data: exercises, isError: isExercisesError, isLoading: isExercisesLoading }] = useLazyGetExercisesQuery()
+
+    useEffect(() => {
+        getExercises({
+            maxPersons: defaultExerciseFilter.maxPersons,
+            minPersons: defaultExerciseFilter.minPersons,
+            nameRegex: defaultExerciseFilter.searchValue,
+            tagString: defaultExerciseFilter.tagString,
+        });
+    }, [])
+
+    useEffect(() => {
+        getExercises({
+            maxPersons: exerciseFilter.maxPersons,
+            minPersons: exerciseFilter.minPersons,
+            nameRegex: exerciseFilter.searchValue,
+            tagString: exerciseFilter.tagString,
+        });
+    }, [exerciseFilter.searchValue])
+
+    const handleApplyFilterClick = () => {
+        getExercises({
+            maxPersons: exerciseFilter.maxPersons,
+            minPersons: exerciseFilter.minPersons,
+            nameRegex: exerciseFilter.searchValue,
+            tagString: exerciseFilter.tagString,
+        });
     }
 
     const handleRowClick = (
-        params, // GridRowParams
-        event, // MuiEvent<React.MouseEvent<HTMLElement>>
-        details, // GridCallbackDetails
+        params: GridEventLookup["rowClick"]["params"], // GridRowParams
+        _event: MuiBaseEvent, // MuiEvent<React.MouseEvent<HTMLElement>>
+        _details: GridCallbackDetails, // GridCallbackDetails
     ) => {
         navigate(`/exercises/${params.id}`)
     };
-    const columns2 = [
+
+    const columns2: GridColDef<Exercise>[] = useMemo(() => [
         {
             field: 'name',
             headerName: 'Name',
@@ -73,16 +98,15 @@ const ExerciseList = () => {
             editable: false,
             flex: 3,
             renderCell: (params) => {
-                if(params.value.length >0 && params.value[0] != ""){
-                    return(
-                        params.value.map((el) => 
-                            {return <Chip key={el} label={el} sx={{margin: "1px"}} variant={"outlined"} />;}
+                if (params.value.length > 0 && params.value[0] != "") {
+                    return (
+                        params.value.map((el: string) => <Chip key={el} label={el} sx={{ margin: "1px" }} variant={"outlined"} />
                         )
                     )
-                }            
-              }
+                }
+            }
         },
-    ];
+    ], []);
 
     return (
         <Grid container spacing={2}>
@@ -94,15 +118,15 @@ const ExerciseList = () => {
                     id="outlined-basic"
                     placeholder="Search Exercise"
                     variant="outlined"
-                    value={exerciseSearchValue}
-                    onChange={(event) => setExerciseSearchValue(event.target.value)}
+                    value={exerciseFilter.searchValue}
+                    onChange={onExerciseFilterValueChange("searchValue")}
                     fullWidth
                 />
             </Grid>
             <Grid item xs={12}>
                 <Collapsible label="Filter">
                     <Grid container spacing={2}>
-                        <Grid item xs = {6} >
+                        <Grid item xs={6} >
                             <SoftTypography variant="body2">Persons</SoftTypography>
                             <SoftInput
                                 type="number"
@@ -110,8 +134,8 @@ const ExerciseList = () => {
                                 id="outlined-basic"
                                 placeholder="min"
                                 variant="outlined"
-                                value={filterMinPersons}
-                                onChange={(event) => setFilterMinPersons(event.target.value)}
+                                value={exerciseFilter.minPersons}
+                                onChange={onExerciseFilterValueChange("minPersons")}
 
                             />
                             <SoftInput
@@ -120,22 +144,22 @@ const ExerciseList = () => {
                                 id="outlined-basic"
                                 placeholder="max"
                                 variant="outlined"
-                                value={filterMaxPersons}
-                                onChange={(event) => setFilterMaxPersons(event.target.value)}
+                                value={exerciseFilter.maxPersons}
+                                onChange={onExerciseFilterValueChange("maxPersons")}
                             />
 
                         </Grid>
-                        <Grid item xs = {6} >
+                        <Grid item xs={6} >
                             <SoftTypography variant="body2">Tags</SoftTypography>
                             <SoftInput
                                 id="outlined-basic"
                                 placeholder="search Tag"
                                 variant="outlined"
-                                value={filterTagString}
-                                onChange={(event) => setFilterTagString(event.target.value)}
+                                value={exerciseFilter.tagString}
+                                onChange={onExerciseFilterValueChange("tagString")}
                             />
                         </Grid>
-                        <Grid item xs = {6} >
+                        <Grid item xs={6} >
                             <SoftButton
                                 onClick={handleApplyFilterClick}
                                 color="primary"
@@ -147,11 +171,22 @@ const ExerciseList = () => {
                     </Grid>
                 </Collapsible>
             </Grid>
-            <Grid item xs={12} sx={{ height: "400px" }}>
-                <DataGrid getRowId={(row) => row._id}
-                    rows={exercises}
+            {
+                isExercisesError && <Grid item xs={12}>
+                    <Alert color="error">
+                        An error occurred while loading exercises
+                    </Alert>
+                </Grid>
+            }
+            <Grid item xs={12} sx={{ height: "400px", width: "100%" }}>
+                <DataGrid
+                    slots={{
+                        loadingOverlay: LinearProgress
+                    }}
+                    loading={isExercisesLoading}
+                    getRowId={(row) => row._id}
+                    rows={exercises || []}
                     columns={columns2}
-                    key={"grid"}
                     initialState={{
                         pagination: {
                             paginationModel: {

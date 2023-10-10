@@ -1,29 +1,18 @@
-import React from "react";
 import { useParams, useNavigate } from "react-router-dom"
 import { useState, useEffect } from "react";
-import { Grid, } from "@mui/material";
+import { Alert, Grid, } from "@mui/material";
 import { SoftButton, SoftTypography } from "../../components";
 import { useUpdateBreadcrumbs } from "../../components/Layout/hooks";
 import ExerciseEditForm from "../../components/ExerciseEditForm";
+import { ExerciseWithOutId } from "../../api/quadcoachApi/domain";
+import { useDeleteExerciseMutation, useGetExerciseQuery, useUpdateExerciseMutation } from "../exerciseApi";
 
 const defaultEBreadcrumbRoutes = [{ title: "Exercises", to: "exercises" }]
 
 const UpdateExercise = () => {
-    const [exercise, setExercise] = useState({
-        id: null,
-        name: "",
-        description: "",
-        videoUrl: "",
-        timeMin: 0,
-        persons: 0,
-        beaters: 0,
-        chasers: 0,
-        materials: [],
-        tags: [],
-        descriptionBlocks: [],
-        relatedTo:[],
-        creator: "",
-    })
+    const { id: exerciseId } = useParams()
+    const navigate = useNavigate()
+
     const [breadcrumbRoutes, setBreadcrumbRoutes] = useState([...defaultEBreadcrumbRoutes])
 
     useUpdateBreadcrumbs(
@@ -31,104 +20,80 @@ const UpdateExercise = () => {
         breadcrumbRoutes
     )
 
-    const params = useParams()
-
-    const navigate = useNavigate()
-
-    useEffect(() => {
-        const getExerciseDetails = async () => {
-            let result = await fetch(`/api/exercise/${params.id}`)
-            result = await result.json()
-
-            setExercise({
-                id: result._id,
-                name: result.name,
-                description: result.description,
-                videoUrl: result.video_url,
-                timeMin: result.time_min,
-                persons: result.persons,
-                beaters: result.beaters,
-                chasers: result.chasers,
-                materials: result.materials,
-                tags: result.tags,
-                descriptionBlocks: result.description_blocks,
-                relatedTo: result.related_to,
-                creator: result.creator,
-            })
-        }
-
-        getExerciseDetails()
-    }, [])
+    const { data: exercise, isError: isExerciseError, isLoading: isExerciseLoading } = useGetExerciseQuery(exerciseId || "", {
+        skip: exerciseId == null
+    })
 
     useEffect(() => {
         const routes = [...defaultEBreadcrumbRoutes]
         if (exercise) {
-            routes.push({ title: exercise.name, to: `exercises/${exercise.id}` })
+            routes.push({ title: exercise.name, to: `exercises/${exercise._id}` })
         }
 
         setBreadcrumbRoutes(routes)
     }, [exercise])
 
-    const update = async (exercise) => {
+    const [updateExercise, { isError: isUpdateExerciseError, isLoading: isUpdateExerciseLoading, isSuccess: isUpdateExerciseSuccess }] = useUpdateExerciseMutation();
+    useEffect(() => {
+        if (!isUpdateExerciseSuccess || !exercise) return;
+        navigate(`/exercises/${exercise._id}`)
+    }, [isUpdateExerciseSuccess])
 
-        const dataStringyfied = JSON.stringify(exercise)
-
-        let result = await fetch(`/api/exercise/${params.id}`, {
-            method: "put",
-            body: dataStringyfied,
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        })
-        result = await result.json()
-
-        if (result) {
-            navigate(`/exercises/${params.id}`)
-        }
-
+    const [deleteExercise, { isError: isDeleteExerciseError, isLoading: isDeleteExerciseLoading, isSuccess: isDeleteExerciseSuccess }] = useDeleteExerciseMutation();
+    const onDeleteExerciseClick = () => {
+        if (!exercise) return;
+        deleteExercise(exercise._id);
     }
+    useEffect(() => {
+        if (!isDeleteExerciseSuccess) return;
+        navigate("/")
+    }, [isDeleteExerciseSuccess])
 
-    const deleteExercise = async () => {
-        let result = await fetch(`/api/exercise/${params.id}`, {
-            method: "delete",
-            headers: {
-                'Content-Type': 'application/json'
-            }
+    const onSubmit = (updatedExercise: ExerciseWithOutId) => {
+        if (!exercise) return;
+
+        updateExercise({
+            _id: exercise._id,
+            ...updatedExercise,
         })
-        result = await result.json()
-        if (result) {
-            navigate("/")
-        }
-    }
-
-    const onSubmit = (exercise) => {
-        update(exercise)
     }
 
     return (
         <ExerciseEditForm
-            extraRows={(isValid) => (<Grid item xs={12} justifyContent="center" display="flex">
-                <SoftButton
-                    color="primary"
-                    sx={{ marginRight: 1 }}
-                    type="submit"
-                    disabled={!isValid}
-                >
-                    Update Exercise
-                </SoftButton>
-                <SoftButton
-                    onClick={deleteExercise}
-                    color="error"
-                    type="button"
-                >
-                    Delete Exercise
-                </SoftButton>
-            </Grid>)}
+            extraRows={(isValid) => (
+                <>
+                    {isUpdateExerciseError && <Grid item xs={12} justifyContent="center" display="flex">
+                        <Alert color="error">Some error occurred while updating exercise</Alert>
+                    </Grid>}
+                    {isExerciseError && <Grid item xs={12} justifyContent="center" display="flex">
+                        <Alert color="error">Some error occurred while loading exercise</Alert>
+                    </Grid>}
+                    {isDeleteExerciseError && <Grid item xs={12} justifyContent="center" display="flex">
+                        <Alert color="error">Some error occurred while deleting exercise</Alert>
+                    </Grid>}
+                    <Grid item xs={12} justifyContent="center" display="flex">
+                        <SoftButton
+                            color="primary"
+                            sx={{ marginRight: 1 }}
+                            type="submit"
+                            disabled={!isValid || isUpdateExerciseLoading || isExerciseLoading}
+                        >
+                            Update Exercise
+                        </SoftButton>
+                        <SoftButton
+                            onClick={onDeleteExerciseClick}
+                            color="error"
+                            type="button"
+                            disabled={isDeleteExerciseLoading}
+                        >
+                            Delete Exercise
+                        </SoftButton>
+                    </Grid>
+                </>)}
             header={<SoftTypography variant="h3">Update Exercise</SoftTypography>}
-            initialValues={{
-                ...exercise
-            }}
+            initialValues={exercise}
             onSubmit={onSubmit}
+            isLoadingInitialValues={isExerciseLoading}
         />
     )
 }
