@@ -83,20 +83,20 @@ const ExerciseList = () => {
             headerName: 'Name',
             editable: false,
             hideable: false,
-            // flex: 2,
+            flex: 2,
         },
         {
             field: 'persons',
             headerName: 'Persons',
             type: 'number',
             editable: false,
-            // flex: 1,
+            flex: 1,
         },
         {
             field: 'tags',
             headerName: 'Tags',
             editable: false,
-            // flex: 3,
+            flex: 3,
             renderCell: (params) => {
                 if (params.value.length > 0 && params.value[0] != "") {
                     return (
