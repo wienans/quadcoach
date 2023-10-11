@@ -1,3 +1,4 @@
+import { PartialBy } from "../../../helpers/typeHelpers";
 import Block from "./Block";
 
 type Exercise = {
@@ -17,3 +18,4 @@ type Exercise = {
 
 export default Exercise;
 export type ExerciseWithOutId = Omit<Exercise, "_id">;
+export type ExercisePartialId = PartialBy<Exercise, "_id">;
