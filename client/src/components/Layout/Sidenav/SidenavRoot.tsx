@@ -17,12 +17,18 @@ Coded by www.creative-tim.com
 import Drawer from "@mui/material/Drawer";
 import { styled } from "@mui/material/styles";
 
-export default styled(Drawer)(({ theme, ownerState }) => {
-  const { palette, boxShadows, transitions, breakpoints, functions } = theme;
-  const { transparentSidenav, miniSidenav } = ownerState;
+export type SidenavRootOwnerState = {
+  miniSidenav: boolean
+}
 
-  const sidebarWidth = 250;
-  const { white, transparent } = palette;
+export type SidenavRootProps = {
+  ownerState: SidenavRootOwnerState
+}
+
+export default styled(Drawer)<SidenavRootProps>(({ theme, ownerState }) => {
+  const { boxShadows, transitions, functions } = theme;
+  const { miniSidenav } = ownerState;
+
   const { xxl } = boxShadows;
   const { pxToRem } = functions;
 

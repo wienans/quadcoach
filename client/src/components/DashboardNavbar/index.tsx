@@ -35,7 +35,6 @@ import {
     navbar,
     navbarContainer,
     navbarRow,
-    navbarIconButton,
 } from "./styles";
 
 // Images
@@ -44,7 +43,7 @@ import logoSpotify from "../../assets/images/small-logos/logo-spotify.svg";
 
 // import AuthApi from "../../../api/auth";
 import { createSelector } from "@reduxjs/toolkit";
-import { setMiniSideNav, setOpenSettingsMenu, setTransparentNavbar } from "../Layout/layoutSlice";
+import { setMiniSideNav, setTransparentNavbar } from "../Layout/layoutSlice";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { RootState } from "../../store/store";
 
@@ -78,7 +77,7 @@ export type DashboardNavbarProps = {
 const DashboardNavbar = ({ absolute, light, isMini }: DashboardNavbarProps) => {
     const dispatch = useAppDispatch();
     const [navbarType, setNavbarType] = useState<'fixed' | 'absolute' | 'sticky' | 'static' | 'relative' | undefined>();
-    const { miniSidenav, transparentNavbar, fixedNavbar, openSettingsMenu, breadcrumbs } = useAppSelector(dashboardNavbarSelector)
+    const { miniSidenav, transparentNavbar, fixedNavbar, breadcrumbs } = useAppSelector(dashboardNavbarSelector)
 
     const [openMenu, setOpenMenu] = useState<HTMLButtonElement | undefined>();
 
@@ -109,7 +108,7 @@ const DashboardNavbar = ({ absolute, light, isMini }: DashboardNavbarProps) => {
     }, [dispatch, fixedNavbar]);
 
     const handleMiniSidenav = () => { dispatch(setMiniSideNav(!miniSidenav)) }
-    const handleConfiguratorOpen = () => { dispatch(setOpenSettingsMenu(!openSettingsMenu)) }
+    // const handleConfiguratorOpen = () => { dispatch(setOpenSettingsMenu(!openSettingsMenu)) }
     // const handleOpenMenu = (event: MouseEvent<HTMLButtonElement>) => setOpenMenu(event.currentTarget);
     const handleCloseMenu = () => setOpenMenu(undefined);
 

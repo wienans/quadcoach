@@ -1,4 +1,4 @@
-import Sidenav from "./Sidenav"
+import Sidenav, { SidebarNavRoute } from "./Sidenav"
 import brand from "../../assets/images/logo-ct.png";
 import { Outlet } from 'react-router-dom'
 
@@ -11,13 +11,13 @@ import SettingsMenu from "../SettingsMenu";
 import { Box } from "@mui/material";
 import GitHubIcon from '@mui/icons-material/GitHub';
 
-const sidebarNavRoutes = [
+const sidebarNavRoutes: SidebarNavRoute[] = [
     {
         type: "collapse",
         name: "Home",
         key: "home",
         route: "/",
-        icon: <HomeIcon size="12px" />,
+        icon: <HomeIcon />,
         noCollapse: true,
         protected: true,
         regExp: new RegExp("\\/$"),
@@ -27,7 +27,7 @@ const sidebarNavRoutes = [
         name: "Exercises",
         key: "exercises",
         route: "/exercises",
-        icon: <ListIcon size="12px" />,
+        icon: <ListIcon />,
         noCollapse: true,
         protected: true,
         regExp: new RegExp("\\/exercises$"),
@@ -37,7 +37,7 @@ const sidebarNavRoutes = [
         name: "Add Exercise",
         key: "addExercise",
         route: "/exercises/add",
-        icon: <PlaylistAddIcon size="12px" />,
+        icon: <PlaylistAddIcon />,
         noCollapse: true,
         protected: true,
         regExp: new RegExp("\\/exercises\\/add$"),
@@ -51,7 +51,7 @@ const sidebarNavRoutes = [
         name: "GitHub Repository",
         key: "githubRepo",
         href: "https://github.com/wienans/quadcoach",
-        icon:<GitHubIcon />,
+        icon: <GitHubIcon />,
     },
 ]
 
@@ -67,7 +67,7 @@ const Layout = () => {
             <DashboardLayout>
                 <DashboardNavbar />
                 <SettingsMenu />
-                <Box sx={{paddingLeft:5,paddingRight:5}}>
+                <Box sx={{ paddingLeft: 5, paddingRight: 5 }}>
                     <Outlet />
                 </Box>
             </DashboardLayout>

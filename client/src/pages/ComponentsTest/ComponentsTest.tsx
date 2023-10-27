@@ -1,6 +1,6 @@
 import { Accordion, AccordionDetails, AccordionSummary } from "@mui/material";
 import { SoftBox, SoftButton, SoftTypography, Collapsible } from "../../components";
-import { Gradients, GreyColors, NormalColors } from "../../components/SoftBox/SoftBoxRoot";
+import { GreyColors, } from "../../components/SoftBox/SoftBoxRoot";
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 const ComponentsTest = (): JSX.Element => {
@@ -32,7 +32,7 @@ const ComponentsTest = (): JSX.Element => {
                     </SoftBox>
                     <SoftBox
                         color="black"
-                        bgColor={Gradients.error}
+                        bgColor="error"
                         variant="gradient"
                         borderRadius="lg"
                         shadow="lg"
@@ -68,7 +68,7 @@ const ComponentsTest = (): JSX.Element => {
                     </SoftBox>
                     <SoftBox
                         color="white"
-                        bgColor={NormalColors.black}
+                        bgColor="black"
                         variant="contained"
                         borderRadius="lg"
                         shadow="lg"

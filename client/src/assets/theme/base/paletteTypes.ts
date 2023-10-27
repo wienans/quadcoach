@@ -1,3 +1,5 @@
+import { PaletteColor } from "@mui/material";
+
 export type PaletteGradient = {
     main: string;
     state: string;
@@ -97,6 +99,10 @@ export type PaletteTabsIndicator = {
 
 export type PaletteTabs = {
     indicator: PaletteTabsIndicator;
+}
+
+export function isPaletteColor<T>(type: PaletteColor | T): type is PaletteColor {
+    return type != null && (type as PaletteColor)?.main != null
 }
 
 declare module '@mui/material/styles/createPalette' {

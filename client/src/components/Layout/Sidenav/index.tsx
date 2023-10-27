@@ -13,7 +13,7 @@ Coded by www.creative-tim.com
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 */
 
-import { useEffect, useState } from "react";
+import { ReactNode } from "react";
 
 // react-router-dom components
 import { useLocation, NavLink } from "react-router-dom";
@@ -28,11 +28,10 @@ import Link from "@mui/material/Link";
 import Icon from "@mui/material/Icon";
 
 // Soft UI Dashboard React components
-import { SoftTypography, SoftBox, SoftButton } from "../..";
+import { SoftTypography, SoftBox } from "../..";
 
 // Soft UI Dashboard React examples
 import SidenavCollapse from "./SidenavCollapse";
-import SidenavCard from "./SidenavCard";
 
 // Custom styles for the Sidenav
 import SidenavRoot from "./SidenavRoot";
@@ -41,6 +40,8 @@ import { createSelector } from "@reduxjs/toolkit";
 import { setMiniSideNav } from "../layoutSlice";
 import { useAppDispatch, useAppSelector } from "../../../store/hooks";
 import { RootState } from "../../../store/store";
+import { DrawerProps, Palette, PaletteColor } from "@mui/material";
+import { PickByType } from "../../../helpers/typeHelpers";
 
 // Soft UI Dashboard React context
 // import { useSoftUIController, setMiniSidenav } from "context";
@@ -57,28 +58,69 @@ const sidenavSelector = createSelector(
   })
 )
 
-function Sidenav({ color, brand, brandName, routes, ...rest }) {
+type SidebarNavRouteCollapse = {
+  type: "collapse";
+  key: string;
+  href?: string;
+  route?: string;
+  name: string;
+  icon: ReactNode,
+  noCollapse?: boolean;
+  regExp?: RegExp;
+  /**
+   * Currently not used, later for routes, which can only be called by authenticated user.
+   */
+  protected?: boolean;
+}
+
+function isSidebarNavRouteCollapse<T>(route: T | SidebarNavRouteCollapse): route is SidebarNavRouteCollapse {
+  return (route as SidebarNavRouteCollapse).type === "collapse"
+}
+
+type SidebarNavRouteDivider = {
+  type: "divider";
+  key: string;
+}
+
+function isSidebarNavRouteDivider<T>(route: T | SidebarNavRouteDivider): route is SidebarNavRouteDivider {
+  return (route as SidebarNavRouteDivider).type === "divider"
+}
+
+type SidebarNavRouteTitle = {
+  type: "title";
+  key: string;
+  title: string;
+}
+
+function isSidebarNavRouteTitle<T>(route: T | SidebarNavRouteTitle): route is SidebarNavRouteTitle {
+  return (route as SidebarNavRouteTitle).type === "title"
+}
+
+export type SidebarNavRoute = SidebarNavRouteCollapse | SidebarNavRouteDivider | SidebarNavRouteTitle;
+
+export interface SidenavProps extends Omit<DrawerProps, "color"> {
+  color: keyof PickByType<Palette, PaletteColor>;
+  brand: string;
+  brandName: string;
+  routes: SidebarNavRoute[];
+}
+
+const Sidenav = ({ color, brand, brandName, routes, ...rest }: SidenavProps) => {
   const dispatch = useAppDispatch();
-  const { miniSidenav, transparentSidenav } = useAppSelector(sidenavSelector)
+  const { miniSidenav } = useAppSelector(sidenavSelector)
   const location = useLocation();
   const { pathname } = location;
   const collapseName = pathname.split("/").slice(1)[0];
 
-  // const closeSidenav = () => setMiniSidenav(dispatch, true);
   const closeSidenav = () => dispatch(setMiniSideNav(true));
 
-  useEffect(() => {
+  const isRoutePropsActive = (key: string, regExp?: RegExp) => regExp ? regExp.test(pathname) : key === collapseName;
 
-  }, [dispatch, location]);
+  const renderCollapseRoute = ({ href, route, key, name, icon, noCollapse, regExp }: SidebarNavRouteCollapse): JSX.Element | undefined => {
+    const isActive = isRoutePropsActive(key, regExp)
 
-  // Render all the routes from the routes.js (All the visible items on the Sidenav)
-  const renderRoutes = routes.map(({ type, name, icon, title, noCollapse, key, route, href, regExp, }) => {
-    let returnValue;
-
-    const isActive = regExp ? regExp.test(pathname) : key === collapseName
-
-    if (type === "collapse") {
-      returnValue = href ? (
+    if (href) {
+      return (
         <Link
           href={href}
           key={key}
@@ -94,7 +136,11 @@ function Sidenav({ color, brand, brandName, routes, ...rest }) {
             noCollapse={noCollapse}
           />
         </Link>
-      ) : (
+      )
+    }
+
+    if (route) {
+      return (
         <NavLink to={route} key={key}>
           <SidenavCollapse
             color={color}
@@ -105,33 +151,45 @@ function Sidenav({ color, brand, brandName, routes, ...rest }) {
             noCollapse={noCollapse}
           />
         </NavLink>
-      );
-    } else if (type === "title") {
-      returnValue = (
-        <SoftTypography
-          key={key}
-          display="block"
-          variant="caption"
-          fontWeight="bold"
-          textTransform="uppercase"
-          opacity={0.6}
-          pl={3}
-          mt={2}
-          mb={1}
-          ml={1}
-        >
-          {title}
-        </SoftTypography>
-      );
-    } else if (type === "divider") {
-      returnValue = <Divider key={key} />;
+      )
     }
+  }
 
-    return returnValue;
-  });
+  const renderTitleRoute = ({ title, key }: SidebarNavRouteTitle) => {
+    return (
+      <SoftTypography
+        key={key}
+        display="block"
+        variant="caption"
+        fontWeight="bold"
+        textTransform="uppercase"
+        opacity={0.6}
+        pl={3}
+        mt={2}
+        mb={1}
+        ml={1}
+      >
+        {title}
+      </SoftTypography>
+    )
+  }
+
+  const renderDividerRoute = ({ key }: SidebarNavRouteDivider): JSX.Element | undefined => {
+    return (
+      <Divider key={key} />
+    )
+  }
+
+  const renderRoute = (route: SidebarNavRoute): JSX.Element | undefined => {
+    if (isSidebarNavRouteCollapse(route)) return renderCollapseRoute(route);
+
+    if (isSidebarNavRouteTitle(route)) return renderTitleRoute(route);
+
+    if (isSidebarNavRouteDivider(route)) return renderDividerRoute(route);
+  }
 
   return (
-    <SidenavRoot {...rest} variant="permanent" ownerState={{ transparentSidenav, miniSidenav }}>
+    <SidenavRoot {...rest} variant="permanent" ownerState={{ miniSidenav }}>
       <SoftBox pt={3} pb={1} px={4} textAlign="center">
         <SoftBox
           position="absolute"
@@ -148,7 +206,7 @@ function Sidenav({ color, brand, brandName, routes, ...rest }) {
         <SoftBox component={NavLink} to="/" display="flex" alignItems="center">
           {brand && <SoftBox component="img" src={brand} alt="Soft UI Logo" width="2rem" />}
           <SoftBox
-            width={!brandName && "100%"}
+            width={!brandName ? "100%" : undefined}
             sx={(theme) => sidenavLogoLabel(theme, { miniSidenav })}
           >
             <SoftTypography component="h6" variant="button" fontWeight="medium">
@@ -158,7 +216,7 @@ function Sidenav({ color, brand, brandName, routes, ...rest }) {
         </SoftBox>
       </SoftBox>
       <Divider />
-      <List>{renderRoutes}</List>
+      <List>{routes.map(route => renderRoute(route))}</List>
     </SidenavRoot>
   );
 }

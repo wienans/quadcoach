@@ -1,3 +1,6 @@
+import { Palette, PaletteColor, Theme } from "@mui/material";
+import { PickByType } from "../../../../helpers/typeHelpers";
+
 /**
 =========================================================
 * Soft UI Dashboard React - v4.0.0
@@ -12,7 +15,13 @@ Coded by www.creative-tim.com
 
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 */
-function collapseItem(theme, ownerState) {
+
+export type CollapseItemOwnerState = {
+  active: boolean;
+  transparentSidenav: boolean;
+}
+
+function collapseItem(theme: Theme, ownerState: CollapseItemOwnerState) {
   const { palette, transitions, breakpoints, boxShadows, borders, functions } = theme;
   const { active, transparentSidenav } = ownerState;
 
@@ -50,9 +59,17 @@ function collapseItem(theme, ownerState) {
   };
 }
 
-function collapseIconBox(theme, ownerState) {
-  const { palette, transitions, breakpoints, boxShadows, borders, functions } = theme;
-  const { active, transparentSidenav, color } = ownerState;
+export type CollapseIconBoxColor = "default" | keyof PickByType<Palette, PaletteColor>
+
+export type CollapseIconBoxOwnerState = {
+  active: boolean;
+  transparentSidenav: boolean;
+  color: CollapseIconBoxColor
+}
+
+const collapseIconBox = (theme: Theme, ownerState: CollapseIconBoxOwnerState) => {
+  const { palette, transitions, boxShadows, borders, functions } = theme;
+  const { active, color } = ownerState;
 
   const { white, info, light, gradients } = palette;
   const { md } = boxShadows;
@@ -84,11 +101,21 @@ function collapseIconBox(theme, ownerState) {
   };
 }
 
-const collapseIcon = ({ palette: { white, gradients } }, { active }) => ({
+export type CollapseIconOwnerState = {
+  active: boolean;
+}
+
+const collapseIcon = ({ palette: { white, gradients } }: Theme, { active }: CollapseIconOwnerState) => ({
   color: active ? white.main : gradients.dark.state,
 });
 
-function collapseText(theme, ownerState) {
+export type CollapseTextOwnerState = {
+  active: boolean;
+  transparentSidenav: boolean;
+  miniSidenav: boolean;
+}
+
+function collapseText(theme: Theme, ownerState: CollapseTextOwnerState) {
   const { typography, transitions, breakpoints, functions } = theme;
   const { miniSidenav, transparentSidenav, active } = ownerState;
 
