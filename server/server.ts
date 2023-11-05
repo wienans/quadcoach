@@ -143,3 +143,8 @@ app.get("/api/search/:key", async (req, res) => {
     res.send({ "result": "No Record Found" })
   }
 })
+
+app.get("/api/tags", async (req, res) => {
+  const result = await Exercise.find({},{tags:1})
+  console.log(result)
+})

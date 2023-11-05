@@ -29,6 +29,7 @@ import {
   ExercisePartialId,
 } from "../../api/quadcoachApi/domain";
 import AddRelatedExercisesDialog from "./AddRelatedExercisesDialog";
+import AddTagDialog from "./AddTagDiaglog";
 import { uniqBy } from "lodash";
 import "./translations";
 import { useTranslation } from "react-i18next";
@@ -182,6 +183,20 @@ const ExerciseEditForm = ({
 
     setOpenRelatedDialog(false);
   };
+  
+  const handleAddTagConfirm = (arrayHelpers: FieldArrayRenderProps, selectedExercisesToAdd?: Exercise[]) => {
+      if (selectedExercisesToAdd?.length) {
+          const notAddedExercises = uniqBy(selectedExercisesToAdd.filter(
+              newEx => !formik.values.relatedToExercises ||
+                  !formik.values.relatedToExercises.some(
+                      rel => rel._id == newEx._id
+                  )
+          ), "_id")
+          notAddedExercises.forEach(newEx => arrayHelpers.push(newEx))
+      }
+
+      setOpenTagDialog(false);
+  }
 
   const handleDeleteRelatedExercise =
     (arrayHelpers: FieldArrayRenderProps, index: number) => (): void => {
@@ -514,7 +529,18 @@ const ExerciseEditForm = ({
                                   setNewTag("");
                                 }}
                               />
-                              <Dialog
+                              <AddTagDialog
+                                isOpen={openTagDialog}
+                                onConfirm={(selectedExercises) =>
+                                  handleAddTagConfirm(
+                                    arrayHelpers,
+                                    selectedExercises,
+                                  )
+                                }
+                                alreadyAddedExercises={[
+                                ]}
+                              />
+                              {/* <Dialog
                                 open={openTagDialog}
                                 onClose={() => {
                                   setOpenTagDialog(false);
@@ -575,7 +601,7 @@ const ExerciseEditForm = ({
                                     )}
                                   </SoftButton>
                                 </DialogActions>
-                              </Dialog>
+                              </Dialog> */}
                             </div>
                           );
                         }}
