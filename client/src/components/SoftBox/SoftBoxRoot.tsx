@@ -15,26 +15,15 @@ Coded by www.creative-tim.com
 
 // @mui material components
 import Box from "@mui/material/Box";
-import { Palette, styled, Theme, } from "@mui/material/styles";
+import { Palette, PaletteColor, styled, Theme, } from "@mui/material/styles";
 import { Property, Globals } from "csstype"
 import { ValidBorderRadius } from "../../assets/theme/base/borders";
 import { isButtonBoxShadow, isSliderBoxShadow, isTabsBoxShadow, ValidBoxShadows } from "../../assets/theme/base/boxShadows";
 import { ResponsiveStyleValue } from "@mui/system";
+import { isPaletteColor, PaletteGradients } from "../../assets/theme/base/paletteTypes";
+import { PickByType } from "../../helpers/typeHelpers";
 
-export enum NormalColors {
-    transparent = "transparent",
-    white = "white",
-    black = "black",
-    primary = "primary",
-    secondary = "secondary",
-    info = "info",
-    success = "success",
-    warning = "warning",
-    error = "error",
-    light = "light",
-    dark = "dark",
-    text = "text",
-}
+export type NormalColors = keyof PickByType<Palette, PaletteColor>
 
 export enum GreyColors {
     grey100 = "grey100",
@@ -68,28 +57,20 @@ export function getPaletteColorForGreyColors(color: GreyColors, palette: Palette
 
 export function getPaletteColorForSoftBoxColors(color: string, palette: Palette): string | undefined {
     const greyColor = Object.entries(GreyColors).find(([key]) => key === color)?.[1]
-    const normalColor = Object.entries(NormalColors).find(([key]) => key === color)?.[1]
     if (greyColor) {
         return getPaletteColorForGreyColors(greyColor, palette);
     }
 
-    if (!normalColor) return undefined;
+    if (color && isPaletteColor(palette[color as NormalColors])) {
+        return palette[color as NormalColors].main
+    }
 
-    return palette[normalColor].main;
-}
-
-export enum Gradients {
-    primary = "primary",
-    secondary = "secondary",
-    info = "info",
-    success = "success",
-    warning = "warning",
-    error = "error",
-    dark = "dark",
-    light = "light",
+    return undefined;
 }
 
 export type Variant = "contained" | "gradient"
+
+export type Gradients = keyof PaletteGradients
 
 export type OwnerState = {
     variant?: Variant;
@@ -121,9 +102,9 @@ export default styled(Box)<SoftBoxRootProps>(({ theme, ownerState }) => {
     // background value
     let backgroundValue: Property.Background | undefined = bgColor;
     if (variant === "gradient") {
-        const gradient = Object.values(Gradients).find(v => v === bgColor)
+        const gradient = bgColor ? gradients[bgColor as keyof PaletteGradients] : undefined
         backgroundValue = gradient
-            ? linearGradient(gradients[gradient].main, gradients[gradient].state)
+            ? linearGradient(gradient.main, gradient.state)
             : white.main;
     } else if (bgColor) {
         const paletteColor = getPaletteColorForSoftBoxColors(bgColor, palette);
@@ -133,12 +114,11 @@ export default styled(Box)<SoftBoxRootProps>(({ theme, ownerState }) => {
     // color value
     let colorValue: string[] | Property.Color | Property.Color[] | undefined = color ? [color] : undefined;
     const greyColor = color ? Object.entries(GreyColors).find(([key]) => key === color)?.[1] : undefined;
-    const normalColor = color ? Object.entries(NormalColors).find(([key]) => key === color)?.[1] : undefined
     if (greyColor) {
         colorValue = getPaletteColorForGreyColors(greyColor, palette);
     }
-    else if (normalColor) {
-        colorValue = palette[normalColor].main;
+    else if (color && isPaletteColor(palette[color as NormalColors])) {
+        colorValue = palette[color as NormalColors].main;
     }
 
     // border radius

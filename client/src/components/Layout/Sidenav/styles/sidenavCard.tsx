@@ -1,7 +1,13 @@
 // Images
+import { SxProps, Theme } from "@mui/material";
 import backgroundImage from "../../../../assets/images/curved-images/white-curved.jpeg";
+import { PaletteGradients } from "../../../../assets/theme/base/paletteTypes";
 
-function card (theme, ownerState) {
+export type CardOwnerState = {
+  miniSidenav: boolean;
+}
+
+function card(theme: Theme, ownerState: CardOwnerState) {
   const { borders, functions, transitions, breakpoints } = theme;
   const { miniSidenav } = ownerState;
 
@@ -26,7 +32,11 @@ function card (theme, ownerState) {
   };
 }
 
-function cardContent (theme, ownerState) {
+export type CardContentOwnerState = {
+  sidenavColor: "default" | keyof PaletteGradients
+}
+
+function cardContent(theme: Theme, ownerState: CardContentOwnerState) {
   const { palette, functions, borders } = theme;
   const { sidenavColor } = ownerState;
 
@@ -69,7 +79,7 @@ function cardContent (theme, ownerState) {
   };
 }
 
-const cardIconBox = {
+const cardIconBox: SxProps<Theme> = {
   display: "grid",
   placeItems: "center",
   transition: ({ transitions }) =>
@@ -79,7 +89,11 @@ const cardIconBox = {
     }),
 };
 
-function cardIcon (theme, ownerState) {
+export type CardIconOwnerState = {
+  sidenavColor: "default" | keyof PaletteGradients
+}
+
+function cardIcon(theme: Theme, ownerState: CardIconOwnerState) {
   const { functions, palette } = theme;
   const { sidenavColor } = ownerState;
 
@@ -89,7 +103,7 @@ function cardIcon (theme, ownerState) {
   return {
     backgroundImage:
       sidenavColor === "default"
-        ? linearGradient(gradients.dark, gradients.dark.state)
+        ? linearGradient(gradients.dark.main, gradients.dark.state)
         : linearGradient(gradients[sidenavColor].main, gradients[sidenavColor].state),
     WebkitBackgroundClip: "text",
     WebkitTextFillColor: transparent.main,

@@ -12,10 +12,7 @@ Coded by www.creative-tim.com
 
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 */
-import { useState } from "react"
-
-// prop-types is a library for typechecking of props.
-import PropTypes from "prop-types";
+import { ReactNode, useState } from "react"
 
 // @mui material components
 import Collapse from "@mui/material/Collapse";
@@ -34,20 +31,37 @@ import {
   collapseIcon,
   collapseText,
 } from "./styles/sidenavCollapse";
+import { useAppSelector } from "../../../store/hooks";
+import { PickByType } from "../../../helpers/typeHelpers";
+import { Palette, PaletteColor } from "@mui/material";
+import { SoftBoxProps } from "../../SoftBox";
 
 // Soft UI Dashboard React context
 // import { useSoftUIController } from "context";
 
-function SidenavCollapse ({ color, icon, name, children, active, noCollapse, open, ...rest }) {
-  // const [controller] = useSoftUIController();
-  // const { miniSidenav, transparentSidenav } = controller;
-  const [miniSidenav, setMiniSidenav] = useState(false)
-  const [transparentSidenav] = useState(true)
+export type SidenavCollapseProps<C extends React.ElementType> = SoftBoxProps<C> & {
+  color: keyof PickByType<Palette, PaletteColor>;
+  icon: string | ReactNode;
+  name?: ReactNode;
+  children?: ReactNode;
+  active: boolean;
+  /**
+   * no functionality is implemented in free version
+   */
+  noCollapse?: boolean;
+  open?: boolean;
+}
 
+const SidenavCollapse = <C extends React.ElementType,>(
+  { color, icon, name, children, active, noCollapse, open, ...rest }: SidenavCollapseProps<C>
+) => {
+  const miniSidenav = useAppSelector(state => state.layout.miniSidenav)
+  const [transparentSidenav] = useState(true)
+  const softBoxProps: SoftBoxProps<C> = rest as SoftBoxProps<C>
   return (
     <>
       <ListItem component="li">
-        <SoftBox {...rest} sx={(theme) => collapseItem(theme, { active, transparentSidenav })}>
+        <SoftBox {...softBoxProps} sx={(theme) => collapseItem(theme, { active, transparentSidenav })}>
           <ListItemIcon
             sx={(theme) => collapseIconBox(theme, { active, transparentSidenav, color })}
           >
@@ -80,17 +94,6 @@ SidenavCollapse.defaultProps = {
   noCollapse: false,
   children: false,
   open: false,
-};
-
-// Typechecking props for the SidenavCollapse
-SidenavCollapse.propTypes = {
-  color: PropTypes.oneOf(["primary", "secondary", "info", "success", "warning", "error", "dark"]),
-  icon: PropTypes.node.isRequired,
-  name: PropTypes.string.isRequired,
-  children: PropTypes.node,
-  active: PropTypes.bool,
-  noCollapse: PropTypes.bool,
-  open: PropTypes.bool,
 };
 
 export default SidenavCollapse;
