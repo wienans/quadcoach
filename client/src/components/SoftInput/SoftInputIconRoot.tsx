@@ -19,23 +19,28 @@ import Icon from "@mui/material/Icon";
 import { styled } from "@mui/material/styles";
 
 export type SoftInputIconRootOwnerState = {
-    size: InputBaseProps["size"]
-}
+  size: InputBaseProps["size"];
+};
 
 export type SoftInputIconRootProps = {
-    ownerState: SoftInputIconRootOwnerState
-}
+  ownerState: SoftInputIconRootOwnerState;
+};
 
-export default styled(Icon)<SoftInputIconRootProps>(({ theme, ownerState }) => {
-    const { typography } = theme;
-    const { size } = ownerState;
+const SoftInputIconRoot = styled(Icon)<SoftInputIconRootProps>(({
+  theme,
+  ownerState,
+}) => {
+  const { typography } = theme;
+  const { size } = ownerState;
 
-    const { fontWeightBold, size: fontSize } = typography;
+  const { fontWeightBold, size: fontSize } = typography;
 
-    return {
-        fontWeight: fontWeightBold,
-        ...size === "small" && {
-            fontSize: `${fontSize.md} !important`,
-        }
-    };
+  return {
+    fontWeight: fontWeightBold,
+    ...(size === "small" && {
+      fontSize: `${fontSize.md} !important`,
+    }),
+  };
 });
+
+export default SoftInputIconRoot;

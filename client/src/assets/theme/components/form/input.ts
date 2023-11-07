@@ -12,7 +12,12 @@ Coded by www.creative-tim.com
 
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 */
-import { ComponentsOverrides, ComponentsProps, ComponentsVariants, Theme } from "@mui/material";
+import {
+  ComponentsOverrides,
+  ComponentsProps,
+  ComponentsVariants,
+  Theme,
+} from "@mui/material";
 
 // Soft UI Dashboard React Base Styles
 import colors from "../../base/colors";
@@ -21,9 +26,7 @@ import borders from "../../base/borders";
 // Soft UI Dashboard PRO helper functions
 import pxToRem from "../../functions/pxToRem";
 
-
-
-declare module '@mui/material/InputBase' {
+declare module "@mui/material/InputBase" {
   interface InputBasePropsSizeOverrides {
     large: true;
   }
@@ -33,14 +36,16 @@ const { inputColors } = colors;
 const { borderWidth, borderRadius } = borders;
 
 const input: {
-  defaultProps?: ComponentsProps['MuiInput'];
-  styleOverrides?: ComponentsOverrides<Theme>['MuiInput'];
-  variants?: ComponentsVariants['MuiInput'];
+  defaultProps?: ComponentsProps["MuiInput"];
+  styleOverrides?: ComponentsOverrides<Theme>["MuiInput"];
+  variants?: ComponentsVariants["MuiInput"];
 } = {
   styleOverrides: {
     root: {
       display: "flex !important",
-      padding: `${pxToRem(8)} ${pxToRem(28)} ${pxToRem(8)} ${pxToRem(12)} !important`,
+      padding: `${pxToRem(8)} ${pxToRem(28)} ${pxToRem(8)} ${pxToRem(
+        12,
+      )} !important`,
       border: `${borderWidth[1]} solid ${inputColors.borderColor.main}`,
       borderRadius: `${borderRadius.md} !important`,
 

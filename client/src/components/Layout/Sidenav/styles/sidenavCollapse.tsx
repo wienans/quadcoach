@@ -19,10 +19,11 @@ Coded by www.creative-tim.com
 export type CollapseItemOwnerState = {
   active: boolean;
   transparentSidenav: boolean;
-}
+};
 
 function collapseItem(theme: Theme, ownerState: CollapseItemOwnerState) {
-  const { palette, transitions, breakpoints, boxShadows, borders, functions } = theme;
+  const { palette, transitions, breakpoints, boxShadows, borders, functions } =
+    theme;
   const { active, transparentSidenav } = ownerState;
 
   const { dark, white, text, transparent } = palette;
@@ -36,7 +37,9 @@ function collapseItem(theme: Theme, ownerState: CollapseItemOwnerState) {
     display: "flex",
     alignItems: "center",
     width: "100%",
-    padding: `${pxToRem(10.8)} ${pxToRem(12.8)} ${pxToRem(10.8)} ${pxToRem(16)}`,
+    padding: `${pxToRem(10.8)} ${pxToRem(12.8)} ${pxToRem(10.8)} ${pxToRem(
+      16,
+    )}`,
     margin: `0 ${pxToRem(16)}`,
     borderRadius: borderRadius.md,
     cursor: "pointer",
@@ -59,15 +62,20 @@ function collapseItem(theme: Theme, ownerState: CollapseItemOwnerState) {
   };
 }
 
-export type CollapseIconBoxColor = "default" | keyof PickByType<Palette, PaletteColor>
+export type CollapseIconBoxColor =
+  | "default"
+  | keyof PickByType<Palette, PaletteColor>;
 
 export type CollapseIconBoxOwnerState = {
   active: boolean;
   transparentSidenav: boolean;
-  color: CollapseIconBoxColor
-}
+  color: CollapseIconBoxColor;
+};
 
-const collapseIconBox = (theme: Theme, ownerState: CollapseIconBoxOwnerState) => {
+const collapseIconBox = (
+  theme: Theme,
+  ownerState: CollapseIconBoxOwnerState,
+) => {
   const { palette, transitions, boxShadows, borders, functions } = theme;
   const { active, color } = ownerState;
 
@@ -99,13 +107,16 @@ const collapseIconBox = (theme: Theme, ownerState: CollapseIconBoxOwnerState) =>
       fill: active ? white.main : gradients.dark.state,
     },
   };
-}
+};
 
 export type CollapseIconOwnerState = {
   active: boolean;
-}
+};
 
-const collapseIcon = ({ palette: { white, gradients } }: Theme, { active }: CollapseIconOwnerState) => ({
+const collapseIcon = (
+  { palette: { white, gradients } }: Theme,
+  { active }: CollapseIconOwnerState,
+) => ({
   color: active ? white.main : gradients.dark.state,
 });
 
@@ -113,7 +124,7 @@ export type CollapseTextOwnerState = {
   active: boolean;
   transparentSidenav: boolean;
   miniSidenav: boolean;
-}
+};
 
 function collapseText(theme: Theme, ownerState: CollapseTextOwnerState) {
   const { typography, transitions, breakpoints, functions } = theme;
@@ -128,7 +139,8 @@ function collapseText(theme: Theme, ownerState: CollapseTextOwnerState) {
     [breakpoints.up("xl")]: {
       opacity: miniSidenav || (miniSidenav && transparentSidenav) ? 0 : 1,
       maxWidth: miniSidenav || (miniSidenav && transparentSidenav) ? 0 : "100%",
-      marginLeft: miniSidenav || (miniSidenav && transparentSidenav) ? 0 : pxToRem(12.8),
+      marginLeft:
+        miniSidenav || (miniSidenav && transparentSidenav) ? 0 : pxToRem(12.8),
       transition: transitions.create(["opacity", "margin"], {
         easing: transitions.easing.easeInOut,
         duration: transitions.duration.standard,

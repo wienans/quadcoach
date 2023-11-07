@@ -12,7 +12,13 @@ Coded by www.creative-tim.com
 
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 */
-import { ComponentsOverrides, ComponentsProps, ComponentsVariants, Theme, SimplePaletteColorOptions } from "@mui/material";
+import {
+  ComponentsOverrides,
+  ComponentsProps,
+  ComponentsVariants,
+  Theme,
+  SimplePaletteColorOptions,
+} from "@mui/material";
 
 // Soft UI Dashboard React base styles
 import colors from "../../base/colors";
@@ -20,9 +26,9 @@ import colors from "../../base/colors";
 const { dark } = colors;
 
 const formLabel: {
-  defaultProps?: ComponentsProps['MuiFormLabel'];
-  styleOverrides?: ComponentsOverrides<Theme>['MuiFormLabel'];
-  variants?: ComponentsVariants['MuiFormLabel'];
+  defaultProps?: ComponentsProps["MuiFormLabel"];
+  styleOverrides?: ComponentsOverrides<Theme>["MuiFormLabel"];
+  variants?: ComponentsVariants["MuiFormLabel"];
 } = {
   styleOverrides: {
     root: {

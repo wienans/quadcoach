@@ -3,7 +3,7 @@
  * https://redux-toolkit.js.org/rtk-query/api/createApi#tagtypes
  */
 export enum TagType {
-    exercise = "exercise",
-    block = "block",
-    user = "user",
+  exercise = "exercise",
+  block = "block",
+  user = "user",
 }

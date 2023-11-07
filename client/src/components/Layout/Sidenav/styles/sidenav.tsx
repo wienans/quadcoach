@@ -17,9 +17,12 @@ Coded by www.creative-tim.com
 
 export type SidenavLogoLabelOwnerState = {
   miniSidenav: boolean;
-}
+};
 
-export default function sidenavLogoLabel(theme: Theme, ownerState: SidenavLogoLabelOwnerState) {
+export default function sidenavLogoLabel(
+  theme: Theme,
+  ownerState: SidenavLogoLabelOwnerState,
+) {
   const { functions, transitions, typography, breakpoints } = theme;
   const { miniSidenav } = ownerState;
 

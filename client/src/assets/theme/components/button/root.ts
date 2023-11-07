@@ -25,12 +25,15 @@ import { Theme } from "@mui/system";
 const { fontWeightBold, size } = typography;
 const { borderRadius } = borders;
 
-const root: CSSInterpolation
+const root:
+  | CSSInterpolation
   | ((
-    // Record<string, unknown> is for other props that the slot receive internally
-    // Documenting all ownerStates could be a huge work, let's wait until we have a real needs from developers.
-    props: ({ ownerState: ButtonProps & Record<string, unknown> }) & { theme: Theme } & Record<string, unknown>,
-  ) => CSSInterpolation) = {
+      // Record<string, unknown> is for other props that the slot receive internally
+      // Documenting all ownerStates could be a huge work, let's wait until we have a real needs from developers.
+      props: { ownerState: ButtonProps & Record<string, unknown> } & {
+        theme: Theme;
+      } & Record<string, unknown>,
+    ) => CSSInterpolation) = {
   display: "inline-flex",
   justifyContent: "center",
   alignItems: "center",

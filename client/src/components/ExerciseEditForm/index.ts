@@ -1,1 +1,1 @@
-export { default } from "./ExerciseEditForm"
+export { default } from "./ExerciseEditForm";

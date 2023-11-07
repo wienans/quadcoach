@@ -31,13 +31,13 @@ const XL = `@media (min-width: ${xl}px)`;
 const XXL = `@media (min-width: ${xxl}px)`;
 
 export type SharedClasses = {
-  paddingRight: string,
-  paddingLeft: string,
-  marginRight: string,
-  marginLeft: string,
-  width: string,
-  position: string,
-}
+  paddingRight: string;
+  paddingLeft: string;
+  marginRight: string;
+  marginLeft: string;
+  width: string;
+  position: string;
+};
 
 const sharedClasses: SharedClasses = {
   paddingRight: `${pxToRem(24)} !important`,
@@ -48,7 +48,7 @@ const sharedClasses: SharedClasses = {
   position: "relative",
 };
 
-const container: ComponentsOverrides<Theme>['MuiCssBaseline'] = {
+const container: ComponentsOverrides<Theme>["MuiCssBaseline"] = {
   [SM]: {
     ".MuiContainer-root": {
       ...sharedClasses,

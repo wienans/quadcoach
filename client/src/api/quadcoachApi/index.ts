@@ -1,1 +1,1 @@
-export { default } from "./quadcoachApi"
+export { default } from "./quadcoachApi";

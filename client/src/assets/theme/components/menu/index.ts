@@ -12,7 +12,13 @@ Coded by www.creative-tim.com
 
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 */
-import { ComponentsOverrides, ComponentsProps, ComponentsVariants, SimplePaletteColorOptions, Theme } from "@mui/material";
+import {
+  ComponentsOverrides,
+  ComponentsProps,
+  ComponentsVariants,
+  SimplePaletteColorOptions,
+  Theme,
+} from "@mui/material";
 
 // Soft UI Dashboard React base styles
 import boxShadows from "../../base/boxShadows";
@@ -29,9 +35,9 @@ const { text, white } = colors;
 const { borderRadius } = borders;
 
 const menu: {
-  defaultProps?: ComponentsProps['MuiMenu'];
-  styleOverrides?: ComponentsOverrides<Theme>['MuiMenu'];
-  variants?: ComponentsVariants['MuiMenu'];
+  defaultProps?: ComponentsProps["MuiMenu"];
+  styleOverrides?: ComponentsOverrides<Theme>["MuiMenu"];
+  variants?: ComponentsVariants["MuiMenu"];
 } = {
   defaultProps: {
     disableAutoFocusItem: true,
@@ -45,7 +51,9 @@ const menu: {
       fontSize: size!.sm,
       color: text!.main,
       textAlign: "left",
-      backgroundColor: `${(white as SimplePaletteColorOptions).main} !important`,
+      backgroundColor: `${
+        (white as SimplePaletteColorOptions).main
+      } !important`,
       borderRadius: borderRadius.md,
     },
   },

@@ -12,7 +12,13 @@ Coded by www.creative-tim.com
 
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 */
-import { ComponentsOverrides, ComponentsProps, ComponentsVariants, Theme, SimplePaletteColorOptions } from "@mui/material";
+import {
+  ComponentsOverrides,
+  ComponentsProps,
+  ComponentsVariants,
+  Theme,
+  SimplePaletteColorOptions,
+} from "@mui/material";
 
 // Soft UI Dashboard React base styles
 import boxShadows from "../../base/boxShadows";
@@ -29,14 +35,15 @@ const { text, white, transparent, light, dark, gradients } = colors;
 const { borderRadius } = borders;
 
 const whiteSimplePaletteColorOptions = white as SimplePaletteColorOptions;
-const transparentSimplePaletteColorOptions = transparent as SimplePaletteColorOptions;
+const transparentSimplePaletteColorOptions =
+  transparent as SimplePaletteColorOptions;
 const lightSimplePaletteColorOptions = light as SimplePaletteColorOptions;
 const darkSimplePaletteColorOptions = dark as SimplePaletteColorOptions;
 
 const autocomplete: {
-  defaultProps?: ComponentsProps['MuiAutocomplete'];
-  styleOverrides?: ComponentsOverrides<Theme>['MuiAutocomplete'];
-  variants?: ComponentsVariants['MuiAutocomplete'];
+  defaultProps?: ComponentsProps["MuiAutocomplete"];
+  styleOverrides?: ComponentsOverrides<Theme>["MuiAutocomplete"];
+  variants?: ComponentsVariants["MuiAutocomplete"];
 } = {
   styleOverrides: {
     popper: {
@@ -61,10 +68,11 @@ const autocomplete: {
       color: text!.main,
       transition: "background-color 300ms ease, color 300ms ease",
 
-      "&:hover, &:focus, &.Mui-selected, &.Mui-selected:hover, &.Mui-selected:focus": {
-        backgroundColor: lightSimplePaletteColorOptions.main,
-        color: darkSimplePaletteColorOptions.main,
-      },
+      "&:hover, &:focus, &.Mui-selected, &.Mui-selected:hover, &.Mui-selected:focus":
+        {
+          backgroundColor: lightSimplePaletteColorOptions.main,
+          color: darkSimplePaletteColorOptions.main,
+        },
 
       '&[aria-selected="true"]': {
         backgroundColor: `${lightSimplePaletteColorOptions.main} !important`,
@@ -99,10 +107,11 @@ const autocomplete: {
         padding: `0 ${pxToRem(10)} 0 ${pxToRem(4)}`,
       },
 
-      "& .MuiSvgIcon-root, & .MuiSvgIcon-root:hover, & .MuiSvgIcon-root:focus": {
-        color: whiteSimplePaletteColorOptions.main,
-        marginRight: 0,
-      },
+      "& .MuiSvgIcon-root, & .MuiSvgIcon-root:hover, & .MuiSvgIcon-root:focus":
+        {
+          color: whiteSimplePaletteColorOptions.main,
+          marginRight: 0,
+        },
     },
   },
 };

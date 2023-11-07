@@ -12,14 +12,18 @@ Coded by www.creative-tim.com
 
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 */
-import { ComponentsOverrides, SimplePaletteColorOptions, Theme } from "@mui/material";
+import {
+  ComponentsOverrides,
+  SimplePaletteColorOptions,
+  Theme,
+} from "@mui/material";
 
 // Soft UI Dashboard React Base Styles
 import colors from "./colors";
 
 const { info, dark } = colors;
 
-const globals: ComponentsOverrides<Theme>['MuiCssBaseline'] = {
+const globals: ComponentsOverrides<Theme>["MuiCssBaseline"] = {
   html: {
     scrollBehavior: "smooth",
   },

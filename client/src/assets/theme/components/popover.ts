@@ -12,7 +12,13 @@ Coded by www.creative-tim.com
 
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 */
-import { ComponentsOverrides, ComponentsProps, ComponentsVariants, Theme, SimplePaletteColorOptions } from "@mui/material";
+import {
+  ComponentsOverrides,
+  ComponentsProps,
+  ComponentsVariants,
+  Theme,
+  SimplePaletteColorOptions,
+} from "@mui/material";
 
 // Soft UI Dashboard React helper functions
 import pxToRem from "../functions/pxToRem";
@@ -27,9 +33,9 @@ const { lg } = boxShadows;
 const { borderRadius } = borders;
 
 const popover: {
-  defaultProps?: ComponentsProps['MuiPopover'];
-  styleOverrides?: ComponentsOverrides<Theme>['MuiPopover'];
-  variants?: ComponentsVariants['MuiPopover'];
+  defaultProps?: ComponentsProps["MuiPopover"];
+  styleOverrides?: ComponentsOverrides<Theme>["MuiPopover"];
+  variants?: ComponentsVariants["MuiPopover"];
 } = {
   styleOverrides: {
     paper: {

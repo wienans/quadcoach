@@ -24,26 +24,25 @@ import { ReactNode } from "react";
 // import { useSoftUIController, setLayout } from "context";
 
 export type DashboardLayoutProps = {
-    children: ReactNode
-}
+  children: ReactNode;
+};
 
 const DashboardLayout = ({ children }: DashboardLayoutProps) => {
-
-    return (
-        <SoftBox
-            sx={{
-                p: 3,
-                position: "relative",
-            }}
-        >
-            {children}
-        </SoftBox>
-    );
-}
+  return (
+    <SoftBox
+      sx={{
+        p: 3,
+        position: "relative",
+      }}
+    >
+      {children}
+    </SoftBox>
+  );
+};
 
 // Typechecking props for the DashboardLayout
 DashboardLayout.propTypes = {
-    children: PropTypes.node.isRequired,
+  children: PropTypes.node.isRequired,
 };
 
 export default DashboardLayout;

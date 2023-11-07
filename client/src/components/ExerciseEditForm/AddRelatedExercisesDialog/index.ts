@@ -1,1 +1,1 @@
-export { default } from "./AddRelatedExercisesDialog"
+export { default } from "./AddRelatedExercisesDialog";

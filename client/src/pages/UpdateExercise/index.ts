@@ -1,1 +1,1 @@
-export { default } from "./UpdateExercise"
+export { default } from "./UpdateExercise";

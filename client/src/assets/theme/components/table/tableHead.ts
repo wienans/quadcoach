@@ -12,7 +12,12 @@ Coded by www.creative-tim.com
 
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 */
-import { ComponentsOverrides, ComponentsProps, ComponentsVariants, Theme } from "@mui/material";
+import {
+  ComponentsOverrides,
+  ComponentsProps,
+  ComponentsVariants,
+  Theme,
+} from "@mui/material";
 
 // Soft UI Dashboard React base styles
 import borders from "../../base/borders";
@@ -23,9 +28,9 @@ import pxToRem from "../../functions/pxToRem";
 const { borderRadius } = borders;
 
 const tableHead: {
-  defaultProps?: ComponentsProps['MuiTableHead'];
-  styleOverrides?: ComponentsOverrides<Theme>['MuiTableHead'];
-  variants?: ComponentsVariants['MuiTableHead'];
+  defaultProps?: ComponentsProps["MuiTableHead"];
+  styleOverrides?: ComponentsOverrides<Theme>["MuiTableHead"];
+  variants?: ComponentsVariants["MuiTableHead"];
 } = {
   styleOverrides: {
     root: {

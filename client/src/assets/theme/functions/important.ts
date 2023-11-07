@@ -2,4 +2,4 @@
 // For example appearance type inside inputBase.ts is not allowing to have !important, but theme die so
 const important = <T extends string>(s: T): T => `${s} !important` as T;
 
-export default important
+export default important;

@@ -12,7 +12,13 @@ Coded by www.creative-tim.com
 
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 */
-import { ComponentsOverrides, ComponentsProps, ComponentsVariants, SimplePaletteColorOptions, Theme } from "@mui/material";
+import {
+  ComponentsOverrides,
+  ComponentsProps,
+  ComponentsVariants,
+  SimplePaletteColorOptions,
+  Theme,
+} from "@mui/material";
 
 // Soft UI Dashboard React base styles
 import borders from "../../base/borders";
@@ -25,14 +31,16 @@ const { borderWidth } = borders;
 const { light } = colors;
 
 const tableCell: {
-  defaultProps?: ComponentsProps['MuiTableCell'];
-  styleOverrides?: ComponentsOverrides<Theme>['MuiTableCell'];
-  variants?: ComponentsVariants['MuiTableCell'];
+  defaultProps?: ComponentsProps["MuiTableCell"];
+  styleOverrides?: ComponentsOverrides<Theme>["MuiTableCell"];
+  variants?: ComponentsVariants["MuiTableCell"];
 } = {
   styleOverrides: {
     root: {
       padding: `${pxToRem(12)} ${pxToRem(16)}`,
-      borderBottom: `${borderWidth[1]} solid ${(light as SimplePaletteColorOptions).main}`,
+      borderBottom: `${borderWidth[1]} solid ${
+        (light as SimplePaletteColorOptions).main
+      }`,
     },
   },
 };

@@ -45,7 +45,10 @@ const SidenavCard = () => {
           mb={2}
           sx={cardIconBox}
         >
-          <Icon fontSize="medium" sx={(theme) => cardIcon(theme, { sidenavColor })}>
+          <Icon
+            fontSize="medium"
+            sx={(theme) => cardIcon(theme, { sidenavColor })}
+          >
             star
           </Icon>
         </SoftBox>
@@ -73,6 +76,6 @@ const SidenavCard = () => {
       </CardContent>
     </Card>
   );
-}
+};
 
 export default SidenavCard;
