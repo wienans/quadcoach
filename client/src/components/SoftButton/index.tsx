@@ -13,40 +13,32 @@ Coded by www.creative-tim.com
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 */
 
-import { ReactNode, forwardRef } from "react";
+import { ReactNode, Ref, forwardRef } from "react";
 
 // Custom styles for SoftButton
 import SoftButtonRoot from "./SoftButtonRoot";
 import { ButtonProps } from "@mui/material";
 
-export interface SoftButtonProps extends ButtonProps {
+export type SoftButtonProps<C extends React.ElementType> = ButtonProps<C, { component?: C, ref?: C }> & {
     children: ReactNode;
     circular?: boolean;
     iconOnly?: boolean;
 }
 
-const SoftButton = forwardRef<HTMLButtonElement, SoftButtonProps>(
-    ({ color, variant, size, circular = false, iconOnly = false, children, ...rest }, ref) => (
-        <SoftButtonRoot
-            {...rest}
-            ref={ref}
-            color="primary"
-            variant={variant === "gradient" ? "contained" : variant}
-            size={size}
-            ownerState={{ color, variant, size, circular, iconOnly }}
-        >
-            {children}
-        </SoftButtonRoot>
-    )
+const SoftButton = <C extends React.ElementType,>(
+    { color, variant = "contained", size = "medium", circular = false, iconOnly = false, children, ...rest }: SoftButtonProps<C>,
+    ref?: Ref<C>
+) => (
+    <SoftButtonRoot
+        {...rest}
+        ref={ref}
+        color="primary"
+        variant={variant === "gradient" ? "contained" : variant}
+        size={size}
+        ownerState={{ color, variant, size, circular, iconOnly }}
+    >
+        {children}
+    </SoftButtonRoot>
 );
 
-// Setting default values for the props of SoftButton
-SoftButton.defaultProps = {
-    size: "medium",
-    variant: "contained",
-    color: "white",
-    circular: false,
-    iconOnly: false,
-};
-
-export default SoftButton;
+export default forwardRef(SoftButton);

@@ -13,12 +13,8 @@ Coded by www.creative-tim.com
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 */
 
-import { useState, useEffect } from "react";
-
 // @mui material components
 import Divider from "@mui/material/Divider";
-import Switch from "@mui/material/Switch";
-import IconButton from "@mui/material/IconButton";
 import Link from "@mui/material/Link";
 import Icon from "@mui/material/Icon";
 
@@ -33,7 +29,7 @@ import SettingsMenuRoot from "./SettingsMenuRoot";
 import { setOpenSettingsMenu } from "../Layout/layoutSlice";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 
-function SettingsMenu() {
+const SettingsMenu = () => {
     const dispatch = useAppDispatch();
     const openSettingsMenu = useAppSelector(state => state.layout.openSettingsMenu)
 

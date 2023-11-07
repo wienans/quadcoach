@@ -17,7 +17,15 @@ Coded by www.creative-tim.com
 import Drawer from "@mui/material/Drawer";
 import { styled } from "@mui/material/styles";
 
-export default styled(Drawer)(({ theme, ownerState }) => {
+export type SettingsMenuRootOwnerState = {
+    openSettingsMenu: boolean;
+}
+
+export type SettingsMenuRootProps = {
+    ownerState: SettingsMenuRootOwnerState
+}
+
+export default styled(Drawer)<SettingsMenuRootProps>(({ theme, ownerState }) => {
     const { boxShadows, functions, transitions } = theme;
     const { openSettingsMenu } = ownerState;
 

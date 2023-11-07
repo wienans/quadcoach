@@ -14,10 +14,19 @@ Coded by www.creative-tim.com
 */
 
 // @mui material components
+import { InputBaseProps } from "@mui/material";
 import Icon from "@mui/material/Icon";
 import { styled } from "@mui/material/styles";
 
-export default styled(Icon)(({ theme, ownerState }) => {
+export type SoftInputIconRootOwnerState = {
+    size: InputBaseProps["size"]
+}
+
+export type SoftInputIconRootProps = {
+    ownerState: SoftInputIconRootOwnerState
+}
+
+export default styled(Icon)<SoftInputIconRootProps>(({ theme, ownerState }) => {
     const { typography } = theme;
     const { size } = ownerState;
 
@@ -25,6 +34,8 @@ export default styled(Icon)(({ theme, ownerState }) => {
 
     return {
         fontWeight: fontWeightBold,
-        fontSize: size === "small" && `${fontSize.md} !important`,
+        ...size === "small" && {
+            fontSize: `${fontSize.md} !important`,
+        }
     };
 });

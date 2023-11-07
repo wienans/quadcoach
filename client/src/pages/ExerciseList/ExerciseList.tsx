@@ -117,7 +117,6 @@ const ExerciseList = () => {
                 <SoftInput
                     id="outlined-basic"
                     placeholder="Search Exercise"
-                    variant="outlined"
                     value={exerciseFilter.searchValue}
                     onChange={onExerciseFilterValueChange("searchValue")}
                     fullWidth
@@ -133,7 +132,6 @@ const ExerciseList = () => {
                                 inputProps={{ min: 0, step: "1" }}
                                 id="outlined-basic"
                                 placeholder="min"
-                                variant="outlined"
                                 value={exerciseFilter.minPersons}
                                 onChange={onExerciseFilterValueChange("minPersons")}
 
@@ -143,7 +141,6 @@ const ExerciseList = () => {
                                 inputProps={{ min: 0, step: "1" }}
                                 id="outlined-basic"
                                 placeholder="max"
-                                variant="outlined"
                                 value={exerciseFilter.maxPersons}
                                 onChange={onExerciseFilterValueChange("maxPersons")}
                             />
@@ -154,7 +151,6 @@ const ExerciseList = () => {
                             <SoftInput
                                 id="outlined-basic"
                                 placeholder="search Tag"
-                                variant="outlined"
                                 value={exerciseFilter.tagString}
                                 onChange={onExerciseFilterValueChange("tagString")}
                             />

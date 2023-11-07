@@ -14,10 +14,24 @@ Coded by www.creative-tim.com
 */
 
 // @mui material components
-import InputBase from "@mui/material/InputBase";
-import { styled } from "@mui/material/styles";
+import InputBase, { InputBaseProps } from "@mui/material/InputBase";
+import { Direction, styled } from "@mui/material/styles";
+import { IconDirection } from "./types";
 
-export default styled(InputBase)(({ theme, ownerState }) => {
+export type SoftInputRootOwnerState = {
+    size: InputBaseProps["size"];
+    error: InputBaseProps["error"];
+    success?: boolean;
+    iconDirection?: IconDirection,
+    direction?: Direction,
+    disabled: InputBaseProps["disabled"];
+}
+
+export type SoftInputRootProps = {
+    ownerState: SoftInputRootOwnerState
+}
+
+export default styled(InputBase)<SoftInputRootProps>(({ theme, ownerState }) => {
     const { palette, boxShadows, functions, typography, borders } = theme;
     const { size, error, success, iconDirection, direction, disabled } = ownerState;
 

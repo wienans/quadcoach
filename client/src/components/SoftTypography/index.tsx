@@ -13,7 +13,7 @@ Coded by www.creative-tim.com
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 */
 
-import { ReactNode, forwardRef } from "react";
+import { ReactNode, Ref, forwardRef } from "react";
 import SoftTypographyRoot, { TypographyOwnerState } from "./SoftTypographyRoot";
 import { TypographyProps } from "@mui/material";
 
@@ -21,10 +21,10 @@ export interface SoftTypographyProps extends TypographyOwnerState, Omit<Typograp
     children: ReactNode;
 }
 
-const SoftTypography = forwardRef<HTMLElement, SoftTypographyProps>(
+const SoftTypography =
     (
-        { color, fontWeight, textTransform, verticalAlign, textGradient, opacity, children, ...rest },
-        ref
+        { color, fontWeight, textTransform, verticalAlign, textGradient, opacity, children, ...rest }: SoftTypographyProps,
+        ref: Ref<HTMLElement>
     ) => (
         <SoftTypographyRoot
             {...rest}
@@ -33,8 +33,7 @@ const SoftTypography = forwardRef<HTMLElement, SoftTypographyProps>(
         >
             {children}
         </SoftTypographyRoot>
-    )
-);
+    );
 
 // Setting default values for the props of SoftTypography
 SoftTypography.defaultProps = {
@@ -46,4 +45,4 @@ SoftTypography.defaultProps = {
     opacity: 1,
 };
 
-export default SoftTypography;
+export default forwardRef(SoftTypography);

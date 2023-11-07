@@ -16,7 +16,17 @@ Coded by www.creative-tim.com
 // @mui material components
 import { styled } from "@mui/material/styles";
 
-export default styled("div")(({ theme, ownerState }) => {
+export type SoftInputWithIconRootOwnerState = {
+    error?: boolean;
+    success?: boolean;
+    disabled?: boolean;
+}
+
+export type SoftInputWithIconRootProps = {
+    ownerState: SoftInputWithIconRootOwnerState
+}
+
+export default styled("div")<SoftInputWithIconRootProps>(({ theme, ownerState }) => {
     const { palette, functions, borders } = theme;
     const { error, success, disabled } = ownerState;
 

@@ -21,6 +21,14 @@ import borders from "../../base/borders";
 // Soft UI Dashboard PRO helper functions
 import pxToRem from "../../functions/pxToRem";
 
+
+
+declare module '@mui/material/InputBase' {
+  interface InputBasePropsSizeOverrides {
+    large: true;
+  }
+}
+
 const { inputColors } = colors;
 const { borderWidth, borderRadius } = borders;
 

@@ -1,5 +1,6 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 import { BreadcrumbRoute } from "../Breadcrumbs";
+import { Direction } from "@mui/material";
 
 export type StoredBreadCrumbs = {
     title: string;
@@ -16,7 +17,7 @@ interface LayoutState {
     transparentNavbar: boolean;
     fixedNavbar: boolean;
     openSettingsMenu: boolean;
-    direction: string; // TODO check possible values. ltr and rtl?
+    direction: Direction;
     layout: string;
     breadcrumbs?: StoredBreadCrumbs
 }
@@ -60,7 +61,7 @@ export const layoutSlice = createSlice({
         setOpenSettingsMenu: (state, action: PayloadAction<boolean>) => {
             state.openSettingsMenu = action.payload
         },
-        setDirection: (state, action: PayloadAction<string>) => {
+        setDirection: (state, action: PayloadAction<Direction>) => {
             state.direction = action.payload
         },
         setLayout: (state, action: PayloadAction<string>) => {

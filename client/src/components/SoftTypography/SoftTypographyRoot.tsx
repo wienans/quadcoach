@@ -16,16 +16,18 @@ Coded by www.creative-tim.com
 // @mui material components
 import Typography, { TypographyProps } from "@mui/material/Typography";
 import { styled } from "@mui/material/styles";
+import { Palette, PaletteColor, TypeText } from "@mui/material";
 import { Property, } from "csstype"
-import { getGradientColor, getPaletteColor } from "../../assets/theme/base/colors";
+import { PickByType, isObjKey } from "../../helpers/typeHelpers";
+import { PaletteGradient, PaletteGradients } from "../../assets/theme/base/paletteTypes";
 
 export interface TypographyOwnerState {
-    verticalAlign?: "unset" | "baseline" | "sub" | "super" | "text-top" | "text-bottom" | "middle" | "top" | "bottom";
+    verticalAlign?: Property.VerticalAlign;//CSSProperties["verticalAlign"] //"unset" | "baseline" | "sub" | "super" | "text-top" | "text-bottom" | "middle" | "top" | "bottom";
     opacity?: Property.Opacity;
     textGradient?: boolean;
     fontWeight?: false | "light" | "regular" | "medium" | "bold";
     textTransform?: "none" | "capitalize" | "uppercase" | "lowercase";
-    color?: "inherit" | "primary" | "secondary" | "info" | "success" | "warning" | "error" | "light" | "dark" | "text" | "white",
+    color?: "inherit" | keyof PickByType<Palette, PaletteColor> | keyof PaletteGradients | keyof PickByType<Palette, TypeText>,
 }
 
 export interface SoftTypographyRootProps extends Omit<TypographyProps, "position"> {
@@ -48,11 +50,12 @@ export default styled(Typography)<SoftTypographyRootProps>(({ theme, ownerState 
         bold: fontWeightBold,
     };
 
-    const paletteColor = color && typeof color === "string" ? getPaletteColor(color, palette) : undefined;
-
     // styles for the typography with textGradient={true}
     const gradientStyles = () => {
-        const gradientColor = color && typeof color === "string" ? getGradientColor(color, palette) : undefined;
+        let gradientColor: PaletteGradient | undefined = undefined;
+        if (color && isObjKey<PaletteGradients>(color, palette.gradients)) {
+            gradientColor = palette.gradients[color]
+        }
 
         if (!gradientColor) return;
 
@@ -66,12 +69,24 @@ export default styled(Typography)<SoftTypographyRootProps>(({ theme, ownerState 
         };
     };
 
+    const getColor = (): string => {
+        if (!color) return "inherit";
+
+        if (isObjKey<PickByType<Palette, PaletteColor>>(color, palette))
+            return palette[color].main;
+
+        if (isObjKey<PickByType<Palette, TypeText>>(color, palette))
+            return palette[color].main;
+
+        return "inherit";
+    }
+
     return {
         opacity,
         textTransform,
         verticalAlign,
         textDecoration: "none",
-        color: paletteColor?.main ?? "inherit",
+        color: getColor(),
         ...(fontWeight && { fontWeight: fontWeights[fontWeight] && fontWeights[fontWeight] }),
         position: "relative",
         ...(textGradient && gradientStyles()),

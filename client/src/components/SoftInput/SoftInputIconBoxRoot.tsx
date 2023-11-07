@@ -14,9 +14,18 @@ Coded by www.creative-tim.com
 */
 
 // @mui material components
+import { InputBaseProps } from "@mui/material";
 import { styled } from "@mui/material/styles";
 
-export default styled("div")(({ theme, ownerState }) => {
+export type SoftInputIconBoxRootOwnerState = {
+    size: InputBaseProps["size"]
+}
+
+export type SoftInputIconBoxRootProps = {
+    ownerState: SoftInputIconBoxRootOwnerState
+}
+
+export default styled("div")<SoftInputIconBoxRootProps>(({ theme, ownerState }) => {
     const { palette, functions } = theme;
     const { size } = ownerState;
 
