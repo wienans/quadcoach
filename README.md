@@ -39,6 +39,16 @@ docker rm quadcoach-backend quadcoach-frontend
 docker image rm quadcoach-backend quadcoach-frontend
 ```
 
+### vs code extensions
+
+- For showing errors of eslint while coding using eslint extension
+Name: ESLint
+Id: dbaeumer.vscode-eslint
+Description: Integrates ESLint JavaScript into VS Code.
+Version: 2.4.2
+Publisher: Microsoft
+VS Marketplace Link: https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint
+
 ## Production Environment
 
 In Production Vite will build the React App and then we will copy the data into the docker container.
