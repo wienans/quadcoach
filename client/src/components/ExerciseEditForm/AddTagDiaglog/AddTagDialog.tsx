@@ -1,63 +1,58 @@
-import { Dialog, DialogActions, DialogContent, DialogTitle, Autocomplete, TextField } from "@mui/material";
+import {
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+} from "@mui/material";
 import { useState } from "react";
-import { Exercise } from "../../../api/quadcoachApi/domain";
 import TagAutocomplete from "./TagAutocomplete";
 import { SoftButton } from "../..";
 
 export type AddTagDialogProps = {
-    isOpen: boolean;
-    /**
-     * Called if closing dialog or cancel or add was clicked
-     * @param selectedExercises if add was clicked, variable has selected exercises
-     * @returns 
-     */
-    onConfirm: (selectedExercises?: Exercise[]) => void;
-    alreadyAddedExercises: Exercise[];
-}
+  isOpen: boolean;
+  /**
+   * Called if closing dialog or cancel or add was clicked
+   * @param selectedTags if add was clicked, variable has selected exercises
+   * @returns
+   */
+  onConfirm: (selectedTags?: string[]) => void;
+  alreadyAddedTags: string[];
+};
 
-const AddTagDialog = ({ isOpen, onConfirm, alreadyAddedExercises }: AddTagDialogProps): JSX.Element => {
-    const [selectedTags, setSelectedTags] = useState<Exercise[]>([])
+const AddTagDialog = ({
+  isOpen,
+  onConfirm,
+  alreadyAddedTags,
+}: AddTagDialogProps): JSX.Element => {
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
-    const onClose = (selectedTags?: Exercise[]) => {
-        onConfirm(selectedTags)
+  const onClose = (selectedTags?: string[]) => {
+    onConfirm(selectedTags);
 
-        // reset
-        setSelectedTags([])
-    }
+    // reset
+    setSelectedTags([]);
+  };
 
-
-    return (
-        <Dialog open={isOpen} onClose={() => onClose()}>
-            <DialogTitle>Add Tag</DialogTitle>
-            <DialogContent>
-                <TagAutocomplete
-                    selectedExercises={selectedTags}
-                    onTagSelectedChange={(selectedTags) => setSelectedTags(selectedTags)}
-                    alreadyAddedExercises={alreadyAddedExercises}
-                />
-                {/* <Autocomplete
-                    id="tag-text"
-                    freeSolo
-                    options={["Beater", "Chaser", "Keeper", "Warm-Up"]}
-                    renderInput={(params) =>
-                        <TextField
-                            {...params}
-                            autoFocus
-                            id="name"
-                            fullWidth
-                            value={newTag}
-                            onChange={(e) => { setNewTag(e.target.value) }}
-                            onBlur={(e) => { setNewTag(e.target.value) }}
-                        />
-                    }
-                /> */}
-            </DialogContent>
-            <DialogActions>
-                <SoftButton color="secondary" onClick={() => onClose()}>Cancel</SoftButton>
-                <SoftButton color="primary" onClick={() => onClose(selectedTags)}>Add</SoftButton>
-            </DialogActions>
-        </Dialog>
-    );
-}
+  return (
+    <Dialog open={isOpen} onClose={() => onClose()}>
+      <DialogTitle>Add Tag</DialogTitle>
+      <DialogContent>
+        <TagAutocomplete
+          selectedTags={selectedTags}
+          onTagSelectedChange={(selectedTags) => setSelectedTags(selectedTags)}
+          alreadyAddedTags={alreadyAddedTags}
+        />
+      </DialogContent>
+      <DialogActions>
+        <SoftButton color="secondary" onClick={() => onClose()}>
+          Cancel
+        </SoftButton>
+        <SoftButton color="primary" onClick={() => onClose(selectedTags)}>
+          Add
+        </SoftButton>
+      </DialogActions>
+    </Dialog>
+  );
+};
 
 export default AddTagDialog;

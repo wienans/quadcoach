@@ -1,1 +1,1 @@
-export { default } from "./AddTagDialog"
+export { default } from "./AddTagDialog";

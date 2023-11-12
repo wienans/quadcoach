@@ -84,7 +84,6 @@ const ExerciseEditForm = ({
   const { t } = useTranslation("ExerciseEditForm");
 
   const [openTagDialog, setOpenTagDialog] = useState<boolean>(false);
-  const [newTag, setNewTag] = useState<string>("");
   const [openMaterialDialog, setOpenMaterialDialog] = useState<boolean>(false);
   const [newMaterial, setNewMaterial] = useState<string>("");
   const [openRelatedDialog, setOpenRelatedDialog] = useState<boolean>(false);
@@ -183,20 +182,24 @@ const ExerciseEditForm = ({
 
     setOpenRelatedDialog(false);
   };
-  
-  const handleAddTagConfirm = (arrayHelpers: FieldArrayRenderProps, selectedExercisesToAdd?: Exercise[]) => {
-      if (selectedExercisesToAdd?.length) {
-          const notAddedExercises = uniqBy(selectedExercisesToAdd.filter(
-              newEx => !formik.values.relatedToExercises ||
-                  !formik.values.relatedToExercises.some(
-                      rel => rel._id == newEx._id
-                  )
-          ), "_id")
-          notAddedExercises.forEach(newEx => arrayHelpers.push(newEx))
-      }
 
-      setOpenTagDialog(false);
-  }
+  const handleAddTagConfirm = (
+    arrayHelpers: FieldArrayRenderProps,
+    selectedTagToAdd?: string[],
+  ) => {
+    console.log(selectedTagToAdd);
+    if (selectedTagToAdd?.length) {
+      const notAddedTags = selectedTagToAdd.filter(
+        (newTag) =>
+          !formik.values.tags ||
+          !formik.values.tags.some((rel) => rel == newTag),
+      );
+
+      notAddedTags.forEach((newTag) => arrayHelpers.push(newTag));
+    }
+
+    setOpenTagDialog(false);
+  };
 
   const handleDeleteRelatedExercise =
     (arrayHelpers: FieldArrayRenderProps, index: number) => (): void => {
@@ -526,82 +529,22 @@ const ExerciseEditForm = ({
                                 color="info"
                                 onClick={() => {
                                   setOpenTagDialog(true);
-                                  setNewTag("");
                                 }}
                               />
                               <AddTagDialog
                                 isOpen={openTagDialog}
-                                onConfirm={(selectedExercises) =>
-                                  handleAddTagConfirm(
-                                    arrayHelpers,
-                                    selectedExercises,
-                                  )
+                                onConfirm={(selectedTag) =>
+                                  handleAddTagConfirm(arrayHelpers, selectedTag)
                                 }
-                                alreadyAddedExercises={[
+                                alreadyAddedTags={[
+                                  ...(formik.values.tags
+                                    ? formik.values.tags
+                                    : []),
+                                  // ...(initialValues?.tags != null
+                                  //   ? [initialValues?.tags as string[]]
+                                  //   : []),
                                 ]}
                               />
-                              {/* <Dialog
-                                open={openTagDialog}
-                                onClose={() => {
-                                  setOpenTagDialog(false);
-                                }}
-                              >
-                                <DialogTitle>
-                                  {t(
-                                    "ExerciseEditForm:info.tags.addTagsDialog.title",
-                                  )}
-                                </DialogTitle>
-                                <DialogContent>
-                                  <Autocomplete
-                                    id="tag-text"
-                                    freeSolo
-                                    options={[
-                                      "Beater",
-                                      "Chaser",
-                                      "Keeper",
-                                      "Warm-Up",
-                                    ]}
-                                    renderInput={(params) => (
-                                      <TextField
-                                        {...params}
-                                        autoFocus
-                                        id="name"
-                                        fullWidth
-                                        value={newTag}
-                                        onChange={(e) => {
-                                          setNewTag(e.target.value);
-                                        }}
-                                        onBlur={(e) => {
-                                          setNewTag(e.target.value);
-                                        }}
-                                      />
-                                    )}
-                                  />
-                                </DialogContent>
-                                <DialogActions>
-                                  <SoftButton
-                                    color="success"
-                                    onClick={() => {
-                                      arrayHelpers.push(newTag);
-                                      setOpenTagDialog(false);
-                                    }}
-                                  >
-                                    {t(
-                                      "ExerciseEditForm:info.tags.addTagsDialog.confirm",
-                                    )}
-                                  </SoftButton>
-                                  <SoftButton
-                                    color="error"
-                                    onClick={() => {
-                                      setOpenTagDialog(false);
-                                    }}
-                                  >
-                                    {t(
-                                      "ExerciseEditForm:info.tags.addTagsDialog.cancel",
-                                    )}
-                                  </SoftButton>
-                                </DialogActions>
-                              </Dialog> */}
                             </div>
                           );
                         }}

@@ -104,6 +104,12 @@ export const exerciseApiSlice = quadcoachApi.injectEndpoints({
             }, new Array<TagDescription<TagType>>())
           : [TagType.exercise, TagType.block],
     }),
+    getAllTags: builder.query<string[], string>({
+      query: () => ({
+        url: `/api/tags`,
+        method: "get",
+      }),
+    }),
     getExercises: builder.query<Exercise[], GetExercisesRequest | undefined>({
       query: (request) => {
         const { maxPersons, minPersons, nameRegex, tagString } = request || {};
@@ -155,6 +161,7 @@ export const {
   useUpdateExerciseMutation,
   useAddExerciseMutation,
   useGetRelatedExercisesQuery,
+  useGetAllTagsQuery,
   useGetExercisesQuery,
   useLazyGetExercisesQuery,
 } = exerciseApiSlice;
