@@ -154,6 +154,7 @@ app.get("/api/search/:key", async (req, res) => {
 });
 
 app.get("/api/tags", async (req, res) => {
-  const result = await Exercise.find({}, { tags: 1 });
-  console.log(result);
+  // gets all distinct values of tags
+  const result = await Exercise.distinct("tags");
+  res.send(result);
 });
