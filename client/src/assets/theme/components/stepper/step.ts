@@ -12,15 +12,20 @@ Coded by www.creative-tim.com
 
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 */
-import { ComponentsOverrides, ComponentsProps, ComponentsVariants, Theme } from "@mui/material";
+import {
+  ComponentsOverrides,
+  ComponentsProps,
+  ComponentsVariants,
+  Theme,
+} from "@mui/material";
 
 // Soft UI Dashboard React helper functions
 import pxToRem from "../../functions/pxToRem";
 
 const step: {
-  defaultProps?: ComponentsProps['MuiStep'];
-  styleOverrides?: ComponentsOverrides<Theme>['MuiStep'];
-  variants?: ComponentsVariants['MuiStep'];
+  defaultProps?: ComponentsProps["MuiStep"];
+  styleOverrides?: ComponentsOverrides<Theme>["MuiStep"];
+  variants?: ComponentsVariants["MuiStep"];
 } = {
   styleOverrides: {
     root: {

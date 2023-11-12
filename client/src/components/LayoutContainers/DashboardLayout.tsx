@@ -12,44 +12,37 @@ Coded by www.creative-tim.com
 
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 */
-import { useAppSelector } from "../../store/hooks";
 
 // prop-types is a library for typechecking of props.
 import PropTypes from "prop-types";
 
 // Soft UI Dashboard React components
 import SoftBox from "../SoftBox";
+import { ReactNode } from "react";
 
 // Soft UI Dashboard React context
 // import { useSoftUIController, setLayout } from "context";
 
-function DashboardLayout({ children }) {
-    const miniSidenav = useAppSelector(state => state.layout.miniSidenav)
+export type DashboardLayoutProps = {
+  children: ReactNode;
+};
 
-    return (
-        <SoftBox
-            sx={({ breakpoints, transitions, functions: { pxToRem } }) => ({
-                p: 3,
-                position: "relative",
-
-                // Move content with Sidenav
-                // [breakpoints.up("xl")]: {
-                //     marginLeft: miniSidenav ? pxToRem(0) : pxToRem(274),
-                //     transition: transitions.create(["margin-left", "margin-right"], {
-                //         easing: transitions.easing.easeInOut,
-                //         duration: transitions.duration.standard,
-                //     }),
-                // },
-            })}
-        >
-            {children}
-        </SoftBox>
-    );
-}
+const DashboardLayout = ({ children }: DashboardLayoutProps) => {
+  return (
+    <SoftBox
+      sx={{
+        p: 3,
+        position: "relative",
+      }}
+    >
+      {children}
+    </SoftBox>
+  );
+};
 
 // Typechecking props for the DashboardLayout
 DashboardLayout.propTypes = {
-    children: PropTypes.node.isRequired,
+  children: PropTypes.node.isRequired,
 };
 
 export default DashboardLayout;

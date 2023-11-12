@@ -12,7 +12,13 @@ Coded by www.creative-tim.com
 
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 */
-import { ComponentsOverrides, ComponentsProps, ComponentsVariants, SimplePaletteColorOptions, Theme } from "@mui/material";
+import {
+  ComponentsOverrides,
+  ComponentsProps,
+  ComponentsVariants,
+  SimplePaletteColorOptions,
+  Theme,
+} from "@mui/material";
 
 // Soft UI Dashboard React base styles
 import colors from "../../base/colors";
@@ -27,9 +33,9 @@ const { borderRadius } = borders;
 const { size } = typography;
 
 const menuItem: {
-  defaultProps?: ComponentsProps['MuiMenuItem'];
-  styleOverrides?: ComponentsOverrides<Theme>['MuiMenuItem'];
-  variants?: ComponentsVariants['MuiMenuItem'];
+  defaultProps?: ComponentsProps["MuiMenuItem"];
+  styleOverrides?: ComponentsOverrides<Theme>["MuiMenuItem"];
+  variants?: ComponentsVariants["MuiMenuItem"];
 } = {
   styleOverrides: {
     root: {
@@ -41,10 +47,11 @@ const menuItem: {
       color: text!.main,
       transition: "background-color 300ms ease, color 300ms ease",
 
-      "&:hover, &:focus, &.Mui-selected, &.Mui-selected:hover, &.Mui-selected:focus": {
-        backgroundColor: (light as SimplePaletteColorOptions).main,
-        color: (dark as SimplePaletteColorOptions).main,
-      },
+      "&:hover, &:focus, &.Mui-selected, &.Mui-selected:hover, &.Mui-selected:focus":
+        {
+          backgroundColor: (light as SimplePaletteColorOptions).main,
+          color: (dark as SimplePaletteColorOptions).main,
+        },
     },
   },
 };

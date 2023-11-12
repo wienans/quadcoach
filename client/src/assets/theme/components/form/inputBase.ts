@@ -12,7 +12,13 @@ Coded by www.creative-tim.com
 
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 */
-import { ComponentsOverrides, ComponentsProps, ComponentsVariants, SimplePaletteColorOptions, Theme } from "@mui/material";
+import {
+  ComponentsOverrides,
+  ComponentsProps,
+  ComponentsVariants,
+  SimplePaletteColorOptions,
+  Theme,
+} from "@mui/material";
 
 // Soft UI Dashboard React Base Styles
 import colors from "../../base/colors";
@@ -28,9 +34,9 @@ const { size, fontWeightRegular } = typography;
 const { borderWidth, borderRadius } = borders;
 
 const inputBase: {
-  defaultProps?: ComponentsProps['MuiInputBase'];
-  styleOverrides?: ComponentsOverrides<Theme>['MuiInputBase'];
-  variants?: ComponentsVariants['MuiInputBase'];
+  defaultProps?: ComponentsProps["MuiInputBase"];
+  styleOverrides?: ComponentsOverrides<Theme>["MuiInputBase"];
+  variants?: ComponentsVariants["MuiInputBase"];
 } = {
   styleOverrides: {
     root: {
@@ -43,12 +49,15 @@ const inputBase: {
       fontWeight: `${fontWeightRegular} !important`,
       lineHeight: "1.4 !important",
       color: `${grey![700]} !important`,
-      backgroundColor: `${(white as SimplePaletteColorOptions).main} !important`,
+      backgroundColor: `${
+        (white as SimplePaletteColorOptions).main
+      } !important`,
       backgroundClip: "padding-box !important",
       border: `${borderWidth[1]} solid ${inputColors.borderColor.main}`,
-      appearance: important("none"),//"none !important",
+      appearance: important("none"), //"none !important",
       borderRadius: borderRadius.md,
-      transition: "box-shadow 150ms ease, border-color 150ms ease, padding 150ms ease !important",
+      transition:
+        "box-shadow 150ms ease, border-color 150ms ease, padding 150ms ease !important",
     },
 
     input: {

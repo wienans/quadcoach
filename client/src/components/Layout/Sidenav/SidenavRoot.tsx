@@ -18,14 +18,17 @@ import Drawer from "@mui/material/Drawer";
 import { styled } from "@mui/material/styles";
 
 export type SidenavRootOwnerState = {
-  miniSidenav: boolean
-}
+  miniSidenav: boolean;
+};
 
 export type SidenavRootProps = {
-  ownerState: SidenavRootOwnerState
-}
+  ownerState: SidenavRootOwnerState;
+};
 
-export default styled(Drawer)<SidenavRootProps>(({ theme, ownerState }) => {
+const SidenavRoot = styled(Drawer)<SidenavRootProps>(({
+  theme,
+  ownerState,
+}) => {
   const { boxShadows, transitions, functions } = theme;
   const { miniSidenav } = ownerState;
 
@@ -33,15 +36,13 @@ export default styled(Drawer)<SidenavRootProps>(({ theme, ownerState }) => {
   const { pxToRem } = functions;
 
   // styles for the sidenav when miniSidenav={false}
-  const drawerOpenStyles = () => (
-    {
-      transform: "translateX(0)",
-      transition: transitions.create("transform", {
-        easing: transitions.easing.sharp,
-        duration: transitions.duration.shorter,
-      })
-    }
-  );
+  const drawerOpenStyles = () => ({
+    transform: "translateX(0)",
+    transition: transitions.create("transform", {
+      easing: transitions.easing.sharp,
+      duration: transitions.duration.shorter,
+    }),
+  });
 
   // styles for the sidenav when miniSidenav={true}
   const drawerCloseStyles = () => ({
@@ -49,7 +50,7 @@ export default styled(Drawer)<SidenavRootProps>(({ theme, ownerState }) => {
     transition: transitions.create("transform", {
       easing: transitions.easing.sharp,
       duration: transitions.duration.shorter,
-    })
+    }),
   });
   return {
     "& .MuiDrawer-paper": {
@@ -60,3 +61,5 @@ export default styled(Drawer)<SidenavRootProps>(({ theme, ownerState }) => {
     },
   };
 });
+
+export default SidenavRoot;

@@ -48,15 +48,16 @@ import { PickByType } from "../../../helpers/typeHelpers";
 
 // create a selector when selecting two or properties at once for better performance
 const selectMiniSidenav = (state: RootState) => state.layout.miniSidenav;
-const selectTransparentSidenav = (state: RootState) => state.layout.transparentSidenav;
+const selectTransparentSidenav = (state: RootState) =>
+  state.layout.transparentSidenav;
 const sidenavSelector = createSelector(
   selectMiniSidenav,
   selectTransparentSidenav,
   (miniSidenav, transparentSidenav) => ({
     miniSidenav,
-    transparentSidenav
-  })
-)
+    transparentSidenav,
+  }),
+);
 
 type SidebarNavRouteCollapse = {
   type: "collapse";
@@ -64,39 +65,48 @@ type SidebarNavRouteCollapse = {
   href?: string;
   route?: string;
   name: string;
-  icon: ReactNode,
+  icon: ReactNode;
   noCollapse?: boolean;
   regExp?: RegExp;
   /**
    * Currently not used, later for routes, which can only be called by authenticated user.
    */
   protected?: boolean;
-}
+};
 
-function isSidebarNavRouteCollapse<T>(route: T | SidebarNavRouteCollapse): route is SidebarNavRouteCollapse {
-  return (route as SidebarNavRouteCollapse).type === "collapse"
+function isSidebarNavRouteCollapse<T>(
+  route: T | SidebarNavRouteCollapse,
+): route is SidebarNavRouteCollapse {
+  return (route as SidebarNavRouteCollapse).type === "collapse";
 }
 
 type SidebarNavRouteDivider = {
   type: "divider";
   key: string;
-}
+};
 
-function isSidebarNavRouteDivider<T>(route: T | SidebarNavRouteDivider): route is SidebarNavRouteDivider {
-  return (route as SidebarNavRouteDivider).type === "divider"
+function isSidebarNavRouteDivider<T>(
+  route: T | SidebarNavRouteDivider,
+): route is SidebarNavRouteDivider {
+  return (route as SidebarNavRouteDivider).type === "divider";
 }
 
 type SidebarNavRouteTitle = {
   type: "title";
   key: string;
   title: string;
+};
+
+function isSidebarNavRouteTitle<T>(
+  route: T | SidebarNavRouteTitle,
+): route is SidebarNavRouteTitle {
+  return (route as SidebarNavRouteTitle).type === "title";
 }
 
-function isSidebarNavRouteTitle<T>(route: T | SidebarNavRouteTitle): route is SidebarNavRouteTitle {
-  return (route as SidebarNavRouteTitle).type === "title"
-}
-
-export type SidebarNavRoute = SidebarNavRouteCollapse | SidebarNavRouteDivider | SidebarNavRouteTitle;
+export type SidebarNavRoute =
+  | SidebarNavRouteCollapse
+  | SidebarNavRouteDivider
+  | SidebarNavRouteTitle;
 
 export interface SidenavProps extends Omit<DrawerProps, "color"> {
   color: keyof PickByType<Palette, PaletteColor>;
@@ -105,19 +115,34 @@ export interface SidenavProps extends Omit<DrawerProps, "color"> {
   routes: SidebarNavRoute[];
 }
 
-const Sidenav = ({ color, brand, brandName, routes, ...rest }: SidenavProps) => {
+const Sidenav = ({
+  color,
+  brand,
+  brandName,
+  routes,
+  ...rest
+}: SidenavProps) => {
   const dispatch = useAppDispatch();
-  const { miniSidenav } = useAppSelector(sidenavSelector)
+  const { miniSidenav } = useAppSelector(sidenavSelector);
   const location = useLocation();
   const { pathname } = location;
   const collapseName = pathname.split("/").slice(1)[0];
 
   const closeSidenav = () => dispatch(setMiniSideNav(true));
 
-  const isRoutePropsActive = (key: string, regExp?: RegExp) => regExp ? regExp.test(pathname) : key === collapseName;
+  const isRoutePropsActive = (key: string, regExp?: RegExp) =>
+    regExp ? regExp.test(pathname) : key === collapseName;
 
-  const renderCollapseRoute = ({ href, route, key, name, icon, noCollapse, regExp }: SidebarNavRouteCollapse): JSX.Element | undefined => {
-    const isActive = isRoutePropsActive(key, regExp)
+  const renderCollapseRoute = ({
+    href,
+    route,
+    key,
+    name,
+    icon,
+    noCollapse,
+    regExp,
+  }: SidebarNavRouteCollapse): JSX.Element | undefined => {
+    const isActive = isRoutePropsActive(key, regExp);
 
     if (href) {
       return (
@@ -136,7 +161,7 @@ const Sidenav = ({ color, brand, brandName, routes, ...rest }: SidenavProps) => 
             noCollapse={noCollapse}
           />
         </Link>
-      )
+      );
     }
 
     if (route) {
@@ -151,9 +176,9 @@ const Sidenav = ({ color, brand, brandName, routes, ...rest }: SidenavProps) => 
             noCollapse={noCollapse}
           />
         </NavLink>
-      )
+      );
     }
-  }
+  };
 
   const renderTitleRoute = ({ title, key }: SidebarNavRouteTitle) => {
     return (
@@ -171,14 +196,14 @@ const Sidenav = ({ color, brand, brandName, routes, ...rest }: SidenavProps) => 
       >
         {title}
       </SoftTypography>
-    )
-  }
+    );
+  };
 
-  const renderDividerRoute = ({ key }: SidebarNavRouteDivider): JSX.Element | undefined => {
-    return (
-      <Divider key={key} />
-    )
-  }
+  const renderDividerRoute = ({
+    key,
+  }: SidebarNavRouteDivider): JSX.Element | undefined => {
+    return <Divider key={key} />;
+  };
 
   const renderRoute = (route: SidebarNavRoute): JSX.Element | undefined => {
     if (isSidebarNavRouteCollapse(route)) return renderCollapseRoute(route);
@@ -186,7 +211,7 @@ const Sidenav = ({ color, brand, brandName, routes, ...rest }: SidenavProps) => 
     if (isSidebarNavRouteTitle(route)) return renderTitleRoute(route);
 
     if (isSidebarNavRouteDivider(route)) return renderDividerRoute(route);
-  }
+  };
 
   return (
     <SidenavRoot {...rest} variant="permanent" ownerState={{ miniSidenav }}>
@@ -204,7 +229,14 @@ const Sidenav = ({ color, brand, brandName, routes, ...rest }: SidenavProps) => 
           </SoftTypography>
         </SoftBox>
         <SoftBox component={NavLink} to="/" display="flex" alignItems="center">
-          {brand && <SoftBox component="img" src={brand} alt="Soft UI Logo" width="2rem" />}
+          {brand && (
+            <SoftBox
+              component="img"
+              src={brand}
+              alt="Soft UI Logo"
+              width="2rem"
+            />
+          )}
           <SoftBox
             width={!brandName ? "100%" : undefined}
             sx={(theme) => sidenavLogoLabel(theme, { miniSidenav })}
@@ -216,10 +248,10 @@ const Sidenav = ({ color, brand, brandName, routes, ...rest }: SidenavProps) => 
         </SoftBox>
       </SoftBox>
       <Divider />
-      <List>{routes.map(route => renderRoute(route))}</List>
+      <List>{routes.map((route) => renderRoute(route))}</List>
     </SidenavRoot>
   );
-}
+};
 
 // Setting default values for the props of Sidenav
 Sidenav.defaultProps = {
@@ -229,7 +261,15 @@ Sidenav.defaultProps = {
 
 // Typechecking props for the Sidenav
 Sidenav.propTypes = {
-  color: PropTypes.oneOf(["primary", "secondary", "info", "success", "warning", "error", "dark"]),
+  color: PropTypes.oneOf([
+    "primary",
+    "secondary",
+    "info",
+    "success",
+    "warning",
+    "error",
+    "dark",
+  ]),
   brand: PropTypes.string,
   brandName: PropTypes.string.isRequired,
   routes: PropTypes.arrayOf(PropTypes.object).isRequired,

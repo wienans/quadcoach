@@ -12,7 +12,13 @@ Coded by www.creative-tim.com
 
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 */
-import { ComponentsOverrides, ComponentsProps, ComponentsVariants, SimplePaletteColorOptions, Theme } from "@mui/material";
+import {
+  ComponentsOverrides,
+  ComponentsProps,
+  ComponentsVariants,
+  SimplePaletteColorOptions,
+  Theme,
+} from "@mui/material";
 
 // Soft UI Dashboard React base styles
 import colors from "../../base/colors";
@@ -29,9 +35,9 @@ const { borderWidth } = borders;
 const { md } = boxShadows;
 
 const switchButton: {
-  defaultProps?: ComponentsProps['MuiSwitch'];
-  styleOverrides?: ComponentsOverrides<Theme>['MuiSwitch'];
-  variants?: ComponentsVariants['MuiSwitch'];
+  defaultProps?: ComponentsProps["MuiSwitch"];
+  styleOverrides?: ComponentsOverrides<Theme>["MuiSwitch"];
+  variants?: ComponentsVariants["MuiSwitch"];
 } = {
   defaultProps: {
     disableRipple: true,
@@ -68,7 +74,10 @@ const switchButton: {
       },
 
       "&.Mui-focusVisible .MuiSwitch-thumb": {
-        backgroundImage: linearGradient(gradients.info.main, gradients.info.state),
+        backgroundImage: linearGradient(
+          gradients.info.main,
+          gradients.info.state,
+        ),
       },
     },
 
@@ -82,7 +91,9 @@ const switchButton: {
 
     track: {
       backgroundColor: rgba(gradients.dark.state, 0.1),
-      border: `${borderWidth[1]} solid ${(light as SimplePaletteColorOptions).main}`,
+      border: `${borderWidth[1]} solid ${
+        (light as SimplePaletteColorOptions).main
+      }`,
       borderRadius: pxToRem(160),
       opacity: 1,
       transition: `background-color 250ms ease, border-color 200ms ease`,

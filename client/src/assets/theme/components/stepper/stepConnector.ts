@@ -12,7 +12,13 @@ Coded by www.creative-tim.com
 
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 */
-import { ComponentsOverrides, ComponentsProps, ComponentsVariants, Theme, SimplePaletteColorOptions } from "@mui/material";
+import {
+  ComponentsOverrides,
+  ComponentsProps,
+  ComponentsVariants,
+  Theme,
+  SimplePaletteColorOptions,
+} from "@mui/material";
 
 // Soft UI Dashboard React base styles
 import borders from "../../base/borders";
@@ -22,9 +28,9 @@ const { dark } = colors;
 const { borderWidth, borderColor } = borders;
 
 const stepConnector: {
-  defaultProps?: ComponentsProps['MuiStepConnector'];
-  styleOverrides?: ComponentsOverrides<Theme>['MuiStepConnector'];
-  variants?: ComponentsVariants['MuiStepConnector'];
+  defaultProps?: ComponentsProps["MuiStepConnector"];
+  styleOverrides?: ComponentsOverrides<Theme>["MuiStepConnector"];
+  variants?: ComponentsVariants["MuiStepConnector"];
 } = {
   styleOverrides: {
     root: {

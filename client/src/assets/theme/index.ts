@@ -77,20 +77,26 @@ import svgIcon from "./components/svgIcon";
 import link from "./components/link";
 
 export type ThemeFunctions = {
-  boxShadow: (offset: number[], radius: number[], color: string | number | chroma.Color, opacity: number, inset?: string) => string;
+  boxShadow: (
+    offset: number[],
+    radius: number[],
+    color: string | number | chroma.Color,
+    opacity: number,
+    inset?: string,
+  ) => string;
   hexToRgb: (color: string | number | chroma.Color) => string;
   linearGradient: (color: string, colorState: string, angle?: number) => string;
   pxToRem: (number: number, baseNumber?: number | undefined) => string;
   rgba: (color: string | number | chroma.Color, opacity: number) => string;
-}
+};
 
-declare module '@mui/material/styles' {
+declare module "@mui/material/styles" {
   interface Theme {
-    functions: ThemeFunctions
+    functions: ThemeFunctions;
   }
   // allow configuration using `createTheme`
   interface ThemeOptions {
-    functions: ThemeFunctions
+    functions: ThemeFunctions;
   }
 }
 

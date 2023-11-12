@@ -1,153 +1,155 @@
 import { PaletteColor } from "@mui/material";
 
 export type PaletteGradient = {
-    main: string;
-    state: string;
-}
+  main: string;
+  state: string;
+};
 
 export type PaletteGradients = {
-    primary: PaletteGradient;
-    secondary: PaletteGradient;
-    info: PaletteGradient;
-    success: PaletteGradient;
-    warning: PaletteGradient;
-    error: PaletteGradient;
-    light: PaletteGradient;
-    dark: PaletteGradient;
-}
+  primary: PaletteGradient;
+  secondary: PaletteGradient;
+  info: PaletteGradient;
+  success: PaletteGradient;
+  warning: PaletteGradient;
+  error: PaletteGradient;
+  light: PaletteGradient;
+  dark: PaletteGradient;
+};
 
 export type PaletteSocialMediaColor = {
-    main: string;
-    dark: string;
-}
+  main: string;
+  dark: string;
+};
 
 export type PaletteSocialMediaColors = {
-    facebook: PaletteSocialMediaColor;
-    twitter: PaletteSocialMediaColor;
-    instagram: PaletteSocialMediaColor;
-    linkedin: PaletteSocialMediaColor;
-    pinterest: PaletteSocialMediaColor;
-    youtube: PaletteSocialMediaColor;
-    vimeo: PaletteSocialMediaColor;
-    slack: PaletteSocialMediaColor;
-    dribbble: PaletteSocialMediaColor;
-    github: PaletteSocialMediaColor;
-    reddit: PaletteSocialMediaColor;
-    tumblr: PaletteSocialMediaColor;
-}
+  facebook: PaletteSocialMediaColor;
+  twitter: PaletteSocialMediaColor;
+  instagram: PaletteSocialMediaColor;
+  linkedin: PaletteSocialMediaColor;
+  pinterest: PaletteSocialMediaColor;
+  youtube: PaletteSocialMediaColor;
+  vimeo: PaletteSocialMediaColor;
+  slack: PaletteSocialMediaColor;
+  dribbble: PaletteSocialMediaColor;
+  github: PaletteSocialMediaColor;
+  reddit: PaletteSocialMediaColor;
+  tumblr: PaletteSocialMediaColor;
+};
 
 export type AlertColor = {
-    main: string;
-    state: string;
-    border: string;
-}
+  main: string;
+  state: string;
+  border: string;
+};
 
 export type AlertColors = {
-    primary: AlertColor;
-    secondary: AlertColor;
-    info: AlertColor;
-    success: AlertColor;
-    warning: AlertColor;
-    error: AlertColor;
-    light: AlertColor;
-    dark: AlertColor;
-}
+  primary: AlertColor;
+  secondary: AlertColor;
+  info: AlertColor;
+  success: AlertColor;
+  warning: AlertColor;
+  error: AlertColor;
+  light: AlertColor;
+  dark: AlertColor;
+};
 
 export type BadgeColor = {
-    background: string,
-    text: string,
-}
+  background: string;
+  text: string;
+};
 
 export type BadgeColors = {
-    primary: BadgeColor;
-    secondary: BadgeColor;
-    info: BadgeColor;
-    success: BadgeColor;
-    warning: BadgeColor;
-    error: BadgeColor;
-    light: BadgeColor;
-    dark: BadgeColor;
-}
+  primary: BadgeColor;
+  secondary: BadgeColor;
+  info: BadgeColor;
+  success: BadgeColor;
+  warning: BadgeColor;
+  error: BadgeColor;
+  light: BadgeColor;
+  dark: BadgeColor;
+};
 
 export type PaletteInputColorsBorderColor = {
-    main: string;
-    focus: string;
-}
+  main: string;
+  focus: string;
+};
 
 export type PaletteInputColors = {
-    borderColor: PaletteInputColorsBorderColor;
-    boxShadow: string,
-    error: string,
-    success: string,
-}
+  borderColor: PaletteInputColorsBorderColor;
+  boxShadow: string;
+  error: string;
+  success: string;
+};
 
 export type PaletteSliderColorsThumb = {
-    borderColor: string;
-}
+  borderColor: string;
+};
 
 export type PaletteSliderColors = {
-    thumb: PaletteSliderColorsThumb;
-}
+  thumb: PaletteSliderColorsThumb;
+};
 
 export type PaletteCircleSliderColors = {
-    background: string;
-}
+  background: string;
+};
 
 export type PaletteTabsIndicator = {
-    boxShadow: string;
-}
+  boxShadow: string;
+};
 
 export type PaletteTabs = {
-    indicator: PaletteTabsIndicator;
+  indicator: PaletteTabsIndicator;
+};
+
+export function isPaletteColor<T>(
+  type: PaletteColor | T,
+): type is PaletteColor {
+  return type != null && (type as PaletteColor)?.main != null;
 }
 
-export function isPaletteColor<T>(type: PaletteColor | T): type is PaletteColor {
-    return type != null && (type as PaletteColor)?.main != null
-}
+declare module "@mui/material/styles/createPalette" {
+  interface Palette {
+    transparent: PaletteColor;
+    white: PaletteColor;
+    black: PaletteColor;
+    light: PaletteColor;
+    dark: PaletteColor;
+    gradients: PaletteGradients;
+    socialMediaColors: PaletteSocialMediaColors;
+    alertColors: AlertColors;
+    badgeColors: BadgeColors;
+    inputColors: PaletteInputColors;
+    sliderColors: PaletteSliderColors;
+    circleSliderColors: PaletteCircleSliderColors;
+    tabs: PaletteTabs;
+  }
 
-declare module '@mui/material/styles/createPalette' {
-    interface Palette {
-        transparent: PaletteColor;
-        white: PaletteColor;
-        black: PaletteColor;
-        light: PaletteColor;
-        dark: PaletteColor;
-        gradients: PaletteGradients;
-        socialMediaColors: PaletteSocialMediaColors;
-        alertColors: AlertColors;
-        badgeColors: BadgeColors;
-        inputColors: PaletteInputColors;
-        sliderColors: PaletteSliderColors;
-        circleSliderColors: PaletteCircleSliderColors;
-        tabs: PaletteTabs;
-    }
+  interface PaletteOptions {
+    transparent: PaletteColorOptions;
+    white: PaletteColorOptions;
+    black: PaletteColorOptions;
+    light: PaletteColorOptions;
+    dark: PaletteColorOptions;
+    gradients: PaletteGradients;
+    socialMediaColors: PaletteSocialMediaColors;
+    alertColors: AlertColors;
+    badgeColors: BadgeColors;
+    inputColors: PaletteInputColors;
+    sliderColors: PaletteSliderColors;
+    circleSliderColors: PaletteCircleSliderColors;
+    tabs: PaletteTabs;
+  }
 
-    interface PaletteOptions {
-        transparent: PaletteColorOptions;
-        white: PaletteColorOptions;
-        black: PaletteColorOptions;
-        light: PaletteColorOptions;
-        dark: PaletteColorOptions;
-        gradients: PaletteGradients;
-        socialMediaColors: PaletteSocialMediaColors;
-        alertColors: AlertColors;
-        badgeColors: BadgeColors;
-        inputColors: PaletteInputColors;
-        sliderColors: PaletteSliderColors;
-        circleSliderColors: PaletteCircleSliderColors;
-        tabs: PaletteTabs;
-    }
+  interface TypeText {
+    main: string;
+    focus: string;
+  }
 
-    interface TypeText {
-        main: string;
-        focus: string;
-    }
+  interface PaletteColor {
+    focus?: string;
+  }
 
-    interface PaletteColor {
-        focus?: string;
-    }
-
-    interface SimplePaletteColorOptions {
-        focus?: string;
-    }
+  interface SimplePaletteColorOptions {
+    focus?: string;
+  }
 }

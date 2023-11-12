@@ -12,12 +12,17 @@ Coded by www.creative-tim.com
 
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 */
-import { ComponentsOverrides, ComponentsProps, ComponentsVariants, Theme } from "@mui/material";
+import {
+  ComponentsOverrides,
+  ComponentsProps,
+  ComponentsVariants,
+  Theme,
+} from "@mui/material";
 
 const appBar: {
-  defaultProps?: ComponentsProps['MuiAppBar'];
-  styleOverrides?: ComponentsOverrides<Theme>['MuiAppBar'];
-  variants?: ComponentsVariants['MuiAppBar'];
+  defaultProps?: ComponentsProps["MuiAppBar"];
+  styleOverrides?: ComponentsOverrides<Theme>["MuiAppBar"];
+  variants?: ComponentsVariants["MuiAppBar"];
 } = {
   defaultProps: {
     color: "transparent",

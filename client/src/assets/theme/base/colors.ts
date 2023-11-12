@@ -13,9 +13,15 @@ Coded by www.creative-tim.com
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 */
 
-import { Palette, PaletteColor, PaletteOptions, SimplePaletteColorOptions } from "@mui/material";
-import "./paletteTypes"
-import { PaletteGradient } from "./paletteTypes";
+import {
+  Palette,
+  PaletteColor,
+  PaletteOptions,
+  SimplePaletteColorOptions,
+} from "@mui/material";
+import "./paletteTypes";
+import { PaletteGradient, PaletteGradients } from "./paletteTypes";
+import { isObjKey } from "../../../helpers/typeHelpers";
 
 /**
  * The base colors for the Soft UI Dashboard React.
@@ -320,6 +326,20 @@ const colors: PaletteOptions = {
 
 export default colors;
 
-export const getPaletteColor = (color: string, palette: Palette): PaletteColor | undefined => Object.entries(palette).find(([key, value]) => key === color && (value as PaletteColor)?.main != null)?.[1]
+export const getPaletteColor = (
+  color: string,
+  palette: Palette,
+): PaletteColor | undefined =>
+  Object.entries(palette).find(
+    ([key, value]) => key === color && (value as PaletteColor)?.main != null,
+  )?.[1];
 
-export const getGradientColor = (color: string, palette: Palette): PaletteGradient | undefined => Object.entries(palette.gradients).find(([key]) => key === color)?.[1]
+// export const getGradientColor = (color: string, palette: Palette): PaletteGradient | undefined => Object.entries(palette.gradients).find(([key]) => key === color)?.[1]
+export const getGradientColor = (
+  color: string,
+  palette: Palette,
+): PaletteGradient | undefined => {
+  if (!isObjKey<PaletteGradients>(color, palette.gradients)) return undefined;
+
+  return palette.gradients[color];
+};

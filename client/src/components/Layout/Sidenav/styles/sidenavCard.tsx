@@ -5,7 +5,7 @@ import { PaletteGradients } from "../../../../assets/theme/base/paletteTypes";
 
 export type CardOwnerState = {
   miniSidenav: boolean;
-}
+};
 
 function card(theme: Theme, ownerState: CardOwnerState) {
   const { borders, functions, transitions, breakpoints } = theme;
@@ -33,8 +33,8 @@ function card(theme: Theme, ownerState: CardOwnerState) {
 }
 
 export type CardContentOwnerState = {
-  sidenavColor: "default" | keyof PaletteGradients
-}
+  sidenavColor: "default" | keyof PaletteGradients;
+};
 
 function cardContent(theme: Theme, ownerState: CardContentOwnerState) {
   const { palette, functions, borders } = theme;
@@ -57,7 +57,10 @@ function cardContent(theme: Theme, ownerState: CardContentOwnerState) {
       backgroundImage:
         sidenavColor === "default"
           ? linearGradient(gradients.secondary.main, gradients.secondary.state)
-          : linearGradient(gradients[sidenavColor].main, gradients[sidenavColor].state),
+          : linearGradient(
+              gradients[sidenavColor].main,
+              gradients[sidenavColor].state,
+            ),
       display: "block",
       height: "100%",
       width: "100%",
@@ -90,8 +93,8 @@ const cardIconBox: SxProps<Theme> = {
 };
 
 export type CardIconOwnerState = {
-  sidenavColor: "default" | keyof PaletteGradients
-}
+  sidenavColor: "default" | keyof PaletteGradients;
+};
 
 function cardIcon(theme: Theme, ownerState: CardIconOwnerState) {
   const { functions, palette } = theme;
@@ -104,7 +107,10 @@ function cardIcon(theme: Theme, ownerState: CardIconOwnerState) {
     backgroundImage:
       sidenavColor === "default"
         ? linearGradient(gradients.dark.main, gradients.dark.state)
-        : linearGradient(gradients[sidenavColor].main, gradients[sidenavColor].state),
+        : linearGradient(
+            gradients[sidenavColor].main,
+            gradients[sidenavColor].state,
+          ),
     WebkitBackgroundClip: "text",
     WebkitTextFillColor: transparent.main,
   };

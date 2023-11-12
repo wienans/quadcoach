@@ -12,7 +12,13 @@ Coded by www.creative-tim.com
 
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 */
-import { ComponentsOverrides, ComponentsProps, ComponentsVariants, SimplePaletteColorOptions, Theme } from "@mui/material";
+import {
+  ComponentsOverrides,
+  ComponentsProps,
+  ComponentsVariants,
+  SimplePaletteColorOptions,
+  Theme,
+} from "@mui/material";
 
 // Soft UI Dashboard React Base Styles
 import colors from "../../base/colors";
@@ -26,13 +32,13 @@ const { black, white } = colors;
 const { borderWidth, borderRadius } = borders;
 const { xxl } = boxShadows;
 
-const whiteSimplePaletteColorOptions = white as SimplePaletteColorOptions
-const blackSimplePaletteColorOptions = black as SimplePaletteColorOptions
+const whiteSimplePaletteColorOptions = white as SimplePaletteColorOptions;
+const blackSimplePaletteColorOptions = black as SimplePaletteColorOptions;
 
 const card: {
-  defaultProps?: ComponentsProps['MuiCard'];
-  styleOverrides?: ComponentsOverrides<Theme>['MuiCard'];
-  variants?: ComponentsVariants['MuiCard'];
+  defaultProps?: ComponentsProps["MuiCard"];
+  styleOverrides?: ComponentsOverrides<Theme>["MuiCard"];
+  variants?: ComponentsVariants["MuiCard"];
 } = {
   styleOverrides: {
     root: {
@@ -43,7 +49,10 @@ const card: {
       wordWrap: "break-word",
       backgroundColor: whiteSimplePaletteColorOptions.main,
       backgroundClip: "border-box",
-      border: `${borderWidth[0]} solid ${rgba(blackSimplePaletteColorOptions.main, 0.125)}`,
+      border: `${borderWidth[0]} solid ${rgba(
+        blackSimplePaletteColorOptions.main,
+        0.125,
+      )}`,
       borderRadius: borderRadius.xl,
       boxShadow: xxl,
     },

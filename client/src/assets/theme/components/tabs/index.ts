@@ -11,7 +11,13 @@ Coded by www.creative-tim.com
  =========================================================
 
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-*/import { ComponentsOverrides, ComponentsProps, ComponentsVariants, Theme, SimplePaletteColorOptions } from "@mui/material";
+*/ import {
+  ComponentsOverrides,
+  ComponentsProps,
+  ComponentsVariants,
+  Theme,
+  SimplePaletteColorOptions,
+} from "@mui/material";
 
 // Soft UI Dashboard React base styles
 import colors from "../../base/colors";
@@ -27,9 +33,9 @@ const { borderRadius } = borders;
 const { tabsBoxShadow } = boxShadows;
 
 const tabs: {
-  defaultProps?: ComponentsProps['MuiTabs'];
-  styleOverrides?: ComponentsOverrides<Theme>['MuiTabs'];
-  variants?: ComponentsVariants['MuiTabs'];
+  defaultProps?: ComponentsProps["MuiTabs"];
+  styleOverrides?: ComponentsOverrides<Theme>["MuiTabs"];
+  variants?: ComponentsVariants["MuiTabs"];
 } = {
   styleOverrides: {
     root: {

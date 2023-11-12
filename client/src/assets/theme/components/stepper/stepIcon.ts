@@ -12,7 +12,13 @@ Coded by www.creative-tim.com
 
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 */
-import { ComponentsOverrides, ComponentsProps, ComponentsVariants, Theme, SimplePaletteColorOptions } from "@mui/material";
+import {
+  ComponentsOverrides,
+  ComponentsProps,
+  ComponentsVariants,
+  Theme,
+  SimplePaletteColorOptions,
+} from "@mui/material";
 
 // Soft UI Dashboard React base styles
 import colors from "../../base/colors";
@@ -25,12 +31,12 @@ import boxShadow from "../../functions/boxShadow";
 const { dark, white } = colors;
 const { borderWidth, borderColor } = borders;
 
-const darkSimplePaletteColorOptions = dark as SimplePaletteColorOptions
+const darkSimplePaletteColorOptions = dark as SimplePaletteColorOptions;
 
 const stepIcon: {
-  defaultProps?: ComponentsProps['MuiStepIcon'];
-  styleOverrides?: ComponentsOverrides<Theme>['MuiStepIcon'];
-  variants?: ComponentsVariants['MuiStepIcon'];
+  defaultProps?: ComponentsProps["MuiStepIcon"];
+  styleOverrides?: ComponentsOverrides<Theme>["MuiStepIcon"];
+  variants?: ComponentsVariants["MuiStepIcon"];
 } = {
   styleOverrides: {
     root: {
@@ -50,7 +56,12 @@ const stepIcon: {
         fill: darkSimplePaletteColorOptions.main,
         stroke: darkSimplePaletteColorOptions.main,
         borderColor: darkSimplePaletteColorOptions.main,
-        boxShadow: boxShadow([0, 0], [0, 2], darkSimplePaletteColorOptions.main, 1),
+        boxShadow: boxShadow(
+          [0, 0],
+          [0, 2],
+          darkSimplePaletteColorOptions.main,
+          1,
+        ),
       },
 
       "&.Mui-completed": {
@@ -58,7 +69,12 @@ const stepIcon: {
         fill: darkSimplePaletteColorOptions.main,
         stroke: darkSimplePaletteColorOptions.main,
         borderColor: darkSimplePaletteColorOptions.main,
-        boxShadow: boxShadow([0, 0], [0, 2], darkSimplePaletteColorOptions.main, 1),
+        boxShadow: boxShadow(
+          [0, 0],
+          [0, 2],
+          darkSimplePaletteColorOptions.main,
+          1,
+        ),
       },
     },
   },

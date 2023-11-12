@@ -53,13 +53,22 @@ const baseDisplayProperties = {
   lineHeight: 1.2,
 };
 
-export type TypographySizeBreakpoints = "xxs" | "xs" | "sm" | "md" | "lg" | "xl"
-export type TypographySize = Record<TypographySizeBreakpoints, string>
+export type TypographySizeBreakpoints =
+  | "xxs"
+  | "xs"
+  | "sm"
+  | "md"
+  | "lg"
+  | "xl";
+export type TypographySize = Record<TypographySizeBreakpoints, string>;
 
-export type TypographyLineHeightBreakpoints = "sm" | "md" | "lg"
-export type TypographyLineHeight = Record<TypographyLineHeightBreakpoints, number>
+export type TypographyLineHeightBreakpoints = "sm" | "md" | "lg";
+export type TypographyLineHeight = Record<
+  TypographyLineHeightBreakpoints,
+  number
+>;
 
-declare module '@mui/material/styles' {
+declare module "@mui/material/styles" {
   interface TypographyVariants {
     d1: React.CSSProperties;
     d2: React.CSSProperties;
@@ -85,7 +94,7 @@ declare module '@mui/material/styles' {
 }
 
 // Update the Typography's variant prop options
-declare module '@mui/material/Typography' {
+declare module "@mui/material/Typography" {
   interface TypographyPropsVariantOverrides {
     d1: true;
     d2: true;

@@ -26,16 +26,12 @@ import Menu from "@mui/material/Menu";
 import Icon from "@mui/material/Icon";
 
 // Soft UI Dashboard React components
-import { SoftBox, SoftInput, Breadcrumbs, NotificationItem } from ".."
+import { SoftBox, SoftInput, Breadcrumbs, NotificationItem } from "..";
 
 // import { useAuth } from "../../../auth-context/auth.context";
 
 // Custom styles for DashboardNavbar
-import {
-    navbar,
-    navbarContainer,
-    navbarRow,
-} from "./styles";
+import { navbar, navbarContainer, navbarRow } from "./styles";
 
 // Images
 import team2 from "../../assets/images/team-2.jpg";
@@ -49,141 +45,170 @@ import { RootState } from "../../store/store";
 
 // create a selector when selecting two or properties at once for better performance
 const selectMiniSidenav = (state: RootState) => state.layout.miniSidenav;
-const selectTransparentNavbar = (state: RootState) => state.layout.transparentNavbar;
+const selectTransparentNavbar = (state: RootState) =>
+  state.layout.transparentNavbar;
 const selectFixedNavbar = (state: RootState) => state.layout.fixedNavbar;
-const selectOpenSettingsMenu = (state: RootState) => state.layout.openSettingsMenu;
+const selectOpenSettingsMenu = (state: RootState) =>
+  state.layout.openSettingsMenu;
 const selectBreadcrumbs = (state: RootState) => state.layout.breadcrumbs;
 const dashboardNavbarSelector = createSelector(
-    selectMiniSidenav,
-    selectTransparentNavbar,
-    selectFixedNavbar,
-    selectOpenSettingsMenu,
-    selectBreadcrumbs,
-    (miniSidenav, transparentNavbar, fixedNavbar, openSettingsMenu, breadcrumbs) => ({
-        miniSidenav,
-        transparentNavbar,
-        fixedNavbar,
-        openSettingsMenu,
-        breadcrumbs,
-    })
-)
+  selectMiniSidenav,
+  selectTransparentNavbar,
+  selectFixedNavbar,
+  selectOpenSettingsMenu,
+  selectBreadcrumbs,
+  (
+    miniSidenav,
+    transparentNavbar,
+    fixedNavbar,
+    openSettingsMenu,
+    breadcrumbs,
+  ) => ({
+    miniSidenav,
+    transparentNavbar,
+    fixedNavbar,
+    openSettingsMenu,
+    breadcrumbs,
+  }),
+);
 
 export type DashboardNavbarProps = {
-    absolute: boolean;
-    light: boolean;
-    isMini: boolean;
-}
+  absolute: boolean;
+  light: boolean;
+  isMini: boolean;
+};
 
 const DashboardNavbar = ({ absolute, light, isMini }: DashboardNavbarProps) => {
-    const dispatch = useAppDispatch();
-    const [navbarType, setNavbarType] = useState<'fixed' | 'absolute' | 'sticky' | 'static' | 'relative' | undefined>();
-    const { miniSidenav, transparentNavbar, fixedNavbar, breadcrumbs } = useAppSelector(dashboardNavbarSelector)
+  const dispatch = useAppDispatch();
+  const [navbarType, setNavbarType] = useState<
+    "fixed" | "absolute" | "sticky" | "static" | "relative" | undefined
+  >();
+  const { miniSidenav, transparentNavbar, fixedNavbar, breadcrumbs } =
+    useAppSelector(dashboardNavbarSelector);
 
-    const [openMenu, setOpenMenu] = useState<HTMLButtonElement | undefined>();
+  const [openMenu, setOpenMenu] = useState<HTMLButtonElement | undefined>();
 
-    useEffect(() => {
-        // Setting the navbar type
-        if (fixedNavbar) {
-            setNavbarType("sticky");
-        } else {
-            setNavbarType("static");
-        }
+  useEffect(() => {
+    // Setting the navbar type
+    if (fixedNavbar) {
+      setNavbarType("sticky");
+    } else {
+      setNavbarType("static");
+    }
 
-        // A function that sets the transparent state of the navbar.
-        function handleTransparentNavbar() {
-            dispatch(setTransparentNavbar((fixedNavbar && window.scrollY === 0) || !fixedNavbar));
-        }
+    // A function that sets the transparent state of the navbar.
+    function handleTransparentNavbar() {
+      dispatch(
+        setTransparentNavbar(
+          (fixedNavbar && window.scrollY === 0) || !fixedNavbar,
+        ),
+      );
+    }
 
-        /** 
+    /** 
          The event listener that's calling the handleTransparentNavbar function when 
          scrolling the window.
         */
-        window.addEventListener("scroll", handleTransparentNavbar);
+    window.addEventListener("scroll", handleTransparentNavbar);
 
-        // Call the handleTransparentNavbar function to set the state with the initial value.
-        handleTransparentNavbar();
+    // Call the handleTransparentNavbar function to set the state with the initial value.
+    handleTransparentNavbar();
 
-        // Remove event listener on cleanup
-        return () => window.removeEventListener("scroll", handleTransparentNavbar);
-    }, [dispatch, fixedNavbar]);
+    // Remove event listener on cleanup
+    return () => window.removeEventListener("scroll", handleTransparentNavbar);
+  }, [dispatch, fixedNavbar]);
 
-    const handleMiniSidenav = () => { dispatch(setMiniSideNav(!miniSidenav)) }
-    // const handleConfiguratorOpen = () => { dispatch(setOpenSettingsMenu(!openSettingsMenu)) }
-    // const handleOpenMenu = (event: MouseEvent<HTMLButtonElement>) => setOpenMenu(event.currentTarget);
-    const handleCloseMenu = () => setOpenMenu(undefined);
+  const handleMiniSidenav = () => {
+    dispatch(setMiniSideNav(!miniSidenav));
+  };
+  // const handleConfiguratorOpen = () => { dispatch(setOpenSettingsMenu(!openSettingsMenu)) }
+  // const handleOpenMenu = (event: MouseEvent<HTMLButtonElement>) => setOpenMenu(event.currentTarget);
+  const handleCloseMenu = () => setOpenMenu(undefined);
 
-    // Render the notifications menu
-    const renderMenu = () => (
-        <Menu
-            anchorEl={openMenu}
-            anchorReference={undefined}
-            anchorOrigin={{
-                vertical: "bottom",
-                horizontal: "left",
-            }}
-            open={Boolean(openMenu)}
-            onClose={handleCloseMenu}
-            sx={{ mt: 2 }}
-        >
-            <NotificationItem
-                image={<img src={team2} alt="person" />}
-                title={["New message", "from Laur"]}
-                date="13 minutes ago"
-                onClick={handleCloseMenu}
-            />
-            <NotificationItem
-                image={<img src={logoSpotify} alt="person" />}
-                title={["New album", "by Travis Scott"]}
-                date="1 day"
-                onClick={handleCloseMenu}
-            />
-            <NotificationItem
-                color="secondary"
-                image={
-                    <Icon fontSize="small" sx={{ color: ({ palette: { white } }) => white.main }}>
-                        payment
-                    </Icon>
-                }
-                title={["", "Payment successfully completed"]}
-                date="2 days"
-                onClick={handleCloseMenu}
-            />
-        </Menu>
-    );
+  // Render the notifications menu
+  const renderMenu = () => (
+    <Menu
+      anchorEl={openMenu}
+      anchorReference={undefined}
+      anchorOrigin={{
+        vertical: "bottom",
+        horizontal: "left",
+      }}
+      open={Boolean(openMenu)}
+      onClose={handleCloseMenu}
+      sx={{ mt: 2 }}
+    >
+      <NotificationItem
+        image={<img src={team2} alt="person" />}
+        title={["New message", "from Laur"]}
+        date="13 minutes ago"
+        onClick={handleCloseMenu}
+      />
+      <NotificationItem
+        image={<img src={logoSpotify} alt="person" />}
+        title={["New album", "by Travis Scott"]}
+        date="1 day"
+        onClick={handleCloseMenu}
+      />
+      <NotificationItem
+        color="secondary"
+        image={
+          <Icon
+            fontSize="small"
+            sx={{ color: ({ palette: { white } }) => white.main }}
+          >
+            payment
+          </Icon>
+        }
+        title={["", "Payment successfully completed"]}
+        date="2 days"
+        onClick={handleCloseMenu}
+      />
+    </Menu>
+  );
 
-    return (
-        <AppBar
-            position={absolute ? "absolute" : navbarType}
+  return (
+    <AppBar
+      position={absolute ? "absolute" : navbarType}
+      color="inherit"
+      sx={(theme) => navbar(theme, { transparentNavbar, absolute, light })}
+    >
+      <Toolbar sx={(theme) => navbarContainer(theme)}>
+        {breadcrumbs ? (
+          <SoftBox
             color="inherit"
-            sx={(theme) => navbar(theme, { transparentNavbar, absolute, light })}
-        >
-            <Toolbar sx={(theme) => navbarContainer(theme)}>
-                {
-                    breadcrumbs ?
-                        <SoftBox color="inherit" mb={{ xs: 1, md: 0 }} sx={(theme) => navbarRow(theme, { isMini })}>
-                            <Breadcrumbs icon="home" title={breadcrumbs.title} routes={breadcrumbs.routes} light={light} />
-                        </SoftBox>
-                        : <SoftBox />
-                }
-                {isMini ? null : (
-                    <SoftBox sx={(theme) => navbarRow(theme, { isMini })}>
-                        <SoftBox pr={1}>
-                            <SoftInput
-                                placeholder="Type here..."
-                                icon={{ component: "search", direction: "left" }}
-                            />
-                        </SoftBox>
-                        <SoftBox color={light ? "white" : "inherit"}>
-                            <IconButton
-                                size="small"
-                                color="inherit"
-                                onClick={handleMiniSidenav}
-                            >
-                                <Icon className={light ? "text-white" : "text-dark"}>
-                                    {miniSidenav ? "menu_open" : "menu"}
-                                </Icon>
-                            </IconButton>
-                            {/* <IconButton
+            mb={{ xs: 1, md: 0 }}
+            sx={(theme) => navbarRow(theme, { isMini })}
+          >
+            <Breadcrumbs
+              icon="home"
+              title={breadcrumbs.title}
+              routes={breadcrumbs.routes}
+              light={light}
+            />
+          </SoftBox>
+        ) : (
+          <SoftBox />
+        )}
+        {isMini ? null : (
+          <SoftBox sx={(theme) => navbarRow(theme, { isMini })}>
+            <SoftBox pr={1}>
+              <SoftInput
+                placeholder="Type here..."
+                icon={{ component: "search", direction: "left" }}
+              />
+            </SoftBox>
+            <SoftBox color={light ? "white" : "inherit"}>
+              <IconButton
+                size="small"
+                color="inherit"
+                onClick={handleMiniSidenav}
+              >
+                <Icon className={light ? "text-white" : "text-dark"}>
+                  {miniSidenav ? "menu_open" : "menu"}
+                </Icon>
+              </IconButton>
+              {/* <IconButton
                                 size="small"
                                 color="inherit"
                                 sx={navbarIconButton}
@@ -191,7 +216,7 @@ const DashboardNavbar = ({ absolute, light, isMini }: DashboardNavbarProps) => {
                             >
                                 <Icon>settings</Icon>
                             </IconButton> */}
-                            {/* <IconButton
+              {/* <IconButton
                                 size="small"
                                 color="inherit"
                                 sx={navbarIconButton}
@@ -201,27 +226,27 @@ const DashboardNavbar = ({ absolute, light, isMini }: DashboardNavbarProps) => {
                             >
                                 <Icon className={light ? "text-white" : "text-dark"}>notifications</Icon>
                             </IconButton> */}
-                            {renderMenu()}
-                        </SoftBox>
-                    </SoftBox>
-                )}
-            </Toolbar>
-        </AppBar>
-    );
-}
+              {renderMenu()}
+            </SoftBox>
+          </SoftBox>
+        )}
+      </Toolbar>
+    </AppBar>
+  );
+};
 
 // Setting default values for the props of DashboardNavbar
 DashboardNavbar.defaultProps = {
-    absolute: false,
-    light: false,
-    isMini: false,
+  absolute: false,
+  light: false,
+  isMini: false,
 };
 
 // Typechecking props for the DashboardNavbar
 DashboardNavbar.propTypes = {
-    absolute: PropTypes.bool,
-    light: PropTypes.bool,
-    isMini: PropTypes.bool,
+  absolute: PropTypes.bool,
+  light: PropTypes.bool,
+  isMini: PropTypes.bool,
 };
 
 export default DashboardNavbar;

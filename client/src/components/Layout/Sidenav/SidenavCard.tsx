@@ -12,7 +12,6 @@ Coded by www.creative-tim.com
 
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 */
-import { useState } from "react"
 
 // @mui material components
 import Card from "@mui/material/Card";
@@ -25,15 +24,14 @@ import { SoftButton, SoftBox, SoftTypography } from "../..";
 
 // Custom styles for the SidenavCard
 import { card, cardContent, cardIconBox, cardIcon } from "./styles/sidenavCard";
+import { useAppSelector } from "../../../store/hooks";
 
 // Soft UI Dashboard React context
 // import { useSoftUIController } from "context";
 
-function SidenavCard() {
-  // const [controller] = useSoftUIController();
-  // const { miniSidenav, sidenavColor } = controller;
-  const [miniSidenav, setMiniSidenav] = useState(false)
-  const [sidenavColor] = useState("info")
+const SidenavCard = () => {
+  const miniSidenav = useAppSelector((state) => state.layout.miniSidenav);
+  const sidenavColor = useAppSelector((state) => state.layout.sidenavColor);
 
   return (
     <Card sx={(theme) => card(theme, { miniSidenav })}>
@@ -47,7 +45,10 @@ function SidenavCard() {
           mb={2}
           sx={cardIconBox}
         >
-          <Icon fontSize="medium" sx={(theme) => cardIcon(theme, { sidenavColor })}>
+          <Icon
+            fontSize="medium"
+            sx={(theme) => cardIcon(theme, { sidenavColor })}
+          >
             star
           </Icon>
         </SoftBox>
@@ -75,6 +76,6 @@ function SidenavCard() {
       </CardContent>
     </Card>
   );
-}
+};
 
 export default SidenavCard;

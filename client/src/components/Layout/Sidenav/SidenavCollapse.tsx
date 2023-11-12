@@ -12,7 +12,7 @@ Coded by www.creative-tim.com
 
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 */
-import { ReactNode, useState } from "react"
+import { ReactNode, useState } from "react";
 
 // @mui material components
 import Collapse from "@mui/material/Collapse";
@@ -22,7 +22,7 @@ import ListItemText from "@mui/material/ListItemText";
 import Icon from "@mui/material/Icon";
 
 // Soft UI Dashboard React components
-import { SoftBox } from "../../"
+import { SoftBox } from "../../";
 
 // Custom styles for the SidenavCollapse
 import {
@@ -39,34 +39,48 @@ import { SoftBoxProps } from "../../SoftBox";
 // Soft UI Dashboard React context
 // import { useSoftUIController } from "context";
 
-export type SidenavCollapseProps<C extends React.ElementType> = SoftBoxProps<C> & {
-  color: keyof PickByType<Palette, PaletteColor>;
-  icon: string | ReactNode;
-  name?: ReactNode;
-  children?: ReactNode;
-  active: boolean;
-  /**
-   * no functionality is implemented in free version
-   */
-  noCollapse?: boolean;
-  open?: boolean;
-}
+export type SidenavCollapseProps<C extends React.ElementType> =
+  SoftBoxProps<C> & {
+    color: keyof PickByType<Palette, PaletteColor>;
+    icon: string | ReactNode;
+    name?: ReactNode;
+    children?: ReactNode;
+    active: boolean;
+    /**
+     * no functionality is implemented in free version
+     */
+    noCollapse?: boolean;
+    open?: boolean;
+  };
 
-const SidenavCollapse = <C extends React.ElementType,>(
-  { color, icon, name, children, active, noCollapse, open, ...rest }: SidenavCollapseProps<C>
-) => {
-  const miniSidenav = useAppSelector(state => state.layout.miniSidenav)
-  const [transparentSidenav] = useState(true)
-  const softBoxProps: SoftBoxProps<C> = rest as SoftBoxProps<C>
+const SidenavCollapse = <C extends React.ElementType>({
+  color,
+  icon,
+  name,
+  children,
+  active,
+  open,
+  ...rest
+}: SidenavCollapseProps<C>) => {
+  const miniSidenav = useAppSelector((state) => state.layout.miniSidenav);
+  const [transparentSidenav] = useState(true);
+  const softBoxProps: SoftBoxProps<C> = rest as SoftBoxProps<C>;
   return (
     <>
       <ListItem component="li">
-        <SoftBox {...softBoxProps} sx={(theme) => collapseItem(theme, { active, transparentSidenav })}>
+        <SoftBox
+          {...softBoxProps}
+          sx={(theme) => collapseItem(theme, { active, transparentSidenav })}
+        >
           <ListItemIcon
-            sx={(theme) => collapseIconBox(theme, { active, transparentSidenav, color })}
+            sx={(theme) =>
+              collapseIconBox(theme, { active, transparentSidenav, color })
+            }
           >
             {typeof icon === "string" ? (
-              <Icon sx={(theme) => collapseIcon(theme, { active })}>{icon}</Icon>
+              <Icon sx={(theme) => collapseIcon(theme, { active })}>
+                {icon}
+              </Icon>
             ) : (
               icon
             )}
@@ -74,7 +88,9 @@ const SidenavCollapse = <C extends React.ElementType,>(
 
           <ListItemText
             primary={name}
-            sx={(theme) => collapseText(theme, { miniSidenav, transparentSidenav, active })}
+            sx={(theme) =>
+              collapseText(theme, { miniSidenav, transparentSidenav, active })
+            }
           />
         </SoftBox>
       </ListItem>
@@ -85,7 +101,7 @@ const SidenavCollapse = <C extends React.ElementType,>(
       )}
     </>
   );
-}
+};
 
 // Setting default values for the props of SidenavCollapse
 SidenavCollapse.defaultProps = {

@@ -16,33 +16,48 @@ Coded by www.creative-tim.com
 // @mui material components
 import { styled } from "@mui/material/styles";
 
-export default styled("div")(({ theme, ownerState }) => {
-    const { palette, functions, borders } = theme;
-    const { error, success, disabled } = ownerState;
+export type SoftInputWithIconRootOwnerState = {
+  error?: boolean;
+  success?: boolean;
+  disabled?: boolean;
+};
 
-    const { inputColors, grey, white } = palette;
-    const { pxToRem } = functions;
-    const { borderRadius, borderWidth } = borders;
+export type SoftInputWithIconRootProps = {
+  ownerState: SoftInputWithIconRootOwnerState;
+};
 
-    // border color value
-    let borderColorValue = inputColors.borderColor.main;
+const SoftInputWithIconRoot = styled("div")<SoftInputWithIconRootProps>(({
+  theme,
+  ownerState,
+}) => {
+  const { palette, functions, borders } = theme;
+  const { error, success, disabled } = ownerState;
 
-    if (error) {
-        borderColorValue = inputColors.error;
-    } else if (success) {
-        borderColorValue = inputColors.success;
-    }
+  const { inputColors, grey, white } = palette;
+  const { pxToRem } = functions;
+  const { borderRadius, borderWidth } = borders;
 
-    return {
-        display: "flex",
-        alignItems: "center",
-        backgroundColor: disabled ? grey[200] : white.main,
-        border: `${borderWidth[1]} solid`,
-        borderRadius: borderRadius.md,
-        borderColor: borderColorValue,
+  // border color value
+  let borderColorValue = inputColors.borderColor.main;
 
-        "& .MuiInputBase-input": {
-            height: pxToRem(20),
-        },
-    };
+  if (error) {
+    borderColorValue = inputColors.error;
+  } else if (success) {
+    borderColorValue = inputColors.success;
+  }
+
+  return {
+    display: "flex",
+    alignItems: "center",
+    backgroundColor: disabled ? grey[200] : white.main,
+    border: `${borderWidth[1]} solid`,
+    borderRadius: borderRadius.md,
+    borderColor: borderColorValue,
+
+    "& .MuiInputBase-input": {
+      height: pxToRem(20),
+    },
+  };
 });
+
+export default SoftInputWithIconRoot;

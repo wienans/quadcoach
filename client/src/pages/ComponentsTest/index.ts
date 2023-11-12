@@ -1,1 +1,1 @@
-export { default } from "./ComponentsTest"
+export { default } from "./ComponentsTest";
