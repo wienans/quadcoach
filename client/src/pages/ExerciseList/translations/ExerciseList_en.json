@@ -1,0 +1,24 @@
+{
+  "dashboardBreadcrumb": "Dashboard",
+  "exercisesBreadcrumb": "Exercises",
+  "columns": {
+    "name": "Name",
+    "persons": "Persons",
+    "tags": "Tags"
+  },
+  "title": "Exercise list",
+  "filter": {
+    "name": "Search exercise",
+    "persons": {
+      "title": "Persons",
+      "min": "min",
+      "max": "max"
+    },
+    "tags": {
+      "title": "Tags",
+      "placeholder": "Search tag"
+    },
+    "apply": "Apply filter"
+  },
+  "errorLoadingExercises": "An error occurred while loading exercises."
+}

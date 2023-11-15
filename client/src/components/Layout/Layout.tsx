@@ -1,3 +1,4 @@
+import "./translations";
 import Sidenav, { SidebarNavRoute } from "./Sidenav";
 import brand from "../../assets/images/logo-ct.png";
 import { Outlet } from "react-router-dom";
@@ -14,7 +15,7 @@ import GitHubIcon from "@mui/icons-material/GitHub";
 const sidebarNavRoutes: SidebarNavRoute[] = [
   {
     type: "collapse",
-    name: "Home",
+    nameResourceKey: "Layout:routes.home",
     key: "home",
     route: "/",
     icon: <HomeIcon />,
@@ -24,7 +25,7 @@ const sidebarNavRoutes: SidebarNavRoute[] = [
   },
   {
     type: "collapse",
-    name: "Exercises",
+    nameResourceKey: "Layout:routes.exercises",
     key: "exercises",
     route: "/exercises",
     icon: <ListIcon />,
@@ -34,7 +35,7 @@ const sidebarNavRoutes: SidebarNavRoute[] = [
   },
   {
     type: "collapse",
-    name: "Add Exercise",
+    nameResourceKey: "Layout:routes.addExercise",
     key: "addExercise",
     route: "/exercises/add",
     icon: <PlaylistAddIcon />,
@@ -48,7 +49,7 @@ const sidebarNavRoutes: SidebarNavRoute[] = [
   },
   {
     type: "collapse",
-    name: "GitHub Repository",
+    nameResourceKey: "Layout:routes.gitHubRepository",
     key: "githubRepo",
     href: "https://github.com/wienans/quadcoach",
     icon: <GitHubIcon />,

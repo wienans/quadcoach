@@ -5,4 +5,4 @@ const SoftBoxForwardRef = forwardRef(SoftBox);
 
 export default SoftBoxForwardRef;
 export type { SoftBoxProps } from "./SoftBox";
-export { GreyColors } from "./softBoxRootHelper"
+export { GreyColors } from "./softBoxRootHelper";

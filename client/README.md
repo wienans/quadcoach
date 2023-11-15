@@ -67,6 +67,52 @@ For now we would use following structures and guidance for react functional comp
 
   Hint: if you want to write quick such component, type FuCoProps and use autocompletion.
 
+## Translations
+
+For translations we are using i18next or rather react-i18next library for translations. Its documentation can be found [here](https://react.i18next.com/).
+Standard configuration of i18next is located at src/i18n/index. This file needs to be imported before components with their translations are imported or rather i18next.addResourceBundle is called. That's why it is imported inside main.ts at first.
+
+For translations create a new folder called translations, add for every supported language one json file called component_languageKey.json and one index.ts file.
+Content of index.ts would be 
+```typescript
+  import i18next from "i18next";
+  import de from "./yourComponent_de.json";
+  import en from "./yourComponent_en.json";
+  // more languages...
+
+  const namespace = "YourNamespace";
+
+  i18next.addResourceBundle("de", namespace, de);
+  i18next.addResourceBundle("en", namespace, en);
+  // more languages...
+```
+, which can be generated using vs code snippet with prefix "translationsIndex".
+
+Jsons would look like
+```json
+{
+  "firstKey": "My test",
+  "secondKey": {
+    "nestedKey": "Blub"
+  },
+  "withParameter": "Wert: {{parameter}}"
+}
+```
+
+Inside component, for which the translations are, import at first line the translations index file. 
+To use translations we use the useTranslation hook, other ways you could read in the documentation.
+So inside your component at the begining write ```const { t } = usetTranslation("YourNamespace")```
+and then you could use it inside JSX code like  
+```JSX
+<span>{t("YourNamespace:firstKey")}</span>
+<span>{t("YourNamespace:secondKey.nestedKey")}</span>
+<span>{t("YourNamespace:withParameter", {parameter: 0})}</span>
+```
+
+Inside application language could be changed inside DashboardNavbar, which uses i18n.changeLanguage(languageCode), whereby i18n could be also deconstructed from useTranslations hook.
+
+**Hint:** Mostly we create for every component one translations folder and its translations, but it could be also sensful to create only translation folder and translation with nested properties if some small components would only have two translation values.
+
 ## Redux Toolkit
 
 Information about Redux Toolkit could be found [here](https://redux-toolkit.js.org/introduction/getting-started).

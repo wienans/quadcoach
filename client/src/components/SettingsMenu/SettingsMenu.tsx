@@ -12,7 +12,7 @@ Coded by www.creative-tim.com
 
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 */
-
+import "./translations";
 // @mui material components
 import Divider from "@mui/material/Divider";
 import Link from "@mui/material/Link";
@@ -28,8 +28,10 @@ import { SoftBox, SoftTypography, SoftButton } from "..";
 import SettingsMenuRoot from "./SettingsMenuRoot";
 import { setOpenSettingsMenu } from "../Layout/layoutSlice";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
+import { useTranslation } from "react-i18next";
 
 const SettingsMenu = () => {
+  const { t } = useTranslation("SettingsMenu");
   const dispatch = useAppDispatch();
   const openSettingsMenu = useAppSelector(
     (state) => state.layout.openSettingsMenu,
@@ -48,7 +50,9 @@ const SettingsMenu = () => {
         px={3}
       >
         <SoftBox>
-          <SoftTypography variant="h5">Einstellungen</SoftTypography>
+          <SoftTypography variant="h5">
+            {t("SettingsMenu:settings")}
+          </SoftTypography>
         </SoftBox>
 
         <Icon
@@ -75,7 +79,7 @@ const SettingsMenu = () => {
         <SoftBox textAlign="center">
           <SoftBox mb={0.5}>
             <SoftTypography variant="h6">
-              Thank you for using QuadCoach!
+              {t("SettingsMenu:thanks")}
             </SoftTypography>
           </SoftBox>
 

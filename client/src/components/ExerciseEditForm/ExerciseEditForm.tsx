@@ -30,6 +30,8 @@ import {
 } from "../../api/quadcoachApi/domain";
 import AddRelatedExercisesDialog from "./AddRelatedExercisesDialog";
 import { uniqBy } from "lodash";
+import "./translations";
+import { useTranslation } from "react-i18next";
 
 const exerciseShape = shape({
   name: string,
@@ -78,6 +80,8 @@ const ExerciseEditForm = ({
   header: Header,
   isLoadingInitialValues = false,
 }: ExerciseEditFormProps) => {
+  const { t } = useTranslation("ExerciseEditForm");
+
   const [openTagDialog, setOpenTagDialog] = useState<boolean>(false);
   const [newTag, setNewTag] = useState<string>("");
   const [openMaterialDialog, setOpenMaterialDialog] = useState<boolean>(false);
@@ -101,16 +105,24 @@ const ExerciseEditForm = ({
     },
 
     validationSchema: Yup.object({
-      name: Yup.string().required("Please enter a name"),
+      name: Yup.string().required("ExerciseEditForm:info.name.missing"),
       persons: Yup.number().min(0),
-      beaters: Yup.number().min(0).required("Please enter number of Beaters"),
-      chasers: Yup.number().min(0).required("Please enter number of Chasers"),
+      beaters: Yup.number()
+        .min(0)
+        .required("ExerciseEditForm:info.beatersAmount.missing"),
+      chasers: Yup.number()
+        .min(0)
+        .required("ExerciseEditForm:info.chasersAmount.missing"),
       materials: Yup.array().of(Yup.string()),
       tags: Yup.array().of(Yup.string()),
       description_blocks: Yup.array().of(
         Yup.object({
-          description: Yup.string().required("Please enter a description"),
-          video_url: Yup.string().url("Please enter a valid url"),
+          description: Yup.string().required(
+            "ExerciseEditForm:block.description.missing",
+          ),
+          video_url: Yup.string().url(
+            "ExerciseEditForm:block.videoUrl.notValid",
+          ),
           coaching_points: Yup.string(),
           timeMin: Yup.number(),
         }),
@@ -186,13 +198,20 @@ const ExerciseEditForm = ({
     )
       return;
     if (typeof formik.errors.description_blocks === "string")
-      return formik.errors.description_blocks;
+      return t(formik.errors.description_blocks);
     if (!formik.errors.description_blocks[descriptionBlockIndex]) return;
     const errorForBlock =
       formik.errors.description_blocks[descriptionBlockIndex];
-    if (typeof errorForBlock === "string") return errorForBlock;
-    return errorForBlock[field];
+    if (typeof errorForBlock === "string") return t(errorForBlock);
+
+    const fieldError = errorForBlock[field];
+    if (!fieldError) return undefined;
+    return t(fieldError);
   };
+
+  const translateError = (
+    errorResourceKey: string | undefined,
+  ): string | undefined => (errorResourceKey ? t(errorResourceKey) : undefined);
 
   return (
     <FormikProvider value={formik}>
@@ -238,11 +257,13 @@ const ExerciseEditForm = ({
                     fontWeight="bold"
                     textTransform="uppercase"
                   >
-                    Info
+                    {t("ExerciseEditForm:info.title")}
                   </SoftTypography>
                   <Grid item xs={12} p={1}>
                     <FormGroup>
-                      <SoftTypography variant="body2">Name</SoftTypography>
+                      <SoftTypography variant="body2">
+                        {t("ExerciseEditForm:info.name.label")}
+                      </SoftTypography>
                       <SoftInput
                         error={
                           formik.touched.name && Boolean(formik.errors.name)
@@ -250,8 +271,9 @@ const ExerciseEditForm = ({
                         name="name"
                         required
                         id="outlined-basic"
-                        placeholder="Name"
-                        variant="outlined"
+                        placeholder={t(
+                          "ExerciseEditForm:info.name.placeholder",
+                        )}
                         value={formik.values.name}
                         onChange={formik.handleChange}
                         fullWidth
@@ -259,7 +281,7 @@ const ExerciseEditForm = ({
                       />
                       {formik.touched.name && Boolean(formik.errors.name) && (
                         <FormHelperText error>
-                          {formik.errors.name}
+                          {translateError(formik.errors.name)}
                         </FormHelperText>
                       )}
                     </FormGroup>
@@ -267,7 +289,7 @@ const ExerciseEditForm = ({
                   <Grid item xs={12} p={1}>
                     <FormGroup>
                       <SoftTypography variant="body2">
-                        Person amount
+                        {t("ExerciseEditForm:info.personAmount.label")}
                       </SoftTypography>
                       <SoftInput
                         type="number"
@@ -279,8 +301,9 @@ const ExerciseEditForm = ({
                         name="persons"
                         required
                         id="outlined-basic"
-                        placeholder="Persons"
-                        variant="outlined"
+                        placeholder={t(
+                          "ExerciseEditForm:info.personAmount.placeholder",
+                        )}
                         value={formik.values.persons}
                         onChange={formik.handleChange}
                         fullWidth
@@ -289,7 +312,7 @@ const ExerciseEditForm = ({
                       {formik.touched.persons != null &&
                         Boolean(formik.errors.persons) && (
                           <FormHelperText error>
-                            {formik.errors.persons}
+                            {translateError(formik.errors.persons)}
                           </FormHelperText>
                         )}
                     </FormGroup>
@@ -297,7 +320,7 @@ const ExerciseEditForm = ({
                   <Grid item xs={12} p={1}>
                     <FormGroup>
                       <SoftTypography variant="body2">
-                        Chaser amount
+                        {t("ExerciseEditForm:info.chasersAmount.label")}
                       </SoftTypography>
                       <SoftInput
                         type="number"
@@ -309,8 +332,9 @@ const ExerciseEditForm = ({
                         name="chasers"
                         required
                         id="outlined-basic"
-                        placeholder="Chaser"
-                        variant="outlined"
+                        placeholder={t(
+                          "ExerciseEditForm:info.chasersAmount.placeholder",
+                        )}
                         value={formik.values.chasers}
                         onChange={formik.handleChange}
                         fullWidth
@@ -319,7 +343,7 @@ const ExerciseEditForm = ({
                       {formik.touched.chasers != null &&
                         Boolean(formik.errors.chasers) && (
                           <FormHelperText error>
-                            {formik.errors.chasers}
+                            {translateError(formik.errors.chasers)}
                           </FormHelperText>
                         )}
                     </FormGroup>
@@ -327,7 +351,7 @@ const ExerciseEditForm = ({
                   <Grid item xs={12} p={1}>
                     <FormGroup>
                       <SoftTypography variant="body2">
-                        Beater amount
+                        {t("ExerciseEditForm:info.beatersAmount.label")}
                       </SoftTypography>
                       <SoftInput
                         type="number"
@@ -339,8 +363,9 @@ const ExerciseEditForm = ({
                         name="beaters"
                         required
                         id="outlined-basic"
-                        placeholder="Beater"
-                        variant="outlined"
+                        placeholder={t(
+                          "ExerciseEditForm:info.beatersAmount.placeholder",
+                        )}
                         value={formik.values.beaters}
                         onChange={formik.handleChange}
                         fullWidth
@@ -349,14 +374,16 @@ const ExerciseEditForm = ({
                       {formik.touched.beaters != null &&
                         Boolean(formik.errors.beaters) && (
                           <FormHelperText error>
-                            {formik.errors.beaters}
+                            {translateError(formik.errors.beaters)}
                           </FormHelperText>
                         )}
                     </FormGroup>
                   </Grid>
                   <Grid item xs={12} p={1}>
                     <FormGroup>
-                      <SoftTypography variant="body2">Materials</SoftTypography>
+                      <SoftTypography variant="body2">
+                        {t("ExerciseEditForm:info.materials.label")}
+                      </SoftTypography>
                       <FieldArray
                         name="materials"
                         render={(arrayHelpers) => {
@@ -394,7 +421,11 @@ const ExerciseEditForm = ({
                                   setOpenMaterialDialog(false);
                                 }}
                               >
-                                <DialogTitle>Add Material</DialogTitle>
+                                <DialogTitle>
+                                  {t(
+                                    "ExerciseEditForm:info.materials.addMaterialDialog.title",
+                                  )}
+                                </DialogTitle>
                                 <DialogContent>
                                   <Autocomplete
                                     id="material-text"
@@ -419,21 +450,25 @@ const ExerciseEditForm = ({
                                 </DialogContent>
                                 <DialogActions>
                                   <SoftButton
-                                    color="error"
-                                    onClick={() => {
-                                      setOpenMaterialDialog(false);
-                                    }}
-                                  >
-                                    Cancel
-                                  </SoftButton>
-                                  <SoftButton
                                     color="success"
                                     onClick={() => {
                                       arrayHelpers.push(newMaterial);
                                       setOpenMaterialDialog(false);
                                     }}
                                   >
-                                    Add
+                                    {t(
+                                      "ExerciseEditForm:info.materials.addMaterialDialog.confirm",
+                                    )}
+                                  </SoftButton>
+                                  <SoftButton
+                                    color="error"
+                                    onClick={() => {
+                                      setOpenMaterialDialog(false);
+                                    }}
+                                  >
+                                    {t(
+                                      "ExerciseEditForm:info.materials.addMaterialDialog.cancel",
+                                    )}
                                   </SoftButton>
                                 </DialogActions>
                               </Dialog>
@@ -445,7 +480,9 @@ const ExerciseEditForm = ({
                   </Grid>
                   <Grid item xs={12} p={1}>
                     <FormGroup>
-                      <SoftTypography variant="body2">Tags</SoftTypography>
+                      <SoftTypography variant="body2">
+                        {t("ExerciseEditForm:info.tags.label")}
+                      </SoftTypography>
                       <FieldArray
                         name="tags"
                         render={(arrayHelpers) => {
@@ -483,7 +520,11 @@ const ExerciseEditForm = ({
                                   setOpenTagDialog(false);
                                 }}
                               >
-                                <DialogTitle>Add Tag</DialogTitle>
+                                <DialogTitle>
+                                  {t(
+                                    "ExerciseEditForm:info.tags.addTagsDialog.title",
+                                  )}
+                                </DialogTitle>
                                 <DialogContent>
                                   <Autocomplete
                                     id="tag-text"
@@ -513,21 +554,25 @@ const ExerciseEditForm = ({
                                 </DialogContent>
                                 <DialogActions>
                                   <SoftButton
-                                    color="error"
-                                    onClick={() => {
-                                      setOpenTagDialog(false);
-                                    }}
-                                  >
-                                    Cancel
-                                  </SoftButton>
-                                  <SoftButton
                                     color="success"
                                     onClick={() => {
                                       arrayHelpers.push(newTag);
                                       setOpenTagDialog(false);
                                     }}
                                   >
-                                    Add
+                                    {t(
+                                      "ExerciseEditForm:info.tags.addTagsDialog.confirm",
+                                    )}
+                                  </SoftButton>
+                                  <SoftButton
+                                    color="error"
+                                    onClick={() => {
+                                      setOpenTagDialog(false);
+                                    }}
+                                  >
+                                    {t(
+                                      "ExerciseEditForm:info.tags.addTagsDialog.cancel",
+                                    )}
                                   </SoftButton>
                                 </DialogActions>
                               </Dialog>
@@ -541,7 +586,7 @@ const ExerciseEditForm = ({
                   <Grid item xs={12} p={1}>
                     <FormGroup>
                       <SoftTypography variant="body2">
-                        Related To:
+                        {t("ExerciseEditForm:info.relatedTo.label")}
                       </SoftTypography>
                       <FieldArray
                         name="relatedToExercises"
@@ -617,12 +662,14 @@ const ExerciseEditForm = ({
                                 fontWeight="bold"
                                 textTransform="uppercase"
                               >
-                                Block {index + 1}
+                                {t("ExerciseEditForm:block.title", {
+                                  blockNumber: index + 1,
+                                })}
                               </SoftTypography>
                               <Grid item xs={12} p={1}>
                                 <FormGroup>
                                   <SoftTypography variant="body2">
-                                    Video URL
+                                    {t("ExerciseEditForm:block.videoUrl.label")}
                                   </SoftTypography>
                                   <SoftInput
                                     error={Boolean(
@@ -633,8 +680,9 @@ const ExerciseEditForm = ({
                                     )}
                                     name={`description_blocks[${index}].video_url`}
                                     id="outlined-basic"
-                                    placeholder="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
-                                    variant="outlined"
+                                    placeholder={t(
+                                      "ExerciseEditForm:block.videoUrl.placeholder",
+                                    )}
                                     value={
                                       formik.values.description_blocks[index]
                                         .video_url
@@ -662,7 +710,9 @@ const ExerciseEditForm = ({
                               <Grid item xs={12} p={1}>
                                 <FormGroup>
                                   <SoftTypography variant="body2">
-                                    Description
+                                    {t(
+                                      "ExerciseEditForm:block.description.label",
+                                    )}
                                   </SoftTypography>
                                   <SoftInput
                                     error={Boolean(
@@ -673,8 +723,9 @@ const ExerciseEditForm = ({
                                     )}
                                     name={`description_blocks[${index}].description`}
                                     id="outlined-basic"
-                                    placeholder="Description"
-                                    variant="outlined"
+                                    placeholder={t(
+                                      "ExerciseEditForm:block.description.placeholder",
+                                    )}
                                     value={
                                       formik.values.description_blocks[index]
                                         .description
@@ -703,7 +754,9 @@ const ExerciseEditForm = ({
                               <Grid item xs={12} p={1}>
                                 <FormGroup>
                                   <SoftTypography variant="body2">
-                                    Coaching Points
+                                    {t(
+                                      "ExerciseEditForm:block.coachingPoints.label",
+                                    )}
                                   </SoftTypography>
                                   <SoftInput
                                     error={Boolean(
@@ -714,8 +767,9 @@ const ExerciseEditForm = ({
                                     )}
                                     name={`description_blocks[${index}].coaching_points`}
                                     id="outlined-basic"
-                                    placeholder="Coaching Points"
-                                    variant="outlined"
+                                    placeholder={t(
+                                      "ExerciseEditForm:block.coachingPoints.placeholder",
+                                    )}
                                     value={
                                       formik.values.description_blocks[index]
                                         .coaching_points
@@ -744,7 +798,9 @@ const ExerciseEditForm = ({
                               <Grid item xs={12} p={1}>
                                 <FormGroup>
                                   <SoftTypography variant="body2">
-                                    Suggested Time (Minutes)
+                                    {t(
+                                      "ExerciseEditForm:block.suggestedTime.label",
+                                    )}
                                   </SoftTypography>
                                   <SoftInput
                                     type="number"
@@ -757,8 +813,9 @@ const ExerciseEditForm = ({
                                     )}
                                     name={`description_blocks[${index}].time_min`}
                                     id="outlined-basic"
-                                    placeholder="Minutes"
-                                    variant="outlined"
+                                    placeholder={t(
+                                      "ExerciseEditForm:block.suggestedTime.placeholder",
+                                    )}
                                     value={
                                       formik.values.description_blocks[index]
                                         .time_min
@@ -788,7 +845,7 @@ const ExerciseEditForm = ({
                                   arrayHelpers.remove(index);
                                 }}
                               >
-                                Remove Block
+                                {t("ExerciseEditForm:block.removeBlock")}
                               </SoftButton>
                             </SoftBox>
                           );
@@ -799,7 +856,7 @@ const ExerciseEditForm = ({
                             arrayHelpers.push(emptyDescriptionBlock);
                           }}
                         >
-                          Add Description Block
+                          {t("ExerciseEditForm:block.addBlock")}
                         </SoftButton>
                       </div>
                     );

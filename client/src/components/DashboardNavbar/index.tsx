@@ -12,8 +12,9 @@ Coded by www.creative-tim.com
 
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 */
+import "./translations";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, MouseEvent } from "react";
 
 // prop-types is a library for typechecking of props.
 import PropTypes from "prop-types";
@@ -26,22 +27,36 @@ import Menu from "@mui/material/Menu";
 import Icon from "@mui/material/Icon";
 
 // Soft UI Dashboard React components
-import { SoftBox, SoftInput, Breadcrumbs, NotificationItem } from "..";
-
-// import { useAuth } from "../../../auth-context/auth.context";
+import { SoftBox, SoftInput, Breadcrumbs } from "..";
 
 // Custom styles for DashboardNavbar
 import { navbar, navbarContainer, navbarRow } from "./styles";
 
-// Images
-import team2 from "../../assets/images/team-2.jpg";
-import logoSpotify from "../../assets/images/small-logos/logo-spotify.svg";
+import TranslateIcon from "@mui/icons-material/Translate";
 
 // import AuthApi from "../../../api/auth";
 import { createSelector } from "@reduxjs/toolkit";
 import { setMiniSideNav, setTransparentNavbar } from "../Layout/layoutSlice";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { RootState } from "../../store/store";
+import { MenuItem } from "@mui/material";
+import { useTranslation } from "react-i18next";
+
+type Language = {
+  code: string;
+  label: string;
+};
+
+const languages: Language[] = [
+  {
+    code: "de",
+    label: "Deutsch",
+  },
+  {
+    code: "en",
+    label: "English",
+  },
+];
 
 // create a selector when selecting two or properties at once for better performance
 const selectMiniSidenav = (state: RootState) => state.layout.miniSidenav;
@@ -80,13 +95,20 @@ export type DashboardNavbarProps = {
 
 const DashboardNavbar = ({ absolute, light, isMini }: DashboardNavbarProps) => {
   const dispatch = useAppDispatch();
+  const { i18n, t } = useTranslation();
   const [navbarType, setNavbarType] = useState<
     "fixed" | "absolute" | "sticky" | "static" | "relative" | undefined
   >();
   const { miniSidenav, transparentNavbar, fixedNavbar, breadcrumbs } =
     useAppSelector(dashboardNavbarSelector);
 
-  const [openMenu, setOpenMenu] = useState<HTMLButtonElement | undefined>();
+  const [openLangugageMenu, setOpenLanguageMenu] = useState<
+    HTMLButtonElement | undefined
+  >();
+
+  const currentLanguageCode =
+    languages.find((language) => language.code === i18n.language)?.code ??
+    languages[0].code;
 
   useEffect(() => {
     // Setting the navbar type
@@ -122,48 +144,40 @@ const DashboardNavbar = ({ absolute, light, isMini }: DashboardNavbarProps) => {
     dispatch(setMiniSideNav(!miniSidenav));
   };
   // const handleConfiguratorOpen = () => { dispatch(setOpenSettingsMenu(!openSettingsMenu)) }
-  // const handleOpenMenu = (event: MouseEvent<HTMLButtonElement>) => setOpenMenu(event.currentTarget);
-  const handleCloseMenu = () => setOpenMenu(undefined);
+  const handleOpenLanguageMenu = (event: MouseEvent<HTMLButtonElement>) =>
+    setOpenLanguageMenu(event.currentTarget);
+  const handleCloseLanguageMenu = () => {
+    setOpenLanguageMenu(undefined);
+  };
+
+  const handleLanguageMenuItemClicked = (newLanguageCode: string) => () => {
+    i18n.changeLanguage(newLanguageCode);
+    handleCloseLanguageMenu();
+  };
 
   // Render the notifications menu
-  const renderMenu = () => (
+  const renderLanguageMenu = () => (
     <Menu
-      anchorEl={openMenu}
+      anchorEl={openLangugageMenu}
       anchorReference={undefined}
       anchorOrigin={{
         vertical: "bottom",
         horizontal: "left",
       }}
-      open={Boolean(openMenu)}
-      onClose={handleCloseMenu}
+      open={Boolean(openLangugageMenu)}
+      onClose={handleCloseLanguageMenu}
       sx={{ mt: 2 }}
     >
-      <NotificationItem
-        image={<img src={team2} alt="person" />}
-        title={["New message", "from Laur"]}
-        date="13 minutes ago"
-        onClick={handleCloseMenu}
-      />
-      <NotificationItem
-        image={<img src={logoSpotify} alt="person" />}
-        title={["New album", "by Travis Scott"]}
-        date="1 day"
-        onClick={handleCloseMenu}
-      />
-      <NotificationItem
-        color="secondary"
-        image={
-          <Icon
-            fontSize="small"
-            sx={{ color: ({ palette: { white } }) => white.main }}
-          >
-            payment
-          </Icon>
-        }
-        title={["", "Payment successfully completed"]}
-        date="2 days"
-        onClick={handleCloseMenu}
-      />
+      {languages.map((language) => (
+        <MenuItem
+          key={language.code}
+          selected={language.code === currentLanguageCode}
+          disabled={language.code === currentLanguageCode}
+          onClick={handleLanguageMenuItemClicked(language.code)}
+        >
+          {language.label}
+        </MenuItem>
+      ))}
     </Menu>
   );
 
@@ -194,11 +208,18 @@ const DashboardNavbar = ({ absolute, light, isMini }: DashboardNavbarProps) => {
           <SoftBox sx={(theme) => navbarRow(theme, { isMini })}>
             <SoftBox pr={1}>
               <SoftInput
-                placeholder="Type here..."
+                placeholder={t("DashboardNavbar:searchBox.placeholder")}
                 icon={{ component: "search", direction: "left" }}
               />
             </SoftBox>
             <SoftBox color={light ? "white" : "inherit"}>
+              <IconButton
+                size="small"
+                color="inherit"
+                onClick={handleOpenLanguageMenu}
+              >
+                <TranslateIcon />
+              </IconButton>
               <IconButton
                 size="small"
                 color="inherit"
@@ -208,25 +229,7 @@ const DashboardNavbar = ({ absolute, light, isMini }: DashboardNavbarProps) => {
                   {miniSidenav ? "menu_open" : "menu"}
                 </Icon>
               </IconButton>
-              {/* <IconButton
-                                size="small"
-                                color="inherit"
-                                sx={navbarIconButton}
-                                onClick={handleConfiguratorOpen}
-                            >
-                                <Icon>settings</Icon>
-                            </IconButton> */}
-              {/* <IconButton
-                                size="small"
-                                color="inherit"
-                                sx={navbarIconButton}
-                                aria-controls="notification-menu"
-                                aria-haspopup="true"
-                                onClick={handleOpenMenu}
-                            >
-                                <Icon className={light ? "text-white" : "text-dark"}>notifications</Icon>
-                            </IconButton> */}
-              {renderMenu()}
+              {renderLanguageMenu()}
             </SoftBox>
           </SoftBox>
         )}

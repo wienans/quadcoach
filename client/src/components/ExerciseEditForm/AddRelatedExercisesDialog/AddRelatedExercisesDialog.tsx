@@ -1,3 +1,4 @@
+import "./translations";
 import {
   Dialog,
   DialogActions,
@@ -8,8 +9,9 @@ import { useState } from "react";
 import { Exercise } from "../../../api/quadcoachApi/domain";
 import ExerciseAutocomplete from "./ExerciseAutocomplete";
 import { SoftButton } from "../..";
+import { useTranslation } from "react-i18next";
 
-export type EditRelatedExercisesDialogProps = {
+export type AddRelatedExercisesDialogProps = {
   isOpen: boolean;
   /**
    * Called if closing dialog or cancel or add was clicked
@@ -24,7 +26,8 @@ const AddRelatedExercisesDialog = ({
   isOpen,
   onConfirm,
   alreadyAddedExercises,
-}: EditRelatedExercisesDialogProps): JSX.Element => {
+}: AddRelatedExercisesDialogProps): JSX.Element => {
+  const { t } = useTranslation("AddRelatedExercisesDialog");
   const [selectedRelatedExercises, setSelectedRelatedExercises] = useState<
     Exercise[]
   >([]);
@@ -38,7 +41,7 @@ const AddRelatedExercisesDialog = ({
 
   return (
     <Dialog open={isOpen} onClose={() => onClose()}>
-      <DialogTitle>Add Related Exercise</DialogTitle>
+      <DialogTitle>{t("AddRelatedExercisesDialog:title")}</DialogTitle>
       <DialogContent>
         <ExerciseAutocomplete
           selectedExercises={selectedRelatedExercises}
@@ -49,14 +52,14 @@ const AddRelatedExercisesDialog = ({
         />
       </DialogContent>
       <DialogActions>
-        <SoftButton color="secondary" onClick={() => onClose()}>
-          Cancel
-        </SoftButton>
         <SoftButton
           color="primary"
           onClick={() => onClose(selectedRelatedExercises)}
         >
-          Add
+          {t("AddRelatedExercisesDialog:add")}
+        </SoftButton>
+        <SoftButton color="secondary" onClick={() => onClose()}>
+          {t("AddRelatedExercisesDialog:cancel")}
         </SoftButton>
       </DialogActions>
     </Dialog>

@@ -1,3 +1,4 @@
+import "./translations";
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { Alert, Grid } from "@mui/material";
@@ -12,10 +13,12 @@ import {
   useUpdateExerciseMutation,
 } from "../exerciseApi";
 import { ExerciseExtendWithRelatedExercises } from "../../components/ExerciseEditForm/ExerciseEditForm";
+import { useTranslation } from "react-i18next";
 
 const defaultEBreadcrumbRoutes = [{ title: "Exercises", to: "exercises" }];
 
 const UpdateExercise = () => {
+  const { t } = useTranslation("UpdateExercise");
   const { id: exerciseId } = useParams();
   const navigate = useNavigate();
 
@@ -23,7 +26,10 @@ const UpdateExercise = () => {
     ...defaultEBreadcrumbRoutes,
   ]);
 
-  useUpdateBreadcrumbs("update", breadcrumbRoutes);
+  useUpdateBreadcrumbs(
+    t("UpdateExercise:updateExerciseBreadcrumb"),
+    breadcrumbRoutes,
+  );
 
   const {
     data: exercise,
@@ -103,28 +109,28 @@ const UpdateExercise = () => {
           {isUpdateExerciseError && (
             <Grid item xs={12} justifyContent="center" display="flex">
               <Alert color="error">
-                Some error occurred while updating exercise
+                {t("UpdateExercise:errorUpdatingExercise")}
               </Alert>
             </Grid>
           )}
           {isExerciseError && (
             <Grid item xs={12} justifyContent="center" display="flex">
               <Alert color="error">
-                Some error occurred while loading exercise
+                {t("UpdateExercise:errorLoadingExercise")}
               </Alert>
             </Grid>
           )}
           {isDeleteExerciseError && (
             <Grid item xs={12} justifyContent="center" display="flex">
               <Alert color="error">
-                Some error occurred while deleting exercise
+                {t("UpdateExercise:errorDeletingExercise")}
               </Alert>
             </Grid>
           )}
           {isRelatedToExercisesError && (
             <Grid item xs={12} justifyContent="center" display="flex">
               <Alert color="error">
-                Some error occurred while loading realted exercises
+                {t("UpdateExercise:errorLoadingRelatedExercises")}
               </Alert>
             </Grid>
           )}
@@ -137,7 +143,7 @@ const UpdateExercise = () => {
                 !isValid || isUpdateExerciseLoading || isExerciseLoading
               }
             >
-              Update Exercise
+              {t("UpdateExercise:updateExercise")}
             </SoftButton>
             <SoftButton
               onClick={onDeleteExerciseClick}
@@ -145,7 +151,7 @@ const UpdateExercise = () => {
               type="button"
               disabled={isDeleteExerciseLoading}
             >
-              Delete Exercise
+              {t("UpdateExercise:deleteExercise")}
             </SoftButton>
           </Grid>
         </>

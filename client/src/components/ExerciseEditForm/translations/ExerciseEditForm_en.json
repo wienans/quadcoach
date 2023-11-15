@@ -1,0 +1,66 @@
+{
+  "info": {
+    "title": "Info",
+    "name": {
+      "label": "Name",
+      "placeholder": "Name",
+      "missing": "Please enter name."
+    },
+    "personAmount": {
+      "label": "Person amount",
+      "placeholder": "Person amount"
+    },
+    "beatersAmount": {
+      "label": "Beaters amount",
+      "placeholder": "Beaters amount",
+      "missing": "Please enter amount of beaters."
+    },
+    "chasersAmount": {
+      "label": "Chasers amount",
+      "placeholder": "Chasers amount",
+      "missing": "Please enter amount of chasers."
+    },
+    "materials": {
+      "label": "Materials",
+      "addMaterialDialog": {
+        "title": "Add materials",
+        "cancel": "Cancel",
+        "confirm": "Add"
+      }
+    },
+    "tags": {
+      "label": "Tags",
+      "addTagsDialog": {
+        "title": "Add tags",
+        "cancel": "Cancel",
+        "confirm": "Add"
+      }
+    },
+    "relatedTo": {
+      "label": "Related Exercises"
+    }
+  },
+  "block": {
+    "title": "Block {{blockNumber}}",
+    "removeBlock": "Remove block",
+    "addBlock": "Add block",
+    "description": {
+      "label": "Description",
+      "placeholder": "Description",
+      "missing": "Please enter a description."
+    },
+    "videoUrl": {
+      "label": "Video URL",
+      "placeholder": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      "notValid": "Please enter a valid url."
+    },
+    "coachingPoints": {
+      "label": "Coaching points",
+      "placeholder": "Coaching points"
+    },
+    "suggestedTime": {
+      "label": "Suggested Time (Minutes)",
+      "placeholder": "Minutes"
+    }
+  }
+}

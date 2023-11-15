@@ -1,3 +1,4 @@
+import "./translations";
 import { ChangeEvent, useEffect, useMemo, useState } from "react";
 import { DataGrid, GridColDef, GridEventLookup } from "@mui/x-data-grid";
 import { Alert, Grid, LinearProgress } from "@mui/material";
@@ -8,6 +9,7 @@ import { Collapsible } from "../../components";
 import { Chip } from "@mui/material";
 import { useLazyGetExercisesQuery } from "../exerciseApi";
 import { Exercise } from "../../api/quadcoachApi/domain";
+import { useTranslation } from "react-i18next";
 
 type ExerciseFilter = {
   searchValue: string;
@@ -24,6 +26,7 @@ const defaultExerciseFilter: ExerciseFilter = {
 };
 
 const ExerciseList = () => {
+  const { t } = useTranslation("ExerciseList");
   const location = useLocation().pathname;
   const navigate = useNavigate();
 
@@ -42,7 +45,12 @@ const ExerciseList = () => {
       });
     };
 
-  useUpdateBreadcrumbs(isDashboard ? "Dashboard" : "Exercises", []);
+  useUpdateBreadcrumbs(
+    isDashboard
+      ? t("ExerciseList:dashboardBreadcrumb")
+      : t("ExerciseList:dashboardBreadcrumb"),
+    [],
+  );
 
   const [
     getExercises,
@@ -90,21 +98,21 @@ const ExerciseList = () => {
     () => [
       {
         field: "name",
-        headerName: "Name",
+        headerName: t("ExerciseList:columns.name"),
         editable: false,
         hideable: false,
         flex: 2,
       },
       {
         field: "persons",
-        headerName: "Persons",
+        headerName: t("ExerciseList:columns.persons"),
         type: "number",
         editable: false,
         flex: 1,
       },
       {
         field: "tags",
-        headerName: "Tags",
+        headerName: t("ExerciseList:columns.tags"),
         editable: false,
         flex: 3,
         renderCell: (params) => {
@@ -121,18 +129,18 @@ const ExerciseList = () => {
         },
       },
     ],
-    [],
+    [t],
   );
 
   return (
     <Grid container spacing={2}>
       <Grid item xs={12}>
-        <SoftTypography variant="h3">Exercise List</SoftTypography>
+        <SoftTypography variant="h3">{t("ExerciseList:title")}</SoftTypography>
       </Grid>
       <Grid item xs={12}>
         <SoftInput
           id="outlined-basic"
-          placeholder="Search Exercise"
+          placeholder={t("ExerciseList:filter.name")}
           value={exerciseFilter.searchValue}
           onChange={onExerciseFilterValueChange("searchValue")}
           fullWidth
@@ -142,12 +150,14 @@ const ExerciseList = () => {
         <Collapsible label="Filter">
           <Grid container spacing={2}>
             <Grid item xs={6}>
-              <SoftTypography variant="body2">Persons</SoftTypography>
+              <SoftTypography variant="body2">
+                {t("ExerciseList:filter.persons.title")}
+              </SoftTypography>
               <SoftInput
                 type="number"
                 inputProps={{ min: 0, step: "1" }}
                 id="outlined-basic"
-                placeholder="min"
+                placeholder={t("ExerciseList:filter.persons.min")}
                 value={exerciseFilter.minPersons}
                 onChange={onExerciseFilterValueChange("minPersons")}
               />
@@ -155,16 +165,18 @@ const ExerciseList = () => {
                 type="number"
                 inputProps={{ min: 0, step: "1" }}
                 id="outlined-basic"
-                placeholder="max"
+                placeholder={t("ExerciseList:filter.persons.max")}
                 value={exerciseFilter.maxPersons}
                 onChange={onExerciseFilterValueChange("maxPersons")}
               />
             </Grid>
             <Grid item xs={6}>
-              <SoftTypography variant="body2">Tags</SoftTypography>
+              <SoftTypography variant="body2">
+                {t("ExerciseList:filter.tags.title")}
+              </SoftTypography>
               <SoftInput
                 id="outlined-basic"
-                placeholder="search Tag"
+                placeholder={t("ExerciseList:filter.tags.placeholder")}
                 value={exerciseFilter.tagString}
                 onChange={onExerciseFilterValueChange("tagString")}
               />
@@ -175,7 +187,7 @@ const ExerciseList = () => {
                 color="primary"
                 sx={{ marginRight: 1 }}
               >
-                Apply Filter
+                {t("ExerciseList:filter.apply")}
               </SoftButton>
             </Grid>
           </Grid>
@@ -183,7 +195,10 @@ const ExerciseList = () => {
       </Grid>
       {isExercisesError && (
         <Grid item xs={12}>
-          <Alert color="error">An error occurred while loading exercises</Alert>
+          <Alert color="error">
+            {" "}
+            {t("ExerciseList:errorLoadingExercises")}
+          </Alert>
         </Grid>
       )}
       <Grid item xs={12} sx={{ height: "400px", width: "100%" }}>

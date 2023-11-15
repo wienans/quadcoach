@@ -106,4 +106,18 @@
     ],
     "description": "Creates basic structure for a redux-toolkit slice"
   },
+  "Translations index": {
+    "scope": "typescript",
+    "prefix": "translationsIndex",
+    "body": [
+      "import i18next from \"i18next\"",
+      "import de from \"./${1}_de.json\"",
+      "import en from \"./${1}_en.json\"",
+      "",
+      "export const namespace = \"${2}\"",
+      "",
+      "i18next.addResourceBundle(\"de\", namespace, de, true, true)"
+      "i18next.addResourceBundle(\"en\", namespace, en, true, true)"
+    ]
+  }
 }

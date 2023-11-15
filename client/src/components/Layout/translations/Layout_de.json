@@ -1,0 +1,8 @@
+{
+  "routes": {
+    "home": "Startseite",
+    "exercises": "Übungen",
+    "addExercise": "Übung hinzufügen",
+    "gitHubRepository": "GitHub Repository"
+  }
+}
