@@ -29,7 +29,7 @@ import {
   ExercisePartialId,
 } from "../../api/quadcoachApi/domain";
 import AddRelatedExercisesDialog from "./AddRelatedExercisesDialog";
-import AddTagDialog from "./AddTagDiaglog";
+import AddTagDialog from "./AddTagDialog";
 import { uniqBy } from "lodash";
 import "./translations";
 import { useTranslation } from "react-i18next";
