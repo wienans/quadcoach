@@ -7,4 +7,5 @@ export enum TagType {
   block = "block",
   user = "user",
   tag = "tag",
+  material = "material",
 }

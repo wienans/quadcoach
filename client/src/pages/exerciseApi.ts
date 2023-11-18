@@ -42,6 +42,7 @@ export const exerciseApiSlice = quadcoachApi.injectEndpoints({
         result
           ? [
               TagType.tag,
+              TagType.material,
               { type: TagType.exercise, id: result._id },
               ...(result.description_blocks
                 ? result.description_blocks.map((block) => ({
@@ -50,7 +51,7 @@ export const exerciseApiSlice = quadcoachApi.injectEndpoints({
                   }))
                 : [TagType.block]),
             ]
-          : [TagType.exercise, TagType.block, TagType.tag],
+          : [TagType.exercise, TagType.block, TagType.tag, TagType.material],
     }),
     deleteExercise: builder.mutation<void, string>({
       query(exerciseId) {
@@ -63,6 +64,7 @@ export const exerciseApiSlice = quadcoachApi.injectEndpoints({
         { type: TagType.exercise, id: exerciseId },
         TagType.block,
         TagType.tag,
+        TagType.material,
       ],
     }),
     addExercise: builder.mutation<Exercise, Omit<Exercise, "_id">>({
@@ -77,6 +79,7 @@ export const exerciseApiSlice = quadcoachApi.injectEndpoints({
         result
           ? [
               TagType.tag,
+              TagType.material,
               { type: TagType.exercise, id: result._id },
               ...(result.description_blocks
                 ? result.description_blocks.map((block) => ({
@@ -85,7 +88,7 @@ export const exerciseApiSlice = quadcoachApi.injectEndpoints({
                   }))
                 : [TagType.block]),
             ]
-          : [TagType.exercise, TagType.block, TagType.tag],
+          : [TagType.exercise, TagType.block, TagType.tag, TagType.material],
     }),
     getRelatedExercises: builder.query<Exercise[], string>({
       query: (exerciseId: string) => ({
@@ -126,6 +129,26 @@ export const exerciseApiSlice = quadcoachApi.injectEndpoints({
         };
       },
       providesTags: () => [TagType.tag],
+    }),
+    getAllMaterials: builder.query<string[], string | undefined>({
+      query: (materialRegex) => {
+        const urlParams = new URLSearchParams();
+
+        if (materialRegex != null && materialRegex !== "") {
+          urlParams.append("materialName[regex]", materialRegex);
+          urlParams.append("materialName[options]", "i");
+        }
+
+        const urlParamsString = urlParams.toString();
+
+        return {
+          url: `/api/materials${
+            urlParamsString === "" ? "" : `?${urlParamsString}`
+          }`,
+          method: "get",
+        };
+      },
+      providesTags: () => [TagType.material],
     }),
     getExercises: builder.query<Exercise[], GetExercisesRequest | undefined>({
       query: (request) => {
@@ -179,6 +202,7 @@ export const {
   useAddExerciseMutation,
   useGetRelatedExercisesQuery,
   useGetAllTagsQuery,
+  useGetAllMaterialsQuery,
   useGetExercisesQuery,
   useLazyGetExercisesQuery,
 } = exerciseApiSlice;

@@ -30,6 +30,7 @@ import {
 } from "../../api/quadcoachApi/domain";
 import AddRelatedExercisesDialog from "./AddRelatedExercisesDialog";
 import AddTagDialog from "./AddTagDialog";
+import AddMaterialDialog from "./AddMaterialDialog";
 import { uniqBy } from "lodash";
 import "./translations";
 import { useTranslation } from "react-i18next";
@@ -85,7 +86,6 @@ const ExerciseEditForm = ({
 
   const [openTagDialog, setOpenTagDialog] = useState<boolean>(false);
   const [openMaterialDialog, setOpenMaterialDialog] = useState<boolean>(false);
-  const [newMaterial, setNewMaterial] = useState<string>("");
   const [openRelatedDialog, setOpenRelatedDialog] = useState<boolean>(false);
 
   const formik = useFormik<ExerciseExtendWithRelatedExercises>({
@@ -198,6 +198,25 @@ const ExerciseEditForm = ({
     }
 
     setOpenTagDialog(false);
+  };
+
+  const handleAddMaterialConfirm = (
+    arrayHelpers: FieldArrayRenderProps,
+    selectedMaterialsToAdd?: string[],
+  ) => {
+    if (selectedMaterialsToAdd?.length) {
+      const notAddedMaterials = selectedMaterialsToAdd.filter(
+        (newMaterial) =>
+          !formik.values.materials ||
+          !formik.values.materials.some((rel) => rel == newMaterial),
+      );
+
+      notAddedMaterials.forEach((newMaterial) =>
+        arrayHelpers.push(newMaterial),
+      );
+    }
+
+    setOpenMaterialDialog(false);
   };
 
   const handleDeleteRelatedExercise =
@@ -429,66 +448,22 @@ const ExerciseEditForm = ({
                                 color="info"
                                 onClick={() => {
                                   setOpenMaterialDialog(true);
-                                  setNewMaterial("");
                                 }}
                               />
-                              <Dialog
-                                open={openMaterialDialog}
-                                onClose={() => {
-                                  setOpenMaterialDialog(false);
-                                }}
-                              >
-                                <DialogTitle>
-                                  {t(
-                                    "ExerciseEditForm:info.materials.addMaterialDialog.title",
-                                  )}
-                                </DialogTitle>
-                                <DialogContent>
-                                  <Autocomplete
-                                    id="material-text"
-                                    freeSolo
-                                    options={["Cones", "Hoops"]}
-                                    renderInput={(params) => (
-                                      <TextField
-                                        {...params}
-                                        autoFocus
-                                        id="name"
-                                        fullWidth
-                                        value={newMaterial}
-                                        onChange={(e) => {
-                                          setNewMaterial(e.target.value);
-                                        }}
-                                        onBlur={(e) => {
-                                          setNewMaterial(e.target.value);
-                                        }}
-                                      />
-                                    )}
-                                  />
-                                </DialogContent>
-                                <DialogActions>
-                                  <SoftButton
-                                    color="success"
-                                    onClick={() => {
-                                      arrayHelpers.push(newMaterial);
-                                      setOpenMaterialDialog(false);
-                                    }}
-                                  >
-                                    {t(
-                                      "ExerciseEditForm:info.materials.addMaterialDialog.confirm",
-                                    )}
-                                  </SoftButton>
-                                  <SoftButton
-                                    color="error"
-                                    onClick={() => {
-                                      setOpenMaterialDialog(false);
-                                    }}
-                                  >
-                                    {t(
-                                      "ExerciseEditForm:info.materials.addMaterialDialog.cancel",
-                                    )}
-                                  </SoftButton>
-                                </DialogActions>
-                              </Dialog>
+                              <AddMaterialDialog
+                                isOpen={openMaterialDialog}
+                                onConfirm={(selectedMaterials) =>
+                                  handleAddMaterialConfirm(
+                                    arrayHelpers,
+                                    selectedMaterials,
+                                  )
+                                }
+                                alreadyAddedMaterials={[
+                                  ...(formik.values.materials
+                                    ? formik.values.materials
+                                    : []),
+                                ]}
+                              />
                             </div>
                           );
                         }}
