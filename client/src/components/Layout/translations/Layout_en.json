@@ -1,0 +1,8 @@
+{
+  "routes": {
+    "home": "Home",
+    "exercises": "Exercises",
+    "addExercise": "Add Exercise",
+    "gitHubRepository": "GitHub Repository"
+  }
+}

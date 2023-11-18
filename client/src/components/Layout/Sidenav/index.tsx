@@ -18,9 +18,6 @@ import { ReactNode } from "react";
 // react-router-dom components
 import { useLocation, NavLink } from "react-router-dom";
 
-// prop-types is a library for typechecking of props.
-import PropTypes from "prop-types";
-
 // @mui material components
 import List from "@mui/material/List";
 import Divider from "@mui/material/Divider";
@@ -42,6 +39,7 @@ import { useAppDispatch, useAppSelector } from "../../../store/hooks";
 import { RootState } from "../../../store/store";
 import { DrawerProps, Palette, PaletteColor } from "@mui/material";
 import { PickByType } from "../../../helpers/typeHelpers";
+import { useTranslation } from "react-i18next";
 
 // Soft UI Dashboard React context
 // import { useSoftUIController, setMiniSidenav } from "context";
@@ -64,7 +62,7 @@ type SidebarNavRouteCollapse = {
   key: string;
   href?: string;
   route?: string;
-  name: string;
+  nameResourceKey: string;
   icon: ReactNode;
   noCollapse?: boolean;
   regExp?: RegExp;
@@ -94,7 +92,7 @@ function isSidebarNavRouteDivider<T>(
 type SidebarNavRouteTitle = {
   type: "title";
   key: string;
-  title: string;
+  titleResourceKey: string;
 };
 
 function isSidebarNavRouteTitle<T>(
@@ -122,6 +120,7 @@ const Sidenav = ({
   routes,
   ...rest
 }: SidenavProps) => {
+  const { t } = useTranslation();
   const dispatch = useAppDispatch();
   const { miniSidenav } = useAppSelector(sidenavSelector);
   const location = useLocation();
@@ -137,7 +136,7 @@ const Sidenav = ({
     href,
     route,
     key,
-    name,
+    nameResourceKey,
     icon,
     noCollapse,
     regExp,
@@ -155,7 +154,7 @@ const Sidenav = ({
         >
           <SidenavCollapse
             color={color}
-            name={name}
+            name={t(nameResourceKey)}
             icon={icon}
             active={isActive}
             noCollapse={noCollapse}
@@ -170,7 +169,7 @@ const Sidenav = ({
           <SidenavCollapse
             color={color}
             key={key}
-            name={name}
+            name={t(nameResourceKey)}
             icon={icon}
             active={isActive}
             noCollapse={noCollapse}
@@ -180,7 +179,10 @@ const Sidenav = ({
     }
   };
 
-  const renderTitleRoute = ({ title, key }: SidebarNavRouteTitle) => {
+  const renderTitleRoute = ({
+    titleResourceKey,
+    key,
+  }: SidebarNavRouteTitle) => {
     return (
       <SoftTypography
         key={key}
@@ -194,7 +196,7 @@ const Sidenav = ({
         mb={1}
         ml={1}
       >
-        {title}
+        {t(titleResourceKey)}
       </SoftTypography>
     );
   };
@@ -257,22 +259,6 @@ const Sidenav = ({
 Sidenav.defaultProps = {
   color: "info",
   brand: "",
-};
-
-// Typechecking props for the Sidenav
-Sidenav.propTypes = {
-  color: PropTypes.oneOf([
-    "primary",
-    "secondary",
-    "info",
-    "success",
-    "warning",
-    "error",
-    "dark",
-  ]),
-  brand: PropTypes.string,
-  brandName: PropTypes.string.isRequired,
-  routes: PropTypes.arrayOf(PropTypes.object).isRequired,
 };
 
 export default Sidenav;

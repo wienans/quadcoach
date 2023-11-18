@@ -6,8 +6,12 @@ import ExerciseEditForm from "../../components/ExerciseEditForm";
 import { ExerciseWithOutId } from "../../api/quadcoachApi/domain";
 import { useEffect } from "react";
 import { useAddExerciseMutation } from "../exerciseApi";
+import { useTranslation } from "react-i18next";
+import "./translations";
 
 const AddExercise = () => {
+  const { t } = useTranslation("AddExercise");
+
   useUpdateBreadcrumbs("Add Exercise", [
     { title: "Exercises", to: "exercises" },
   ]);
@@ -39,7 +43,7 @@ const AddExercise = () => {
           {isAddExerciseError && (
             <Grid item xs={12} justifyContent="center" display="flex">
               <SoftBox bgColor="error">
-                Some error occurred while adding the exercise.
+                {t("AddExercise:errorWhileAdding")}
               </SoftBox>
             </Grid>
           )}
@@ -49,12 +53,16 @@ const AddExercise = () => {
               color="primary"
               disabled={isAddExerciseLoading}
             >
-              Add Exercise
+              {t("AddExercise:addExcercise")}
             </SoftButton>
           </Grid>
         </>
       )}
-      header={<SoftTypography variant="h3">Add Exercise</SoftTypography>}
+      header={
+        <SoftTypography variant="h3">
+          {t("AddExercise:addExcercise")}
+        </SoftTypography>
+      }
       onSubmit={onSubmit}
     />
   );

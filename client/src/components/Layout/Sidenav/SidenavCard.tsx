@@ -12,6 +12,7 @@ Coded by www.creative-tim.com
 
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 */
+import "./translations/sidenavCardTranslations";
 
 // @mui material components
 import Card from "@mui/material/Card";
@@ -25,11 +26,14 @@ import { SoftButton, SoftBox, SoftTypography } from "../..";
 // Custom styles for the SidenavCard
 import { card, cardContent, cardIconBox, cardIcon } from "./styles/sidenavCard";
 import { useAppSelector } from "../../../store/hooks";
+import { useTranslation } from "react-i18next";
 
 // Soft UI Dashboard React context
 // import { useSoftUIController } from "context";
 
 const SidenavCard = () => {
+  const { t } = useTranslation("SidenavCard");
+
   const miniSidenav = useAppSelector((state) => state.layout.miniSidenav);
   const sidenavColor = useAppSelector((state) => state.layout.sidenavColor);
 
@@ -54,11 +58,11 @@ const SidenavCard = () => {
         </SoftBox>
         <SoftBox lineHeight={1}>
           <SoftTypography variant="h6" color="white">
-            Need help?
+            {t("SidenavCard:help.title")}
           </SoftTypography>
           <SoftBox mb={1.825} mt={-1}>
             <SoftTypography variant="caption" color="white" fontWeight="medium">
-              Please check our docs
+              {t("SidenavCard:help.subtitle")}
             </SoftTypography>
           </SoftBox>
           <SoftButton
@@ -70,7 +74,7 @@ const SidenavCard = () => {
             color="white"
             fullWidth
           >
-            documentation
+            {t("SidenavCard:help.link")}
           </SoftButton>
         </SoftBox>
       </CardContent>

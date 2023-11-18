@@ -1,0 +1,25 @@
+{
+  "exerciseTitle": "Übung {{exerciseName}}",
+  "exerciseTitleDefault": "Übung ansehen",
+  "exercisesBreadcrumb": "Übungen",
+  "errorLoadingExercise": "Es ist ein Fehler beim Laden der Übung aufgetreten.",
+  "updateExercise": "Übung bearbeiten",
+  "deleteExercise": "Übung löschen",
+  "errorDeletingExercise": "Es ist ein Fehler beim Löschen der Übung aufgetreten.",
+  "errorLoadingRelatedExercises": "Es ist ein Fehler beim Laden der zugehörigen Übungen aufgetreten.",
+  "info": "Info",
+  "materials": "Materialien:",
+  "tags": "Stichwörter:",
+  "realtedToExercises": "Zugehörige Übungen:",
+  "personNumber": "Personenanzahl:",
+  "beaterNumber": "Beateranzahl:",
+  "chaserNumber": "Chaseranzahl:",
+  "time": "Zeit:",
+  "minutesValue": "{{value}} Min",
+  "block": {
+    "title": "Block {{blockNumber}}",
+    "minutes": "Zeit: {{minutes}} Minuten",
+    "description": "Beschreibung:",
+    "coachingPoints": "Coaching-Punkte:"
+  }
+}

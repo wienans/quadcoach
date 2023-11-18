@@ -1,0 +1,9 @@
+{
+  "updateExerciseBreadcrumb": "update",
+  "errorUpdatingExercise": "An error occurred while saving exercise changes.",
+  "errorLoadingExercise": "An error occurred while loading exercise.",
+  "errorDeletingExercise": "An error occurred while deleting exercise.",
+  "errorLoadingRelatedExercises": "An error occurred while loading related exercises.",
+  "deleteExercise": "Delete exercise",
+  "updateExercise": "Update exercise"
+}

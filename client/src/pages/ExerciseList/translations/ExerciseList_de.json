@@ -1,0 +1,24 @@
+{
+  "dashboardBreadcrumb": "Dashboard",
+  "exercisesBreadcrumb": "Übungen",
+  "columns": {
+    "name": "Name",
+    "persons": "Personenanzahl",
+    "tags": "Stichwörter"
+  },
+  "title": "Übungsliste",
+  "filter": {
+    "name": "Suche Übung",
+    "persons": {
+      "title": "Personenanzahl",
+      "min": "min",
+      "max": "max"
+    },
+    "tags": {
+      "title": "Stichwörter",
+      "placeholder": "Suche Stichwort"
+    },
+    "apply": "Filter anwenden"
+  },
+  "errorLoadingExercises": "Es ist ein Fehler beim Laden der Übungen aufgetreten."
+}

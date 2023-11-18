@@ -1,3 +1,4 @@
+import "./translations";
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import {
@@ -21,15 +22,20 @@ import {
   useGetExerciseQuery,
   useGetRelatedExercisesQuery,
 } from "../exerciseApi";
+import { useTranslation } from "react-i18next";
+import { TFunction } from "i18next";
 
 type ExerciseValue = {
-  label: string;
-  getElement: (exercise: Exercise) => JSX.Element;
+  labelResourceKey: string;
+  getElement: (
+    exercise: Exercise,
+    t: TFunction<"Exercise", undefined>,
+  ) => JSX.Element;
 };
 
 const values: ExerciseValue[] = [
   {
-    label: "Person Number:",
+    labelResourceKey: "personNumber",
     getElement: (exercise) => (
       <SoftTypography variant="button" fontWeight="regular" color="text">
         {exercise.persons}
@@ -37,7 +43,7 @@ const values: ExerciseValue[] = [
     ),
   },
   {
-    label: "Beater Number:",
+    labelResourceKey: "beaterNumber",
     getElement: (exercise) => (
       <SoftTypography variant="button" fontWeight="regular" color="text">
         {exercise.beaters}
@@ -45,7 +51,7 @@ const values: ExerciseValue[] = [
     ),
   },
   {
-    label: "Chaser Number:",
+    labelResourceKey: "chaserNumber",
     getElement: (exercise) => (
       <SoftTypography variant="button" fontWeight="regular" color="text">
         {exercise.chasers}
@@ -53,16 +59,17 @@ const values: ExerciseValue[] = [
     ),
   },
   {
-    label: "Time:",
-    getElement: (exercise) => (
+    labelResourceKey: "time",
+    getElement: (exercise, t) => (
       <SoftTypography variant="button" fontWeight="regular" color="text">
-        {exercise.time_min} Min
+        {t("Exercise:minutesValue", { value: exercise.time_min })}
       </SoftTypography>
     ),
   },
 ];
 
 const Exercise = () => {
+  const { t } = useTranslation("Exercise");
   const { id: exerciseId } = useParams();
   const navigate = useNavigate();
   const {
@@ -81,8 +88,10 @@ const Exercise = () => {
   });
 
   useUpdateBreadcrumbs(
-    exercise?.name ? `Exercise ${exercise?.name}` : "View exercise",
-    [{ title: "Exercises", to: "exercises" }],
+    exercise?.name
+      ? t("Exercise:exerciseTitle", { exerciseName: exercise.name })
+      : t("Exercise:exerciseTitleDefault"),
+    [{ title: t("Exercise:exercisesBreadcrumb"), to: "exercises" }],
   );
 
   const update = async () => {
@@ -130,7 +139,7 @@ const Exercise = () => {
   }
 
   if (!exercise || isExerciseError) {
-    return <Alert color="error">Error while loading exercise</Alert>;
+    return <Alert color="error">{t("Exercise:errorLoadingExercise")}</Alert>;
   }
 
   return (
@@ -161,14 +170,14 @@ const Exercise = () => {
                 color="primary"
                 sx={{ marginRight: 1 }}
               >
-                Update Exercise
+                {t("Exercise:updateExercise")}
               </SoftButton>
               <SoftButton
                 onClick={onDeleteExerciseClick}
                 color="error"
                 disabled={!exercise || isDeleteExerciseLoading}
               >
-                Delete Exercise
+                {t("Exercise:deleteExercise")}
               </SoftButton>
             </Grid>
           </Grid>
@@ -181,12 +190,12 @@ const Exercise = () => {
       </Card>
       {isDeleteExerciseError && (
         <Alert color="error" sx={{ mt: 5, mb: 3 }}>
-          Error occurred while deleting exercise
+          {t("Exercise:errorDeletingExercise")}
         </Alert>
       )}
       {isRelatedExercisesError && (
         <Alert color="error" sx={{ mt: 5, mb: 3 }}>
-          Error occurred while loading related exercises
+          {t("Exercise:errorLoadingRelatedExercises")}
         </Alert>
       )}
       <SoftBox mt={5} mb={3}>
@@ -197,22 +206,22 @@ const Exercise = () => {
               fontWeight="bold"
               textTransform="uppercase"
             >
-              Info
+              {t("Exercise:info")}
             </SoftTypography>
             <SoftBox>
               <Grid container spacing={2}>
-                {values.map(({ label, getElement }) => (
-                  <Grid item xs={6} sm={3} key={label}>
-                    <SoftBox key={label} display="flex" py={1} pr={2}>
+                {values.map(({ labelResourceKey, getElement }) => (
+                  <Grid item xs={6} sm={3} key={labelResourceKey}>
+                    <SoftBox display="flex" py={1} pr={2}>
                       <SoftTypography
                         variant="button"
                         fontWeight="bold"
                         textTransform="capitalize"
                         mr={2}
                       >
-                        {label}
+                        {t(labelResourceKey)}
                       </SoftTypography>
-                      {getElement(exercise)}
+                      {getElement(exercise, t)}
                     </SoftBox>
                   </Grid>
                 ))}
@@ -225,7 +234,7 @@ const Exercise = () => {
                 textTransform="capitalize"
                 mr={2}
               >
-                Materials:
+                {t("Exercise:materials")}
               </SoftTypography>
               {exercise.materials
                 ?.filter((el) => el !== "")
@@ -246,7 +255,7 @@ const Exercise = () => {
                 textTransform="capitalize"
                 mr={2}
               >
-                Tags:
+                {t("Exercise:tags")}
               </SoftTypography>
               {exercise.tags
                 ?.filter((el) => el !== "")
@@ -267,7 +276,7 @@ const Exercise = () => {
                 textTransform="capitalize"
                 mr={2}
               >
-                Related To:
+                {t("Exercise:realtedToExercises")}
               </SoftTypography>
               {isRelatedExercisesLoading ? (
                 <Box sx={{ display: "flex" }}>
@@ -319,14 +328,14 @@ const Exercise = () => {
                   fontWeight="bold"
                   textTransform="uppercase"
                 >
-                  Block {index + 1}
+                  {t("Exercise:block.title", { blockNumber: index + 1 })}
                 </SoftTypography>
                 <SoftTypography
                   variant="button"
                   textTransform="capitalize"
                   mr={2}
                 >
-                  Time: {el.time_min} minutes
+                  {t("Exercise:block.minutes", { minutes: el.time_min })}
                 </SoftTypography>
               </SoftBox>
               <SoftBox
@@ -348,7 +357,7 @@ const Exercise = () => {
                   fontWeight="bold"
                   textTransform="uppercase"
                 >
-                  Description
+                  {t("Exercise:block.description")}
                 </SoftTypography>
                 <SoftTypography
                   variant="body2"
@@ -364,7 +373,7 @@ const Exercise = () => {
                   fontWeight="bold"
                   textTransform="uppercase"
                 >
-                  Coaching Points
+                  {t("Exercise:block.coachingPoints")}
                 </SoftTypography>
                 <SoftTypography
                   variant="body2"
