@@ -41,6 +41,7 @@ export const exerciseApiSlice = quadcoachApi.injectEndpoints({
       invalidatesTags: (result) =>
         result
           ? [
+              TagType.tag,
               { type: TagType.exercise, id: result._id },
               ...(result.description_blocks
                 ? result.description_blocks.map((block) => ({
@@ -49,7 +50,7 @@ export const exerciseApiSlice = quadcoachApi.injectEndpoints({
                   }))
                 : [TagType.block]),
             ]
-          : [TagType.exercise, TagType.block],
+          : [TagType.exercise, TagType.block, TagType.tag],
     }),
     deleteExercise: builder.mutation<void, string>({
       query(exerciseId) {
@@ -61,6 +62,7 @@ export const exerciseApiSlice = quadcoachApi.injectEndpoints({
       invalidatesTags: (_result, _error, exerciseId) => [
         { type: TagType.exercise, id: exerciseId },
         TagType.block,
+        TagType.tag,
       ],
     }),
     addExercise: builder.mutation<Exercise, Omit<Exercise, "_id">>({
@@ -74,6 +76,7 @@ export const exerciseApiSlice = quadcoachApi.injectEndpoints({
       invalidatesTags: (result) =>
         result
           ? [
+              TagType.tag,
               { type: TagType.exercise, id: result._id },
               ...(result.description_blocks
                 ? result.description_blocks.map((block) => ({
@@ -82,7 +85,7 @@ export const exerciseApiSlice = quadcoachApi.injectEndpoints({
                   }))
                 : [TagType.block]),
             ]
-          : [TagType.exercise, TagType.block],
+          : [TagType.exercise, TagType.block, TagType.tag],
     }),
     getRelatedExercises: builder.query<Exercise[], string>({
       query: (exerciseId: string) => ({
@@ -104,11 +107,25 @@ export const exerciseApiSlice = quadcoachApi.injectEndpoints({
             }, new Array<TagDescription<TagType>>())
           : [TagType.exercise, TagType.block],
     }),
-    getAllTags: builder.query<string[], string>({
-      query: () => ({
-        url: `/api/tags`,
-        method: "get",
-      }),
+    getAllTags: builder.query<string[], string | undefined>({
+      query: (tagRegex) => {
+        const urlParams = new URLSearchParams();
+
+        if (tagRegex != null && tagRegex !== "") {
+          urlParams.append("tagName[regex]", tagRegex);
+          urlParams.append("tagName[options]", "i");
+        }
+
+        const urlParamsString = urlParams.toString();
+
+        return {
+          url: `/api/tags${
+            urlParamsString === "" ? "" : `?${urlParamsString}`
+          }`,
+          method: "get",
+        };
+      },
+      providesTags: () => [TagType.tag],
     }),
     getExercises: builder.query<Exercise[], GetExercisesRequest | undefined>({
       query: (request) => {

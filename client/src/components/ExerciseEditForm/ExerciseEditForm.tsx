@@ -187,7 +187,6 @@ const ExerciseEditForm = ({
     arrayHelpers: FieldArrayRenderProps,
     selectedTagToAdd?: string[],
   ) => {
-    console.log(selectedTagToAdd);
     if (selectedTagToAdd?.length) {
       const notAddedTags = selectedTagToAdd.filter(
         (newTag) =>
@@ -540,9 +539,6 @@ const ExerciseEditForm = ({
                                   ...(formik.values.tags
                                     ? formik.values.tags
                                     : []),
-                                  // ...(initialValues?.tags != null
-                                  //   ? [initialValues?.tags as string[]]
-                                  //   : []),
                                 ]}
                               />
                             </div>

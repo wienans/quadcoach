@@ -14,7 +14,9 @@ const TagAutocomplete = ({
   alreadyAddedTags,
 }: TagAutocompleteProps): JSX.Element => {
   const [searchValue, setSearchValue] = useState<string>("");
-  const { data: tags, isLoading: isTagsLoading } = useGetAllTagsQuery("");
+  const { data: tags, isLoading: isTagsLoading } = useGetAllTagsQuery(
+    searchValue !== "" ? searchValue : undefined,
+  );
 
   return (
     <Autocomplete

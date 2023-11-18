@@ -6,4 +6,5 @@ export enum TagType {
   exercise = "exercise",
   block = "block",
   user = "user",
+  tag = "tag",
 }
