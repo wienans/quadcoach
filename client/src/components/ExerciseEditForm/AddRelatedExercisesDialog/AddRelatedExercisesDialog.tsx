@@ -52,14 +52,14 @@ const AddRelatedExercisesDialog = ({
         />
       </DialogContent>
       <DialogActions>
+        <SoftButton color="secondary" onClick={() => onClose()}>
+          {t("AddRelatedExercisesDialog:cancel")}
+        </SoftButton>
         <SoftButton
           color="primary"
           onClick={() => onClose(selectedRelatedExercises)}
         >
           {t("AddRelatedExercisesDialog:add")}
-        </SoftButton>
-        <SoftButton color="secondary" onClick={() => onClose()}>
-          {t("AddRelatedExercisesDialog:cancel")}
         </SoftButton>
       </DialogActions>
     </Dialog>

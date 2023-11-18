@@ -1,3 +1,4 @@
+import "./translations";
 import {
   Dialog,
   DialogActions,
@@ -7,6 +8,7 @@ import {
 import { useState } from "react";
 import MaterialAutocomplete from "./MaterialAutocomplete";
 import { SoftButton } from "../..";
+import { useTranslation } from "react-i18next";
 
 export type AddMaterialDialogProps = {
   isOpen: boolean;
@@ -24,6 +26,7 @@ const AddMaterialDialog = ({
   onConfirm,
   alreadyAddedMaterials,
 }: AddMaterialDialogProps): JSX.Element => {
+  const { t } = useTranslation("AddMaterialDialog");
   const [selectedMaterials, setSelectedMaterials] = useState<string[]>([]);
 
   const onClose = (selectedMaterials?: string[]) => {
@@ -35,7 +38,7 @@ const AddMaterialDialog = ({
 
   return (
     <Dialog open={isOpen} onClose={() => onClose()}>
-      <DialogTitle>Add Material</DialogTitle>
+      <DialogTitle>{t("AddMaterialDialog:title")}</DialogTitle>
       <DialogContent>
         <MaterialAutocomplete
           selectedMaterials={selectedMaterials}
@@ -47,10 +50,10 @@ const AddMaterialDialog = ({
       </DialogContent>
       <DialogActions>
         <SoftButton color="secondary" onClick={() => onClose()}>
-          Cancel
+          {t("AddMaterialDialog:cancel")}
         </SoftButton>
         <SoftButton color="primary" onClick={() => onClose(selectedMaterials)}>
-          Add
+          {t("AddMaterialDialog:add")}
         </SoftButton>
       </DialogActions>
     </Dialog>

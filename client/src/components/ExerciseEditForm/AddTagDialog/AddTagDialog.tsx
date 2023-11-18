@@ -1,3 +1,4 @@
+import "./translations";
 import {
   Dialog,
   DialogActions,
@@ -7,6 +8,7 @@ import {
 import { useState } from "react";
 import TagAutocomplete from "./TagAutocomplete";
 import { SoftButton } from "../..";
+import { useTranslation } from "react-i18next";
 
 export type AddTagDialogProps = {
   isOpen: boolean;
@@ -24,6 +26,7 @@ const AddTagDialog = ({
   onConfirm,
   alreadyAddedTags,
 }: AddTagDialogProps): JSX.Element => {
+  const { t } = useTranslation("AddTagDialog");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
   const onClose = (selectedTags?: string[]) => {
@@ -35,7 +38,7 @@ const AddTagDialog = ({
 
   return (
     <Dialog open={isOpen} onClose={() => onClose()}>
-      <DialogTitle>Add Tag</DialogTitle>
+      <DialogTitle>{t("AddTagDialog:title")}</DialogTitle>
       <DialogContent>
         <TagAutocomplete
           selectedTags={selectedTags}
@@ -45,10 +48,10 @@ const AddTagDialog = ({
       </DialogContent>
       <DialogActions>
         <SoftButton color="secondary" onClick={() => onClose()}>
-          Cancel
+          {t("AddTagDialog:cancel")}
         </SoftButton>
         <SoftButton color="primary" onClick={() => onClose(selectedTags)}>
-          Add
+          {t("AddTagDialog:add")}
         </SoftButton>
       </DialogActions>
     </Dialog>
