@@ -154,7 +154,25 @@ app.get("/api/search/:key", async (req, res) => {
 });
 
 app.get("/api/tags", async (req, res) => {
+  let queryString: string = JSON.stringify(req.query);
+
+  // Rebuild querry string
+  queryString = queryString.replace(
+    /\b(gte|gt|lte|lt|eq|ne|regex|options|in|nin)\b/g,
+    (match) => `$${match}`
+  );
+  let querry = JSON.parse(queryString);
   // gets all distinct values of tags
-  const result = await Exercise.distinct("tags");
-  res.send(result);
+  const result: string[] = await Exercise.distinct("tags");
+  if (querry["tagName"] != undefined) {
+    // Apply Regex, "i" for case insensitive
+    let regex: RegExp = new RegExp(
+      querry["tagName"]["$regex"],
+      querry["tagName"]["$options"]
+    );
+    let filtered: string[] = result.filter((item) => item.match(regex));
+    res.send(filtered);
+  } else {
+    res.send(result);
+  }
 });
