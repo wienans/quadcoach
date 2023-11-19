@@ -5,6 +5,7 @@ import { Outlet } from "react-router-dom";
 
 import HomeIcon from "@mui/icons-material/Home";
 import PlaylistAddIcon from "@mui/icons-material/PlaylistAdd";
+import DeveloperBoardIcon from "@mui/icons-material/DeveloperBoard";
 import ListIcon from "@mui/icons-material/List";
 import { DashboardLayout } from "../LayoutContainers";
 import DashboardNavbar from "../DashboardNavbar";
@@ -42,6 +43,16 @@ const sidebarNavRoutes: SidebarNavRoute[] = [
     noCollapse: true,
     protected: true,
     regExp: new RegExp("\\/exercises\\/add$"),
+  },
+  {
+    type: "collapse",
+    nameResourceKey: "Layout:routes.tacticsboard",
+    key: "tacticsboard",
+    route: "/tacticsboard",
+    icon: <DeveloperBoardIcon />,
+    noCollapse: true,
+    protected: true,
+    regExp: new RegExp("\\/tacticsboard$"),
   },
   {
     type: "divider",
