@@ -1,15 +1,41 @@
 import "./translations";
-import { ChangeEvent, useEffect, useMemo, useState } from "react";
-import { DataGrid, GridColDef, GridEventLookup } from "@mui/x-data-grid";
-import { Alert, Grid, LinearProgress } from "@mui/material";
+import { ChangeEvent, MouseEvent, useEffect, useState } from "react";
+import {
+  Alert,
+  Card,
+  CardContent,
+  CardHeader,
+  Collapse,
+  Grid,
+  Slider,
+  Theme,
+  ToggleButton,
+  ToggleButtonGroup,
+  useMediaQuery,
+} from "@mui/material";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useUpdateBreadcrumbs } from "../../components/Layout/hooks";
-import { SoftTypography, SoftInput, SoftButton } from "../../components";
-import { Collapsible } from "../../components";
-import { Chip } from "@mui/material";
+import {
+  SoftTypography,
+  SoftInput,
+  SoftBox,
+  SoftButton,
+} from "../../components";
 import { useLazyGetExercisesQuery } from "../exerciseApi";
-import { Exercise } from "../../api/quadcoachApi/domain";
 import { useTranslation } from "react-i18next";
+import FilterAltIcon from "@mui/icons-material/FilterAlt";
+import GridViewIcon from "@mui/icons-material/GridView";
+import ListIcon from "@mui/icons-material/List";
+import ExercisesListView from "./listView/ExercisesListView";
+import ExercisesCardView from "./cardView/ExercisesCardView";
+import AddIcon from "@mui/icons-material/Add";
+
+const maxPersons = 100;
+
+enum ViewType {
+  List = "List",
+  Cards = "Cards",
+}
 
 type ExerciseFilter = {
   searchValue: string;
@@ -19,7 +45,7 @@ type ExerciseFilter = {
 };
 
 const defaultExerciseFilter: ExerciseFilter = {
-  maxPersons: 999,
+  maxPersons: maxPersons,
   minPersons: 0,
   searchValue: "",
   tagString: "",
@@ -29,6 +55,15 @@ const ExerciseList = () => {
   const { t } = useTranslation("ExerciseList");
   const location = useLocation().pathname;
   const navigate = useNavigate();
+  const isUpMd = useMediaQuery((theme: Theme) => theme.breakpoints.up("md"));
+
+  const [showFilters, setShowFilters] = useState<boolean>(false);
+  const [viewType, setViewType] = useState<ViewType>(ViewType.Cards);
+
+  useEffect(() => {
+    if (isUpMd) return;
+    setViewType(ViewType.Cards);
+  }, [isUpMd]);
 
   const isDashboard = location === "/";
 
@@ -79,150 +114,163 @@ const ExerciseList = () => {
     });
   }, [exerciseFilter.searchValue, getExercises, exerciseFilter]);
 
-  const handleApplyFilterClick = () => {
-    getExercises({
-      maxPersons: exerciseFilter.maxPersons,
-      minPersons: exerciseFilter.minPersons,
-      nameRegex: exerciseFilter.searchValue,
-      tagString: exerciseFilter.tagString,
-    });
+  const onOpenExerciseClick = (exerciseId: string) => {
+    navigate(`/exercises/${exerciseId}`);
   };
 
-  const handleRowClick = (
-    params: GridEventLookup["rowClick"]["params"], // GridRowParams
+  const onViewTypeChange = (
+    _event: MouseEvent<HTMLElement>,
+    newViewType: ViewType,
   ) => {
-    navigate(`/exercises/${params.id}`);
+    setViewType(newViewType);
   };
-
-  const columns2: GridColDef<Exercise>[] = useMemo(
-    () => [
-      {
-        field: "name",
-        headerName: t("ExerciseList:columns.name"),
-        editable: false,
-        hideable: false,
-        flex: 2,
-      },
-      {
-        field: "persons",
-        headerName: t("ExerciseList:columns.persons"),
-        type: "number",
-        editable: false,
-        flex: 1,
-      },
-      {
-        field: "tags",
-        headerName: t("ExerciseList:columns.tags"),
-        editable: false,
-        flex: 3,
-        renderCell: (params) => {
-          if (params.value.length > 0 && params.value[0] != "") {
-            return params.value.map((el: string) => (
-              <Chip
-                key={el}
-                label={el}
-                sx={{ margin: "1px" }}
-                variant={"outlined"}
-              />
-            ));
-          }
-        },
-      },
-    ],
-    [t],
-  );
 
   return (
-    <Grid container spacing={2}>
-      <Grid item xs={12}>
-        <SoftTypography variant="h3">{t("ExerciseList:title")}</SoftTypography>
-      </Grid>
-      <Grid item xs={12}>
-        <SoftInput
-          id="outlined-basic"
-          placeholder={t("ExerciseList:filter.name")}
-          value={exerciseFilter.searchValue}
-          onChange={onExerciseFilterValueChange("searchValue")}
-          fullWidth
-        />
-      </Grid>
-      <Grid item xs={12}>
-        <Collapsible label="Filter">
-          <Grid container spacing={2}>
-            <Grid item xs={6}>
-              <SoftTypography variant="body2">
-                {t("ExerciseList:filter.persons.title")}
-              </SoftTypography>
-              <SoftInput
-                type="number"
-                inputProps={{ min: 0, step: "1" }}
-                id="outlined-basic"
-                placeholder={t("ExerciseList:filter.persons.min")}
-                value={exerciseFilter.minPersons}
-                onChange={onExerciseFilterValueChange("minPersons")}
-              />
-              <SoftInput
-                type="number"
-                inputProps={{ min: 0, step: "1" }}
-                id="outlined-basic"
-                placeholder={t("ExerciseList:filter.persons.max")}
-                value={exerciseFilter.maxPersons}
-                onChange={onExerciseFilterValueChange("maxPersons")}
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <SoftTypography variant="body2">
-                {t("ExerciseList:filter.tags.title")}
-              </SoftTypography>
-              <SoftInput
-                id="outlined-basic"
-                placeholder={t("ExerciseList:filter.tags.placeholder")}
-                value={exerciseFilter.tagString}
-                onChange={onExerciseFilterValueChange("tagString")}
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <SoftButton
-                onClick={handleApplyFilterClick}
-                color="primary"
-                sx={{ marginRight: 1 }}
+    <SoftBox sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
+      <Card>
+        <CardHeader
+          title={
+            <SoftTypography variant="h3">
+              {t("ExerciseList:title")}
+            </SoftTypography>
+          }
+          action={
+            <SoftBox display="flex" flexDirection="row" alignItems="center">
+              {isUpMd && (
+                <SoftInput
+                  id="outlined-basic"
+                  placeholder={t("ExerciseList:filter.name")}
+                  value={exerciseFilter.searchValue}
+                  onChange={onExerciseFilterValueChange("searchValue")}
+                  sx={(theme) => ({
+                    minWidth: "200px",
+                    mr: 1,
+                    [theme.breakpoints.up("lg")]: {
+                      minWidth: "300px",
+                    },
+                  })}
+                />
+              )}
+              <ToggleButton
+                value={showFilters ? "shown" : "hide"}
+                selected={showFilters}
+                onChange={() => {
+                  setShowFilters(!showFilters);
+                }}
               >
-                {t("ExerciseList:filter.apply")}
-              </SoftButton>
-            </Grid>
-          </Grid>
-        </Collapsible>
-      </Grid>
-      {isExercisesError && (
-        <Grid item xs={12}>
-          <Alert color="error">
-            {" "}
-            {t("ExerciseList:errorLoadingExercises")}
-          </Alert>
-        </Grid>
-      )}
-      <Grid item xs={12} sx={{ height: "400px", width: "100%" }}>
-        <DataGrid
-          slots={{
-            loadingOverlay: LinearProgress,
-          }}
-          loading={isExercisesLoading}
-          getRowId={(row) => row._id}
-          rows={exercises || []}
-          columns={columns2}
-          initialState={{
-            pagination: {
-              paginationModel: {
-                pageSize: 5,
-              },
-            },
-          }}
-          pageSizeOptions={[5]}
-          disableRowSelectionOnClick
-          onRowClick={handleRowClick}
+                <FilterAltIcon />
+              </ToggleButton>
+            </SoftBox>
+          }
         />
-      </Grid>
-    </Grid>
+        {!isUpMd && (
+          <SoftBox display="flex" alignItems="center" sx={{ pb: 2, px: 2 }}>
+            <SoftInput
+              id="outlined-basic"
+              placeholder={t("ExerciseList:filter.name")}
+              value={exerciseFilter.searchValue}
+              onChange={onExerciseFilterValueChange("searchValue")}
+            />
+          </SoftBox>
+        )}
+        <Collapse in={showFilters} timeout="auto" unmountOnExit>
+          <CardContent sx={{ p: 2 }}>
+            <Grid container spacing={2} sx={{ pl: 2, width: "100%" }}>
+              <Grid item xs={12} md={6}>
+                <SoftTypography variant="body2">
+                  {t("ExerciseList:filter.persons.titleWithNumbers", {
+                    minValue: exerciseFilter.minPersons,
+                    maxValue: exerciseFilter.maxPersons,
+                  })}
+                </SoftTypography>
+                <Slider
+                  getAriaLabel={() => t("ExerciseList:filter.persons.title")}
+                  value={[exerciseFilter.minPersons, exerciseFilter.maxPersons]}
+                  onChange={(_event: Event, newValue: number | number[]) => {
+                    const [newMin, newMax] = newValue as number[];
+                    setExerciseFilter({
+                      ...exerciseFilter,
+                      maxPersons: newMax,
+                      minPersons: newMin,
+                    });
+                  }}
+                  valueLabelDisplay="auto"
+                  getAriaValueText={(value: number) => value.toString()}
+                  max={maxPersons}
+                  min={0}
+                />
+              </Grid>
+              <Grid
+                item
+                xs={12}
+                md={6}
+                sx={{ display: "flex", flexDirection: "column" }}
+              >
+                <SoftTypography variant="body2">
+                  {t("ExerciseList:filter.tags.title")}
+                </SoftTypography>
+                <SoftInput
+                  id="outlined-basic"
+                  placeholder={t("ExerciseList:filter.tags.placeholder")}
+                  value={exerciseFilter.tagString}
+                  onChange={onExerciseFilterValueChange("tagString")}
+                  sx={{ width: "100%" }}
+                />
+              </Grid>
+            </Grid>
+          </CardContent>
+        </Collapse>
+      </Card>
+      <SoftBox sx={{ mt: 2, display: "flex" }}>
+        <SoftButton
+          startIcon={isUpMd && <AddIcon />}
+          color="secondary"
+          href="/exercises/add"
+        >
+          {isUpMd ? t("ExerciseList:addExercise") : <AddIcon />}
+        </SoftButton>
+        <ToggleButtonGroup
+          value={viewType}
+          exclusive
+          onChange={onViewTypeChange}
+          aria-label="text alignment"
+          sx={{ marginLeft: "auto" }}
+        >
+          <ToggleButton value={ViewType.Cards} aria-label="Kartenansicht">
+            <GridViewIcon />
+          </ToggleButton>
+          <ToggleButton value={ViewType.List} aria-label="Listenansicht">
+            <ListIcon />
+          </ToggleButton>
+        </ToggleButtonGroup>
+      </SoftBox>
+      {isExercisesError && (
+        <Alert color="error" sx={{ mt: 2 }}>
+          {" "}
+          {t("ExerciseList:errorLoadingExercises")}
+        </Alert>
+      )}
+      {!isExercisesError && viewType === ViewType.List && (
+        <Card sx={{ mt: 2 }}>
+          <CardContent>
+            <ExercisesListView
+              isExercisesLoading={isExercisesLoading}
+              onOpenExerciseClick={onOpenExerciseClick}
+              exercises={exercises}
+            />
+          </CardContent>
+        </Card>
+      )}
+      {!isExercisesError && viewType === ViewType.Cards && (
+        <SoftBox sx={{ mt: 2, flexGrow: 1, overflowY: "auto", p: 2 }}>
+          <ExercisesCardView
+            isExercisesLoading={isExercisesLoading}
+            onOpenExerciseClick={onOpenExerciseClick}
+            exercises={exercises}
+          />
+        </SoftBox>
+      )}
+    </SoftBox>
   );
 };
 

@@ -167,6 +167,7 @@ export const exerciseApiSlice = quadcoachApi.injectEndpoints({
         }
         if (tagString != null && tagString !== "") {
           urlParams.append("tags[regex]", tagString);
+          urlParams.append("tags[options]", "i");
         }
 
         const urlParamsString = urlParams.toString();

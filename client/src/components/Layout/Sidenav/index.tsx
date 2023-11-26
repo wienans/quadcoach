@@ -165,7 +165,7 @@ const Sidenav = ({
 
     if (route) {
       return (
-        <NavLink to={route} key={key}>
+        <NavLink to={route} key={key} onClick={closeSidenav}>
           <SidenavCollapse
             color={color}
             key={key}
