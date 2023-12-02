@@ -129,8 +129,9 @@ const ExerciseCard = ({
         <Tooltip title={t("ExerciseList:cardView.personAmount")}>
           <Chip
             avatar={
+              <PeopleIcon />
               // <FunctionsIcon />
-              <NumbersIcon />
+              // <NumbersIcon />
             }
             label={exercise.persons}
             sx={{ mr: 1 }}
@@ -177,7 +178,7 @@ const ExerciseCard = ({
       <Collapse in={moreInformationExpanded} timeout="auto" unmountOnExit>
         <CardContent>
           <List sx={{ width: "100%" }} component="nav">
-            <ListItem>
+            {/* <ListItem>
               <ListItemAvatar>
                 <Avatar>
                   <PeopleIcon />
@@ -187,7 +188,7 @@ const ExerciseCard = ({
                 primary={exercise.persons}
                 secondary={t("ExerciseList:cardView.personsAmount")}
               />
-            </ListItem>
+            </ListItem> */}
             <ListItem>
               <ListItemAvatar>
                 <Avatar>
