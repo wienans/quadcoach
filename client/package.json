@@ -23,6 +23,7 @@
     "@types/redux-logger": "^3.0.9",
     "axios": "^1.5.1",
     "chroma-js": "^2.4.2",
+    "fabric": "^5.3.0",
     "formik": "^2.4.5",
     "i18next": "^23.6.0",
     "i18next-browser-languagedetector": "^7.1.0",
@@ -38,6 +39,7 @@
     "yup": "^1.2.0"
   },
   "devDependencies": {
+    "@types/fabric": "^5.3.6",
     "@types/react": "^18.2.15",
     "@types/react-dom": "^18.2.7",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
