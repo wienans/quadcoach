@@ -8,9 +8,11 @@
   },
   "title": "Übungsliste",
   "filter": {
+    "title": "Filter",
     "name": "Suche Übung",
     "persons": {
       "title": "Personenanzahl",
+      "titleWithNumbers": "Personenanzahl: {{minValue}} - {{maxValue}}",
       "min": "min",
       "max": "max"
     },
@@ -20,5 +22,22 @@
     },
     "apply": "Filter anwenden"
   },
-  "errorLoadingExercises": "Es ist ein Fehler beim Laden der Übungen aufgetreten."
+  "errorLoadingExercises": "Es ist ein Fehler beim Laden der Übungen aufgetreten.",
+  "noExercisesFound": "Keine Übungen gefunden",
+  "cardView": {
+    "exerciseType": "Allgemeine Übung",
+    "exerciseType_beater": "Beater-Übung",
+    "exerciseType_chaser": "Chaser-Übung",
+    "exerciseType_all": "Übung für Beater und Chaser",
+    "personAmount": "Personenanzahl",
+    "beaterAmount": "Beateranzahl",
+    "chaserAmount": "Chaseranzahl",
+    "timeInMinutes": "Zeit in Minuten",
+    "openExercise": "Übung öffnen",
+    "personsAmount": "Personenanzahl",
+    "materials": "Materialien",
+    "tags": "Stichwörter",
+    "relatedExercises": "Zugehörige Übungen"
+  },
+  "addExercise": "Übung hinzufügen"
 }

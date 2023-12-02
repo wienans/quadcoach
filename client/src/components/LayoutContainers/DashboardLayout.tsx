@@ -33,6 +33,9 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
       sx={{
         p: 3,
         position: "relative",
+        display: "flex",
+        flexDirection: "column",
+        height: "100vh",
       }}
     >
       {children}

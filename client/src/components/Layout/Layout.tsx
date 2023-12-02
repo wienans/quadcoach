@@ -68,7 +68,16 @@ const Layout = () => {
       <DashboardLayout>
         <DashboardNavbar />
         <SettingsMenu />
-        <Box sx={{ paddingLeft: 5, paddingRight: 5 }}>
+        <Box
+          sx={(theme) => ({
+            px: 1,
+            [theme.breakpoints.up("sm")]: {
+              px: 2,
+            },
+            flexGrow: 1,
+            minHeight: 0,
+          })}
+        >
           <Outlet />
         </Box>
       </DashboardLayout>

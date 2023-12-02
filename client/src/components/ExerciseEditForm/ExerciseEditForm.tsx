@@ -7,19 +7,7 @@ import {
   useFormik,
 } from "formik";
 import * as Yup from "yup";
-import {
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Chip,
-  FormGroup,
-  FormHelperText,
-  Grid,
-  TextField,
-  Autocomplete,
-  Skeleton,
-} from "@mui/material";
+import { Chip, FormGroup, FormHelperText, Grid, Skeleton } from "@mui/material";
 import SoftTypography from "../SoftTypography";
 import SoftInput from "../SoftInput";
 import { SoftBox, SoftButton } from "..";
