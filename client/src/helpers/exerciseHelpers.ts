@@ -1,6 +1,7 @@
 import { Exercise } from "../api/quadcoachApi/domain";
 
 export enum ExerciseType {
+  general = "general",
   all = "all",
   beater = "beater",
   chaser = "chaser",
@@ -13,4 +14,4 @@ export const getExerciseType = (exercise: Exercise): ExerciseType =>
     ? ExerciseType.beater
     : exercise.beaters === 0 && exercise.chasers > 0
     ? ExerciseType.chaser
-    : ExerciseType.all;
+    : ExerciseType.general;

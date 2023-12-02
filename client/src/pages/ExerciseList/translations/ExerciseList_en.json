@@ -29,6 +29,7 @@
     "exerciseType_beater": "Beater exercise",
     "exerciseType_chaser": "Chaser exercise",
     "exerciseType_all": "Exercise for Beater and Chaser",
+    "personAmount": "Person amount",
     "beaterAmount": "Beater amount",
     "chaserAmount": "Chaser amount",
     "timeInMinutes": "Time in minutes",

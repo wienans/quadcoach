@@ -40,6 +40,11 @@ const ExerciseAvatar = ({
               "linear-gradient(145deg, rgba(0,0,0,1) 0%, rgba(255,255,255,1) 50%, rgba(44,237,0,1) 100%)",
             color: "grey",
           }),
+          ...(typeToUse === ExerciseType.general && {
+            background:
+              "linear-gradient(145deg, rgba(0,0,0,1) 0%, rgba(255,255,255,1) 50%, rgba(44,237,0,1) 100%)",
+            color: "grey",
+          }),
         }}
       >
         {exercise.beaters > 0 && "B"}
