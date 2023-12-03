@@ -1,0 +1,8 @@
+{
+  "dashboard": "Dashboard",
+  "exercises": "Übungen",
+  "addExercise": "Übung hinzufügen",
+  "exercise": "Übung {{exerciseName}}",
+  "updateExercise": "Übung bearbeiten",
+  "componentsTest": "Komponententest"
+}

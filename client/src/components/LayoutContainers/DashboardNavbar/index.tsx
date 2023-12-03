@@ -16,9 +16,6 @@ import "./translations";
 
 import { useState, useEffect, MouseEvent } from "react";
 
-// prop-types is a library for typechecking of props.
-import PropTypes from "prop-types";
-
 // @material-ui core components
 import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
@@ -27,7 +24,7 @@ import Menu from "@mui/material/Menu";
 import Icon from "@mui/material/Icon";
 
 // Soft UI Dashboard React components
-import { SoftBox, SoftInput, Breadcrumbs } from "..";
+import { SoftBox, Breadcrumbs } from "../..";
 
 // Custom styles for DashboardNavbar
 import { navbar, navbarContainer, navbarRow } from "./styles";
@@ -36,9 +33,9 @@ import TranslateIcon from "@mui/icons-material/Translate";
 
 // import AuthApi from "../../../api/auth";
 import { createSelector } from "@reduxjs/toolkit";
-import { setMiniSideNav, setTransparentNavbar } from "../Layout/layoutSlice";
-import { useAppDispatch, useAppSelector } from "../../store/hooks";
-import { RootState } from "../../store/store";
+import { setMiniSideNav, setTransparentNavbar } from "../../Layout/layoutSlice";
+import { useAppDispatch, useAppSelector } from "../../../store/hooks";
+import { RootState } from "../../../store/store";
 import { MenuItem } from "@mui/material";
 import { useTranslation } from "react-i18next";
 
@@ -65,42 +62,33 @@ const selectTransparentNavbar = (state: RootState) =>
 const selectFixedNavbar = (state: RootState) => state.layout.fixedNavbar;
 const selectOpenSettingsMenu = (state: RootState) =>
   state.layout.openSettingsMenu;
-const selectBreadcrumbs = (state: RootState) => state.layout.breadcrumbs;
 const dashboardNavbarSelector = createSelector(
   selectMiniSidenav,
   selectTransparentNavbar,
   selectFixedNavbar,
   selectOpenSettingsMenu,
-  selectBreadcrumbs,
-  (
+  (miniSidenav, transparentNavbar, fixedNavbar, openSettingsMenu) => ({
     miniSidenav,
     transparentNavbar,
     fixedNavbar,
     openSettingsMenu,
-    breadcrumbs,
-  ) => ({
-    miniSidenav,
-    transparentNavbar,
-    fixedNavbar,
-    openSettingsMenu,
-    breadcrumbs,
   }),
 );
 
 export type DashboardNavbarProps = {
   absolute: boolean;
   light: boolean;
-  isMini: boolean;
 };
 
-const DashboardNavbar = ({ absolute, light, isMini }: DashboardNavbarProps) => {
+const DashboardNavbar = ({ absolute, light }: DashboardNavbarProps) => {
   const dispatch = useAppDispatch();
-  const { i18n, t } = useTranslation();
+  const { i18n } = useTranslation();
   const [navbarType, setNavbarType] = useState<
     "fixed" | "absolute" | "sticky" | "static" | "relative" | undefined
   >();
-  const { miniSidenav, transparentNavbar, fixedNavbar, breadcrumbs } =
-    useAppSelector(dashboardNavbarSelector);
+  const { miniSidenav, transparentNavbar, fixedNavbar } = useAppSelector(
+    dashboardNavbarSelector,
+  );
 
   const [openLangugageMenu, setOpenLanguageMenu] = useState<
     HTMLButtonElement | undefined
@@ -188,51 +176,34 @@ const DashboardNavbar = ({ absolute, light, isMini }: DashboardNavbarProps) => {
       sx={(theme) => navbar(theme, { transparentNavbar, absolute, light })}
     >
       <Toolbar sx={(theme) => navbarContainer(theme)}>
-        {breadcrumbs ? (
-          <SoftBox
-            color="inherit"
-            mb={{ xs: 1, md: 0 }}
-            sx={(theme) => navbarRow(theme, { isMini })}
-          >
-            <Breadcrumbs
-              icon="home"
-              title={breadcrumbs.title}
-              routes={breadcrumbs.routes}
-              light={light}
-            />
+        <SoftBox
+          color="inherit"
+          mb={{ xs: 1, md: 0 }}
+          sx={(theme) => navbarRow(theme, { isMini: false })}
+        >
+          <Breadcrumbs light={light} />
+        </SoftBox>
+        <SoftBox sx={(theme) => navbarRow(theme, { isMini: false })}>
+          <SoftBox color={light ? "white" : "inherit"}>
+            <IconButton
+              size="small"
+              color="inherit"
+              onClick={handleOpenLanguageMenu}
+            >
+              <TranslateIcon />
+            </IconButton>
+            <IconButton
+              size="small"
+              color="inherit"
+              onClick={handleMiniSidenav}
+            >
+              <Icon className={light ? "text-white" : "text-dark"}>
+                {miniSidenav ? "menu_open" : "menu"}
+              </Icon>
+            </IconButton>
+            {renderLanguageMenu()}
           </SoftBox>
-        ) : (
-          <SoftBox />
-        )}
-        {isMini ? null : (
-          <SoftBox sx={(theme) => navbarRow(theme, { isMini })}>
-            <SoftBox pr={1}>
-              <SoftInput
-                placeholder={t("DashboardNavbar:searchBox.placeholder")}
-                icon={{ component: "search", direction: "left" }}
-              />
-            </SoftBox>
-            <SoftBox color={light ? "white" : "inherit"}>
-              <IconButton
-                size="small"
-                color="inherit"
-                onClick={handleOpenLanguageMenu}
-              >
-                <TranslateIcon />
-              </IconButton>
-              <IconButton
-                size="small"
-                color="inherit"
-                onClick={handleMiniSidenav}
-              >
-                <Icon className={light ? "text-white" : "text-dark"}>
-                  {miniSidenav ? "menu_open" : "menu"}
-                </Icon>
-              </IconButton>
-              {renderLanguageMenu()}
-            </SoftBox>
-          </SoftBox>
-        )}
+        </SoftBox>
       </Toolbar>
     </AppBar>
   );
@@ -243,13 +214,6 @@ DashboardNavbar.defaultProps = {
   absolute: false,
   light: false,
   isMini: false,
-};
-
-// Typechecking props for the DashboardNavbar
-DashboardNavbar.propTypes = {
-  absolute: PropTypes.bool,
-  light: PropTypes.bool,
-  isMini: PropTypes.bool,
 };
 
 export default DashboardNavbar;

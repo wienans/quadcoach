@@ -25,7 +25,6 @@ interface LayoutState {
   openSettingsMenu: boolean;
   direction: Direction;
   layout: string;
-  breadcrumbs?: StoredBreadCrumbs;
 }
 
 /** For now we will add all properties from ui template. In future we would delete not needed properties. */
@@ -41,7 +40,6 @@ const initialState: LayoutState = {
   openSettingsMenu: false,
   direction: "ltr",
   layout: "dashboard",
-  breadcrumbs: undefined,
 };
 
 export const layoutSlice = createSlice({
@@ -73,12 +71,6 @@ export const layoutSlice = createSlice({
     setLayout: (state, action: PayloadAction<string>) => {
       state.layout = action.payload;
     },
-    setBreadcrumbs: (
-      state,
-      action: PayloadAction<StoredBreadCrumbs | undefined>,
-    ) => {
-      state.breadcrumbs = action.payload;
-    },
   },
 });
 
@@ -91,7 +83,6 @@ export const {
   setOpenSettingsMenu,
   setDirection,
   setLayout,
-  setBreadcrumbs,
 } = layoutSlice.actions;
 
 export default layoutSlice.reducer;

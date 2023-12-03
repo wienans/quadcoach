@@ -12,6 +12,7 @@ Coded by www.creative-tim.com
 
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 */
+import "./translationts";
 
 // react-router-dom components
 import { Link } from "react-router-dom";
@@ -22,6 +23,8 @@ import Icon from "@mui/material/Icon";
 
 // Soft UI Dashboard React components
 import { SoftBox, SoftTypography } from "..";
+import BreadcrumbElementWrapper from "./BreadcrumbElementWrapper";
+import { useBreadcrumbsToRender } from "./hooks";
 
 export type BreadcrumbRoute = {
   title: string;
@@ -29,13 +32,13 @@ export type BreadcrumbRoute = {
 };
 
 export type BreadcrumbsProps = {
-  icon: string;
-  title: string;
-  routes: BreadcrumbRoute[];
   light: boolean;
 };
 
-const Breadcrumbs = ({ icon, title, routes, light }: BreadcrumbsProps) => {
+const Breadcrumbs = ({ light }: BreadcrumbsProps) => {
+  const breadcrumbsToRender = useBreadcrumbsToRender();
+  const breadcrumbsToRenderLength = breadcrumbsToRender.length;
+
   return (
     <SoftBox mr={{ xs: 0, xl: 8 }}>
       <MuiBreadcrumbs
@@ -54,52 +57,17 @@ const Breadcrumbs = ({ icon, title, routes, light }: BreadcrumbsProps) => {
             opacity={light ? 0.8 : 0.5}
             sx={{ lineHeight: 0 }}
           >
-            <Icon>{icon}</Icon>
+            <Icon>home</Icon>
           </SoftTypography>
         </Link>
-        {routes &&
-          routes.map((el) => {
-            const TitleElement = (
-              <SoftTypography
-                key={el.title}
-                component="span"
-                variant="button"
-                fontWeight="regular"
-                textTransform="capitalize"
-                color={light ? "white" : "dark"}
-                opacity={light ? 0.8 : 0.5}
-                sx={{ lineHeight: 0 }}
-              >
-                {el.title}
-              </SoftTypography>
-            );
-
-            if (!el.to) return TitleElement;
-            return (
-              <Link to={el.to} key={el.title}>
-                {TitleElement}
-              </Link>
-            );
-          })}
-        <SoftTypography
-          variant="button"
-          fontWeight="regular"
-          textTransform="capitalize"
-          color={light ? "white" : "dark"}
-          sx={{ lineHeight: 0 }}
-        >
-          {title}
-        </SoftTypography>
+        {breadcrumbsToRender.map((route, index) => (
+          <BreadcrumbElementWrapper
+            isLastElement={index === breadcrumbsToRenderLength - 1}
+            route={route}
+            key={route.handle.type}
+          />
+        ))}
       </MuiBreadcrumbs>
-      <SoftTypography
-        fontWeight="bold"
-        textTransform="capitalize"
-        variant="h6"
-        color={light ? "white" : "dark"}
-        noWrap
-      >
-        {title}
-      </SoftTypography>
     </SoftBox>
   );
 };
