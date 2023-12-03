@@ -9,62 +9,17 @@ import {
   SoftInput,
   SoftButton,
   SoftBox,
+  FabricJsCanvas,
 } from "../../components";
-import { fabric } from "fabric";
-import { FabricJSCanvas, useFabricJSEditor } from "fabricjs-react";
-import { Null } from "mdi-material-ui";
+// import { fabric } from "fabric";
+// import { FabricJSCanvas, useFabricJSEditor } from "fabricjs-react";
 
 const TacticsBoard = (): JSX.Element => {
   const { t } = useTranslation("TacticsBoard");
   useUpdateBreadcrumbs(t("TacticsBoard:titel"));
-  const refContainer = useRef();
-  const [dimensions, setDimensions] = useState({
-    height: 686,
-    width: 1220,
-  });
-  const { editor, onReady } = useFabricJSEditor();
-  let scaleRatio = 1;
-
-  useEffect(() => {
-    if (!editor || !fabric) {
-      return;
-    }
-    editor.canvas.setHeight(686);
-    editor.canvas.setWidth(1220);
-    editor.canvas.setBackgroundImage(
-      "/full-court_inkscape.svg",
-      editor.canvas.renderAll.bind(editor.canvas),
-    );
-    editor.canvas.renderAll();
-    handleResize();
-  }, [editor, editor?.canvas.backgroundImage]);
-
-  const handleResize = () => {
-    if (!editor || !fabric) {
-      return;
-    }
-    // Calculate the Correct Scaling
-    if (refContainer.current) {
-      const width = refContainer.current.offsetWidth;
-      if (width >= 1220) {
-        scaleRatio = 1.0;
-      } else {
-        scaleRatio = width / 1220;
-      }
-      editor.canvas.setDimensions({
-        width: editor.canvas.getWidth() * scaleRatio,
-        height: editor.canvas.getHeight() * scaleRatio,
-      });
-      setDimensions({
-        width: editor.canvas.getWidth() * scaleRatio,
-        height: editor.canvas.getHeight() * scaleRatio,
-      });
-      editor.canvas.setZoom(scaleRatio);
-    }
-  };
-
+  const refContainer = useRef(null);
   return (
-    <div ref={refContainer}>
+    <div>
       <SoftBox
         variant="contained"
         shadow="lg"
@@ -84,75 +39,26 @@ const TacticsBoard = (): JSX.Element => {
       >
         <Grid container spacing={2}>
           <Grid item xs={4}>
-            <SoftButton
-              onClick={() => {
-                if (!editor || !fabric) {
-                  return;
-                }
-                editor.addCircle();
-              }}
-            >
-              Chaser
-            </SoftButton>
+            <SoftButton onClick={() => {}}>Chaser</SoftButton>
 
-            <SoftButton
-              onClick={() => {
-                if (!editor || !fabric) {
-                  return;
-                }
-                editor.addCircle();
-              }}
-            >
-              Beater
-            </SoftButton>
+            <SoftButton onClick={() => {}}>Beater</SoftButton>
           </Grid>
           <Grid item xs={4}>
-            <SoftButton
-              onClick={() => {
-                if (!editor || !fabric) {
-                  return;
-                }
-                editor.addCircle();
-              }}
-            >
-              Quaffel
-            </SoftButton>
-            <SoftButton
-              onClick={() => {
-                if (!editor || !fabric) {
-                  return;
-                }
-                editor.addCircle();
-              }}
-            >
-              Bludger
-            </SoftButton>
+            <SoftButton onClick={() => {}}>Quaffel</SoftButton>
+            <SoftButton onClick={() => {}}>Bludger</SoftButton>
           </Grid>
           <Grid item xs={4}>
-            <SoftButton
-              onClick={() => {
-                if (!editor || !fabric) {
-                  return;
-                }
-                editor.addCircle();
-              }}
-            >
-              Chaser
-            </SoftButton>
-            <SoftButton
-              onClick={() => {
-                if (!editor || !fabric) {
-                  return;
-                }
-                editor.addCircle();
-              }}
-            >
-              Beater
-            </SoftButton>
+            <SoftButton onClick={() => {}}>Chaser</SoftButton>
+            <SoftButton onClick={() => {}}>Beater</SoftButton>
           </Grid>
 
-          <Grid item xs={12}>
-            <FabricJSCanvas className="tactics-board" onReady={onReady} />
+          <Grid item xs={12} ref={refContainer}>
+            <FabricJsCanvas
+              initialHight={686}
+              initialWidth={1220}
+              backgroundImage="./full-court_inkscape.svg"
+              containerRef={refContainer}
+            />
           </Grid>
         </Grid>
       </div>
