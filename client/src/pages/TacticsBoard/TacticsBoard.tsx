@@ -1,6 +1,6 @@
 import "./translations";
 import { useNavigate } from "react-router-dom";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Grid } from "@mui/material";
 import { useUpdateBreadcrumbs } from "../../components/Layout/hooks";
 import { useTranslation } from "react-i18next";
@@ -11,13 +11,25 @@ import {
   SoftBox,
   FabricJsCanvas,
 } from "../../components";
-// import { fabric } from "fabric";
+import { fabric } from "fabric";
+import { FabricJSCanvasRef } from "../../components/FabricJSCanvas/FabricJsCanvas";
 // import { FabricJSCanvas, useFabricJSEditor } from "fabricjs-react";
 
 const TacticsBoard = (): JSX.Element => {
   const { t } = useTranslation("TacticsBoard");
   useUpdateBreadcrumbs(t("TacticsBoard:titel"));
-  const refContainer = useRef(null);
+  const refContainer = useRef<HTMLDivElement>(null);
+
+  const canvasRef = useRef<FabricJSCanvasRef>(null);
+
+  const rect = new fabric.Rect({
+    left: 100,
+    top: 100,
+    fill: "red",
+    width: 20,
+    height: 20,
+    angle: 45,
+  });
   return (
     <div>
       <SoftBox
@@ -39,7 +51,13 @@ const TacticsBoard = (): JSX.Element => {
       >
         <Grid container spacing={2}>
           <Grid item xs={4}>
-            <SoftButton onClick={() => {}}>Chaser</SoftButton>
+            <SoftButton
+              onClick={() => {
+                canvasRef.current?.getCanvas().add(rect);
+              }}
+            >
+              Chaser
+            </SoftButton>
 
             <SoftButton onClick={() => {}}>Beater</SoftButton>
           </Grid>
@@ -58,6 +76,8 @@ const TacticsBoard = (): JSX.Element => {
               initialWidth={1220}
               backgroundImage="./full-court_inkscape.svg"
               containerRef={refContainer}
+              visibleObject={rect}
+              ref={canvasRef}
             />
           </Grid>
         </Grid>
