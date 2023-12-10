@@ -10,6 +10,7 @@ import {
   SoftButton,
   SoftBox,
   FabricJsCanvas,
+  FabricJsContextProvider,
 } from "../../components";
 import { fabric } from "fabric";
 // import { FabricJSCanvas, useFabricJSEditor } from "fabricjs-react";
@@ -67,13 +68,15 @@ const TacticsBoard = (): JSX.Element => {
           </Grid>
 
           <Grid item xs={12} ref={refContainer}>
-            <FabricJsCanvas
-              initialHight={686}
-              initialWidth={1220}
-              backgroundImage="./full-court_inkscape.svg"
-              containerRef={refContainer}
-              visibleObject={rect}
-            />
+            <FabricJsContextProvider>
+              <FabricJsCanvas
+                initialHight={686}
+                initialWidth={1220}
+                backgroundImage="./full-court_inkscape.svg"
+                containerRef={refContainer}
+                visibleObject={rect}
+              />
+            </FabricJsContextProvider>
           </Grid>
         </Grid>
       </div>

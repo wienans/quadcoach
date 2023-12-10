@@ -8,8 +8,9 @@ import {
   RefObject,
   forwardRef,
   useImperativeHandle,
+  useContext,
 } from "react";
-
+import { FabricJsContext } from "..";
 export type FabricJsCanvasProps = {
   initialWidth: number;
   initialHight: number;
@@ -26,6 +27,12 @@ const FabricJsCanvas = ({
   visibleObject,
 }: FabricJsCanvasProps): JSX.Element => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const { canvas, initCanvas, activeObject, setActiveObject, loadFromJSON } =
+    useContext(FabricJsContext);
+
+  useEffect(() => {
+    initCanvas(canvasRef.current);
+  }, [canvasRef, initCanvas, initialHight, initialWidth]);
 
   useEffect(() => {
     const canvas = new fabric.Canvas(canvasRef.current);
@@ -51,18 +58,18 @@ const FabricJsCanvas = ({
         canvas.renderAll();
       }
     };
-    const init = () => {
-      if (backgroundImage) {
-        canvas.setBackgroundImage(
-          backgroundImage,
-          canvas.renderAll.bind(canvas),
-        );
-      }
-      // canvas.isDrawingMode = true;
-      // canvas.add(visibleObject);
-      handleResize();
-    };
-    init();
+    // const init = () => {
+    //   if (backgroundImage) {
+    //     canvas.setBackgroundImage(
+    //       backgroundImage,
+    //       canvas.renderAll.bind(canvas),
+    //     );
+    //   }
+    //   // canvas.isDrawingMode = true;
+    //   // canvas.add(visibleObject);
+    //   handleResize();
+    // };
+    // init();
 
     window.addEventListener("resize", handleResize, false);
     return () => {
@@ -79,7 +86,7 @@ const FabricJsCanvas = ({
 
   return (
     <div>
-      <canvas id="tacticboard" ref={canvasRef} />
+      <canvas ref={canvasRef} />
     </div>
   );
 };

@@ -7,4 +7,6 @@ export { default as Breadcrumbs } from "./Breadcrumbs";
 export { default as NotificationItem } from "./NotificationItem";
 export { default as SettingsMenu } from "./SettingsMenu";
 export { default as Collapsible } from "./Collapsible";
-export { default as FabricJsCanvas } from "./FabricJSCanvas";
+export { default as FabricJsCanvas } from "./FabricJsCanvas";
+export { FabricJsContextProvider } from "./FabricJsContext";
+export { FabricJsContext } from "./FabricJsContext";
