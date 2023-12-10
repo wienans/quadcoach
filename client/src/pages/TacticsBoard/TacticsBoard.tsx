@@ -12,16 +12,12 @@ import {
   FabricJsCanvas,
 } from "../../components";
 import { fabric } from "fabric";
-import { FabricJSCanvasRef } from "../../components/FabricJSCanvas/FabricJsCanvas";
 // import { FabricJSCanvas, useFabricJSEditor } from "fabricjs-react";
 
 const TacticsBoard = (): JSX.Element => {
   const { t } = useTranslation("TacticsBoard");
   useUpdateBreadcrumbs(t("TacticsBoard:titel"));
   const refContainer = useRef<HTMLDivElement>(null);
-
-  const canvasRef = useRef<FabricJSCanvasRef>(null);
-
   const rect = new fabric.Rect({
     left: 100,
     top: 100,
@@ -53,7 +49,7 @@ const TacticsBoard = (): JSX.Element => {
           <Grid item xs={4}>
             <SoftButton
               onClick={() => {
-                canvasRef.current?.getCanvas().add(rect);
+                refCanvas.current?.add(rect);
               }}
             >
               Chaser
@@ -77,7 +73,6 @@ const TacticsBoard = (): JSX.Element => {
               backgroundImage="./full-court_inkscape.svg"
               containerRef={refContainer}
               visibleObject={rect}
-              ref={canvasRef}
             />
           </Grid>
         </Grid>
