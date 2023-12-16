@@ -34,7 +34,6 @@ const FabricJsCanvas = ({
     const canvasInstance = new fabric.Canvas("fabricCanvas", {
       width: initialWidth,
       height: initialHight,
-      backgroundImage: backgroundImage,
     });
     console.debug("USEEFFEKT");
 
@@ -65,8 +64,23 @@ const FabricJsCanvas = ({
         canvasInstance.renderAll();
       }
     };
+    const init = () => {
+      // Set the Background image
+      if (backgroundImage) {
+        canvasInstance.setBackgroundImage(
+          backgroundImage,
+          canvasInstance.renderAll.bind(canvasInstance),
+        );
+      }
+      handleResize();
+    };
+
+    // Initialize Background and resize
+    init();
+
     // Add the Event Listeners
     window.addEventListener("resize", handleResize, false);
+
     return () => {
       canvasInstance.dispose();
       window.removeEventListener("resize", handleResize);
