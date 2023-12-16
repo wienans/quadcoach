@@ -1,66 +1,43 @@
-import { useState, useCallback, createContext } from "react";
+import {
+  createContext,
+  useContext,
+  ReactNode,
+  FC,
+  useState,
+  useCallback,
+} from "react";
 import { fabric } from "fabric";
 
-export type FabricJsContextProps = {
+// Define a generic type for the object to be added
+type FabricJsObject = fabric.Object;
+
+export interface FabricJsContextProps {
   canvas: fabric.Canvas | null;
-  initCanvas: (el) => void;
-  loadFromJSON: () => void;
-  activeObject: string;
-  setActiveObject: () => void;
-};
+  setCanvas: (canvas: fabric.Canvas) => void;
+  addObject: (object: FabricJsObject) => void;
+}
 
-export const FabricJsContext = createContext<FabricJsContextProps>({
-  canvas: null,
-  initCanvas = initCanvas,
-  loadFromJSON = loadFromJSON,
-  activeObject = activeObject,
-  setActiveObject = setActiveObject,
-});
+export const FabricJsContext = createContext<FabricJsContextProps | undefined>(
+  undefined,
+);
 
-export const FabricJsContextProvider = ({ children }) => {
-  const [canvas, setCanvas] = useState(null);
-  const [activeObject, setActiveObject] = useState(null);
+export const FabricJsContextProvider: FC<{ children: ReactNode }> = ({
+  children,
+}) => {
+  const [canvas, setCanvas] = useState<fabric.Canvas | null>(null);
 
-  const initCanvas = useCallback((el) => {
-    const canvasOptions = {
-      preserveObjectStacking: true,
-      selection: true,
-      defaultCursor: "default",
-      backgroundColor: "#f3f3f3",
-    };
-    let c = new fabric.Canvas(el, canvasOptions);
-    c.renderAll();
-    setCanvas(c);
-  }, []);
-
-  const loadFromJSON = useCallback((el, json) => {
-    let c = new fabric.Canvas(el);
-    c.loadFromJSON(
-      json,
-      () => {
-        c.renderAll.bind(c);
-        c.setWidth(json.width);
-        c.setHeight(json.height);
-      },
-      function (o, object) {
-        fabric.log(o, object);
-      },
-    );
-    c.renderAll();
-    setCanvas(c);
-  }, []);
+  const addObject = useCallback(
+    (object: FabricJsObject) => {
+      if (canvas) {
+        canvas.add(object);
+      }
+    },
+    [canvas],
+  );
 
   return (
-    <FabricContext.Provider
-      value={{
-        canvas,
-        initCanvas,
-        loadFromJSON,
-        activeObject,
-        setActiveObject,
-      }}
-    >
+    <FabricJsContext.Provider value={{ canvas, setCanvas, addObject }}>
       {children}
-    </FabricContext.Provider>
+    </FabricJsContext.Provider>
   );
 };

@@ -1,2 +1,2 @@
-export { FabricJsContext } from "./FabricJsContext";
 export { FabricJsContextProvider } from "./FabricJsContext";
+export { useFabricJs } from "./useFabricJs";

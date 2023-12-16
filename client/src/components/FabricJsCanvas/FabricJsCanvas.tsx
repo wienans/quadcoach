@@ -11,6 +11,7 @@ import {
   useContext,
 } from "react";
 import { FabricJsContext } from "..";
+import { useFabricJs } from "../FabricJsContext";
 export type FabricJsCanvasProps = {
   initialWidth: number;
   initialHight: number;
@@ -26,17 +27,22 @@ const FabricJsCanvas = ({
   containerRef,
   visibleObject,
 }: FabricJsCanvasProps): JSX.Element => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const { canvas, initCanvas, activeObject, setActiveObject, loadFromJSON } =
-    useContext(FabricJsContext);
+  const canvasRef2 = useRef<fabric.Canvas | null>(null);
+  const { setCanvas } = useFabricJs();
 
   useEffect(() => {
-    initCanvas(canvasRef.current);
-  }, [canvasRef, initCanvas, initialHight, initialWidth]);
-
-  useEffect(() => {
-    const canvas = new fabric.Canvas(canvasRef.current);
+    const canvasInstance = new fabric.Canvas("fabricCanvas", {
+      width: initialWidth,
+      height: initialHight,
+      backgroundImage: backgroundImage,
+    });
     console.debug("USEEFFEKT");
+
+    // Save canvas reference to the local ref
+    canvasRef2.current = canvasInstance;
+
+    // Update the context with the current canvas instance
+    setCanvas(canvasInstance);
 
     const handleResize = () => {
       console.debug("Resize");
@@ -53,27 +59,15 @@ const FabricJsCanvas = ({
           width: initialWidth * scaleRatio,
           height: initialHight * scaleRatio,
         };
-        canvas.setDimensions(dim);
-        canvas.setZoom(scaleRatio);
-        canvas.renderAll();
+        canvasInstance.setDimensions(dim);
+        canvasInstance.setZoom(scaleRatio);
+        canvasInstance.renderAll();
       }
     };
-    // const init = () => {
-    //   if (backgroundImage) {
-    //     canvas.setBackgroundImage(
-    //       backgroundImage,
-    //       canvas.renderAll.bind(canvas),
-    //     );
-    //   }
-    //   // canvas.isDrawingMode = true;
-    //   // canvas.add(visibleObject);
-    //   handleResize();
-    // };
-    // init();
 
     window.addEventListener("resize", handleResize, false);
     return () => {
-      canvas.dispose();
+      canvasInstance.dispose();
       window.removeEventListener("resize", handleResize);
     };
   }, [
@@ -82,11 +76,12 @@ const FabricJsCanvas = ({
     backgroundImage,
     initialHight,
     initialWidth,
+    setCanvas,
   ]);
 
   return (
     <div>
-      <canvas ref={canvasRef} />
+      <canvas id="fabricCanvas" />
     </div>
   );
 };

@@ -48,13 +48,7 @@ const TacticsBoard = (): JSX.Element => {
       >
         <Grid container spacing={2}>
           <Grid item xs={4}>
-            <SoftButton
-              onClick={() => {
-                refCanvas.current?.add(rect);
-              }}
-            >
-              Chaser
-            </SoftButton>
+            <SoftButton onClick={() => {}}>Chaser</SoftButton>
 
             <SoftButton onClick={() => {}}>Beater</SoftButton>
           </Grid>
@@ -68,7 +62,7 @@ const TacticsBoard = (): JSX.Element => {
           </Grid>
 
           <Grid item xs={12} ref={refContainer}>
-            <FabricJsContextProvider>
+            {/* <FabricJsContextProvider>
               <FabricJsCanvas
                 initialHight={686}
                 initialWidth={1220}
@@ -76,7 +70,7 @@ const TacticsBoard = (): JSX.Element => {
                 containerRef={refContainer}
                 visibleObject={rect}
               />
-            </FabricJsContextProvider>
+            </FabricJsContextProvider> */}
           </Grid>
         </Grid>
       </div>
