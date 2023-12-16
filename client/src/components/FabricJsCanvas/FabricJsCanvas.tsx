@@ -27,7 +27,7 @@ const FabricJsCanvas = ({
   containerRef,
   visibleObject,
 }: FabricJsCanvasProps): JSX.Element => {
-  const canvasRef2 = useRef<fabric.Canvas | null>(null);
+  const canvasRef = useRef<fabric.Canvas | null>(null);
   const { setCanvas } = useFabricJs();
 
   useEffect(() => {
@@ -39,7 +39,7 @@ const FabricJsCanvas = ({
     console.debug("USEEFFEKT");
 
     // Save canvas reference to the local ref
-    canvasRef2.current = canvasInstance;
+    canvasRef.current = canvasInstance;
 
     // Update the context with the current canvas instance
     setCanvas(canvasInstance);
@@ -59,12 +59,13 @@ const FabricJsCanvas = ({
           width: initialWidth * scaleRatio,
           height: initialHight * scaleRatio,
         };
+        // Set the Dimensions
         canvasInstance.setDimensions(dim);
         canvasInstance.setZoom(scaleRatio);
         canvasInstance.renderAll();
       }
     };
-
+    // Add the Event Listeners
     window.addEventListener("resize", handleResize, false);
     return () => {
       canvasInstance.dispose();

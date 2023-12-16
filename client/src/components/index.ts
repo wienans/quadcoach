@@ -9,3 +9,4 @@ export { default as SettingsMenu } from "./SettingsMenu";
 export { default as Collapsible } from "./Collapsible";
 export { default as FabricJsCanvas } from "./FabricJsCanvas";
 export { default as FabricJsContextProvider } from "./FabricJsContext";
+export { default as TacticsBoardToolBar } from "./TacticsBoardToolBar";

@@ -11,9 +11,9 @@ import {
   SoftBox,
   FabricJsCanvas,
   FabricJsContextProvider,
+  TacticsBoardToolBar,
 } from "../../components";
 import { fabric } from "fabric";
-import TacticsBoardToolBar from "./ToolBar/TacticsBoardToolBar";
 
 const TacticsBoard = (): JSX.Element => {
   const { t } = useTranslation("TacticsBoard");
