@@ -13,12 +13,13 @@ import {
   FabricJsContextProvider,
 } from "../../components";
 import { fabric } from "fabric";
-// import { FabricJSCanvas, useFabricJSEditor } from "fabricjs-react";
+import TacticsBoardToolBar from "./ToolBar/TacticsBoardToolBar";
 
 const TacticsBoard = (): JSX.Element => {
   const { t } = useTranslation("TacticsBoard");
   useUpdateBreadcrumbs(t("TacticsBoard:titel"));
   const refContainer = useRef<HTMLDivElement>(null);
+  //const { addObject } = useFabricJs();
   const rect = new fabric.Rect({
     left: 100,
     top: 100,
@@ -28,41 +29,44 @@ const TacticsBoard = (): JSX.Element => {
     angle: 45,
   });
   return (
-    <div>
-      <SoftBox
-        variant="contained"
-        shadow="lg"
-        opacity={1}
-        p={1}
-        my={2}
-        borderRadius="lg"
-      >
-        <SoftTypography variant="h3">{t("TacticsBoard:titel")}</SoftTypography>
-      </SoftBox>
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <Grid container spacing={2}>
-          <Grid item xs={4}>
-            <SoftButton onClick={() => {}}>Chaser</SoftButton>
+    <FabricJsContextProvider>
+      <div>
+        <SoftBox
+          variant="contained"
+          shadow="lg"
+          opacity={1}
+          p={1}
+          my={2}
+          borderRadius="lg"
+        >
+          <SoftTypography variant="h3">
+            {t("TacticsBoard:titel")}
+          </SoftTypography>
+        </SoftBox>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Grid container spacing={2}>
+            <Grid item xs={4}>
+              <TacticsBoardToolBar />
+              <SoftButton onClick={() => {}}>Chaser</SoftButton>
 
-            <SoftButton onClick={() => {}}>Beater</SoftButton>
-          </Grid>
-          <Grid item xs={4}>
-            <SoftButton onClick={() => {}}>Quaffel</SoftButton>
-            <SoftButton onClick={() => {}}>Bludger</SoftButton>
-          </Grid>
-          <Grid item xs={4}>
-            <SoftButton onClick={() => {}}>Chaser</SoftButton>
-            <SoftButton onClick={() => {}}>Beater</SoftButton>
-          </Grid>
+              <SoftButton onClick={() => {}}>Beater</SoftButton>
+            </Grid>
+            <Grid item xs={4}>
+              <SoftButton onClick={() => {}}>Quaffel</SoftButton>
+              <SoftButton onClick={() => {}}>Bludger</SoftButton>
+            </Grid>
+            <Grid item xs={4}>
+              <SoftButton onClick={() => {}}>Chaser</SoftButton>
+              <SoftButton onClick={() => {}}>Beater</SoftButton>
+            </Grid>
 
-          <Grid item xs={12} ref={refContainer}>
-            {/* <FabricJsContextProvider>
+            <Grid item xs={12} ref={refContainer}>
               <FabricJsCanvas
                 initialHight={686}
                 initialWidth={1220}
@@ -70,11 +74,11 @@ const TacticsBoard = (): JSX.Element => {
                 containerRef={refContainer}
                 visibleObject={rect}
               />
-            </FabricJsContextProvider> */}
+            </Grid>
           </Grid>
-        </Grid>
+        </div>
       </div>
-    </div>
+    </FabricJsContextProvider>
   );
 };
 

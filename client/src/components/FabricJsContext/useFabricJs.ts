@@ -6,7 +6,9 @@ export const useFabricJs = () => {
   const context = useContext<FabricJsContextProps | undefined>(FabricJsContext);
 
   if (!context) {
-    throw new Error("useFabricJs must be used within a FabricJsProvider");
+    throw new Error(
+      "useFabricJs must be used within a FabricJsContextProvider",
+    );
   }
 
   return context;

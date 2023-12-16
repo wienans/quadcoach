@@ -21,9 +21,7 @@ export const FabricJsContext = createContext<FabricJsContextProps | undefined>(
   undefined,
 );
 
-export const FabricJsContextProvider: FC<{ children: ReactNode }> = ({
-  children,
-}) => {
+const FabricJsContextProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const [canvas, setCanvas] = useState<fabric.Canvas | null>(null);
 
   const addObject = useCallback(
@@ -41,3 +39,5 @@ export const FabricJsContextProvider: FC<{ children: ReactNode }> = ({
     </FabricJsContext.Provider>
   );
 };
+
+export default FabricJsContextProvider;
