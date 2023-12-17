@@ -1,23 +1,11 @@
 import { fabric } from "fabric";
-import {
-  useState,
-  useEffect,
-  useRef,
-  useCallback,
-  MutableRefObject,
-  RefObject,
-  forwardRef,
-  useImperativeHandle,
-  useContext,
-} from "react";
-import { FabricJsContext } from "..";
+import { useEffect, useRef, RefObject } from "react";
 import { useFabricJs } from "../FabricJsContext";
 export type FabricJsCanvasProps = {
   initialWidth: number;
   initialHight: number;
   backgroundImage?: string;
   containerRef: RefObject<HTMLDivElement>;
-  visibleObject: fabric.Rect;
 };
 
 const FabricJsCanvas = ({
@@ -25,7 +13,6 @@ const FabricJsCanvas = ({
   initialHight,
   backgroundImage,
   containerRef,
-  visibleObject,
 }: FabricJsCanvasProps): JSX.Element => {
   const canvasRef = useRef<fabric.Canvas | null>(null);
   const { setCanvas } = useFabricJs();
@@ -85,14 +72,7 @@ const FabricJsCanvas = ({
       canvasInstance.dispose();
       window.removeEventListener("resize", handleResize);
     };
-  }, [
-    visibleObject,
-    containerRef,
-    backgroundImage,
-    initialHight,
-    initialWidth,
-    setCanvas,
-  ]);
+  }, [containerRef, backgroundImage, initialHight, initialWidth, setCanvas]);
 
   return (
     <div>

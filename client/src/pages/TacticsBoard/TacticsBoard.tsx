@@ -1,33 +1,27 @@
 import "./translations";
 import { useNavigate } from "react-router-dom";
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Grid } from "@mui/material";
 import { useUpdateBreadcrumbs } from "../../components/Layout/hooks";
 import { useTranslation } from "react-i18next";
 import {
   SoftTypography,
-  SoftInput,
-  SoftButton,
   SoftBox,
   FabricJsCanvas,
   FabricJsContextProvider,
   TacticsBoardToolBar,
+  TacticsBoardSpeedDial,
+  TacticsBoardSpeedDialBalls,
 } from "../../components";
-import { fabric } from "fabric";
 
 const TacticsBoard = (): JSX.Element => {
   const { t } = useTranslation("TacticsBoard");
   useUpdateBreadcrumbs(t("TacticsBoard:titel"));
   const refContainer = useRef<HTMLDivElement>(null);
-  //const { addObject } = useFabricJs();
-  const rect = new fabric.Rect({
-    left: 100,
-    top: 100,
-    fill: "red",
-    width: 20,
-    height: 20,
-    angle: 45,
-  });
+  const [editMode, setEditMode] = useState<boolean>(true);
+  const [page, setPage] = useState<number>(1);
+  const [maxPages, setMaxPages] = useState<number>(1);
+
   return (
     <FabricJsContextProvider>
       <div>
@@ -52,18 +46,36 @@ const TacticsBoard = (): JSX.Element => {
         >
           <Grid container spacing={2}>
             <Grid item xs={12}>
-              <TacticsBoardToolBar />
+              <TacticsBoardToolBar
+                setEditMode={setEditMode}
+                setPage={setPage}
+                page={page}
+                setMaxPages={setMaxPages}
+                maxPages={maxPages}
+              />
             </Grid>
 
-            <Grid item xs={12} ref={refContainer}>
+            <Grid
+              item
+              xs={12}
+              ref={refContainer}
+              style={{ display: "flex", justifyContent: "center" }}
+            >
+              <TacticsBoardSpeedDialBalls editMode={editMode} />
+              <TacticsBoardSpeedDial teamB={false} editMode={editMode} />
               <FabricJsCanvas
                 initialHight={686}
                 initialWidth={1220}
                 backgroundImage="./full-court_inkscape.svg"
                 containerRef={refContainer}
-                visibleObject={rect}
               />
+              <TacticsBoardSpeedDial teamB={true} editMode={editMode} />
             </Grid>
+            <Grid
+              item
+              xs={12}
+              style={{ display: "flex", justifyContent: "center" }}
+            ></Grid>
           </Grid>
         </div>
       </div>
