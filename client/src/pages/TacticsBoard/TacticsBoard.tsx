@@ -51,19 +51,8 @@ const TacticsBoard = (): JSX.Element => {
           }}
         >
           <Grid container spacing={2}>
-            <Grid item xs={4}>
+            <Grid item xs={12}>
               <TacticsBoardToolBar />
-              <SoftButton onClick={() => {}}>Chaser</SoftButton>
-
-              <SoftButton onClick={() => {}}>Beater</SoftButton>
-            </Grid>
-            <Grid item xs={4}>
-              <SoftButton onClick={() => {}}>Quaffel</SoftButton>
-              <SoftButton onClick={() => {}}>Bludger</SoftButton>
-            </Grid>
-            <Grid item xs={4}>
-              <SoftButton onClick={() => {}}>Chaser</SoftButton>
-              <SoftButton onClick={() => {}}>Beater</SoftButton>
             </Grid>
 
             <Grid item xs={12} ref={refContainer}>
