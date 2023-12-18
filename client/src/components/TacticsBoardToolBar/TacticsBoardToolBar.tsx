@@ -11,7 +11,7 @@ import {
 export type TacticsBoardToolBarProps = {
   setEditMode: (editMode: boolean) => void;
   setPage: (page: number) => void;
-  page: number;
+  currentPage: number;
   setMaxPages: (maxPages: number) => void;
   maxPages: number;
 };
@@ -79,7 +79,7 @@ const TacticsBoardToolBar = ({
               count={maxPages}
               siblingCount={0}
               boundaryCount={0}
-              page={page}
+              page={currentPage}
               onChange={handleChange}
             />
             <SoftButton

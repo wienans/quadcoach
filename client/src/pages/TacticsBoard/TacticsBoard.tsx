@@ -49,7 +49,7 @@ const TacticsBoard = (): JSX.Element => {
               <TacticsBoardToolBar
                 setEditMode={setEditMode}
                 setPage={setPage}
-                page={page}
+                currentPage={page}
                 setMaxPages={setMaxPages}
                 maxPages={maxPages}
               />
