@@ -55,6 +55,16 @@ const routes = [
         },
       },
       {
+        path: "/tacticboards/:id/update",
+        async lazy() {
+          const UpdateTacticBoard = (await import("./UpdateTacticBoard"))
+            .default;
+          return {
+            element: <UpdateTacticBoard />,
+          };
+        },
+      },
+      {
         path: "/tacticsboard",
         async lazy() {
           const TacticsBoard = (await import("./TacticsBoard")).default;
