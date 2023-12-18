@@ -1,6 +1,7 @@
 import { useFabricJs } from "../FabricJsContext";
 import { SpeedDial, SpeedDialAction } from "@mui/material";
 import { fabric } from "fabric";
+import { v4 as uuidv4 } from "uuid";
 
 export type TacticsBoardSpeedDialProps = {
   teamB: boolean;
@@ -22,6 +23,7 @@ const TacticsBoardSpeedDial = ({
       strokeWidth: 3, // Set the width of the stroke
       fill: teamB ? colorTeamB : colorTeamA,
       hasControls: false, // Disable resizing handles
+      uuid: uuidv4(),
     });
     addObject(circle);
   };

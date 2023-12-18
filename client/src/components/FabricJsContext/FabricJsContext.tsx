@@ -63,7 +63,7 @@ const FabricJsContextProvider: FC<{ children: ReactNode }> = ({ children }) => {
 
   const getAllObjectsJson = useCallback(() => {
     if (canvas) {
-      return JSON.stringify(canvas.toJSON());
+      return JSON.stringify(canvas.toJSON(["uuid"]));
     }
     return "";
   }, [canvas]);

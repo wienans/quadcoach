@@ -2,6 +2,7 @@ import { useFabricJs } from "../FabricJsContext";
 import { SpeedDial, SpeedDialAction } from "@mui/material";
 import SportsVolleyballIcon from "@mui/icons-material/SportsVolleyball";
 import { fabric } from "fabric";
+import { v4 as uuidv4 } from "uuid";
 
 export type TacticsBoardSpeedDialProps = {
   editMode: boolean;
@@ -20,6 +21,7 @@ const TacticsBoardSpeedDial = ({
       top: 333,
       fill: ballColor,
       hasControls: false, // Disable resizing handles
+      uuid: uuidv4(),
     });
     addObject(circle);
   };
