@@ -4,3 +4,9 @@ export type {
   ExerciseWithOutId,
   ExercisePartialId,
 } from "./Exercise";
+export type { default as TacticPage } from "./TacticPage";
+export type {
+  default as TacticBoard,
+  TacticBoardWithOutId,
+  TacticBoardPartialId,
+} from "./TacticBoard";
