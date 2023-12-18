@@ -19,12 +19,17 @@ export type TacticsBoardToolBarProps = {
 const TacticsBoardToolBar = ({
   setEditMode,
   setPage,
-  page,
+  currentPage,
   setMaxPages,
   maxPages,
 }: TacticsBoardToolBarProps): JSX.Element => {
-  const { getAllObjectsJson, removeActiveObjects, setSelection } =
-    useFabricJs();
+  const {
+    getAllObjectsJson,
+    removeActiveObjects,
+    setSelection,
+    setDrawMode,
+    loadFromJson,
+  } = useFabricJs();
   const handleChange = (event: React.ChangeEvent<unknown>, value: number) => {
     setPage(value);
   };

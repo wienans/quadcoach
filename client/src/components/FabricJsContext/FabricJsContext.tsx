@@ -14,9 +14,11 @@ export interface FabricJsContextProps {
   addObject: (object: fabric.Object) => void;
   removeActiveObjects: () => void;
   removeObject: (object: fabric.Object) => void;
-  getAllObjectsJson: () => string;
+  getAllObjectsJson: () => object;
   getActiveObjects: () => fabric.Object[];
   setSelection: (selection: boolean) => void;
+  loadFromJson: (page: object) => void;
+  setDrawMode: (drawMode: boolean) => void;
 }
 
 export const FabricJsContext = createContext<FabricJsContextProps | undefined>(
@@ -63,10 +65,22 @@ const FabricJsContextProvider: FC<{ children: ReactNode }> = ({ children }) => {
 
   const getAllObjectsJson = useCallback(() => {
     if (canvas) {
-      return JSON.stringify(canvas.toJSON(["uuid"]));
+      return canvas.toJSON(["uuid"]);
     }
-    return "";
+    return {};
   }, [canvas]);
+
+  const loadFromJson = useCallback(
+    (page: object) => {
+      if (canvas) {
+        return canvas.loadFromJSON(page, () => {
+          canvas.renderAll();
+        });
+      }
+      return {};
+    },
+    [canvas],
+  );
 
   const setSelection = useCallback(
     (selection: boolean) => {
@@ -75,6 +89,14 @@ const FabricJsContextProvider: FC<{ children: ReactNode }> = ({ children }) => {
         canvas.getObjects().forEach((obj) => {
           obj.evented = selection;
         });
+      }
+    },
+    [canvas],
+  );
+  const setDrawMode = useCallback(
+    (drawMode: boolean) => {
+      if (canvas) {
+        canvas.isDrawingMode = drawMode;
       }
     },
     [canvas],
@@ -114,6 +136,8 @@ const FabricJsContextProvider: FC<{ children: ReactNode }> = ({ children }) => {
         removeObject,
         removeActiveObjects,
         setSelection,
+        loadFromJson,
+        setDrawMode,
       }}
     >
       {children}
