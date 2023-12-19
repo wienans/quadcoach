@@ -63,18 +63,18 @@ const UpdateTacticBoard = (): JSX.Element => {
     if (newPage && removePage) return;
     let updatedTacticBoard: TacticBoard = cloneDeep(tacticBoardState);
     if (newPage) {
-      // New Page
+      // Save the last state of the old page
+      updatedTacticBoard.pages[page - 2] = getAllObjectsJson();
+      // Copy the state of the old page to the new page
       updatedTacticBoard.pages[page - 1] = getAllObjectsJson();
       updateTacticBoard(updatedTacticBoard);
     }
     if (removePage) {
       // Remove Last Page
-      console.log("remove");
       updatedTacticBoard.pages.pop();
       updateTacticBoard(updatedTacticBoard);
     }
-    // Visit Page
-    console.log(page);
+    // Show the new Page
     loadFromJson(updatedTacticBoard.pages[page - 1]);
   };
 
