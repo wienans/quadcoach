@@ -23,13 +23,8 @@ const TacticsBoardToolBar = ({
   setMaxPages,
   maxPages,
 }: TacticsBoardToolBarProps): JSX.Element => {
-  const {
-    getAllObjectsJson,
-    removeActiveObjects,
-    setSelection,
-    setDrawMode,
-    loadFromJson,
-  } = useFabricJs();
+  const { getAllObjectsJson, removeActiveObjects, setSelection, setDrawMode } =
+    useFabricJs();
   const handleChange = (event: React.ChangeEvent<unknown>, value: number) => {
     setPage(value);
   };
@@ -66,6 +61,16 @@ const TacticsBoardToolBar = ({
               />
             }
             label="Edit Mode"
+          />
+          <FormControlLabel
+            control={
+              <Switch
+                onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                  setDrawMode(event.target.checked);
+                }}
+              />
+            }
+            label="Draw Mode"
           />
         </Grid>
         <Grid item xs={4}>
