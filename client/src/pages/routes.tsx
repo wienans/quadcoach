@@ -59,8 +59,14 @@ const routes = [
         async lazy() {
           const UpdateTacticBoard = (await import("./UpdateTacticBoard"))
             .default;
+          const FabricJsContextProvider = (await import("../components"))
+            .FabricJsContextProvider;
           return {
-            element: <UpdateTacticBoard />,
+            element: (
+              <FabricJsContextProvider>
+                <UpdateTacticBoard />
+              </FabricJsContextProvider>
+            ),
           };
         },
       },
