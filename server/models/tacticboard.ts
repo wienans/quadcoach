@@ -150,7 +150,7 @@ const pagesSchema = new Schema<ITacticPage>({
     type: [objectSchema],
   },
   backgroundImage: {
-    type: [backImgSchema],
+    type: backImgSchema,
   },
 });
 const tacticBoardSchema = new Schema<ITacticBoard>(
