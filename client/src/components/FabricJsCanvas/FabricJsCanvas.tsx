@@ -6,6 +6,7 @@ export type FabricJsCanvasProps = {
   initialHight: number;
   backgroundImage?: string;
   containerRef: RefObject<HTMLDivElement>;
+  initialCanvas?: object;
 };
 
 const FabricJsCanvas = ({
@@ -13,6 +14,7 @@ const FabricJsCanvas = ({
   initialHight,
   backgroundImage,
   containerRef,
+  initialCanvas,
 }: FabricJsCanvasProps): JSX.Element => {
   const canvasRef = useRef<fabric.Canvas | null>(null);
   const { setCanvas } = useFabricJs();
@@ -58,6 +60,11 @@ const FabricJsCanvas = ({
           backgroundImage,
           canvasInstance.renderAll.bind(canvasInstance),
         );
+      }
+      if (initialCanvas) {
+        canvasInstance.loadFromJSON(initialCanvas, () => {
+          canvasInstance.renderAll();
+        });
       }
       handleResize();
     };

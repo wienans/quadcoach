@@ -101,7 +101,7 @@ const FabricJsContextProvider: FC<{ children: ReactNode }> = ({ children }) => {
     },
     [canvas],
   );
-  // Autosave Functionality
+  // Autosave Functionality not implemented
   useEffect(() => {
     const handleCanvasChange = () => {
       //const json = getAllObjectsJson();
