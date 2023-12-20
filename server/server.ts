@@ -82,56 +82,72 @@ app.get("/api/exercises", async (req, res) => {
 });
 
 app.delete("/api/exercise/:id", async (req, res) => {
-  const result = await Exercise.deleteOne({ _id: req.params.id });
-  if (result) {
-    res.send(result);
+  if (mongoose.isValidObjectId(req.params.id)) {
+    const result = await Exercise.deleteOne({ _id: req.params.id });
+    if (result) {
+      res.send(result);
+    } else {
+      res.send({ result: "No Record Found" });
+    }
   } else {
     res.send({ result: "No Record Found" });
   }
 });
 
 app.get("/api/exercise/:id", async (req, res) => {
-  const result = await Exercise.findOne({ _id: req.params.id });
-  if (result) {
-    res.send(result);
+  if (mongoose.isValidObjectId(req.params.id)) {
+    const result = await Exercise.findOne({ _id: req.params.id });
+    if (result) {
+      res.send(result);
+    } else {
+      res.send({ result: "No Record Found" });
+    }
   } else {
     res.send({ result: "No Record Found" });
   }
 });
 
 app.get("/api/exercise/:id/relatedExercises", async (req, res) => {
-  const exerciseToGetRealted = await Exercise.findOne({
-    _id: req.params.id,
-  }).exec();
-  if (!exerciseToGetRealted) {
-    res.send({ result: "No Record Found" });
-    return;
-  }
+  if (mongoose.isValidObjectId(req.params.id)) {
+    const exerciseToGetRealted = await Exercise.findOne({
+      _id: req.params.id,
+    }).exec();
+    if (!exerciseToGetRealted) {
+      res.send({ result: "No Record Found" });
+      return;
+    }
 
-  if (
-    !exerciseToGetRealted.related_to ||
-    exerciseToGetRealted.related_to.length === 0
-  ) {
-    res.send([]);
-    return;
-  }
+    if (
+      !exerciseToGetRealted.related_to ||
+      exerciseToGetRealted.related_to.length === 0
+    ) {
+      res.send([]);
+      return;
+    }
 
-  const result = await Exercise.find({
-    $or: exerciseToGetRealted.related_to.map((r) => ({ _id: r._id })),
-  });
-  if (result) {
-    res.send(result);
+    const result = await Exercise.find({
+      $or: exerciseToGetRealted.related_to.map((r) => ({ _id: r._id })),
+    });
+    if (result) {
+      res.send(result);
+    } else {
+      res.send({ result: "No Record Found" });
+    }
   } else {
     res.send({ result: "No Record Found" });
   }
 });
 
 app.put("/api/exercise/:id", async (req, res) => {
-  const result = await Exercise.updateOne(
-    { _id: req.params.id },
-    { $set: req.body }
-  );
-  res.send(result);
+  if (mongoose.isValidObjectId(req.params.id)) {
+    const result = await Exercise.updateOne(
+      { _id: req.params.id },
+      { $set: req.body }
+    );
+    res.send(result);
+  } else {
+    res.send({ result: "No Record Found" });
+  }
 });
 
 app.get("/api/search/:key", async (req, res) => {
@@ -225,26 +241,38 @@ app.get("/api/tacticboards", async (req, res) => {
 });
 
 app.delete("/api/tacticboards/:id", async (req, res) => {
-  const result = await TacticBoard.deleteOne({ _id: req.params.id });
-  if (result) {
-    res.send(result);
+  if (mongoose.isValidObjectId(req.params.id)) {
+    const result = await TacticBoard.deleteOne({ _id: req.params.id });
+    if (result) {
+      res.send(result);
+    } else {
+      res.send({ result: "No Record Found" });
+    }
   } else {
     res.send({ result: "No Record Found" });
   }
 });
 
 app.put("/api/tacticboards/:id", async (req, res) => {
-  const result = await TacticBoard.updateOne(
-    { _id: req.params.id },
-    { $set: req.body }
-  );
-  res.send(result);
+  if (mongoose.isValidObjectId(req.params.id)) {
+    const result = await TacticBoard.updateOne(
+      { _id: req.params.id },
+      { $set: req.body }
+    );
+    res.send(result);
+  } else {
+    res.send({ result: "No Record Found" });
+  }
 });
 
 app.get("/api/tacticboards/:id", async (req, res) => {
-  const result = await TacticBoard.findOne({ _id: req.params.id });
-  if (result) {
-    res.send(result);
+  if (mongoose.isValidObjectId(req.params.id)) {
+    const result = await TacticBoard.findOne({ _id: req.params.id });
+    if (result) {
+      res.send(result);
+    } else {
+      res.send({ result: "No Record Found" });
+    }
   } else {
     res.send({ result: "No Record Found" });
   }
