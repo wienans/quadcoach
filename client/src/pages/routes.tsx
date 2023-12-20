@@ -71,11 +71,11 @@ const routes = [
         },
       },
       {
-        path: "/tacticsboard",
+        path: "/tacticboards",
         async lazy() {
-          const TacticsBoard = (await import("./TacticsBoard")).default;
+          const TacticBoardList = (await import("./TacticBoardList")).default;
           return {
-            element: <TacticsBoard />,
+            element: <TacticBoardList />,
           };
         },
       },

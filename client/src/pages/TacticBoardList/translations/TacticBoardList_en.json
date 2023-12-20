@@ -1,0 +1,43 @@
+{
+  "dashboardBreadcrumb": "Dashboard",
+  "exercisesBreadcrumb": "Exercises",
+  "columns": {
+    "name": "Name",
+    "persons": "Persons",
+    "tags": "Tags"
+  },
+  "title": "Exercise list",
+  "filter": {
+    "title": "Filter",
+    "name": "Search exercise",
+    "persons": {
+      "title": "Persons",
+      "titleWithNumbers": "Persons: {{minValue}} - {{maxValue}}",
+      "min": "min",
+      "max": "max"
+    },
+    "tags": {
+      "title": "Tags",
+      "placeholder": "Search tag"
+    },
+    "apply": "Apply filter"
+  },
+  "errorLoadingExercises": "An error occurred while loading exercises.",
+  "noExercisesFound": "No exercises found",
+  "cardView": {
+    "exerciseType": "General exercise",
+    "exerciseType_beater": "Beater exercise",
+    "exerciseType_chaser": "Chaser exercise",
+    "exerciseType_all": "Exercise for Beater and Chaser",
+    "personAmount": "Person amount",
+    "beaterAmount": "Beater amount",
+    "chaserAmount": "Chaser amount",
+    "timeInMinutes": "Time in minutes",
+    "openExercise": "Open exercise",
+    "personsAmount": "Persons",
+    "materials": "Materials",
+    "tags": "Tags",
+    "relatedExercises": "Related exercises"
+  },
+  "addExercise": "Add exercise"
+}
