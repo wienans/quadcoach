@@ -119,6 +119,20 @@ const routes = [
               type: RouteHandleType.updateTacticBoard,
             },
             async lazy() {
+              const UpdateTacticBoardMeta = (
+                await import("../UpdateTacticBoardMeta")
+              ).default;
+              return {
+                element: <UpdateTacticBoardMeta />,
+              };
+            },
+          },
+          {
+            path: ":id/updateBoard",
+            handle: {
+              type: RouteHandleType.updateTacticBoard,
+            },
+            async lazy() {
               const UpdateTacticBoard = (await import("../UpdateTacticBoard"))
                 .default;
               const FabricJsContextProvider = (await import("../../components"))
