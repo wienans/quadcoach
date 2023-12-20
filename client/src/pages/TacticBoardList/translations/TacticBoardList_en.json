@@ -16,7 +16,7 @@
   "errorLoadingTacticBoards": "An error occurred while loading tactic boards.",
   "noTacticBoardsFound": "No tactic board found",
   "cardView": {
-    "openExercise": "Open tactic board",
+    "openTacticBoard": "Open tactic board",
     "tags": "Tags"
   },
   "addTacticBoard": "Add tactic board"

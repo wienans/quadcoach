@@ -4,6 +4,7 @@ import TacticPage from "./TacticPage";
 type TacticBoard = {
   _id: string;
   name?: string;
+  isPrivate?: boolean;
   tags?: string[];
   creator?: string;
   pages: TacticPage[];

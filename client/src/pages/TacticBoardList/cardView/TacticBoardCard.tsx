@@ -113,7 +113,7 @@ const TacticBoardCard = ({
           fullWidth
           onClick={onOpenTacticBoardClick}
         >
-          {t("TacticBoardList:cardView.openExercise")}
+          {t("TacticBoardList:cardView.openTacticBoard")}
         </SoftButton>
       </CardActions>
     </Card>

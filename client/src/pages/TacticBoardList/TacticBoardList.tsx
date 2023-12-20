@@ -18,8 +18,17 @@ import {
   SoftInput,
   SoftBox,
   SoftButton,
+  AddTacticBoardDialog,
 } from "../../components";
-import { useLazyGetTacticBoardsQuery } from "../tacticboardApi";
+import {
+  useLazyGetTacticBoardsQuery,
+  useAddTacticBoardMutation,
+} from "../tacticboardApi";
+import {
+  TacticBoardWithOutId,
+  TacticBoard,
+} from "../../api/quadcoachApi/domain";
+import TacticPage from "../../api/quadcoachApi/domain/TacticPage";
 import { useTranslation } from "react-i18next";
 import FilterAltIcon from "@mui/icons-material/FilterAlt";
 import GridViewIcon from "@mui/icons-material/GridView";
@@ -50,6 +59,8 @@ const TacticBoardList = () => {
 
   const [showFilters, setShowFilters] = useState<boolean>(false);
   const [viewType, setViewType] = useState<ViewType>(ViewType.Cards);
+  const [openAddTacticBoardDialog, setOpenAddTacticBoardDialog] =
+    useState<boolean>(false);
 
   useEffect(() => {
     if (isUpMd) return;
@@ -78,6 +89,15 @@ const TacticBoardList = () => {
     },
   ] = useLazyGetTacticBoardsQuery();
 
+  const [
+    addTacticBoard,
+    {
+      isLoading: isAddTacticBoardLoading,
+      isError: isAddTacticBoardError,
+      isSuccess: isAddTacticBoardSuccess,
+    },
+  ] = useAddTacticBoardMutation();
+
   useEffect(() => {
     getTacticBoards({
       nameRegex: defaultTacticBoardFilter.searchValue,
@@ -94,6 +114,35 @@ const TacticBoardList = () => {
 
   const onOpenTacticBoardClick = (tacticBoardId: string) => {
     navigate(`/tacticboards/${tacticBoardId}/update`);
+  };
+
+  const handleAddTacticBoard = (name: string | undefined) => {
+    if (name) {
+      console.log(name);
+      const emptyPage: TacticPage = {
+        objects: undefined,
+        backgroundImage: {
+          type: "image",
+          src: "/full-court_inkscape.svg",
+          width: 1220,
+          height: 686,
+        },
+      };
+      const newTacticBoard: TacticBoardWithOutId = {
+        name: name,
+        isPrivate: false,
+        pages: [emptyPage],
+      };
+
+      addTacticBoard(newTacticBoard).then(
+        (result: { data: TacticBoard } | { error: unknown }) => {
+          if (!result.data) return;
+          console.log(result.data._id);
+          navigate(`/tacticboards/${result.data._id}/update`);
+        },
+      );
+    }
+    setOpenAddTacticBoardDialog(false);
   };
 
   const onViewTypeChange = (
@@ -179,10 +228,16 @@ const TacticBoardList = () => {
         <SoftButton
           startIcon={isUpMd && <AddIcon />}
           color="secondary"
-          href="/exercises/add"
+          onClick={() => {
+            setOpenAddTacticBoardDialog(true);
+          }}
         >
           {isUpMd ? t("TacticBoardList:addTacticBoard") : <AddIcon />}
         </SoftButton>
+        <AddTacticBoardDialog
+          isOpen={openAddTacticBoardDialog}
+          onConfirm={(name) => handleAddTacticBoard(name)}
+        />
         <ToggleButtonGroup
           value={viewType}
           exclusive
