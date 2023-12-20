@@ -7,20 +7,19 @@ import {
   CardHeader,
   Collapse,
   Grid,
-  Slider,
   Theme,
   ToggleButton,
   ToggleButtonGroup,
   useMediaQuery,
 } from "@mui/material";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {
   SoftTypography,
   SoftInput,
   SoftBox,
   SoftButton,
 } from "../../components";
-import { useLazyGetExercisesQuery } from "../exerciseApi";
+import { useLazyGetTacticBoardsQuery } from "../tacticboardApi";
 import { useTranslation } from "react-i18next";
 import FilterAltIcon from "@mui/icons-material/FilterAlt";
 import GridViewIcon from "@mui/icons-material/GridView";
@@ -29,30 +28,23 @@ import TacticBoardListView from "./listView/TacticBoardListView";
 import TacticBoardCardView from "./cardView/TacticBoardCardView";
 import AddIcon from "@mui/icons-material/Add";
 
-const maxPersons = 100;
-
 enum ViewType {
   List = "List",
   Cards = "Cards",
 }
 
-type ExerciseFilter = {
+type TacticBoardFilter = {
   searchValue: string;
-  minPersons: number;
-  maxPersons: number;
   tagString: string;
 };
 
-const defaultExerciseFilter: ExerciseFilter = {
-  maxPersons: maxPersons,
-  minPersons: 0,
+const defaultTacticBoardFilter: TacticBoardFilter = {
   searchValue: "",
   tagString: "",
 };
 
-const ExerciseList = () => {
-  const { t } = useTranslation("ExerciseList");
-  const location = useLocation().pathname;
+const TacticBoardList = () => {
+  const { t } = useTranslation("TacticBoardList");
   const navigate = useNavigate();
   const isUpMd = useMediaQuery((theme: Theme) => theme.breakpoints.up("md"));
 
@@ -64,50 +56,44 @@ const ExerciseList = () => {
     setViewType(ViewType.Cards);
   }, [isUpMd]);
 
-  const isDashboard = location === "/";
-
-  const [exerciseFilter, setExerciseFilter] = useState<ExerciseFilter>(
-    defaultExerciseFilter,
+  const [tacticBoardFilter, setTacticBoardFilter] = useState<TacticBoardFilter>(
+    defaultTacticBoardFilter,
   );
 
-  const onExerciseFilterValueChange =
-    (exerciseFilterProperty: keyof ExerciseFilter) =>
+  const onTacticBoardFilterValueChange =
+    (tacticBoardFilterProperty: keyof TacticBoardFilter) =>
     (event: ChangeEvent<HTMLInputElement>) => {
-      setExerciseFilter({
-        ...exerciseFilter,
-        [exerciseFilterProperty]: event.target.value,
+      setTacticBoardFilter({
+        ...tacticBoardFilter,
+        [tacticBoardFilterProperty]: event.target.value,
       });
     };
 
   const [
-    getExercises,
+    getTacticBoards,
     {
-      data: exercises,
-      isError: isExercisesError,
-      isLoading: isExercisesLoading,
+      data: tacticBoards,
+      isError: isTacticBoardsError,
+      isLoading: isTacticBoardsLoading,
     },
-  ] = useLazyGetExercisesQuery();
+  ] = useLazyGetTacticBoardsQuery();
 
   useEffect(() => {
-    getExercises({
-      maxPersons: defaultExerciseFilter.maxPersons,
-      minPersons: defaultExerciseFilter.minPersons,
-      nameRegex: defaultExerciseFilter.searchValue,
-      tagString: defaultExerciseFilter.tagString,
+    getTacticBoards({
+      nameRegex: defaultTacticBoardFilter.searchValue,
+      tagString: defaultTacticBoardFilter.tagString,
     });
-  }, [getExercises]);
+  }, [getTacticBoards]);
 
   useEffect(() => {
-    getExercises({
-      maxPersons: exerciseFilter.maxPersons,
-      minPersons: exerciseFilter.minPersons,
-      nameRegex: exerciseFilter.searchValue,
-      tagString: exerciseFilter.tagString,
+    getTacticBoards({
+      nameRegex: tacticBoardFilter.searchValue,
+      tagString: tacticBoardFilter.tagString,
     });
-  }, [exerciseFilter.searchValue, getExercises, exerciseFilter]);
+  }, [tacticBoardFilter.searchValue, getTacticBoards, tacticBoardFilter]);
 
-  const onOpenExerciseClick = (exerciseId: string) => {
-    navigate(`/exercises/${exerciseId}`);
+  const onOpenTacticBoardClick = (tacticBoardId: string) => {
+    navigate(`/tacticboards/${tacticBoardId}/update`);
   };
 
   const onViewTypeChange = (
@@ -123,7 +109,7 @@ const ExerciseList = () => {
         <CardHeader
           title={
             <SoftTypography variant="h3">
-              {t("ExerciseList:title")}
+              {t("TacticBoardList:title")}
             </SoftTypography>
           }
           action={
@@ -131,9 +117,9 @@ const ExerciseList = () => {
               {isUpMd && (
                 <SoftInput
                   id="outlined-basic"
-                  placeholder={t("ExerciseList:filter.name")}
-                  value={exerciseFilter.searchValue}
-                  onChange={onExerciseFilterValueChange("searchValue")}
+                  placeholder={t("TacticBoardList:filter.name")}
+                  value={tacticBoardFilter.searchValue}
+                  onChange={onTacticBoardFilterValueChange("searchValue")}
                   sx={(theme) => ({
                     minWidth: "200px",
                     mr: 1,
@@ -159,39 +145,15 @@ const ExerciseList = () => {
           <SoftBox display="flex" alignItems="center" sx={{ pb: 2, px: 2 }}>
             <SoftInput
               id="outlined-basic"
-              placeholder={t("ExerciseList:filter.name")}
-              value={exerciseFilter.searchValue}
-              onChange={onExerciseFilterValueChange("searchValue")}
+              placeholder={t("TacticBoardList:filter.name")}
+              value={tacticBoardFilter.searchValue}
+              onChange={onTacticBoardFilterValueChange("searchValue")}
             />
           </SoftBox>
         )}
         <Collapse in={showFilters} timeout="auto" unmountOnExit>
           <CardContent sx={{ p: 2 }}>
             <Grid container spacing={2} sx={{ pl: 2, width: "100%" }}>
-              <Grid item xs={12} md={6}>
-                <SoftTypography variant="body2">
-                  {t("ExerciseList:filter.persons.titleWithNumbers", {
-                    minValue: exerciseFilter.minPersons,
-                    maxValue: exerciseFilter.maxPersons,
-                  })}
-                </SoftTypography>
-                <Slider
-                  getAriaLabel={() => t("ExerciseList:filter.persons.title")}
-                  value={[exerciseFilter.minPersons, exerciseFilter.maxPersons]}
-                  onChange={(_event: Event, newValue: number | number[]) => {
-                    const [newMin, newMax] = newValue as number[];
-                    setExerciseFilter({
-                      ...exerciseFilter,
-                      maxPersons: newMax,
-                      minPersons: newMin,
-                    });
-                  }}
-                  valueLabelDisplay="auto"
-                  getAriaValueText={(value: number) => value.toString()}
-                  max={maxPersons}
-                  min={0}
-                />
-              </Grid>
               <Grid
                 item
                 xs={12}
@@ -199,13 +161,13 @@ const ExerciseList = () => {
                 sx={{ display: "flex", flexDirection: "column" }}
               >
                 <SoftTypography variant="body2">
-                  {t("ExerciseList:filter.tags.title")}
+                  {t("TacticBoardList:filter.tags.title")}
                 </SoftTypography>
                 <SoftInput
                   id="outlined-basic"
-                  placeholder={t("ExerciseList:filter.tags.placeholder")}
-                  value={exerciseFilter.tagString}
-                  onChange={onExerciseFilterValueChange("tagString")}
+                  placeholder={t("TacticBoardList:filter.tags.placeholder")}
+                  value={tacticBoardFilter.tagString}
+                  onChange={onTacticBoardFilterValueChange("tagString")}
                   sx={{ width: "100%" }}
                 />
               </Grid>
@@ -219,7 +181,7 @@ const ExerciseList = () => {
           color="secondary"
           href="/exercises/add"
         >
-          {isUpMd ? t("ExerciseList:addExercise") : <AddIcon />}
+          {isUpMd ? t("TacticBoardList:addTacticBoard") : <AddIcon />}
         </SoftButton>
         <ToggleButtonGroup
           value={viewType}
@@ -236,29 +198,29 @@ const ExerciseList = () => {
           </ToggleButton>
         </ToggleButtonGroup>
       </SoftBox>
-      {isExercisesError && (
+      {isTacticBoardsError && (
         <Alert color="error" sx={{ mt: 2 }}>
           {" "}
-          {t("ExerciseList:errorLoadingExercises")}
+          {t("TacticBoardList:errorLoadingTacticBoards")}
         </Alert>
       )}
-      {!isExercisesError && viewType === ViewType.List && (
+      {!isTacticBoardsError && viewType === ViewType.List && (
         <Card sx={{ mt: 2 }}>
           <CardContent>
             <TacticBoardListView
-              isExercisesLoading={isExercisesLoading}
-              onOpenExerciseClick={onOpenExerciseClick}
-              exercises={exercises}
+              isTacticBoardsLoading={isTacticBoardsLoading}
+              onOpenTacticBoardClick={onOpenTacticBoardClick}
+              tacticBoards={tacticBoards}
             />
           </CardContent>
         </Card>
       )}
-      {!isExercisesError && viewType === ViewType.Cards && (
+      {!isTacticBoardsError && viewType === ViewType.Cards && (
         <SoftBox sx={{ mt: 2, flexGrow: 1, overflowY: "auto", p: 2 }}>
           <TacticBoardCardView
-            isExercisesLoading={isExercisesLoading}
-            onOpenExerciseClick={onOpenExerciseClick}
-            exercises={exercises}
+            isTacticBoardsLoading={isTacticBoardsLoading}
+            onOpenTacticBoardClick={onOpenTacticBoardClick}
+            tacticBoards={tacticBoards}
           />
         </SoftBox>
       )}
@@ -266,4 +228,4 @@ const ExerciseList = () => {
   );
 };
 
-export default ExerciseList;
+export default TacticBoardList;

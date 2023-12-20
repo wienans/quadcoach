@@ -19,9 +19,9 @@ const routes = [
           type: RouteHandleType.dashboard,
         },
         async lazy() {
-          const ExerciseList = (await import("../ExerciseList")).default;
+          const ExerciseListRoot = (await import("../ExerciseList")).default;
           return {
-            element: <ExerciseList />,
+            element: <ExerciseListRoot />,
           };
         },
       },
@@ -95,9 +95,10 @@ const routes = [
           type: RouteHandleType.tacticBoards,
         },
         async lazy() {
-          const TacticBoardList = (await import("../TacticBoardList")).default;
+          const TacticBoardListRoot = (await import("../TacticBoardList"))
+            .default;
           return {
-            element: <TacticBoardList />,
+            element: <TacticBoardListRoot />,
           };
         },
         children: [

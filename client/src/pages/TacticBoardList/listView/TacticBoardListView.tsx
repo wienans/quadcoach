@@ -8,11 +8,11 @@ import {
 import { Alert, LinearProgress, styled } from "@mui/material";
 import { SoftBox } from "../../../components";
 import { Chip } from "@mui/material";
-import { Exercise } from "../../../api/quadcoachApi/domain";
+import { TacticBoard } from "../../../api/quadcoachApi/domain";
 import { useTranslation } from "react-i18next";
 
 const NoRowsAlert = () => {
-  const { t } = useTranslation("ExerciseList");
+  const { t } = useTranslation("TacticBoardList");
   return (
     <SoftBox
       display="flex"
@@ -21,7 +21,7 @@ const NoRowsAlert = () => {
       alignItems="center"
       justifyContent="center"
     >
-      <Alert color="info">{t("ExerciseList:noExercisesFound")}</Alert>
+      <Alert color="info">{t("TacticBoardList:noTacticBoardsFound")}</Alert>
     </SoftBox>
   );
 };
@@ -35,44 +35,37 @@ const StyledDataGrid = styled(DataGrid)({
   },
 }) as typeof DataGrid;
 
-export type ExercisesListViewProps = {
-  exercises?: Exercise[];
-  isExercisesLoading: boolean;
-  onOpenExerciseClick: (exerciseId: string) => void;
+export type TacticBoardsListViewProps = {
+  tacticBoards?: TacticBoard[];
+  isTacticBoardsLoading: boolean;
+  onOpenTacticBoardClick: (exerciseId: string) => void;
 };
 
-const ExercisesListView = ({
-  exercises,
-  isExercisesLoading,
-  onOpenExerciseClick,
-}: ExercisesListViewProps): JSX.Element => {
-  const { t } = useTranslation("ExerciseList");
+const TacticBoardsListView = ({
+  tacticBoards,
+  isTacticBoardsLoading,
+  onOpenTacticBoardClick,
+}: TacticBoardsListViewProps): JSX.Element => {
+  const { t } = useTranslation("TacticBoardList");
 
   const handleRowClick: GridEventListener<"rowClick"> = (
-    params: GridRowParams<Exercise>,
+    params: GridRowParams<TacticBoard>,
   ) => {
-    onOpenExerciseClick(params.row._id);
+    onOpenTacticBoardClick(params.row._id);
   };
 
-  const columns2: GridColDef<Exercise>[] = useMemo(
+  const columns2: GridColDef<TacticBoard>[] = useMemo(
     () => [
       {
         field: "name",
-        headerName: t("ExerciseList:columns.name"),
+        headerName: t("TacticBoardList:columns.name"),
         editable: false,
         hideable: false,
         flex: 2,
       },
       {
-        field: "persons",
-        headerName: t("ExerciseList:columns.persons"),
-        type: "number",
-        editable: false,
-        flex: 1,
-      },
-      {
         field: "tags",
-        headerName: t("ExerciseList:columns.tags"),
+        headerName: t("TacticBoardList:columns.tags"),
         editable: false,
         flex: 3,
         renderCell: (params) => {
@@ -98,9 +91,9 @@ const ExercisesListView = ({
         loadingOverlay: LinearProgress,
         noRowsOverlay: NoRowsAlert,
       }}
-      loading={isExercisesLoading}
+      loading={isTacticBoardsLoading}
       getRowId={(row) => row._id}
-      rows={exercises || []}
+      rows={tacticBoards || []}
       columns={columns2}
       initialState={{
         pagination: {
@@ -117,4 +110,4 @@ const ExercisesListView = ({
   );
 };
 
-export default ExercisesListView;
+export default TacticBoardsListView;

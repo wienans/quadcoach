@@ -65,7 +65,7 @@ export const tacticBoardApiSlice = quadcoachApi.injectEndpoints({
 
         const urlParamsString = urlParams.toString();
         return {
-          url: `/api/exercises${
+          url: `/api/tacticboards${
             urlParamsString === "" ? "" : `?${urlParamsString}`
           }`,
           method: "get",

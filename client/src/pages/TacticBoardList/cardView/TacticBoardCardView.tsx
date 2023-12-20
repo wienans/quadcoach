@@ -1,39 +1,43 @@
 import { Alert, Grid } from "@mui/material";
-import { Exercise } from "../../../api/quadcoachApi/domain";
+import { TacticBoard } from "../../../api/quadcoachApi/domain";
 import { useTranslation } from "react-i18next";
 import TacticBoardLoadingCard from "./TacticBoardLoadingCard";
 import TacticBoardCard from "./TacticBoardCard";
 
 export type TacticBoardCardViewProps = {
-  exercises?: Exercise[];
-  isExercisesLoading: boolean;
-  onOpenExerciseClick: (exerciseId: string) => void;
+  tacticBoards?: TacticBoard[];
+  isTacticBoardsLoading: boolean;
+  onOpenTacticBoardClick: (exerciseId: string) => void;
 };
 
 const TacticBoardCardView = ({
-  exercises,
-  isExercisesLoading,
-  onOpenExerciseClick,
+  tacticBoards,
+  isTacticBoardsLoading,
+  onOpenTacticBoardClick,
 }: TacticBoardCardViewProps): JSX.Element => {
   const { t } = useTranslation("TacticBoardList");
 
-  if ((exercises?.length ?? 0) < 1 && !isExercisesLoading) {
-    return <Alert color="info">{t("TacticBoardList:noExercisesFound")}</Alert>;
+  if ((tacticBoards?.length ?? 0) < 1 && !isTacticBoardsLoading) {
+    return (
+      <Alert color="info">{t("TacticBoardList:noTacticBoardsFound")}</Alert>
+    );
   }
 
   return (
     <Grid container spacing={1}>
-      {isExercisesLoading
+      {isTacticBoardsLoading
         ? Array.from(Array(10).keys()).map((loadingNumber) => (
             <Grid item xs={12} md={6} xl={4} xxl={3} key={loadingNumber}>
               <TacticBoardLoadingCard />
             </Grid>
           ))
-        : exercises?.map((exercise) => (
-            <Grid item xs={12} md={6} xl={4} xxl={3} key={exercise._id}>
+        : tacticBoards?.map((tacticBoard) => (
+            <Grid item xs={12} md={6} xl={4} xxl={3} key={tacticBoard._id}>
               <TacticBoardCard
-                exercise={exercise}
-                onOpenExerciseClick={() => onOpenExerciseClick(exercise._id)}
+                tacticBoard={tacticBoard}
+                onOpenTacticBoardClick={() =>
+                  onOpenTacticBoardClick(tacticBoard._id)
+                }
               />
             </Grid>
           ))}

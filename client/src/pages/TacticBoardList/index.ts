@@ -1,1 +1,1 @@
-export { default } from "./TacticBoardList";
+export { default } from "./TacticBoardListRoot";
