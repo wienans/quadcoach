@@ -1,7 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { Grid } from "@mui/material";
 import { SoftBox, SoftButton, SoftTypography } from "../../components";
-import { useUpdateBreadcrumbs } from "../../components/Layout/hooks";
 import ExerciseEditForm from "../../components/ExerciseEditForm";
 import { ExerciseWithOutId } from "../../api/quadcoachApi/domain";
 import { useEffect } from "react";
@@ -11,10 +10,6 @@ import "./translations";
 
 const AddExercise = () => {
   const { t } = useTranslation("AddExercise");
-
-  useUpdateBreadcrumbs("Add Exercise", [
-    { title: "Exercises", to: "exercises" },
-  ]);
 
   const navigate = useNavigate();
   const [

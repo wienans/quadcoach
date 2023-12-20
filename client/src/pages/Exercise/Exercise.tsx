@@ -12,7 +12,6 @@ import {
   Skeleton,
 } from "@mui/material";
 import { SoftBox, SoftButton, SoftTypography } from "../../components";
-import { useUpdateBreadcrumbs } from "../../components/Layout/hooks";
 import { Chip } from "@mui/material";
 import CopyrightIcon from "@mui/icons-material/Copyright";
 import ReactPlayer from "react-player";
@@ -86,13 +85,6 @@ const Exercise = () => {
   } = useGetRelatedExercisesQuery(exerciseId || "", {
     skip: exerciseId == null,
   });
-
-  useUpdateBreadcrumbs(
-    exercise?.name
-      ? t("Exercise:exerciseTitle", { exerciseName: exercise.name })
-      : t("Exercise:exerciseTitleDefault"),
-    [{ title: t("Exercise:exercisesBreadcrumb"), to: "exercises" }],
-  );
 
   const update = async () => {
     navigate(`/exercises/${exerciseId}/update`);

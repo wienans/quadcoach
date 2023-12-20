@@ -8,8 +8,7 @@ import PlaylistAddIcon from "@mui/icons-material/PlaylistAdd";
 import DeveloperBoardIcon from "@mui/icons-material/DeveloperBoard";
 import ListIcon from "@mui/icons-material/List";
 import { DashboardLayout } from "../LayoutContainers";
-import DashboardNavbar from "../DashboardNavbar";
-import SettingsMenu from "../SettingsMenu";
+import DashboardNavbar from "../LayoutContainers/DashboardNavbar";
 import { Box } from "@mui/material";
 import GitHubIcon from "@mui/icons-material/GitHub";
 
@@ -78,7 +77,6 @@ const Layout = () => {
       />
       <DashboardLayout>
         <DashboardNavbar />
-        <SettingsMenu />
         <Box
           sx={(theme) => ({
             px: 1,
@@ -86,7 +84,6 @@ const Layout = () => {
               px: 2,
             },
             flexGrow: 1,
-            minHeight: 0,
           })}
         >
           <Outlet />

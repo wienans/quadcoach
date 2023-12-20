@@ -1,1 +1,1 @@
-export { default } from "./ExerciseList";
+export { default } from "./ExerciseListRoot";

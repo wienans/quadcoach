@@ -26,8 +26,6 @@ import OpenInBrowserIcon from "@mui/icons-material/OpenInBrowser";
 import PeopleIcon from "@mui/icons-material/People";
 import { SoftBox, SoftButton, SoftTypography } from "../../../components";
 import TagIcon from "@mui/icons-material/Tag";
-import NumbersIcon from "@mui/icons-material/Numbers";
-import FunctionsIcon from "@mui/icons-material/Functions";
 import { Cone, Head, RelationOneToMany } from "mdi-material-ui";
 import ReactPlayer from "react-player";
 import {

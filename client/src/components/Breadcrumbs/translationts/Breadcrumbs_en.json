@@ -1,0 +1,8 @@
+{
+  "dashboard": "Dashboard",
+  "exercises": "Exercises",
+  "addExercise": "Add exercise",
+  "exercise": "Exercise {{exerciseName}}",
+  "updateExercise": "Edit exercise",
+  "componentsTest": "Test components"
+}
