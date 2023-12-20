@@ -2,7 +2,6 @@ import "./translations";
 import { useParams } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
 import { Alert, Grid, Skeleton } from "@mui/material";
-import { useUpdateBreadcrumbs } from "../../components/Layout/hooks";
 import { useTranslation } from "react-i18next";
 import {
   useAddTacticBoardMutation,
@@ -25,7 +24,6 @@ const UpdateTacticBoard = (): JSX.Element => {
   const { t } = useTranslation("UpdateTacticBoard");
   const { id: tacticBoardId } = useParams();
   const { getAllObjectsJson, loadFromJson } = useFabricJs();
-  useUpdateBreadcrumbs(t("UpdateTacticBoard:titel"));
 
   const {
     data: tacticBoard,

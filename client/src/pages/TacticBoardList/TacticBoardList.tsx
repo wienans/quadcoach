@@ -14,7 +14,6 @@ import {
   useMediaQuery,
 } from "@mui/material";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useUpdateBreadcrumbs } from "../../components/Layout/hooks";
 import {
   SoftTypography,
   SoftInput,
@@ -79,13 +78,6 @@ const ExerciseList = () => {
         [exerciseFilterProperty]: event.target.value,
       });
     };
-
-  useUpdateBreadcrumbs(
-    isDashboard
-      ? t("ExerciseList:dashboardBreadcrumb")
-      : t("ExerciseList:dashboardBreadcrumb"),
-    [],
-  );
 
   const [
     getExercises,

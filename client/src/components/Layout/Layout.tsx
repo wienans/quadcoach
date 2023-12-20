@@ -45,7 +45,7 @@ const sidebarNavRoutes: SidebarNavRoute[] = [
   },
   {
     type: "collapse",
-    nameResourceKey: "Layout:routes.tacticboards",
+    nameResourceKey: "Layout:routes.tacticBoards",
     key: "tacticboards",
     route: "/tacticboards",
     icon: <DeveloperBoardIcon />,

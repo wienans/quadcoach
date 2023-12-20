@@ -90,30 +90,50 @@ const routes = [
         ],
       },
       {
-        path: "/tacticboards/:id/update",
-        async lazy() {
-          const UpdateTacticBoard = (await import("./UpdateTacticBoard"))
-            .default;
-          const FabricJsContextProvider = (await import("../components"))
-            .FabricJsContextProvider;
-          return {
-            element: (
-              <FabricJsContextProvider>
-                <UpdateTacticBoard />
-              </FabricJsContextProvider>
-            ),
-          };
-        },
-      },
-      {
         path: "/tacticboards",
+        handle: {
+          type: RouteHandleType.tacticBoards,
+        },
         async lazy() {
-          const TacticBoardList = (await import("./TacticBoardList")).default;
+          const TacticBoardList = (await import("../TacticBoardList")).default;
           return {
             element: <TacticBoardList />,
           };
         },
+        children: [
+          {
+            path: ":id",
+            handle: {
+              type: RouteHandleType.tacticBoard,
+            },
+            async lazy() {
+              return {
+                element: <div></div>,
+              };
+            },
+          },
+          {
+            path: ":id/update",
+            handle: {
+              type: RouteHandleType.updateTacticBoard,
+            },
+            async lazy() {
+              const UpdateTacticBoard = (await import("../UpdateTacticBoard"))
+                .default;
+              const FabricJsContextProvider = (await import("../../components"))
+                .FabricJsContextProvider;
+              return {
+                element: (
+                  <FabricJsContextProvider>
+                    <UpdateTacticBoard />
+                  </FabricJsContextProvider>
+                ),
+              };
+            },
+          },
+        ],
       },
+
       {
         path: "/componentsTest",
         handle: {
