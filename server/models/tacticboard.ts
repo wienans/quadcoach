@@ -40,6 +40,7 @@ interface ITacticPage {
 }
 interface ITacticBoard {
   name?: string;
+  isPrivate?: boolean;
   tags?: Types.Array<string>;
   creator?: string;
   pages?: Types.Array<ITacticPage>;
@@ -158,6 +159,9 @@ const tacticBoardSchema = new Schema<ITacticBoard>(
     name: {
       type: String,
       // required: true,
+    },
+    isPrivate: {
+      type: Boolean,
     },
     tags: {
       type: [String],
