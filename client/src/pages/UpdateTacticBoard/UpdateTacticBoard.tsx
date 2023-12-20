@@ -52,7 +52,9 @@ const UpdateTacticBoard = (): JSX.Element => {
 
   // Setting Tacticboard to State
   useEffect(() => {
+    if (!tacticBoard) return;
     setTacticBoardState(tacticBoard);
+    setMaxPages(tacticBoard.pages.length);
   }, [tacticBoard]);
 
   const onLoadPage = (
