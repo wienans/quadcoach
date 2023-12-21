@@ -108,8 +108,15 @@ const routes = [
               type: RouteHandleType.tacticBoard,
             },
             async lazy() {
+              const TacticBoard = (await import("../TacticBoard")).default;
+              const FabricJsContextProvider = (await import("../../components"))
+                .FabricJsContextProvider;
               return {
-                element: <div></div>,
+                element: (
+                  <FabricJsContextProvider>
+                    <TacticBoard />
+                  </FabricJsContextProvider>
+                ),
               };
             },
           },
