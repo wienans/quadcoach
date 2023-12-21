@@ -85,7 +85,7 @@ const UpdateTacticBoardMeta = (): JSX.Element => {
     },
 
     validationSchema: Yup.object({
-      name: Yup.string().required("ExerciseEditForm:info.name.missing"),
+      name: Yup.string().required("UpdateTacticBoardMeta:info.name.missing"),
       tags: Yup.array().of(Yup.string()),
       isPrivate: Yup.boolean(),
     }),
@@ -186,12 +186,12 @@ const UpdateTacticBoardMeta = (): JSX.Element => {
                     fontWeight="bold"
                     textTransform="uppercase"
                   >
-                    {t("ExerciseEditForm:info.title")}
+                    {t("UpdateTacticBoardMeta:info.title")}
                   </SoftTypography>
                   <Grid item xs={12} p={1}>
                     <FormGroup>
                       <SoftTypography variant="body2">
-                        {t("ExerciseEditForm:info.name.label")}
+                        {t("UpdateTacticBoardMeta:info.name.label")}
                       </SoftTypography>
                       <SoftInput
                         error={
@@ -201,7 +201,7 @@ const UpdateTacticBoardMeta = (): JSX.Element => {
                         required
                         id="outlined-basic"
                         placeholder={t(
-                          "ExerciseEditForm:info.name.placeholder",
+                          "UpdateTacticBoardMeta:info.name.placeholder",
                         )}
                         value={formik.values.name}
                         onChange={formik.handleChange}
@@ -228,7 +228,7 @@ const UpdateTacticBoardMeta = (): JSX.Element => {
                         }
                         label={
                           <SoftTypography variant="body2">
-                            {t("ExerciseEditForm:info.isPrivate.label")}
+                            {t("UpdateTacticBoardMeta:info.isPrivate.label")}
                           </SoftTypography>
                         }
                       />
@@ -237,7 +237,7 @@ const UpdateTacticBoardMeta = (): JSX.Element => {
                   <Grid item xs={12} p={1}>
                     <FormControl fullWidth>
                       <InputLabel id="court-select-label">
-                        {t("ExerciseEditForm:info.backgroundImage.label")}
+                        {t("UpdateTacticBoardMeta:info.backgroundImage.label")}
                       </InputLabel>
                       <Select
                         labelId="court-select-label"
@@ -247,7 +247,9 @@ const UpdateTacticBoardMeta = (): JSX.Element => {
                             ? formik.values.pages[0]?.backgroundImage.src
                             : ""
                         }
-                        label={t("ExerciseEditForm:info.backgroundImage.label")}
+                        label={t(
+                          "UpdateTacticBoardMeta:info.backgroundImage.label",
+                        )}
                         onChange={(event: SelectChangeEvent) => {
                           console.log(
                             formik.values.pages[0].backgroundImage.src,
@@ -282,7 +284,7 @@ const UpdateTacticBoardMeta = (): JSX.Element => {
                   <Grid item xs={12} p={1}>
                     <FormGroup>
                       <SoftTypography variant="body2">
-                        {t("ExerciseEditForm:info.tags.label")}
+                        {t("UpdateTacticBoardMeta:info.tags.label")}
                       </SoftTypography>
                       <FieldArray
                         name="tags"
@@ -347,7 +349,7 @@ const UpdateTacticBoardMeta = (): JSX.Element => {
                     fontWeight="bold"
                     textTransform="uppercase"
                   >
-                    {t("ExerciseEditForm:board.title")}
+                    {t("UpdateTacticBoardMeta:board.title")}
                   </SoftTypography>
                   <Grid item xs={12} p={1}>
                     {formik.values.pages[0] ? (
@@ -373,7 +375,7 @@ const UpdateTacticBoardMeta = (): JSX.Element => {
                       sx={{ marginRight: 1 }}
                       type="button"
                     >
-                      {"Edit Tactic Board"}
+                      {t("UpdateTacticBoardMeta:editBoardBtn")}
                     </SoftButton>
                   </Grid>
                 </SoftBox>
@@ -385,7 +387,7 @@ const UpdateTacticBoardMeta = (): JSX.Element => {
                   type="submit"
                   disabled={isUpdateTacticBoardLoading || isTacticBoardLoading}
                 >
-                  {"Update Tactic Board"}
+                  {t("UpdateTacticBoardMeta:updateBoardBtn")}
                 </SoftButton>
                 <SoftButton
                   onClick={onDeleteExerciseClick}
@@ -393,7 +395,7 @@ const UpdateTacticBoardMeta = (): JSX.Element => {
                   type="button"
                   disabled={isDeleteTacticBoardLoading}
                 >
-                  {"Delete Tactic Board"}
+                  {t("UpdateTacticBoardMeta:deleteBoardBtn")}
                 </SoftButton>
               </Grid>
             </>
