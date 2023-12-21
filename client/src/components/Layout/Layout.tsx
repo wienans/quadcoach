@@ -35,16 +35,6 @@ const sidebarNavRoutes: SidebarNavRoute[] = [
   },
   {
     type: "collapse",
-    nameResourceKey: "Layout:routes.addExercise",
-    key: "addExercise",
-    route: "/exercises/add",
-    icon: <PlaylistAddIcon />,
-    noCollapse: true,
-    protected: true,
-    regExp: new RegExp("\\/exercises\\/add$"),
-  },
-  {
-    type: "collapse",
     nameResourceKey: "Layout:routes.tacticBoards",
     key: "tacticboards",
     route: "/tacticboards",
