@@ -44,7 +44,6 @@ interface ITacticBoard {
   tags?: Types.Array<string>;
   creator?: string;
   pages?: Types.Array<ITacticPage>;
-  related_to?: Types.Array<Types.ObjectId>;
 }
 
 const objectSchema = new Schema<IObject>({
@@ -171,10 +170,6 @@ const tacticBoardSchema = new Schema<ITacticBoard>(
     },
     creator: {
       type: String,
-    },
-    related_to: {
-      type: [Types.ObjectId],
-      ref: "exercises",
     },
   },
   { timestamps: true }

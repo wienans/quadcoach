@@ -8,7 +8,6 @@ type TacticBoard = {
   tags?: string[];
   creator?: string;
   pages: TacticPage[];
-  related_to?: string[];
 };
 
 export default TacticBoard;
