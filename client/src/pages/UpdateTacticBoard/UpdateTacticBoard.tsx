@@ -142,7 +142,9 @@ const UpdateTacticBoard = (): JSX.Element => {
                     <FabricJsCanvas
                       initialHight={686}
                       initialWidth={1220}
-                      backgroundImage="/full-court_inkscape.svg"
+                      backgroundImage={
+                        tacticBoard?.pages[currentPage - 1].backgroundImage.src
+                      }
                       containerRef={refContainer}
                       initialCanvas={tacticBoard?.pages[currentPage - 1]}
                     />

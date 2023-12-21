@@ -267,13 +267,13 @@ const UpdateTacticBoardMeta = (): JSX.Element => {
                           );
                         }}
                       >
-                        <MenuItem value={"/full-court_inkscape.svg"}>
+                        <MenuItem value={"/full-court.svg"}>
                           Full Court
                         </MenuItem>
-                        <MenuItem value={"/half-court_inkscape.svg"}>
+                        <MenuItem value={"/half-court.svg"}>
                           Half Court
                         </MenuItem>
-                        <MenuItem value={"/empty-court_inkscape.svg"}>
+                        <MenuItem value={"/empty-court.svg"}>
                           Empty Court
                         </MenuItem>
                       </Select>

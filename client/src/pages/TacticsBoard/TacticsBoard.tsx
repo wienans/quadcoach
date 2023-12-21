@@ -66,7 +66,7 @@ const TacticsBoard = (): JSX.Element => {
               <FabricJsCanvas
                 initialHight={686}
                 initialWidth={1220}
-                backgroundImage="./full-court_inkscape.svg"
+                backgroundImage="./full-court.svg"
                 containerRef={refContainer}
               />
               <TacticsBoardSpeedDial teamB={true} editMode={editMode} />

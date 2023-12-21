@@ -123,7 +123,7 @@ const TacticBoardList = () => {
         objects: undefined,
         backgroundImage: {
           type: "image",
-          src: "/full-court_inkscape.svg",
+          src: "/full-court.svg",
           width: 1220,
           height: 686,
         },
