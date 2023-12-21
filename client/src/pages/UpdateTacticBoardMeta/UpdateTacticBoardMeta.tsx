@@ -224,6 +224,7 @@ const UpdateTacticBoardMeta = (): JSX.Element => {
                             checked={formik.values.isPrivate}
                             onChange={formik.handleChange}
                             name="isPrivate"
+                            disabled={true}
                           />
                         }
                         label={
