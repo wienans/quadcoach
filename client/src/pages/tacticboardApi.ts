@@ -74,7 +74,7 @@ export const tacticBoardApiSlice = quadcoachApi.injectEndpoints({
       },
       providesTags: () => [TagType.tacticboard],
     }),
-    getAllTags: builder.query<string[], string | undefined>({
+    getAllTacticBoardTags: builder.query<string[], string | undefined>({
       query: (tagRegex) => {
         const urlParams = new URLSearchParams();
 
@@ -104,5 +104,5 @@ export const {
   useUpdateTacticBoardMutation,
   useAddTacticBoardMutation,
   useGetTacticBoardsQuery,
-  useGetAllTagsQuery,
+  useGetAllTacticBoardTagsQuery,
 } = tacticBoardApiSlice;

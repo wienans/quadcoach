@@ -1,29 +1,45 @@
 import "./translations";
 import { useNavigate, useParams } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
-import { Alert, Grid, Skeleton } from "@mui/material";
+import {
+  Alert,
+  Grid,
+  Skeleton,
+  Chip,
+  FormGroup,
+  FormHelperText,
+  Checkbox,
+  FormControlLabel,
+  Button,
+} from "@mui/material";
 import { useTranslation } from "react-i18next";
 import {
   useUpdateTacticBoardMutation,
   useGetTacticBoardQuery,
   useDeleteTacticBoardMutation,
 } from "../tacticboardApi";
-import { TacticBoard } from "../../api/quadcoachApi/domain";
+import { TacticBoardPartialId } from "../../api/quadcoachApi/domain";
 import {
   SoftTypography,
   SoftBox,
   SoftButton,
-  TacticsBoardToolBar,
-  TacticsBoardSpeedDial,
-  TacticsBoardSpeedDialBalls,
+  SoftInput,
 } from "../../components";
-import { useFabricJs } from "../../components/FabricJsContext/useFabricJs";
-import cloneDeep from "lodash/cloneDeep";
+import {
+  FieldArray,
+  FieldArrayRenderProps,
+  FormikProvider,
+  useFormik,
+} from "formik";
+import * as Yup from "yup";
+import AddTagDialog from "./AddTagDialog";
 
 const UpdateTacticBoardMeta = (): JSX.Element => {
   const { t } = useTranslation("UpdateTacticBoardMeta");
   const navigate = useNavigate();
   const { id: tacticBoardId } = useParams();
+
+  const [openTagDialog, setOpenTagDialog] = useState<boolean>(false);
 
   const {
     data: tacticBoard,
@@ -32,6 +48,7 @@ const UpdateTacticBoardMeta = (): JSX.Element => {
   } = useGetTacticBoardQuery(tacticBoardId || "", {
     skip: tacticBoardId == null,
   });
+
   const [
     updateTacticBoard,
     {
@@ -50,61 +67,254 @@ const UpdateTacticBoardMeta = (): JSX.Element => {
     },
   ] = useDeleteTacticBoardMutation();
 
+  const formik = useFormik<TacticBoardPartialId>({
+    // enableReinitialize : use this flag when initial values needs to be changed
+    enableReinitialize: true,
+
+    initialValues: {
+      name: tacticBoard?.name ?? "",
+      pages: tacticBoard?.pages ?? [],
+      isPrivate: tacticBoard?.isPrivate ?? false,
+      tags: tacticBoard?.tags ?? [],
+      creator: tacticBoard?.creator ?? "",
+    },
+
+    validationSchema: Yup.object({
+      name: Yup.string().required("ExerciseEditForm:info.name.missing"),
+      tags: Yup.array().of(Yup.string()),
+      isPrivate: Yup.boolean(),
+    }),
+
+    onSubmit: (values) => {
+      if (tacticBoardId) {
+        const { name, isPrivate, tags, pages } = values;
+
+        const updatedTacticBoard: TacticBoardPartialId = {
+          name,
+          isPrivate,
+          pages,
+          tags,
+        };
+        updateTacticBoard({
+          _id: tacticBoardId,
+          ...updatedTacticBoard,
+        });
+      }
+    },
+  });
+
   const onDeleteExerciseClick = () => {
     if (!tacticBoard) return;
     deleteTacticBoard(tacticBoard._id);
     navigate("/tacticboards");
   };
 
+  const translateError = (
+    errorResourceKey: string | undefined,
+  ): string | undefined => (errorResourceKey ? t(errorResourceKey) : undefined);
+
+  const handleAddTagConfirm = (
+    arrayHelpers: FieldArrayRenderProps,
+    selectedTagToAdd?: string[],
+  ) => {
+    if (selectedTagToAdd?.length) {
+      const notAddedTags = selectedTagToAdd.filter(
+        (newTag) =>
+          !formik.values.tags ||
+          !formik.values.tags.some((rel) => rel == newTag),
+      );
+
+      notAddedTags.forEach((newTag) => arrayHelpers.push(newTag));
+    }
+
+    setOpenTagDialog(false);
+  };
+
   return (
-    <div>
-      {isTacticBoardError && (
-        <Grid item xs={12} justifyContent="center" display="flex">
-          <Alert color="error">{"Error Loading"}</Alert>
-        </Grid>
-      )}
-      {isTacticBoardLoading && (
-        <Grid item xs={12} justifyContent="center" display="flex">
-          <Alert color="error">{"Error Loading"}</Alert>
-        </Grid>
-      )}
-      {!isTacticBoardError && !isTacticBoardLoading && (
-        <>
-          <SoftTypography variant="h3">
-            {"Update Tactic Board Meta Data"}
-          </SoftTypography>
-          <SoftTypography>Name: {tacticBoard.name}</SoftTypography>
-          <SoftTypography>Tags: {tacticBoard.tags}</SoftTypography>
-          <Grid item xs={12} justifyContent="center" display="flex">
-            <SoftButton
-              onClick={() =>
-                navigate(`/tacticboards/${tacticBoardId}/updateBoard`)
-              }
-              sx={{ marginRight: 1 }}
-              type="button"
-            >
-              {"Edit Tactic Board"}
-            </SoftButton>
-            <SoftButton
-              color="primary"
-              sx={{ marginRight: 1 }}
-              type="button"
-              disabled={isUpdateTacticBoardLoading || isTacticBoardLoading}
-            >
-              {"Update Tactic Board"}
-            </SoftButton>
-            <SoftButton
-              onClick={onDeleteExerciseClick}
-              color="error"
-              type="button"
-              disabled={isDeleteTacticBoardLoading}
-            >
-              {"Delete Tactic Board"}
-            </SoftButton>
+    <FormikProvider value={formik}>
+      <form
+        onSubmit={(event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          formik.handleSubmit();
+          return false;
+        }}
+      >
+        <Grid container spacing={2}>
+          <Grid item xs={12}>
+            <SoftTypography variant="h3">
+              {"Update Tactic Board Meta Data"}
+            </SoftTypography>
           </Grid>
-        </>
-      )}
-    </div>
+
+          {isTacticBoardError && (
+            <Grid item xs={12} justifyContent="center" display="flex">
+              <Alert color="error">{"Error Loading"}</Alert>
+            </Grid>
+          )}
+          {isTacticBoardLoading && (
+            <>
+              <Grid item xs={12}>
+                <Skeleton variant="rectangular" width={"100%"} height={120} />
+              </Grid>
+              <Grid item xs={12}>
+                <Skeleton variant="rectangular" width={"100%"} height={120} />
+              </Grid>
+              <Grid item xs={12}>
+                <Skeleton variant="rectangular" width={"100%"} height={120} />
+              </Grid>
+            </>
+          )}
+          {!isTacticBoardError && !isTacticBoardLoading && (
+            <>
+              <Grid item xs={12}>
+                <SoftBox
+                  variant="contained"
+                  shadow="lg"
+                  opacity={1}
+                  p={1}
+                  my={2}
+                  borderRadius="lg"
+                >
+                  <SoftTypography
+                    variant="h5"
+                    fontWeight="bold"
+                    textTransform="uppercase"
+                  >
+                    {t("ExerciseEditForm:info.title")}
+                  </SoftTypography>
+                  <Grid item xs={12} p={1}>
+                    <FormGroup>
+                      <SoftTypography variant="body2">
+                        {t("ExerciseEditForm:info.name.label")}
+                      </SoftTypography>
+                      <SoftInput
+                        error={
+                          formik.touched.name && Boolean(formik.errors.name)
+                        }
+                        name="name"
+                        required
+                        id="outlined-basic"
+                        placeholder={t(
+                          "ExerciseEditForm:info.name.placeholder",
+                        )}
+                        value={formik.values.name}
+                        onChange={formik.handleChange}
+                        fullWidth
+                        onBlur={formik.handleBlur}
+                      />
+                      {formik.touched.name && Boolean(formik.errors.name) && (
+                        <FormHelperText error>
+                          {translateError(formik.errors.name)}
+                        </FormHelperText>
+                      )}
+                    </FormGroup>
+                  </Grid>
+                  <Grid item xs={12} p={1}>
+                    <FormGroup>
+                      <FormControlLabel
+                        sx={{ p: 1 }}
+                        control={
+                          <Checkbox
+                            checked={formik.values.isPrivate}
+                            onChange={formik.handleChange}
+                            name="isPrivate"
+                          />
+                        }
+                        label={
+                          <SoftTypography variant="body2">
+                            {t("ExerciseEditForm:info.isPrivate.label")}
+                          </SoftTypography>
+                        }
+                      />
+                    </FormGroup>
+                  </Grid>
+                  <Grid item xs={12} p={1}>
+                    <FormGroup>
+                      <SoftTypography variant="body2">
+                        {t("ExerciseEditForm:info.tags.label")}
+                      </SoftTypography>
+                      <FieldArray
+                        name="tags"
+                        render={(arrayHelpers) => {
+                          return (
+                            <div>
+                              {formik.values.tags?.map((el, index) => {
+                                if (el != "") {
+                                  return (
+                                    <Chip
+                                      size="small"
+                                      key={el + index}
+                                      label={el}
+                                      sx={{ margin: "2px" }}
+                                      variant={"outlined"}
+                                      onDelete={() => {
+                                        arrayHelpers.remove(index);
+                                      }}
+                                    />
+                                  );
+                                }
+                              })}
+                              <Chip
+                                size="small"
+                                label="+"
+                                sx={{ margin: "2px" }}
+                                color="info"
+                                onClick={() => {
+                                  setOpenTagDialog(true);
+                                }}
+                              />
+                              <AddTagDialog
+                                isOpen={openTagDialog}
+                                onConfirm={(selectedTag) =>
+                                  handleAddTagConfirm(arrayHelpers, selectedTag)
+                                }
+                                alreadyAddedTags={[
+                                  ...(formik.values.tags
+                                    ? formik.values.tags
+                                    : []),
+                                ]}
+                              />
+                            </div>
+                          );
+                        }}
+                      />
+                    </FormGroup>
+                  </Grid>
+                </SoftBox>
+              </Grid>
+              <Grid item xs={12} justifyContent="center" display="flex">
+                <SoftButton
+                  onClick={() =>
+                    navigate(`/tacticboards/${tacticBoardId}/updateBoard`)
+                  }
+                  sx={{ marginRight: 1 }}
+                  type="button"
+                >
+                  {"Edit Tactic Board"}
+                </SoftButton>
+                <SoftButton
+                  color="primary"
+                  sx={{ marginRight: 1 }}
+                  type="submit"
+                  disabled={isUpdateTacticBoardLoading || isTacticBoardLoading}
+                >
+                  {"Update Tactic Board"}
+                </SoftButton>
+                <SoftButton
+                  onClick={onDeleteExerciseClick}
+                  color="error"
+                  type="button"
+                  disabled={isDeleteTacticBoardLoading}
+                >
+                  {"Delete Tactic Board"}
+                </SoftButton>
+              </Grid>
+            </>
+          )}
+        </Grid>
+      </form>
+    </FormikProvider>
   );
 };
 
