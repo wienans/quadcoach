@@ -23,7 +23,7 @@ export const tacticBoardApiSlice = quadcoachApi.injectEndpoints({
           data,
         };
       },
-      invalidatesTags: () => [TagType.tacticboard],
+      invalidatesTags: () => [TagType.tacticboard, TagType.tacticboardTag],
     }),
     deleteTacticBoard: builder.mutation<void, string>({
       query(exerciseId) {
@@ -34,6 +34,7 @@ export const tacticBoardApiSlice = quadcoachApi.injectEndpoints({
       },
       invalidatesTags: (_result, _error, exerciseId) => [
         { type: TagType.tacticboard, id: exerciseId },
+        TagType.tacticboardTag,
       ],
     }),
     addTacticBoard: builder.mutation<TacticBoard, Omit<TacticBoard, "_id">>({
@@ -44,7 +45,7 @@ export const tacticBoardApiSlice = quadcoachApi.injectEndpoints({
           data,
         };
       },
-      invalidatesTags: () => [TagType.tacticboard],
+      invalidatesTags: () => [TagType.tacticboard, TagType.tacticboardTag],
     }),
     getTacticBoards: builder.query<
       TacticBoard[],
@@ -73,6 +74,26 @@ export const tacticBoardApiSlice = quadcoachApi.injectEndpoints({
       },
       providesTags: () => [TagType.tacticboard],
     }),
+    getAllTags: builder.query<string[], string | undefined>({
+      query: (tagRegex) => {
+        const urlParams = new URLSearchParams();
+
+        if (tagRegex != null && tagRegex !== "") {
+          urlParams.append("tagName[regex]", tagRegex);
+          urlParams.append("tagName[options]", "i");
+        }
+
+        const urlParamsString = urlParams.toString();
+
+        return {
+          url: `/api/tags/tacticboards${
+            urlParamsString === "" ? "" : `?${urlParamsString}`
+          }`,
+          method: "get",
+        };
+      },
+      providesTags: () => [TagType.tacticboardTag],
+    }),
   }),
 });
 
@@ -83,4 +104,5 @@ export const {
   useUpdateTacticBoardMutation,
   useAddTacticBoardMutation,
   useGetTacticBoardsQuery,
+  useGetAllTagsQuery,
 } = tacticBoardApiSlice;
