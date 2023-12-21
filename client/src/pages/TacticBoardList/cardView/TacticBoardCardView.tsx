@@ -25,22 +25,27 @@ const TacticBoardCardView = ({
 
   return (
     <Grid container spacing={1}>
-      {isTacticBoardsLoading
-        ? Array.from(Array(10).keys()).map((loadingNumber) => (
-            <Grid item xs={12} md={6} xl={4} xxl={3} key={loadingNumber}>
-              <TacticBoardLoadingCard />
-            </Grid>
-          ))
-        : tacticBoards?.map((tacticBoard) => (
-            <Grid item xs={12} md={6} xl={4} xxl={3} key={tacticBoard._id}>
-              <TacticBoardCard
-                tacticBoard={tacticBoard}
-                onOpenTacticBoardClick={() =>
-                  onOpenTacticBoardClick(tacticBoard._id)
-                }
-              />
-            </Grid>
-          ))}
+      {isTacticBoardsLoading &&
+        Array.from(Array(10).keys()).map((loadingNumber) => (
+          <Grid item xs={12} md={6} xl={4} xxl={3} key={loadingNumber}>
+            <TacticBoardLoadingCard />
+          </Grid>
+        ))}
+      {!isTacticBoardsLoading &&
+        tacticBoards?.map((tacticBoard) => {
+          if (tacticBoard.isPrivate != true) {
+            return (
+              <Grid item xs={12} md={6} xl={4} xxl={3} key={tacticBoard._id}>
+                <TacticBoardCard
+                  tacticBoard={tacticBoard}
+                  onOpenTacticBoardClick={() =>
+                    onOpenTacticBoardClick(tacticBoard._id)
+                  }
+                />
+              </Grid>
+            );
+          }
+        })}
     </Grid>
   );
 };
