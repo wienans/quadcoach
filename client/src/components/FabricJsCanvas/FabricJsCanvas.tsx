@@ -79,7 +79,14 @@ const FabricJsCanvas = ({
       canvasInstance.dispose();
       window.removeEventListener("resize", handleResize);
     };
-  }, [containerRef, backgroundImage, initialHight, initialWidth, setCanvas]);
+  }, [
+    initialCanvas,
+    containerRef,
+    backgroundImage,
+    initialHight,
+    initialWidth,
+    setCanvas,
+  ]);
 
   return (
     <div>
