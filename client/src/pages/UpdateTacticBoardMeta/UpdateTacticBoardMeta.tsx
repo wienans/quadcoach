@@ -1,6 +1,6 @@
 import "./translations";
 import { useNavigate, useParams } from "react-router-dom";
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import {
   Alert,
   Grid,
@@ -10,7 +10,11 @@ import {
   FormHelperText,
   Checkbox,
   FormControlLabel,
-  Button,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  SelectChangeEvent,
 } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import {
@@ -33,6 +37,7 @@ import {
 } from "formik";
 import * as Yup from "yup";
 import AddTagDialog from "./AddTagDialog";
+import { cloneDeep } from "lodash";
 
 const UpdateTacticBoardMeta = (): JSX.Element => {
   const { t } = useTranslation("UpdateTacticBoardMeta");
@@ -88,7 +93,7 @@ const UpdateTacticBoardMeta = (): JSX.Element => {
     onSubmit: (values) => {
       if (tacticBoardId) {
         const { name, isPrivate, tags, pages } = values;
-
+        console.log(pages);
         const updatedTacticBoard: TacticBoardPartialId = {
           name,
           isPrivate,
@@ -230,6 +235,51 @@ const UpdateTacticBoardMeta = (): JSX.Element => {
                     </FormGroup>
                   </Grid>
                   <Grid item xs={12} p={1}>
+                    <FormControl fullWidth>
+                      <InputLabel id="court-select-label">
+                        {t("ExerciseEditForm:info.backgroundImage.label")}
+                      </InputLabel>
+                      <Select
+                        labelId="court-select-label"
+                        id="court-select"
+                        value={
+                          formik.values.pages[0]
+                            ? formik.values.pages[0]?.backgroundImage.src
+                            : ""
+                        }
+                        label={t("ExerciseEditForm:info.backgroundImage.label")}
+                        onChange={(event: SelectChangeEvent) => {
+                          console.log(
+                            formik.values.pages[0].backgroundImage.src,
+                          );
+
+                          const updatedPages = cloneDeep(formik.values.pages);
+                          updatedPages.forEach((page) => {
+                            page.backgroundImage.src = event.target.value;
+                          });
+                          formik.setValues({
+                            ...formik.values,
+                            pages: updatedPages,
+                          });
+
+                          console.log(
+                            formik.values.pages[0].backgroundImage.src,
+                          );
+                        }}
+                      >
+                        <MenuItem value={"/full-court_inkscape.svg"}>
+                          Full Court
+                        </MenuItem>
+                        <MenuItem value={"/half-court_inkscape.svg"}>
+                          Half Court
+                        </MenuItem>
+                        <MenuItem value={"/empty-court_inkscape.svg"}>
+                          Empty Court
+                        </MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Grid>
+                  <Grid item xs={12} p={1}>
                     <FormGroup>
                       <SoftTypography variant="body2">
                         {t("ExerciseEditForm:info.tags.label")}
@@ -283,16 +333,52 @@ const UpdateTacticBoardMeta = (): JSX.Element => {
                   </Grid>
                 </SoftBox>
               </Grid>
-              <Grid item xs={12} justifyContent="center" display="flex">
-                <SoftButton
-                  onClick={() =>
-                    navigate(`/tacticboards/${tacticBoardId}/updateBoard`)
-                  }
-                  sx={{ marginRight: 1 }}
-                  type="button"
+              <Grid item xs={12}>
+                <SoftBox
+                  variant="contained"
+                  shadow="lg"
+                  opacity={1}
+                  p={1}
+                  my={2}
+                  borderRadius="lg"
                 >
-                  {"Edit Tactic Board"}
-                </SoftButton>
+                  <SoftTypography
+                    variant="h5"
+                    fontWeight="bold"
+                    textTransform="uppercase"
+                  >
+                    {t("ExerciseEditForm:board.title")}
+                  </SoftTypography>
+                  <Grid item xs={12} p={1}>
+                    {formik.values.pages[0] ? (
+                      <img
+                        src={formik.values.pages[0].backgroundImage.src}
+                        width={"100%"}
+                      />
+                    ) : (
+                      <></>
+                    )}
+                  </Grid>
+                  <Grid item xs={12} p={1}>
+                    <SoftButton
+                      onClick={() => {
+                        if (formik.isValid) {
+                          formik.submitForm().then(() => {
+                            navigate(
+                              `/tacticboards/${tacticBoardId}/updateBoard`,
+                            );
+                          });
+                        }
+                      }}
+                      sx={{ marginRight: 1 }}
+                      type="button"
+                    >
+                      {"Edit Tactic Board"}
+                    </SoftButton>
+                  </Grid>
+                </SoftBox>
+              </Grid>
+              <Grid item xs={12} justifyContent="center" display="flex">
                 <SoftButton
                   color="primary"
                   sx={{ marginRight: 1 }}

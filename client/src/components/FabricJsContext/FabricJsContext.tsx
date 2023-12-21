@@ -65,7 +65,11 @@ const FabricJsContextProvider: FC<{ children: ReactNode }> = ({ children }) => {
 
   const getAllObjectsJson = useCallback(() => {
     if (canvas) {
-      return canvas.toJSON(["uuid"]);
+      let json = canvas.toJSON(["uuid"]);
+      if (json.backgroundImage) {
+        json.backgroundImage.src = new URL(json.backgroundImage.src).pathname;
+      }
+      return json;
     }
     return {};
   }, [canvas]);

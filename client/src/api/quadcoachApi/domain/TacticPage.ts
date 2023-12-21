@@ -35,7 +35,7 @@ type TacticsObject = {
 type TacticPage = {
   version?: string;
   objects?: TacticsObject[];
-  backgroundImage?: TacticsBackImg;
+  backgroundImage: TacticsBackImg;
 };
 
 export default TacticPage;
