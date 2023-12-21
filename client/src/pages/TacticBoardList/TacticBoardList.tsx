@@ -113,7 +113,7 @@ const TacticBoardList = () => {
   }, [tacticBoardFilter.searchValue, getTacticBoards, tacticBoardFilter]);
 
   const onOpenTacticBoardClick = (tacticBoardId: string) => {
-    navigate(`/tacticboards/${tacticBoardId}/update`);
+    navigate(`/tacticboards/${tacticBoardId}`);
   };
 
   const handleAddTacticBoard = (name: string | undefined) => {

@@ -235,51 +235,41 @@ const UpdateTacticBoardMeta = (): JSX.Element => {
                     </FormGroup>
                   </Grid>
                   <Grid item xs={12} p={1}>
-                    <FormControl fullWidth>
-                      <InputLabel id="court-select-label">
-                        {t("UpdateTacticBoardMeta:info.backgroundImage.label")}
-                      </InputLabel>
-                      <Select
-                        labelId="court-select-label"
-                        id="court-select"
-                        value={
-                          formik.values.pages[0]
-                            ? formik.values.pages[0]?.backgroundImage.src
-                            : ""
-                        }
-                        label={t(
-                          "UpdateTacticBoardMeta:info.backgroundImage.label",
-                        )}
-                        onChange={(event: SelectChangeEvent) => {
-                          console.log(
-                            formik.values.pages[0].backgroundImage.src,
-                          );
+                    <SoftTypography variant="body2">
+                      {t("UpdateTacticBoardMeta:info.backgroundImage.label")}
+                    </SoftTypography>
+                    <Select
+                      labelId="court-select-label"
+                      id="court-select"
+                      value={
+                        formik.values.pages[0]
+                          ? formik.values.pages[0]?.backgroundImage.src
+                          : ""
+                      }
+                      label={t(
+                        "UpdateTacticBoardMeta:info.backgroundImage.label",
+                      )}
+                      onChange={(event: SelectChangeEvent) => {
+                        console.log(formik.values.pages[0].backgroundImage.src);
 
-                          const updatedPages = cloneDeep(formik.values.pages);
-                          updatedPages.forEach((page) => {
-                            page.backgroundImage.src = event.target.value;
-                          });
-                          formik.setValues({
-                            ...formik.values,
-                            pages: updatedPages,
-                          });
+                        const updatedPages = cloneDeep(formik.values.pages);
+                        updatedPages.forEach((page) => {
+                          page.backgroundImage.src = event.target.value;
+                        });
+                        formik.setValues({
+                          ...formik.values,
+                          pages: updatedPages,
+                        });
 
-                          console.log(
-                            formik.values.pages[0].backgroundImage.src,
-                          );
-                        }}
-                      >
-                        <MenuItem value={"/full-court.svg"}>
-                          Full Court
-                        </MenuItem>
-                        <MenuItem value={"/half-court.svg"}>
-                          Half Court
-                        </MenuItem>
-                        <MenuItem value={"/empty-court.svg"}>
-                          Empty Court
-                        </MenuItem>
-                      </Select>
-                    </FormControl>
+                        console.log(formik.values.pages[0].backgroundImage.src);
+                      }}
+                    >
+                      <MenuItem value={"/full-court.svg"}>Full Court</MenuItem>
+                      <MenuItem value={"/half-court.svg"}>Half Court</MenuItem>
+                      <MenuItem value={"/empty-court.svg"}>
+                        Empty Court
+                      </MenuItem>
+                    </Select>
                   </Grid>
                   <Grid item xs={12} p={1}>
                     <FormGroup>
@@ -384,7 +374,14 @@ const UpdateTacticBoardMeta = (): JSX.Element => {
                 <SoftButton
                   color="primary"
                   sx={{ marginRight: 1 }}
-                  type="submit"
+                  type="button"
+                  onClick={() => {
+                    if (formik.isValid) {
+                      formik.submitForm().then(() => {
+                        navigate(`/tacticboards`);
+                      });
+                    }
+                  }}
                   disabled={isUpdateTacticBoardLoading || isTacticBoardLoading}
                 >
                   {t("UpdateTacticBoardMeta:updateBoardBtn")}

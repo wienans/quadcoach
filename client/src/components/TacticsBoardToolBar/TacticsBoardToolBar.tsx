@@ -1,5 +1,6 @@
 import { useFabricJs } from "../FabricJsContext";
 import { useState } from "react";
+import { useParams } from "react-router-dom";
 import { SoftTypography, SoftButton, SoftBox } from "..";
 import {
   Switch,
@@ -8,6 +9,7 @@ import {
   Stack,
   Pagination,
 } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 
 export type TacticsBoardToolBarProps = {
   editMode: boolean;
@@ -32,6 +34,8 @@ const TacticsBoardToolBar = ({
   disabled,
   onLoadPage,
 }: TacticsBoardToolBarProps): JSX.Element => {
+  const navigate = useNavigate();
+  const { id: tacticBoardId } = useParams();
   const { getAllObjectsJson, removeActiveObjects, setSelection, setDrawMode } =
     useFabricJs();
   const handleChange = (event: React.ChangeEvent<unknown>, value: number) => {
@@ -45,6 +49,16 @@ const TacticsBoardToolBar = ({
         <Grid item xs={3}>
           <SoftButton
             disabled={disabled}
+            sx={{ m: 1 }}
+            onClick={() => {
+              navigate(`/tacticboards/${tacticBoardId}/update`);
+            }}
+          >
+            Back
+          </SoftButton>
+          <SoftButton
+            disabled={disabled}
+            sx={{ m: 1 }}
             onClick={() => {
               removeActiveObjects();
             }}

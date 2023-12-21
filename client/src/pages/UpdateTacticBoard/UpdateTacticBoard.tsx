@@ -4,11 +4,10 @@ import { useState, useEffect, useRef } from "react";
 import { Alert, Grid, Skeleton } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import {
-  useAddTacticBoardMutation,
   useUpdateTacticBoardMutation,
   useGetTacticBoardQuery,
 } from "../../pages/tacticboardApi";
-import { TacticBoard } from "../../api/quadcoachApi/domain";
+import { TacticBoard, TacticPage } from "../../api/quadcoachApi/domain";
 import {
   SoftTypography,
   SoftBox,
@@ -60,18 +59,28 @@ const UpdateTacticBoard = (): JSX.Element => {
     newPage?: boolean,
     removePage?: boolean,
   ) => {
+    console.log(page);
+    console.log(currentPage);
     if (newPage && removePage) return;
-    let updatedTacticBoard: TacticBoard = cloneDeep(tacticBoardState);
+    if (!tacticBoardState) return;
+    const updatedTacticBoard: TacticBoard = cloneDeep(tacticBoardState);
     if (newPage) {
       // Save the last state of the old page
-      updatedTacticBoard.pages[page - 2] = getAllObjectsJson();
+      updatedTacticBoard.pages[page - 2] = getAllObjectsJson() as TacticPage;
       // Copy the state of the old page to the new page
-      updatedTacticBoard.pages[page - 1] = getAllObjectsJson();
+      updatedTacticBoard.pages[page - 1] = getAllObjectsJson() as TacticPage;
       updateTacticBoard(updatedTacticBoard);
-    }
-    if (removePage) {
+    } else if (removePage) {
       // Remove Last Page
       updatedTacticBoard.pages.pop();
+      updateTacticBoard(updatedTacticBoard);
+    } else if (page > currentPage) {
+      // Go to next page
+      updatedTacticBoard.pages[page - 2] = getAllObjectsJson() as TacticPage;
+      updateTacticBoard(updatedTacticBoard);
+    } else if (page < currentPage) {
+      // go to previous page
+      updatedTacticBoard.pages[page] = getAllObjectsJson() as TacticPage;
       updateTacticBoard(updatedTacticBoard);
     }
     // Show the new Page
@@ -81,8 +90,9 @@ const UpdateTacticBoard = (): JSX.Element => {
   const onSave = () => {
     if (!tacticBoardState) return;
     console.log(getAllObjectsJson());
-    let updatedTacticBoard: TacticBoard = cloneDeep(tacticBoardState);
-    updatedTacticBoard.pages[currentPage - 1] = getAllObjectsJson();
+    const updatedTacticBoard: TacticBoard = cloneDeep(tacticBoardState);
+    updatedTacticBoard.pages[currentPage - 1] =
+      getAllObjectsJson() as TacticPage;
     updateTacticBoard(updatedTacticBoard);
   };
   return (
@@ -136,7 +146,7 @@ const UpdateTacticBoard = (): JSX.Element => {
                 <TacticsBoardSpeedDialBalls editMode={editMode} />
                 <TacticsBoardSpeedDial teamB={false} editMode={editMode} />
                 {isTacticBoardLoading ? (
-                  <Skeleton variant="rectangular" width={1220} height={686} />
+                  <Skeleton variant="rectangular" width={"100%"} height={100} />
                 ) : (
                   <>
                     <FabricJsCanvas
