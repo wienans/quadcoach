@@ -59,7 +59,7 @@ const TacticBoardCard = ({
         avatar={<DeveloperBoardIcon />}
         title={tacticBoard.name}
         action={
-          <Tooltip title={t("TacticBoardList:cardView.openExercise")}>
+          <Tooltip title={t("TacticBoardList:cardView.openTacticBoard")}>
             <IconButton onClick={onOpenTacticBoardClick}>
               <OpenInBrowserIcon />
             </IconButton>
