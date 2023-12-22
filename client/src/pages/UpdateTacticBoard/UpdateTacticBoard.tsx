@@ -22,8 +22,7 @@ import cloneDeep from "lodash/cloneDeep";
 const UpdateTacticBoard = (): JSX.Element => {
   const { t } = useTranslation("UpdateTacticBoard");
   const { id: tacticBoardId } = useParams();
-  const { getAllObjectsJson, loadFromJson } = useFabricJs();
-
+  const { getAllObjectsJson, loadFromJson, setControls } = useFabricJs();
   const {
     data: tacticBoard,
     isError: isTacticBoardError,
@@ -45,14 +44,32 @@ const UpdateTacticBoard = (): JSX.Element => {
   const [editMode, setEditMode] = useState<boolean>(true);
   const [currentPage, setPage] = useState<number>(1);
   const [maxPages, setMaxPages] = useState<number>(1);
-  const [tacticBoardState, setTacticBoardState] = useState<TacticBoard>();
+  const [firstAPICall, setFirstAPICall] = useState<number>(0);
 
-  // Setting Tacticboard to State
   useEffect(() => {
-    if (!tacticBoard) return;
-    setTacticBoardState(tacticBoard);
-    setMaxPages(tacticBoard.pages.length);
-  }, [tacticBoard]);
+    if (
+      !isTacticBoardLoading &&
+      !isTacticBoardError &&
+      tacticBoard &&
+      firstAPICall < 2
+    ) {
+      // API is finished loading, due to sending data to Server every time the Page is switched
+      // we need to stop the this method by counting firstAPICall up and checking the amount on
+      // load of the page API is called twice.
+      console.log("API finished");
+      setFirstAPICall(firstAPICall + 1);
+      setMaxPages(tacticBoard.pages.length);
+      loadFromJson(tacticBoard.pages[0]);
+      setControls(false);
+    }
+  }, [
+    setControls,
+    loadFromJson,
+    firstAPICall,
+    tacticBoard,
+    isTacticBoardError,
+    isTacticBoardLoading,
+  ]);
 
   const onLoadPage = (
     page: number,
@@ -62,8 +79,8 @@ const UpdateTacticBoard = (): JSX.Element => {
     console.log(page);
     console.log(currentPage);
     if (newPage && removePage) return;
-    if (!tacticBoardState) return;
-    const updatedTacticBoard: TacticBoard = cloneDeep(tacticBoardState);
+    if (!tacticBoard) return;
+    const updatedTacticBoard: TacticBoard = cloneDeep(tacticBoard);
     if (newPage) {
       // Save the last state of the old page
       updatedTacticBoard.pages[page - 2] = getAllObjectsJson() as TacticPage;
@@ -83,14 +100,14 @@ const UpdateTacticBoard = (): JSX.Element => {
       updatedTacticBoard.pages[page] = getAllObjectsJson() as TacticPage;
       updateTacticBoard(updatedTacticBoard);
     }
-    // Show the new Page
     loadFromJson(updatedTacticBoard.pages[page - 1]);
+    setControls(false);
   };
 
   const onSave = () => {
-    if (!tacticBoardState) return;
+    if (!tacticBoard) return;
     console.log(getAllObjectsJson());
-    const updatedTacticBoard: TacticBoard = cloneDeep(tacticBoardState);
+    const updatedTacticBoard: TacticBoard = cloneDeep(tacticBoard);
     updatedTacticBoard.pages[currentPage - 1] =
       getAllObjectsJson() as TacticPage;
     updateTacticBoard(updatedTacticBoard);
@@ -152,11 +169,7 @@ const UpdateTacticBoard = (): JSX.Element => {
                     <FabricJsCanvas
                       initialHight={686}
                       initialWidth={1220}
-                      backgroundImage={
-                        tacticBoard?.pages[currentPage - 1].backgroundImage.src
-                      }
                       containerRef={refContainer}
-                      initialCanvas={tacticBoard?.pages[currentPage - 1]}
                     />
                   </>
                 )}

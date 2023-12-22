@@ -8,10 +8,6 @@ import {
   SoftTypography,
   SoftBox,
   FabricJsCanvas,
-  FabricJsContextProvider,
-  TacticsBoardToolBar,
-  TacticsBoardSpeedDial,
-  TacticsBoardSpeedDialBalls,
   SoftButton,
 } from "../../components";
 import { useGetTacticBoardQuery } from "../../pages/tacticboardApi";
@@ -19,7 +15,7 @@ import { useFabricJs } from "../../components/FabricJsContext/useFabricJs";
 const TacticsBoard = (): JSX.Element => {
   const { t } = useTranslation("TacticBoard");
   const { id: tacticBoardId } = useParams();
-  const { getAllObjectsJson, loadFromJson } = useFabricJs();
+  const { loadFromJson, setSelection } = useFabricJs();
   const navigate = useNavigate();
   const {
     data: tacticBoard,
@@ -30,16 +26,26 @@ const TacticsBoard = (): JSX.Element => {
   });
 
   const refContainer = useRef<HTMLDivElement>(null);
-  const [editMode, setEditMode] = useState<boolean>(true);
   const [currentPage, setPage] = useState<number>(1);
-  const [maxPages, setMaxPages] = useState<number>(1);
 
   const onLoadPage = (page: number) => {
     if (!tacticBoard) return;
     // Show the new Page
     loadFromJson(tacticBoard.pages[page - 1]);
+    setSelection(false);
   };
-
+  useEffect(() => {
+    if (!isTacticBoardLoading && !isTacticBoardError && tacticBoard) {
+      loadFromJson(tacticBoard.pages[0]);
+      setSelection(false);
+    }
+  }, [
+    setSelection,
+    loadFromJson,
+    tacticBoard,
+    isTacticBoardError,
+    isTacticBoardLoading,
+  ]);
   return (
     <div>
       <SoftBox
@@ -87,10 +93,7 @@ const TacticsBoard = (): JSX.Element => {
                   count={tacticBoard?.pages.length}
                   siblingCount={0}
                   page={currentPage}
-                  onChange={(
-                    event: React.ChangeEvent<unknown>,
-                    value: number,
-                  ) => {
+                  onChange={(_, value: number) => {
                     onLoadPage(value);
                     setPage(value);
                   }}
@@ -119,11 +122,7 @@ const TacticsBoard = (): JSX.Element => {
               <FabricJsCanvas
                 initialHight={686}
                 initialWidth={1220}
-                backgroundImage={
-                  tacticBoard?.pages[currentPage - 1].backgroundImage.src
-                }
                 containerRef={refContainer}
-                initialCanvas={tacticBoard?.pages[currentPage - 1]}
               />
             </Grid>
           </Grid>

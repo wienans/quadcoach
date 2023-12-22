@@ -1,12 +1,6 @@
-import {
-  createContext,
-  ReactNode,
-  FC,
-  useState,
-  useCallback,
-  useEffect,
-} from "react";
+import { createContext, ReactNode, FC, useState, useCallback } from "react";
 import { fabric } from "fabric";
+import { TacticPage } from "../../api/quadcoachApi/domain";
 
 export interface FabricJsContextProps {
   canvas: fabric.Canvas | null;
@@ -17,8 +11,9 @@ export interface FabricJsContextProps {
   getAllObjectsJson: () => object;
   getActiveObjects: () => fabric.Object[];
   setSelection: (selection: boolean) => void;
-  loadFromJson: (page: object) => void;
+  loadFromJson: (page: TacticPage) => void;
   setDrawMode: (drawMode: boolean) => void;
+  setControls: (controls: boolean) => void;
 }
 
 export const FabricJsContext = createContext<FabricJsContextProps | undefined>(
@@ -65,7 +60,7 @@ const FabricJsContextProvider: FC<{ children: ReactNode }> = ({ children }) => {
 
   const getAllObjectsJson = useCallback(() => {
     if (canvas) {
-      let json = canvas.toJSON(["uuid"]);
+      const json = canvas.toJSON(["uuid"]) as TacticPage;
       if (json.backgroundImage) {
         json.backgroundImage.src = new URL(json.backgroundImage.src).pathname;
       }
@@ -74,14 +69,39 @@ const FabricJsContextProvider: FC<{ children: ReactNode }> = ({ children }) => {
     return {};
   }, [canvas]);
 
-  const loadFromJson = useCallback(
-    (page: object) => {
+  const setControls = useCallback(
+    (controls: boolean) => {
       if (canvas) {
-        return canvas.loadFromJSON(page, () => {
-          canvas.renderAll();
+        canvas.getObjects().forEach((obj) => {
+          obj.hasControls = controls;
         });
       }
-      return {};
+    },
+    [canvas],
+  );
+  const loadFromJson = useCallback(
+    (page: TacticPage) => {
+      if (canvas) {
+        canvas.getObjects().forEach((obj) => {
+          canvas.remove(obj);
+        });
+        canvas.setBackgroundImage(
+          page.backgroundImage.src,
+          canvas.renderAll.bind(canvas),
+        );
+        page.objects?.forEach((obj) => {
+          if (obj.type == "circle") {
+            const addObj = new fabric.Circle(obj);
+            canvas.add(addObj);
+          } else if (obj.type == "rect") {
+            const addObj = new fabric.Rect(obj);
+            canvas.add(addObj);
+          } else if (obj.type == "path") {
+            const addObj = new fabric.Path(obj.path?.toString(), obj);
+            canvas.add(addObj);
+          }
+        });
+      }
     },
     [canvas],
   );
@@ -105,29 +125,6 @@ const FabricJsContextProvider: FC<{ children: ReactNode }> = ({ children }) => {
     },
     [canvas],
   );
-  // Autosave Functionality not implemented
-  useEffect(() => {
-    const handleCanvasChange = () => {
-      //const json = getAllObjectsJson();
-      //console.log(json);
-    };
-
-    if (canvas) {
-      // Attach event listeners for object modifications, additions, and removals
-      canvas.on("object:modified", handleCanvasChange);
-      canvas.on("object:added", handleCanvasChange);
-      canvas.on("object:removed", handleCanvasChange);
-    }
-
-    return () => {
-      // Remove event listeners when the component unmounts or canvas changes
-      if (canvas) {
-        canvas.off("object:modified", handleCanvasChange);
-        canvas.off("object:added", handleCanvasChange);
-        canvas.off("object:removed", handleCanvasChange);
-      }
-    };
-  }, [canvas, getAllObjectsJson]);
 
   return (
     <FabricJsContext.Provider
@@ -142,6 +139,7 @@ const FabricJsContextProvider: FC<{ children: ReactNode }> = ({ children }) => {
         setSelection,
         loadFromJson,
         setDrawMode,
+        setControls,
       }}
     >
       {children}

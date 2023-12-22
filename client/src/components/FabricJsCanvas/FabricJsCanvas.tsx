@@ -23,6 +23,7 @@ const FabricJsCanvas = ({
     const canvasInstance = new fabric.Canvas("fabricCanvas", {
       width: initialWidth,
       height: initialHight,
+      allowTouchScrolling: true,
     });
     console.debug("USEEFFEKT");
 
@@ -54,18 +55,6 @@ const FabricJsCanvas = ({
       }
     };
     const init = () => {
-      // Set the Background image
-      if (backgroundImage) {
-        canvasInstance.setBackgroundImage(
-          backgroundImage,
-          canvasInstance.renderAll.bind(canvasInstance),
-        );
-      }
-      if (initialCanvas) {
-        canvasInstance.loadFromJSON(initialCanvas, () => {
-          canvasInstance.renderAll();
-        });
-      }
       handleResize();
     };
 

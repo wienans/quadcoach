@@ -1,7 +1,7 @@
 import { useFabricJs } from "../FabricJsContext";
 import { useState } from "react";
 import { useParams } from "react-router-dom";
-import { SoftTypography, SoftButton, SoftBox } from "..";
+import { SoftButton } from "..";
 import {
   Switch,
   FormControlLabel,
@@ -36,9 +36,8 @@ const TacticsBoardToolBar = ({
 }: TacticsBoardToolBarProps): JSX.Element => {
   const navigate = useNavigate();
   const { id: tacticBoardId } = useParams();
-  const { getAllObjectsJson, removeActiveObjects, setSelection, setDrawMode } =
-    useFabricJs();
-  const handleChange = (event: React.ChangeEvent<unknown>, value: number) => {
+  const { removeActiveObjects, setSelection, setDrawMode } = useFabricJs();
+  const handleChange = (_: React.ChangeEvent<unknown>, value: number) => {
     setPage(value);
     onLoadPage(value);
   };
@@ -51,6 +50,7 @@ const TacticsBoardToolBar = ({
             disabled={disabled}
             sx={{ m: 1 }}
             onClick={() => {
+              onSave();
               navigate(`/tacticboards/${tacticBoardId}/update`);
             }}
           >
