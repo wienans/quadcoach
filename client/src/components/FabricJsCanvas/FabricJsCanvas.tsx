@@ -24,6 +24,7 @@ const FabricJsCanvas = ({
       width: initialWidth,
       height: initialHight,
       allowTouchScrolling: true,
+      selection: false,
     });
     console.debug("USEEFFEKT");
 
@@ -37,20 +38,30 @@ const FabricJsCanvas = ({
       console.debug("Resize");
       // Calculate the Correct Scaling
       if (containerRef.current) {
-        let scaleRatio = 1.0;
-        const width = containerRef.current.offsetWidth;
-        if (width >= initialWidth) {
-          scaleRatio = 1.0;
+        const ratio = initialWidth / initialHight;
+        const width = containerRef.current.offsetWidth - 20;
+        const top =
+          containerRef.current.getBoundingClientRect().top < 0
+            ? 0
+            : containerRef.current.getBoundingClientRect().top;
+        const height = window.innerHeight - top - 50;
+        const calculatedWidth = ratio * height;
+        let calcHeight = 0;
+        let calcWidth = 0;
+        if (calculatedWidth > width) {
+          calcHeight = width / ratio;
+          calcWidth = width;
         } else {
-          scaleRatio = width / initialWidth;
+          calcHeight = height;
+          calcWidth = calculatedWidth;
         }
         const dim = {
-          width: initialWidth * scaleRatio,
-          height: initialHight * scaleRatio,
+          width: calcWidth,
+          height: calcHeight,
         };
         // Set the Dimensions
         canvasInstance.setDimensions(dim);
-        canvasInstance.setZoom(scaleRatio);
+        canvasInstance.setZoom(calcWidth / initialWidth);
         canvasInstance.renderAll();
       }
     };
