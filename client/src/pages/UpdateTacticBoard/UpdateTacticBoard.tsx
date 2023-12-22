@@ -131,57 +131,62 @@ const UpdateTacticBoard = (): JSX.Element => {
             <SoftTypography variant="h3">
               {t("UpdateTacticBoard:titel")}
             </SoftTypography>
-          </SoftBox>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <Grid container spacing={2}>
-              <Grid item xs={12}>
-                <TacticsBoardToolBar
-                  editMode={editMode}
-                  setEditMode={setEditMode}
-                  setPage={setPage}
-                  currentPage={currentPage}
-                  setMaxPages={setMaxPages}
-                  maxPages={maxPages}
-                  onSave={onSave}
-                  onLoadPage={onLoadPage}
-                  disabled={isTacticBoardLoading}
-                />
-              </Grid>
 
-              <Grid
-                item
-                xs={12}
-                ref={refContainer}
-                style={{ display: "flex", justifyContent: "center" }}
-              >
-                <TacticsBoardSpeedDialBalls editMode={editMode} />
-                <TacticsBoardSpeedDial teamB={false} editMode={editMode} />
-                {isTacticBoardLoading ? (
-                  <Skeleton variant="rectangular" width={"100%"} height={100} />
-                ) : (
-                  <>
-                    <FabricJsCanvas
-                      initialHight={686}
-                      initialWidth={1220}
-                      containerRef={refContainer}
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <TacticsBoardToolBar
+                    editMode={editMode}
+                    setEditMode={setEditMode}
+                    setPage={setPage}
+                    currentPage={currentPage}
+                    setMaxPages={setMaxPages}
+                    maxPages={maxPages}
+                    onSave={onSave}
+                    onLoadPage={onLoadPage}
+                    disabled={isTacticBoardLoading}
+                  />
+                </Grid>
+
+                <Grid
+                  item
+                  xs={12}
+                  ref={refContainer}
+                  style={{ display: "flex", justifyContent: "center" }}
+                >
+                  <TacticsBoardSpeedDialBalls editMode={editMode} />
+                  <TacticsBoardSpeedDial teamB={false} editMode={editMode} />
+                  {isTacticBoardLoading ? (
+                    <Skeleton
+                      variant="rectangular"
+                      width={"100%"}
+                      height={100}
                     />
-                  </>
-                )}
-                <TacticsBoardSpeedDial teamB={true} editMode={editMode} />
+                  ) : (
+                    <>
+                      <FabricJsCanvas
+                        initialHight={686}
+                        initialWidth={1220}
+                        containerRef={refContainer}
+                      />
+                    </>
+                  )}
+                  <TacticsBoardSpeedDial teamB={true} editMode={editMode} />
+                </Grid>
+                <Grid
+                  item
+                  xs={12}
+                  style={{ display: "flex", justifyContent: "center" }}
+                ></Grid>
               </Grid>
-              <Grid
-                item
-                xs={12}
-                style={{ display: "flex", justifyContent: "center" }}
-              ></Grid>
-            </Grid>
-          </div>
+            </div>
+          </SoftBox>
         </>
       )}
     </div>

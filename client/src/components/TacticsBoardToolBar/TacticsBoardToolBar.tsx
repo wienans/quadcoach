@@ -1,3 +1,4 @@
+import "./translations";
 import { useFabricJs } from "../FabricJsContext";
 import { useState } from "react";
 import { useParams } from "react-router-dom";
@@ -10,6 +11,7 @@ import {
   Pagination,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 export type TacticsBoardToolBarProps = {
   editMode: boolean;
@@ -35,6 +37,7 @@ const TacticsBoardToolBar = ({
   onLoadPage,
 }: TacticsBoardToolBarProps): JSX.Element => {
   const navigate = useNavigate();
+  const { t } = useTranslation("TacticsBoardToolBar");
   const { id: tacticBoardId } = useParams();
   const { removeActiveObjects, setSelection, setDrawMode } = useFabricJs();
   const handleChange = (_: React.ChangeEvent<unknown>, value: number) => {
@@ -44,8 +47,8 @@ const TacticsBoardToolBar = ({
   const [drawingEnabled, enableDrawing] = useState<boolean>(false);
   return (
     <div>
-      <Grid container>
-        <Grid item xs={3}>
+      <Grid container spacing={2}>
+        <Grid item xs={4}>
           <SoftButton
             disabled={disabled}
             sx={{ m: 1 }}
@@ -54,7 +57,7 @@ const TacticsBoardToolBar = ({
               navigate(`/tacticboards/${tacticBoardId}/update`);
             }}
           >
-            Back
+            {t("TacticsBoardToolBar:backBtn")}
           </SoftButton>
           <SoftButton
             disabled={disabled}
@@ -63,11 +66,8 @@ const TacticsBoardToolBar = ({
               removeActiveObjects();
             }}
           >
-            Remove
+            {t("TacticsBoardToolBar:removeBtn")}
           </SoftButton>
-        </Grid>
-        <Grid item xs={3}>
-          <SoftButton onClick={onSave}>Save</SoftButton>
         </Grid>
         <Grid item xs={2}>
           <FormControlLabel
@@ -85,7 +85,7 @@ const TacticsBoardToolBar = ({
                 }}
               />
             }
-            label="Edit Mode"
+            label={t("TacticsBoardToolBar:editMode")}
           />
           <FormControlLabel
             control={
@@ -98,10 +98,10 @@ const TacticsBoardToolBar = ({
                 }}
               />
             }
-            label="Draw Mode"
+            label={t("TacticsBoardToolBar:drawMode")}
           />
         </Grid>
-        <Grid item xs={4}>
+        <Grid item xs={6}>
           <Stack spacing={2} direction="row">
             <SoftButton
               size="small"

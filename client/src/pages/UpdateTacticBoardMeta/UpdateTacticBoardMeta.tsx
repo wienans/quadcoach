@@ -148,7 +148,7 @@ const UpdateTacticBoardMeta = (): JSX.Element => {
         <Grid container spacing={2}>
           <Grid item xs={12}>
             <SoftTypography variant="h3">
-              {"Update Tactic Board Meta Data"}
+              {t("UpdateTacticBoardMeta:title")}
             </SoftTypography>
           </Grid>
 

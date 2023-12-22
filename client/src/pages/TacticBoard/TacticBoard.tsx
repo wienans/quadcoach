@@ -61,73 +61,77 @@ const TacticsBoard = (): JSX.Element => {
             ": " +
             (tacticBoard ? tacticBoard.name : "")}
         </SoftTypography>
-      </SoftBox>
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        {isTacticBoardError && (
-          <Grid item xs={12} justifyContent="center" display="flex">
-            <Alert color="error">{"Error"}</Alert>
-          </Grid>
-        )}
-        {isTacticBoardLoading && (
-          <Skeleton variant="rectangular" width={"100%"} height={100} />
-        )}
-        {!isTacticBoardError && !isTacticBoardLoading && (
-          <Grid container spacing={2}>
-            <Grid
-              item
-              xs={12}
-              style={{ display: "flex", justifyContent: "center" }}
-            >
+
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          {isTacticBoardError && (
+            <Grid item xs={12} justifyContent="center" display="flex">
+              <Alert color="error">{"Error"}</Alert>
+            </Grid>
+          )}
+          {isTacticBoardLoading && (
+            <Skeleton variant="rectangular" width={"100%"} height={100} />
+          )}
+          {!isTacticBoardError && !isTacticBoardLoading && (
+            <Grid container spacing={2}>
               <Grid
                 item
-                xs={6}
+                xs={12}
                 style={{ display: "flex", justifyContent: "center" }}
               >
-                <Pagination
-                  count={tacticBoard?.pages.length}
-                  siblingCount={0}
-                  page={currentPage}
-                  onChange={(_, value: number) => {
-                    onLoadPage(value);
-                    setPage(value);
-                  }}
+                <Grid
+                  item
+                  xs={6}
+                  style={{ display: "flex", justifyContent: "center" }}
+                >
+                  <Pagination
+                    count={tacticBoard?.pages.length}
+                    siblingCount={0}
+                    page={currentPage}
+                    onChange={(_, value: number) => {
+                      onLoadPage(value);
+                      setPage(value);
+                    }}
+                  />
+                </Grid>
+                <Grid
+                  item
+                  xs={6}
+                  style={{ display: "flex", justifyContent: "center" }}
+                >
+                  <SoftButton
+                    onClick={() => {
+                      navigate(`/tacticboards/${tacticBoardId}/update`);
+                    }}
+                  >
+                    {t("TacticBoard:editBtn")}
+                  </SoftButton>
+                </Grid>
+              </Grid>
+              <Grid
+                item
+                xs={12}
+                ref={refContainer}
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                }}
+              >
+                <FabricJsCanvas
+                  initialHight={686}
+                  initialWidth={1220}
+                  containerRef={refContainer}
                 />
               </Grid>
-              <Grid
-                item
-                xs={6}
-                style={{ display: "flex", justifyContent: "center" }}
-              >
-                <SoftButton
-                  onClick={() => {
-                    navigate(`/tacticboards/${tacticBoardId}/update`);
-                  }}
-                >
-                  {t("TacticBoard:editBtn")}
-                </SoftButton>
-              </Grid>
             </Grid>
-            <Grid
-              item
-              xs={12}
-              ref={refContainer}
-              style={{ display: "flex", justifyContent: "center" }}
-            >
-              <FabricJsCanvas
-                initialHight={686}
-                initialWidth={1220}
-                containerRef={refContainer}
-              />
-            </Grid>
-          </Grid>
-        )}
-      </div>
+          )}
+        </div>
+      </SoftBox>
     </div>
   );
 };

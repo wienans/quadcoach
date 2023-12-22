@@ -109,7 +109,6 @@ const FabricJsContextProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const setSelection = useCallback(
     (selection: boolean) => {
       if (canvas) {
-        canvas.selection = selection;
         canvas.getObjects().forEach((obj) => {
           obj.evented = selection;
         });
@@ -125,7 +124,6 @@ const FabricJsContextProvider: FC<{ children: ReactNode }> = ({ children }) => {
     },
     [canvas],
   );
-
   return (
     <FabricJsContext.Provider
       value={{
