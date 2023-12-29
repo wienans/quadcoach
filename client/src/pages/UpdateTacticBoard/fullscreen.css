@@ -1,0 +1,20 @@
+
+  :-webkit-full-screen {
+    background-color: white;
+  }
+  
+  :-moz-full-screen {
+    background-color: white;
+  }
+  
+  :-ms-fullscreen {
+    background-color: white;
+  }
+  
+  :fullscreen {
+    background-color: white;
+  }
+
+  :full-screen {
+    background-color: white;
+  }

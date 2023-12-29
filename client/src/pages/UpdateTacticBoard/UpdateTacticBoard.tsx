@@ -15,9 +15,11 @@ import {
   TacticsBoardToolBar,
   TacticsBoardSpeedDial,
   TacticsBoardSpeedDialBalls,
+  SoftButton,
 } from "../../components";
 import { useFabricJs } from "../../components/FabricJsContext/useFabricJs";
 import cloneDeep from "lodash/cloneDeep";
+import "./fullscreen.css";
 
 const UpdateTacticBoard = (): JSX.Element => {
   const { t } = useTranslation("UpdateTacticBoard");
@@ -41,6 +43,7 @@ const UpdateTacticBoard = (): JSX.Element => {
   ] = useUpdateTacticBoardMutation();
 
   const refContainer = useRef<HTMLDivElement>(null);
+  const refFullScreenContainer = useRef<HTMLDivElement>(null);
   const [editMode, setEditMode] = useState<boolean>(true);
   const [currentPage, setPage] = useState<number>(1);
   const [maxPages, setMaxPages] = useState<number>(1);
@@ -104,6 +107,32 @@ const UpdateTacticBoard = (): JSX.Element => {
     setControls(false);
   };
 
+  const handleFullScreen = () => {
+    const container = refFullScreenContainer.current;
+    const isFullscreen = document.fullscreenElement;
+    if (isFullscreen) {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      } else if (document.mozCancelFullScreen) {
+        document.mozCancelFullScreen();
+      } else if (document.webkitExitFullscreen) {
+        document.webkitExitFullscreen();
+      } else if (document.msExitFullscreen) {
+        document.msExitFullscreen();
+      }
+    } else {
+      if (container && container.requestFullscreen) {
+        container.requestFullscreen();
+      } else if (container && container.mozRequestFullScreen) {
+        container.mozRequestFullScreen();
+      } else if (container && container.webkitRequestFullscreen) {
+        container.webkitRequestFullscreen();
+      } else if (container && container.msRequestFullscreen) {
+        container.msRequestFullscreen();
+      }
+    }
+  };
+
   const onSave = () => {
     if (!tacticBoard) return;
     console.log(getAllObjectsJson());
@@ -112,6 +141,7 @@ const UpdateTacticBoard = (): JSX.Element => {
       getAllObjectsJson() as TacticPage;
     updateTacticBoard(updatedTacticBoard);
   };
+
   return (
     <div>
       {isTacticBoardError ? (
@@ -139,8 +169,8 @@ const UpdateTacticBoard = (): JSX.Element => {
                 justifyContent: "center",
               }}
             >
-              <Grid container spacing={2}>
-                <Grid item xs={12}>
+              <Grid container spacing={2} ref={refFullScreenContainer}>
+                <Grid item xs={9}>
                   <TacticsBoardToolBar
                     editMode={editMode}
                     setEditMode={setEditMode}
@@ -153,7 +183,9 @@ const UpdateTacticBoard = (): JSX.Element => {
                     disabled={isTacticBoardLoading}
                   />
                 </Grid>
-
+                <Grid item xs={3}>
+                  <SoftButton onClick={handleFullScreen}>FullScreen</SoftButton>
+                </Grid>
                 <Grid
                   item
                   xs={12}
