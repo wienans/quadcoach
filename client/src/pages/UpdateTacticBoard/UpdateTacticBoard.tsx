@@ -50,6 +50,8 @@ const UpdateTacticBoard = (): JSX.Element => {
   const [editMode, setEditMode] = useState<boolean>(true);
   const [currentPage, setPage] = useState<number>(1);
   const [maxPages, setMaxPages] = useState<number>(1);
+  const [maxAPlayers, setMaxAPlayers] = useState<number>(1);
+  const [maxBPlayers, setMaxBPlayers] = useState<number>(1);
   const [firstAPICall, setFirstAPICall] = useState<number>(0);
 
   useEffect(() => {
@@ -67,6 +69,12 @@ const UpdateTacticBoard = (): JSX.Element => {
       setMaxPages(tacticBoard.pages.length);
       loadFromJson(tacticBoard.pages[0]);
       setControls(false);
+      if (tacticBoard.pages[0].maxPlayerA) {
+        setMaxAPlayers(tacticBoard.pages[0].maxPlayerA);
+      }
+      if (tacticBoard.pages[0].maxPlayerB) {
+        setMaxBPlayers(tacticBoard.pages[0].maxPlayerB);
+      }
     }
   }, [
     setControls,
@@ -89,9 +97,17 @@ const UpdateTacticBoard = (): JSX.Element => {
     const updatedTacticBoard: TacticBoard = cloneDeep(tacticBoard);
     if (newPage) {
       // Save the last state of the old page
-      updatedTacticBoard.pages[page - 2] = getAllObjectsJson() as TacticPage;
+      updatedTacticBoard.pages[page - 2] = {
+        ...getAllObjectsJson(),
+        maxPlayerA: maxAPlayers,
+        maxPlayerB: maxBPlayers,
+      } as TacticPage;
       // Copy the state of the old page to the new page
-      updatedTacticBoard.pages[page - 1] = getAllObjectsJson() as TacticPage;
+      updatedTacticBoard.pages[page - 1] = {
+        ...getAllObjectsJson(),
+        maxPlayerA: maxAPlayers,
+        maxPlayerB: maxBPlayers,
+      } as TacticPage;
       updateTacticBoard(updatedTacticBoard);
     } else if (removePage) {
       // Remove Last Page
@@ -99,14 +115,28 @@ const UpdateTacticBoard = (): JSX.Element => {
       updateTacticBoard(updatedTacticBoard);
     } else if (page > currentPage) {
       // Go to next page
-      updatedTacticBoard.pages[page - 2] = getAllObjectsJson() as TacticPage;
+      updatedTacticBoard.pages[page - 2] = {
+        ...getAllObjectsJson(),
+        maxPlayerA: maxAPlayers,
+        maxPlayerB: maxBPlayers,
+      } as TacticPage;
       updateTacticBoard(updatedTacticBoard);
     } else if (page < currentPage) {
       // go to previous page
-      updatedTacticBoard.pages[page] = getAllObjectsJson() as TacticPage;
+      updatedTacticBoard.pages[page] = {
+        ...getAllObjectsJson(),
+        maxPlayerA: maxAPlayers,
+        maxPlayerB: maxBPlayers,
+      } as TacticPage;
       updateTacticBoard(updatedTacticBoard);
     }
     loadFromJson(updatedTacticBoard.pages[page - 1]);
+    if (updatedTacticBoard.pages[page - 1].maxPlayerA) {
+      setMaxAPlayers(updatedTacticBoard.pages[page - 1].maxPlayerA);
+    }
+    if (updatedTacticBoard.pages[page - 1].maxPlayerB) {
+      setMaxBPlayers(updatedTacticBoard.pages[page - 1].maxPlayerB);
+    }
     setControls(false);
   };
 
@@ -140,8 +170,11 @@ const UpdateTacticBoard = (): JSX.Element => {
     if (!tacticBoard) return;
     console.log(getAllObjectsJson());
     const updatedTacticBoard: TacticBoard = cloneDeep(tacticBoard);
-    updatedTacticBoard.pages[currentPage - 1] =
-      getAllObjectsJson() as TacticPage;
+    updatedTacticBoard.pages[currentPage - 1] = {
+      ...getAllObjectsJson(),
+      maxPlayerA: maxAPlayers,
+      maxPlayerB: maxBPlayers,
+    } as TacticPage;
     updateTacticBoard(updatedTacticBoard);
   };
 
@@ -207,7 +240,12 @@ const UpdateTacticBoard = (): JSX.Element => {
                   style={{ display: "flex", justifyContent: "center" }}
                 >
                   <TacticsBoardSpeedDialBalls editMode={editMode} />
-                  <TacticsBoardSpeedDial teamB={false} editMode={editMode} />
+                  <TacticsBoardSpeedDial
+                    teamB={false}
+                    editMode={editMode}
+                    maxPlayers={maxAPlayers}
+                    setMaxPlayers={setMaxAPlayers}
+                  />
                   {isTacticBoardLoading ? (
                     <Skeleton
                       variant="rectangular"
@@ -223,7 +261,12 @@ const UpdateTacticBoard = (): JSX.Element => {
                       />
                     </>
                   )}
-                  <TacticsBoardSpeedDial teamB={true} editMode={editMode} />
+                  <TacticsBoardSpeedDial
+                    teamB={true}
+                    editMode={editMode}
+                    maxPlayers={maxBPlayers}
+                    setMaxPlayers={setMaxBPlayers}
+                  />
                 </Grid>
                 <Grid
                   item

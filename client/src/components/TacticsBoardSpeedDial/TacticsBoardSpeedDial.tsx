@@ -7,15 +7,18 @@ import { useState } from "react";
 export type TacticsBoardSpeedDialProps = {
   teamB: boolean;
   editMode: boolean;
+  maxPlayers: number;
+  setMaxPlayers: (maxPlayers: number) => void;
 };
 const colorTeamA: string = "purple";
 const colorTeamB: string = "blue";
 const TacticsBoardSpeedDial = ({
   teamB,
   editMode,
+  maxPlayers,
+  setMaxPlayers,
 }: TacticsBoardSpeedDialProps): JSX.Element => {
   const { addObject, getAllObjectsJson } = useFabricJs();
-  const [playerCount, setPlayerCount] = useState<number>(1);
   const handleAddPlayer = (headbandColor: string) => {
     const circle = new fabric.Circle({
       radius: 15,
@@ -26,7 +29,7 @@ const TacticsBoardSpeedDial = ({
       fill: teamB ? colorTeamB : colorTeamA,
       uuid: uuidv4(),
     });
-    const text = new fabric.Text(playerCount.toString(), {
+    const text = new fabric.Text(maxPlayers.toString(), {
       left: teamB ? 1220 - 250 - 30 + 16 : 250 + 16,
       top: 640 + 16,
       fontFamily: "Arial",
@@ -40,7 +43,7 @@ const TacticsBoardSpeedDial = ({
       uuid: uuidv4(),
       hasControls: false, // Disable resizing handles
     });
-    setPlayerCount(playerCount + 1);
+    setMaxPlayers(maxPlayers + 1);
     addObject(group);
     getAllObjectsJson();
   };
