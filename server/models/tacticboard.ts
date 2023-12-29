@@ -44,8 +44,8 @@ interface ITacticPage {
   version?: string;
   objects?: Types.Array<IObject>;
   backgroundImage?: Types.Array<IBackgroundImage>;
-  maxPlayerA?: number;
-  maxPlayerB?: number;
+  playerANumbers?: number[];
+  playerBNumbers?: number[];
 }
 interface ITacticBoard {
   name?: string;
@@ -182,11 +182,11 @@ const pagesSchema = new Schema<ITacticPage>({
   backgroundImage: {
     type: backImgSchema,
   },
-  maxPlayerA: {
-    type: Number,
+  playerANumbers: {
+    type: [Number],
   },
-  maxPlayerB: {
-    type: Number,
+  playerBNumbers: {
+    type: [Number],
   },
 });
 const tacticBoardSchema = new Schema<ITacticBoard>(

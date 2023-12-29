@@ -50,8 +50,8 @@ const UpdateTacticBoard = (): JSX.Element => {
   const [editMode, setEditMode] = useState<boolean>(true);
   const [currentPage, setPage] = useState<number>(1);
   const [maxPages, setMaxPages] = useState<number>(1);
-  const [maxAPlayers, setMaxAPlayers] = useState<number>(1);
-  const [maxBPlayers, setMaxBPlayers] = useState<number>(1);
+  const [playerANumbers, setPlayerANumbers] = useState<number[]>([0]);
+  const [playerBNumbers, setPlayerBNumbers] = useState<number[]>([0]);
   const [firstAPICall, setFirstAPICall] = useState<number>(0);
 
   useEffect(() => {
@@ -69,11 +69,11 @@ const UpdateTacticBoard = (): JSX.Element => {
       setMaxPages(tacticBoard.pages.length);
       loadFromJson(tacticBoard.pages[0]);
       setControls(false);
-      if (tacticBoard.pages[0].maxPlayerA) {
-        setMaxAPlayers(tacticBoard.pages[0].maxPlayerA);
+      if (tacticBoard.pages[0].playerANumbers?.length != 0) {
+        setPlayerANumbers(tacticBoard.pages[0].playerANumbers);
       }
-      if (tacticBoard.pages[0].maxPlayerB) {
-        setMaxBPlayers(tacticBoard.pages[0].maxPlayerB);
+      if (tacticBoard.pages[0].playerBNumbers?.length != 0) {
+        setPlayerBNumbers(tacticBoard.pages[0].playerBNumbers);
       }
     }
   }, [
@@ -99,14 +99,14 @@ const UpdateTacticBoard = (): JSX.Element => {
       // Save the last state of the old page
       updatedTacticBoard.pages[page - 2] = {
         ...getAllObjectsJson(),
-        maxPlayerA: maxAPlayers,
-        maxPlayerB: maxBPlayers,
+        playerANumbers: playerANumbers,
+        playerBNumbers: playerBNumbers,
       } as TacticPage;
       // Copy the state of the old page to the new page
       updatedTacticBoard.pages[page - 1] = {
         ...getAllObjectsJson(),
-        maxPlayerA: maxAPlayers,
-        maxPlayerB: maxBPlayers,
+        playerANumbers: playerANumbers,
+        playerBNumbers: playerBNumbers,
       } as TacticPage;
       updateTacticBoard(updatedTacticBoard);
     } else if (removePage) {
@@ -117,25 +117,25 @@ const UpdateTacticBoard = (): JSX.Element => {
       // Go to next page
       updatedTacticBoard.pages[page - 2] = {
         ...getAllObjectsJson(),
-        maxPlayerA: maxAPlayers,
-        maxPlayerB: maxBPlayers,
+        playerANumbers: playerANumbers,
+        playerBNumbers: playerBNumbers,
       } as TacticPage;
       updateTacticBoard(updatedTacticBoard);
     } else if (page < currentPage) {
       // go to previous page
       updatedTacticBoard.pages[page] = {
         ...getAllObjectsJson(),
-        maxPlayerA: maxAPlayers,
-        maxPlayerB: maxBPlayers,
+        playerANumbers: playerANumbers,
+        playerBNumbers: playerBNumbers,
       } as TacticPage;
       updateTacticBoard(updatedTacticBoard);
     }
     loadFromJson(updatedTacticBoard.pages[page - 1]);
-    if (updatedTacticBoard.pages[page - 1].maxPlayerA) {
-      setMaxAPlayers(updatedTacticBoard.pages[page - 1].maxPlayerA);
+    if (updatedTacticBoard.pages[page - 1].playerANumbers?.length != 0) {
+      setPlayerANumbers(updatedTacticBoard.pages[page - 1].playerANumbers);
     }
-    if (updatedTacticBoard.pages[page - 1].maxPlayerB) {
-      setMaxBPlayers(updatedTacticBoard.pages[page - 1].maxPlayerB);
+    if (updatedTacticBoard.pages[page - 1].playerBNumbers?.length != 0) {
+      setPlayerBNumbers(updatedTacticBoard.pages[page - 1].playerBNumbers);
     }
     setControls(false);
   };
@@ -172,8 +172,8 @@ const UpdateTacticBoard = (): JSX.Element => {
     const updatedTacticBoard: TacticBoard = cloneDeep(tacticBoard);
     updatedTacticBoard.pages[currentPage - 1] = {
       ...getAllObjectsJson(),
-      maxPlayerA: maxAPlayers,
-      maxPlayerB: maxBPlayers,
+      playerANumbers: playerANumbers,
+      playerBNumbers: playerBNumbers,
     } as TacticPage;
     updateTacticBoard(updatedTacticBoard);
   };
@@ -226,6 +226,10 @@ const UpdateTacticBoard = (): JSX.Element => {
                     onSave={onSave}
                     onLoadPage={onLoadPage}
                     disabled={isTacticBoardLoading}
+                    setPlayerANumbers={setPlayerANumbers}
+                    setPlayerBNumbers={setPlayerBNumbers}
+                    playerANumbers={playerANumbers}
+                    playerBNumbers={playerBNumbers}
                   />
                 </Grid>
                 <Grid item xs={2}>
@@ -243,8 +247,8 @@ const UpdateTacticBoard = (): JSX.Element => {
                   <TacticsBoardSpeedDial
                     teamB={false}
                     editMode={editMode}
-                    maxPlayers={maxAPlayers}
-                    setMaxPlayers={setMaxAPlayers}
+                    playerNumbers={playerANumbers}
+                    setPlayerNumbers={setPlayerANumbers}
                   />
                   {isTacticBoardLoading ? (
                     <Skeleton
@@ -264,8 +268,8 @@ const UpdateTacticBoard = (): JSX.Element => {
                   <TacticsBoardSpeedDial
                     teamB={true}
                     editMode={editMode}
-                    maxPlayers={maxBPlayers}
-                    setMaxPlayers={setMaxBPlayers}
+                    playerNumbers={playerBNumbers}
+                    setPlayerNumbers={setPlayerBNumbers}
                   />
                 </Grid>
                 <Grid

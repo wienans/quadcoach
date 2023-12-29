@@ -3,22 +3,41 @@ import { SpeedDial, SpeedDialAction } from "@mui/material";
 import { fabric } from "fabric";
 import { v4 as uuidv4 } from "uuid";
 import { useState } from "react";
+import { cloneDeep } from "lodash";
 
 export type TacticsBoardSpeedDialProps = {
   teamB: boolean;
   editMode: boolean;
-  maxPlayers: number;
-  setMaxPlayers: (maxPlayers: number) => void;
+  playerNumbers: number[];
+  setPlayerNumbers: (array: number[]) => void;
 };
 const colorTeamA: string = "purple";
 const colorTeamB: string = "blue";
 const TacticsBoardSpeedDial = ({
   teamB,
   editMode,
-  maxPlayers,
-  setMaxPlayers,
+  playerNumbers,
+  setPlayerNumbers,
 }: TacticsBoardSpeedDialProps): JSX.Element => {
   const { addObject, getAllObjectsJson } = useFabricJs();
+  const findNumberInArray = (array: number[]) => {
+    const clonedArray = cloneDeep(array);
+    clonedArray.sort(function (a, b) {
+      return a - b;
+    });
+
+    let lowest = -1;
+    for (let i = 0; i < clonedArray.length; ++i) {
+      if (clonedArray[i] != i) {
+        lowest = i;
+        break;
+      }
+    }
+    if (lowest == -1) {
+      lowest = clonedArray[clonedArray.length - 1] + 1;
+    }
+    return lowest;
+  };
   const handleAddPlayer = (headbandColor: string) => {
     const circle = new fabric.Circle({
       radius: 15,
@@ -29,7 +48,8 @@ const TacticsBoardSpeedDial = ({
       fill: teamB ? colorTeamB : colorTeamA,
       uuid: uuidv4(),
     });
-    const text = new fabric.Text(maxPlayers.toString(), {
+    const newNumber = findNumberInArray(playerNumbers);
+    const text = new fabric.Text(newNumber.toString(), {
       left: teamB ? 1220 - 250 - 30 + 16 : 250 + 16,
       top: 640 + 16,
       fontFamily: "Arial",
@@ -43,7 +63,7 @@ const TacticsBoardSpeedDial = ({
       uuid: uuidv4(),
       hasControls: false, // Disable resizing handles
     });
-    setMaxPlayers(maxPlayers + 1);
+    setPlayerNumbers([...playerNumbers, newNumber]);
     addObject(group);
     getAllObjectsJson();
   };

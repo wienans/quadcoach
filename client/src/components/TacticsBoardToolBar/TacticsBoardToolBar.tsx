@@ -18,6 +18,10 @@ export type TacticsBoardToolBarProps = {
   maxPages: number;
   onSave: () => void;
   onLoadPage: (page: number, newPage?: boolean, removePage?: boolean) => void;
+  playerANumbers: number[];
+  setPlayerANumbers: (array: number[]) => void;
+  playerBNumbers: number[];
+  setPlayerBNumbers: (array: number[]) => void;
 };
 
 const TacticsBoardToolBar = ({
@@ -29,8 +33,13 @@ const TacticsBoardToolBar = ({
   maxPages,
   disabled,
   onLoadPage,
+  playerANumbers,
+  setPlayerANumbers,
+  playerBNumbers,
+  setPlayerBNumbers,
 }: TacticsBoardToolBarProps): JSX.Element => {
-  const { removeActiveObjects, setSelection, setDrawMode } = useFabricJs();
+  const { removeActiveObjects, setSelection, setDrawMode, getActiveObjects } =
+    useFabricJs();
   const handleChange = (_: React.ChangeEvent<unknown>, value: number) => {
     setPage(value);
     onLoadPage(value);
@@ -58,8 +67,33 @@ const TacticsBoardToolBar = ({
           </ToggleButton>
           <ToggleButton
             value="delete"
-            disabled={disabled}
+            disabled={!editMode || disabled}
             onClick={() => {
+              getActiveObjects().forEach((obj) => {
+                if (obj._objects) {
+                  let teamA = false;
+                  let number = -1;
+                  obj._objects.forEach((obj) => {
+                    if (obj.type == "text") {
+                      number = parseInt(obj.text);
+                    }
+                    if (obj.type == "circle") {
+                      if (obj.fill == "purple") {
+                        teamA = true;
+                      }
+                    }
+                  });
+                  if (teamA) {
+                    setPlayerANumbers(
+                      playerANumbers.filter((item) => item !== number),
+                    );
+                  } else {
+                    setPlayerBNumbers(
+                      playerBNumbers.filter((item) => item !== number),
+                    );
+                  }
+                }
+              });
               removeActiveObjects();
             }}
           >

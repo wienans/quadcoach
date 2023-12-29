@@ -43,8 +43,8 @@ type TacticPage = {
   version?: string;
   objects?: TacticsObject[];
   backgroundImage: TacticsBackImg;
-  maxPlayerA?: number;
-  maxPlayerB?: number;
+  playerANumbers?: number[];
+  playerBNumbers?: number[];
 };
 
 export default TacticPage;
