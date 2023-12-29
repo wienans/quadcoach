@@ -1,7 +1,7 @@
 import "./translations";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
-import { Alert, Grid, Skeleton } from "@mui/material";
+import { Alert, Grid, Skeleton, Stack, ToggleButton } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import {
   useUpdateTacticBoardMutation,
@@ -19,10 +19,13 @@ import {
 } from "../../components";
 import { useFabricJs } from "../../components/FabricJsContext/useFabricJs";
 import cloneDeep from "lodash/cloneDeep";
-import "./fullscreen.css";
+import "../fullscreen.css";
+import FullscreenIcon from "@mui/icons-material/Fullscreen";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 
 const UpdateTacticBoard = (): JSX.Element => {
   const { t } = useTranslation("UpdateTacticBoard");
+  const navigate = useNavigate();
   const { id: tacticBoardId } = useParams();
   const { getAllObjectsJson, loadFromJson, setControls } = useFabricJs();
   const {
@@ -158,19 +161,28 @@ const UpdateTacticBoard = (): JSX.Element => {
             my={2}
             borderRadius="lg"
           >
-            <SoftTypography variant="h3">
-              {t("UpdateTacticBoard:titel")}
-            </SoftTypography>
+            <Stack spacing={2} direction="row" sx={{ marginBottom: 2 }}>
+              <SoftButton
+                iconOnly={true}
+                onClick={() => {
+                  onSave();
+                  navigate(`/tacticboards/${tacticBoardId}/update`);
+                }}
+              >
+                <ArrowBackIcon />
+              </SoftButton>
+              <SoftTypography variant="h3">
+                {t("UpdateTacticBoard:titel")}
+              </SoftTypography>
+            </Stack>
 
             <div
               style={{
                 display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
               }}
             >
               <Grid container spacing={2} ref={refFullScreenContainer}>
-                <Grid item xs={9}>
+                <Grid item xs={10}>
                   <TacticsBoardToolBar
                     editMode={editMode}
                     setEditMode={setEditMode}
@@ -183,8 +195,10 @@ const UpdateTacticBoard = (): JSX.Element => {
                     disabled={isTacticBoardLoading}
                   />
                 </Grid>
-                <Grid item xs={3}>
-                  <SoftButton onClick={handleFullScreen}>FullScreen</SoftButton>
+                <Grid item xs={2}>
+                  <SoftButton iconOnly={true} onClick={handleFullScreen}>
+                    <FullscreenIcon />
+                  </SoftButton>
                 </Grid>
                 <Grid
                   item

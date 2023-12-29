@@ -1,17 +1,12 @@
 import "./translations";
 import { useFabricJs } from "../FabricJsContext";
 import { useState } from "react";
-import { useParams } from "react-router-dom";
-import { SoftButton } from "..";
-import {
-  Switch,
-  FormControlLabel,
-  Grid,
-  Stack,
-  Pagination,
-} from "@mui/material";
-import { useNavigate } from "react-router-dom";
-import { useTranslation } from "react-i18next";
+import { Grid, Stack, Pagination, ToggleButton } from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
+import RemoveIcon from "@mui/icons-material/Remove";
+import DeleteIcon from "@mui/icons-material/Delete";
+import DrawIcon from "@mui/icons-material/Draw";
+import EditIcon from "@mui/icons-material/Edit";
 
 export type TacticsBoardToolBarProps = {
   editMode: boolean;
@@ -32,13 +27,9 @@ const TacticsBoardToolBar = ({
   currentPage,
   setMaxPages,
   maxPages,
-  onSave,
   disabled,
   onLoadPage,
 }: TacticsBoardToolBarProps): JSX.Element => {
-  const navigate = useNavigate();
-  const { t } = useTranslation("TacticsBoardToolBar");
-  const { id: tacticBoardId } = useParams();
   const { removeActiveObjects, setSelection, setDrawMode } = useFabricJs();
   const handleChange = (_: React.ChangeEvent<unknown>, value: number) => {
     setPage(value);
@@ -47,64 +38,49 @@ const TacticsBoardToolBar = ({
   const [drawingEnabled, enableDrawing] = useState<boolean>(false);
   return (
     <div>
-      <Grid container spacing={2}>
+      <Grid container spacing={2} alignItems="center">
+        <Grid item xs={1}></Grid>
         <Grid item xs={4}>
-          <SoftButton
+          <ToggleButton
+            value="edit"
+            selected={editMode}
             disabled={disabled}
-            sx={{ m: 1 }}
-            onClick={() => {
-              onSave();
-              navigate(`/tacticboards/${tacticBoardId}/update`);
+            onChange={() => {
+              setEditMode(!editMode);
+              setSelection(!editMode);
+              if (!editMode == false) {
+                enableDrawing(false);
+                setDrawMode(false);
+              }
             }}
           >
-            {t("TacticsBoardToolBar:backBtn")}
-          </SoftButton>
-          <SoftButton
+            <EditIcon fontSize="medium" />
+          </ToggleButton>
+          <ToggleButton
+            value="delete"
             disabled={disabled}
-            sx={{ m: 1 }}
             onClick={() => {
               removeActiveObjects();
             }}
           >
-            {t("TacticsBoardToolBar:removeBtn")}
-          </SoftButton>
+            <DeleteIcon fontSize="medium" />
+          </ToggleButton>
+          <ToggleButton
+            value="drawing"
+            selected={drawingEnabled}
+            disabled={!editMode || disabled}
+            onChange={() => {
+              setDrawMode(!drawingEnabled);
+              enableDrawing(!drawingEnabled);
+            }}
+          >
+            <DrawIcon fontSize="medium" />
+          </ToggleButton>
         </Grid>
-        <Grid item xs={2}>
-          <FormControlLabel
-            control={
-              <Switch
-                defaultChecked
-                disabled={disabled}
-                onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                  setEditMode(event.target.checked);
-                  setSelection(event.target.checked);
-                  if (event.target.checked == false) {
-                    enableDrawing(false);
-                    setDrawMode(false);
-                  }
-                }}
-              />
-            }
-            label={t("TacticsBoardToolBar:editMode")}
-          />
-          <FormControlLabel
-            control={
-              <Switch
-                checked={drawingEnabled}
-                disabled={!editMode || disabled}
-                onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                  setDrawMode(event.target.checked);
-                  enableDrawing(event.target.checked);
-                }}
-              />
-            }
-            label={t("TacticsBoardToolBar:drawMode")}
-          />
-        </Grid>
-        <Grid item xs={6}>
+        <Grid item xs={7}>
           <Stack spacing={2} direction="row">
-            <SoftButton
-              size="small"
+            <ToggleButton
+              value="remove-page"
               disabled={disabled || maxPages == 1 || currentPage != maxPages}
               onClick={() => {
                 if (maxPages > 1) {
@@ -114,8 +90,8 @@ const TacticsBoardToolBar = ({
                 }
               }}
             >
-              -
-            </SoftButton>
+              <RemoveIcon />
+            </ToggleButton>
             <Pagination
               count={maxPages}
               siblingCount={0}
@@ -124,8 +100,8 @@ const TacticsBoardToolBar = ({
               disabled={disabled}
               onChange={handleChange}
             />
-            <SoftButton
-              size="small"
+            <ToggleButton
+              value="add-page"
               disabled={disabled || currentPage != maxPages}
               onClick={() => {
                 setMaxPages(maxPages + 1);
@@ -133,8 +109,8 @@ const TacticsBoardToolBar = ({
                 onLoadPage(currentPage + 1, true, false);
               }}
             >
-              +
-            </SoftButton>
+              <AddIcon />
+            </ToggleButton>
           </Stack>
         </Grid>
       </Grid>

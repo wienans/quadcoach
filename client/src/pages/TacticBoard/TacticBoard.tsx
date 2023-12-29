@@ -10,13 +10,17 @@ import {
   FabricJsCanvas,
   SoftButton,
 } from "../../components";
+import FullscreenIcon from "@mui/icons-material/Fullscreen";
+import EditIcon from "@mui/icons-material/Edit";
 import { useGetTacticBoardQuery } from "../../pages/tacticboardApi";
 import { useFabricJs } from "../../components/FabricJsContext/useFabricJs";
+import "../fullscreen.css";
 const TacticsBoard = (): JSX.Element => {
   const { t } = useTranslation("TacticBoard");
   const { id: tacticBoardId } = useParams();
   const { loadFromJson, setSelection } = useFabricJs();
   const navigate = useNavigate();
+  const refFullScreenContainer = useRef<HTMLDivElement>(null);
   const {
     data: tacticBoard,
     isError: isTacticBoardError,
@@ -34,6 +38,33 @@ const TacticsBoard = (): JSX.Element => {
     loadFromJson(tacticBoard.pages[page - 1]);
     setSelection(false);
   };
+
+  const handleFullScreen = () => {
+    const container = refFullScreenContainer.current;
+    const isFullscreen = document.fullscreenElement;
+    if (isFullscreen) {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      } else if (document.mozCancelFullScreen) {
+        document.mozCancelFullScreen();
+      } else if (document.webkitExitFullscreen) {
+        document.webkitExitFullscreen();
+      } else if (document.msExitFullscreen) {
+        document.msExitFullscreen();
+      }
+    } else {
+      if (container && container.requestFullscreen) {
+        container.requestFullscreen();
+      } else if (container && container.mozRequestFullScreen) {
+        container.mozRequestFullScreen();
+      } else if (container && container.webkitRequestFullscreen) {
+        container.webkitRequestFullscreen();
+      } else if (container && container.msRequestFullscreen) {
+        container.msRequestFullscreen();
+      }
+    }
+  };
+
   useEffect(() => {
     if (!isTacticBoardLoading && !isTacticBoardError && tacticBoard) {
       loadFromJson(tacticBoard.pages[0]);
@@ -78,7 +109,7 @@ const TacticsBoard = (): JSX.Element => {
             <Skeleton variant="rectangular" width={"100%"} height={100} />
           )}
           {!isTacticBoardError && !isTacticBoardLoading && (
-            <Grid container spacing={2}>
+            <Grid container spacing={2} ref={refFullScreenContainer}>
               <Grid
                 item
                 xs={12}
@@ -101,15 +132,21 @@ const TacticsBoard = (): JSX.Element => {
                 </Grid>
                 <Grid
                   item
-                  xs={6}
+                  xs={4}
                   style={{ display: "flex", justifyContent: "center" }}
                 >
                   <SoftButton
+                    iconOnly={true}
                     onClick={() => {
                       navigate(`/tacticboards/${tacticBoardId}/update`);
                     }}
                   >
-                    {t("TacticBoard:editBtn")}
+                    <EditIcon />
+                  </SoftButton>
+                </Grid>
+                <Grid item xs={2}>
+                  <SoftButton iconOnly={true} onClick={handleFullScreen}>
+                    <FullscreenIcon />
                   </SoftButton>
                 </Grid>
               </Grid>
