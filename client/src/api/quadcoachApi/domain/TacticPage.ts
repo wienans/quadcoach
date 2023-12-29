@@ -24,12 +24,19 @@ type TacticsObject = {
   scaleY?: number;
   angle?: number;
   opacity?: number;
+  objects?: TacticsObject[];
   visible?: boolean;
   backgroundColor?: string;
   radius?: number;
   startAngle?: number;
   endAngle?: number;
   path?: [[string | number]];
+  text?: string;
+  originX?: string;
+  originY?: string;
+  fontFamily?: string;
+  fontSize?: number;
+  textAlign?: string;
 };
 
 type TacticPage = {

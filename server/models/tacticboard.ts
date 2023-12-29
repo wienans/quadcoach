@@ -20,12 +20,19 @@ interface IObject {
   scaleY?: number;
   angle?: number;
   opacity?: number;
+  objects?: Types.Array<IObject>;
   visible?: boolean;
   backgroundColor?: string;
   radius?: number;
   startAngle?: number;
   endAngle?: number;
   path?: Types.Array<Types.Array<string | number>>;
+  text?: string;
+  originX?: string;
+  originY?: string;
+  fontFamily?: string;
+  fontSize?: number;
+  textAlign?: string;
 }
 interface IBackgroundImage {
   type: string;
@@ -109,6 +116,9 @@ const objectSchema = new Schema<IObject>({
   opacity: {
     type: Number,
   },
+  objects: {
+    type: [],
+  },
   visible: {
     type: Boolean,
   },
@@ -126,6 +136,24 @@ const objectSchema = new Schema<IObject>({
   },
   path: {
     type: [[]],
+  },
+  text: {
+    type: String,
+  },
+  originX: {
+    type: String,
+  },
+  originY: {
+    type: String,
+  },
+  fontFamily: {
+    type: String,
+  },
+  fontSize: {
+    type: Number,
+  },
+  textAlign: {
+    type: String,
   },
 });
 const backImgSchema = new Schema<IBackgroundImage>({

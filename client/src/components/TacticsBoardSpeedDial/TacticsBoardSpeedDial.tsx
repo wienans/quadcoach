@@ -2,6 +2,7 @@ import { useFabricJs } from "../FabricJsContext";
 import { SpeedDial, SpeedDialAction } from "@mui/material";
 import { fabric } from "fabric";
 import { v4 as uuidv4 } from "uuid";
+import { useState } from "react";
 
 export type TacticsBoardSpeedDialProps = {
   teamB: boolean;
@@ -13,7 +14,8 @@ const TacticsBoardSpeedDial = ({
   teamB,
   editMode,
 }: TacticsBoardSpeedDialProps): JSX.Element => {
-  const { addObject } = useFabricJs();
+  const { addObject, getAllObjectsJson } = useFabricJs();
+  const [playerCount, setPlayerCount] = useState<number>(1);
   const handleAddPlayer = (headbandColor: string) => {
     const circle = new fabric.Circle({
       radius: 15,
@@ -22,10 +24,25 @@ const TacticsBoardSpeedDial = ({
       stroke: headbandColor, // Set the color of the stroke
       strokeWidth: 3, // Set the width of the stroke
       fill: teamB ? colorTeamB : colorTeamA,
-      hasControls: false, // Disable resizing handles
       uuid: uuidv4(),
     });
-    addObject(circle);
+    const text = new fabric.Text(playerCount.toString(), {
+      left: teamB ? 1220 - 250 - 30 + 16 : 250 + 16,
+      top: 640 + 16,
+      fontFamily: "Arial",
+      fontSize: 20,
+      textAlign: "center",
+      originX: "center",
+      originY: "center",
+      uuid: uuidv4(),
+    });
+    const group = new fabric.Group([circle, text], {
+      uuid: uuidv4(),
+      hasControls: false, // Disable resizing handles
+    });
+    setPlayerCount(playerCount + 1);
+    addObject(group);
+    getAllObjectsJson();
   };
   const actions = [
     {
