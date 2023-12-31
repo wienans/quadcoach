@@ -27,7 +27,13 @@ const UpdateTacticBoard = (): JSX.Element => {
   const { t } = useTranslation("UpdateTacticBoard");
   const navigate = useNavigate();
   const { id: tacticBoardId } = useParams();
-  const { getAllObjectsJson, loadFromJson, setControls } = useFabricJs();
+  const {
+    getAllObjectsJson,
+    loadFromJson,
+    setControls,
+    getActiveObjects,
+    removeActiveObjects,
+  } = useFabricJs();
   const {
     data: tacticBoard,
     isError: isTacticBoardError,
@@ -162,6 +168,36 @@ const UpdateTacticBoard = (): JSX.Element => {
       }
     }
   };
+  const onDelete = () => {
+    getActiveObjects().forEach((obj) => {
+      if (obj._objects) {
+        let teamA = false;
+        let number = -1;
+        obj._objects.forEach((obj) => {
+          if (obj.type == "text") {
+            number = parseInt(obj.text);
+          }
+          if (obj.type == "circle") {
+            if (obj.fill == "purple") {
+              teamA = true;
+            }
+          }
+        });
+        if (teamA) {
+          setPlayerANumbers(playerANumbers.filter((item) => item !== number));
+        } else {
+          setPlayerBNumbers(playerBNumbers.filter((item) => item !== number));
+        }
+      }
+    });
+    removeActiveObjects();
+  };
+  const handleKeyDown = (event: React.KeyboardEvent) => {
+    console.log(event.key);
+    if (event.key === "Delete" || event.key === "Backspace") {
+      onDelete();
+    }
+  };
 
   const onSave = () => {
     if (!tacticBoard) return;
@@ -175,7 +211,7 @@ const UpdateTacticBoard = (): JSX.Element => {
   };
 
   return (
-    <div>
+    <div onKeyDown={handleKeyDown} tabIndex={0}>
       {isTacticBoardError ? (
         <Grid item xs={12} justifyContent="center" display="flex">
           <Alert color="error">{"Error"}</Alert>
@@ -222,10 +258,7 @@ const UpdateTacticBoard = (): JSX.Element => {
                     onSave={onSave}
                     onLoadPage={onLoadPage}
                     disabled={isTacticBoardLoading}
-                    setPlayerANumbers={setPlayerANumbers}
-                    setPlayerBNumbers={setPlayerBNumbers}
-                    playerANumbers={playerANumbers}
-                    playerBNumbers={playerBNumbers}
+                    onDelete={onDelete}
                   />
                 </Grid>
                 <Grid item xs={2}>
