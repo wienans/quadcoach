@@ -1,7 +1,7 @@
 import "./translations";
 import { useNavigate } from "react-router-dom";
 import { useParams } from "react-router-dom";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Alert, Grid, Pagination, Skeleton } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import {
@@ -14,6 +14,8 @@ import FullscreenIcon from "@mui/icons-material/Fullscreen";
 import EditIcon from "@mui/icons-material/Edit";
 import { useGetTacticBoardQuery } from "../../pages/tacticboardApi";
 import { useFabricJs } from "../../components/FabricJsContext/useFabricJs";
+import PlayCircleIcon from "@mui/icons-material/PlayCircle";
+import PauseCircleIcon from "@mui/icons-material/PauseCircle";
 import "../fullscreen.css";
 const TacticsBoard = (): JSX.Element => {
   const { t } = useTranslation("TacticBoard");
@@ -31,13 +33,17 @@ const TacticsBoard = (): JSX.Element => {
 
   const refContainer = useRef<HTMLDivElement>(null);
   const [currentPage, setPage] = useState<number>(1);
+  const [isAnimating, setIsAnimating] = useState<boolean>(false);
 
-  const onLoadPage = (page: number) => {
-    if (!tacticBoard) return;
-    // Show the new Page
-    loadFromJson(tacticBoard.pages[page - 1]);
-    setSelection(false);
-  };
+  const onLoadPage = useCallback(
+    (page: number) => {
+      if (!tacticBoard) return;
+      // Show the new Page
+      loadFromJson(tacticBoard.pages[page - 1]);
+      setSelection(false);
+    },
+    [loadFromJson, setSelection, tacticBoard],
+  );
 
   const handleFullScreen = () => {
     const container = refFullScreenContainer.current;
@@ -77,6 +83,23 @@ const TacticsBoard = (): JSX.Element => {
     isTacticBoardError,
     isTacticBoardLoading,
   ]);
+
+  useEffect(() => {
+    let interval: number;
+    if (isAnimating && tacticBoard) {
+      // Start the animation only if isAnimating is true
+      interval = setInterval(() => {
+        setPage((prevPage) => {
+          const newPage = (prevPage % tacticBoard.pages.length) + 1;
+          onLoadPage(newPage);
+          return newPage;
+        });
+      }, 1000);
+    }
+
+    // Clean up the interval on component unmount or when the last page is reached
+    return () => clearInterval(interval);
+  }, [isAnimating, onLoadPage, tacticBoard]);
   return (
     <div>
       <SoftBox
@@ -142,6 +165,16 @@ const TacticsBoard = (): JSX.Element => {
                     }}
                   >
                     <EditIcon />
+                  </SoftButton>
+                </Grid>
+                <Grid item xs={2}>
+                  <SoftButton
+                    iconOnly={true}
+                    onClick={() => {
+                      setIsAnimating(!isAnimating);
+                    }}
+                  >
+                    {isAnimating ? <PauseCircleIcon /> : <PlayCircleIcon />}
                   </SoftButton>
                 </Grid>
                 <Grid item xs={2}>
