@@ -55,6 +55,13 @@ const FabricJsCanvas = ({
           calcHeight = height;
           calcWidth = calculatedWidth;
         }
+        // Make the numbers Even
+        if (calcWidth % 2) {
+          calcWidth = calcWidth + 1;
+        }
+        if (calcHeight % 2) {
+          calcHeight = calcHeight + 1;
+        }
         const dim = {
           width: calcWidth,
           height: calcHeight,
