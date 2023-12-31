@@ -8,6 +8,7 @@ export interface FabricJsContextProps {
   addObject: (object: fabric.Object) => void;
   removeActiveObjects: () => void;
   removeObject: (object: fabric.Object) => void;
+  getAllObjects: () => fabric.Object[];
   getAllObjectsJson: () => object;
   getActiveObjects: () => fabric.Object[];
   setSelection: (selection: boolean) => void;
@@ -54,6 +55,13 @@ const FabricJsContextProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const getActiveObjects = useCallback(() => {
     if (canvas) {
       return canvas.getActiveObjects();
+    }
+    return [];
+  }, [canvas]);
+
+  const getAllObjects = useCallback(() => {
+    if (canvas) {
+      return canvas.getObjects();
     }
     return [];
   }, [canvas]);
@@ -144,6 +152,7 @@ const FabricJsContextProvider: FC<{ children: ReactNode }> = ({ children }) => {
         canvas,
         setCanvas,
         addObject,
+        getAllObjects,
         getAllObjectsJson,
         getActiveObjects,
         removeObject,

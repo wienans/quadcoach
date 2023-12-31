@@ -16,11 +16,13 @@ import { useGetTacticBoardQuery } from "../../pages/tacticboardApi";
 import { useFabricJs } from "../../components/FabricJsContext/useFabricJs";
 import PlayCircleIcon from "@mui/icons-material/PlayCircle";
 import PauseCircleIcon from "@mui/icons-material/PauseCircle";
+import MovieIcon from "@mui/icons-material/Movie";
 import "../fullscreen.css";
+let mediaRecorder: MediaRecorder;
 const TacticsBoard = (): JSX.Element => {
   const { t } = useTranslation("TacticBoard");
   const { id: tacticBoardId } = useParams();
-  const { loadFromJson, setSelection } = useFabricJs();
+  const { canvas, loadFromJson, setSelection, getAllObjects } = useFabricJs();
   const navigate = useNavigate();
   const refFullScreenContainer = useRef<HTMLDivElement>(null);
   const {
@@ -34,6 +36,7 @@ const TacticsBoard = (): JSX.Element => {
   const refContainer = useRef<HTMLDivElement>(null);
   const [currentPage, setPage] = useState<number>(1);
   const [isAnimating, setIsAnimating] = useState<boolean>(false);
+  const [isRecording, setIsRecording] = useState<boolean>(false);
 
   const onLoadPage = useCallback(
     (page: number) => {
@@ -70,6 +73,16 @@ const TacticsBoard = (): JSX.Element => {
       }
     }
   };
+  const downloadVideo = (chunks: Blob[]) => {
+    const blob = new Blob(chunks, { type: "video/mp4" });
+    const videoURL = URL.createObjectURL(blob);
+    const tag = document.createElement("a");
+    tag.href = videoURL;
+    tag.download = tacticBoard?.name ? tacticBoard?.name : "tacticboard.mp4";
+    document.body.appendChild(tag);
+    tag.click();
+    document.body.removeChild(tag);
+  };
 
   useEffect(() => {
     if (!isTacticBoardLoading && !isTacticBoardError && tacticBoard) {
@@ -91,15 +104,80 @@ const TacticsBoard = (): JSX.Element => {
       interval = setInterval(() => {
         setPage((prevPage) => {
           const newPage = (prevPage % tacticBoard.pages.length) + 1;
-          onLoadPage(newPage);
+          getAllObjects().forEach((obj) => {
+            const targetObject = tacticBoard.pages[newPage - 1].objects?.find(
+              (nextObject) => nextObject.uuid == obj.uuid,
+            );
+            if (targetObject && canvas) {
+              obj.animate("left", targetObject.left, {
+                onChange: canvas.renderAll.bind(canvas),
+                duration: 1000,
+                onComplete: () => {
+                  onLoadPage(newPage);
+                },
+              });
+              obj.animate("top", targetObject.top, {
+                onChange: canvas.renderAll.bind(canvas),
+                duration: 1000,
+                onComplete: () => {
+                  onLoadPage(newPage);
+                },
+              });
+            }
+          });
           return newPage;
         });
-      }, 1000);
+      }, 2000);
     }
 
     // Clean up the interval on component unmount or when the last page is reached
     return () => clearInterval(interval);
-  }, [isAnimating, onLoadPage, tacticBoard]);
+  }, [isAnimating, onLoadPage, tacticBoard, getAllObjects, canvas]);
+
+  useEffect(() => {
+    let interval: number;
+    if (isRecording && tacticBoard) {
+      // Start the animation only if isAnimating is true
+      interval = setInterval(() => {
+        setPage((prevPage) => {
+          const newPage = (prevPage % tacticBoard.pages.length) + 1;
+          if (prevPage == tacticBoard.pages.length && newPage == 1) {
+            if (mediaRecorder) {
+              mediaRecorder.stop();
+            }
+            setIsRecording(false);
+          }
+          getAllObjects().forEach((obj) => {
+            const targetObject = tacticBoard.pages[newPage - 1].objects?.find(
+              (nextObject) => nextObject.uuid == obj.uuid,
+            );
+            if (targetObject && canvas) {
+              obj.animate("left", targetObject.left, {
+                onChange: canvas.renderAll.bind(canvas),
+                duration: 1000,
+                onComplete: () => {
+                  onLoadPage(newPage);
+                },
+              });
+              obj.animate("top", targetObject.top, {
+                onChange: canvas.renderAll.bind(canvas),
+                duration: 1000,
+                onComplete: () => {
+                  onLoadPage(newPage);
+                },
+              });
+            }
+          });
+
+          return newPage;
+        });
+      }, 2000);
+    }
+
+    // Clean up the interval on component unmount or when the last page is reached
+    return () => clearInterval(interval);
+  }, [isRecording, onLoadPage, tacticBoard, getAllObjects, canvas]);
+
   return (
     <div>
       <SoftBox
@@ -146,6 +224,7 @@ const TacticsBoard = (): JSX.Element => {
                   <Pagination
                     count={tacticBoard?.pages.length}
                     siblingCount={0}
+                    disabled={isAnimating || isRecording}
                     page={currentPage}
                     onChange={(_, value: number) => {
                       onLoadPage(value);
@@ -160,6 +239,7 @@ const TacticsBoard = (): JSX.Element => {
                 >
                   <SoftButton
                     iconOnly={true}
+                    disabled={isAnimating || isRecording}
                     onClick={() => {
                       navigate(`/tacticboards/${tacticBoardId}/update`);
                     }}
@@ -170,6 +250,7 @@ const TacticsBoard = (): JSX.Element => {
                 <Grid item xs={2}>
                   <SoftButton
                     iconOnly={true}
+                    disabled={isRecording}
                     onClick={() => {
                       setIsAnimating(!isAnimating);
                     }}
@@ -178,7 +259,39 @@ const TacticsBoard = (): JSX.Element => {
                   </SoftButton>
                 </Grid>
                 <Grid item xs={2}>
-                  <SoftButton iconOnly={true} onClick={handleFullScreen}>
+                  <SoftButton
+                    iconOnly={true}
+                    disabled={isAnimating || isRecording}
+                    onClick={() => {
+                      const canvasStream =
+                        canvas?.lowerCanvasEl.captureStream(60);
+                      mediaRecorder = new MediaRecorder(canvasStream, {
+                        mimeType: "video/webm",
+                      });
+                      let chunks: Blob[] = [];
+
+                      mediaRecorder.onstop = function () {
+                        downloadVideo(chunks);
+                        console.log(chunks);
+                        chunks = [];
+                      };
+
+                      mediaRecorder.ondataavailable = function (e) {
+                        chunks.push(e.data);
+                      };
+                      mediaRecorder.start();
+                      setIsRecording(!isRecording);
+                    }}
+                  >
+                    <MovieIcon />
+                  </SoftButton>
+                </Grid>
+                <Grid item xs={2}>
+                  <SoftButton
+                    iconOnly={true}
+                    disabled={isAnimating || isRecording}
+                    onClick={handleFullScreen}
+                  >
                     <FullscreenIcon />
                   </SoftButton>
                 </Grid>
