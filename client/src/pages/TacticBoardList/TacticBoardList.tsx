@@ -118,7 +118,6 @@ const TacticBoardList = () => {
 
   const handleAddTacticBoard = (name: string | undefined) => {
     if (name) {
-      console.log(name);
       const emptyPage: TacticPage = {
         objects: undefined,
         backgroundImage: {
@@ -137,7 +136,6 @@ const TacticBoardList = () => {
       addTacticBoard(newTacticBoard).then(
         (result: { data: TacticBoard } | { error: unknown }) => {
           if (!result.data) return;
-          console.log(result.data._id);
           navigate(`/tacticboards/${result.data._id}/update`);
         },
       );

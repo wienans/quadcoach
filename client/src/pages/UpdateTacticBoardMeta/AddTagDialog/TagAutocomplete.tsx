@@ -16,7 +16,6 @@ const TagAutocomplete = ({
   const [searchValue, setSearchValue] = useState<string>("");
   const { data: tags, isLoading: isTagsLoading } =
     useGetAllTacticBoardTagsQuery(searchValue !== "" ? searchValue : undefined);
-  console.log(tags);
   return (
     <Autocomplete
       id="related-text"

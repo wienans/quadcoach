@@ -93,7 +93,6 @@ const UpdateTacticBoardMeta = (): JSX.Element => {
     onSubmit: (values) => {
       if (tacticBoardId) {
         const { name, isPrivate, tags, pages } = values;
-        console.log(pages);
         const updatedTacticBoard: TacticBoardPartialId = {
           name,
           isPrivate,
@@ -251,8 +250,6 @@ const UpdateTacticBoardMeta = (): JSX.Element => {
                         "UpdateTacticBoardMeta:info.backgroundImage.label",
                       )}
                       onChange={(event: SelectChangeEvent) => {
-                        console.log(formik.values.pages[0].backgroundImage.src);
-
                         const updatedPages = cloneDeep(formik.values.pages);
                         updatedPages.forEach((page) => {
                           page.backgroundImage.src = event.target.value;
@@ -261,8 +258,6 @@ const UpdateTacticBoardMeta = (): JSX.Element => {
                           ...formik.values,
                           pages: updatedPages,
                         });
-
-                        console.log(formik.values.pages[0].backgroundImage.src);
                       }}
                     >
                       <MenuItem value={"/full-court.svg"}>Full Court</MenuItem>

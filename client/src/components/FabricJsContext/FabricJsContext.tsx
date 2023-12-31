@@ -68,8 +68,7 @@ const FabricJsContextProvider: FC<{ children: ReactNode }> = ({ children }) => {
 
   const getAllObjectsJson = useCallback(() => {
     if (canvas) {
-      const json = canvas.toJSON(["uuid"]) as TacticPage;
-      console.log(json);
+      const json = canvas.toJSON(["uuid"]) as unknown as TacticPage;
       if (json.backgroundImage) {
         json.backgroundImage.src = new URL(json.backgroundImage.src).pathname;
       }
@@ -106,7 +105,7 @@ const FabricJsContextProvider: FC<{ children: ReactNode }> = ({ children }) => {
             const addObj = new fabric.Rect(obj);
             canvas.add(addObj);
           } else if (obj.type == "path") {
-            const addObj = new fabric.Path(obj.path?.toString(), obj);
+            const addObj = new fabric.Path(obj.path?.toString(), obj as object);
             canvas.add(addObj);
           } else if (obj.type == "group") {
             const objects: fabric.Object[] = [];
@@ -115,8 +114,10 @@ const FabricJsContextProvider: FC<{ children: ReactNode }> = ({ children }) => {
                 const addObj = new fabric.Circle(obj);
                 objects.push(addObj);
               } else if (obj.type == "text") {
-                const addObj = new fabric.Text(obj.text, obj);
-                objects.push(addObj);
+                if (obj.text) {
+                  const addObj = new fabric.Text(obj.text, obj);
+                  objects.push(addObj);
+                }
               }
             });
             const addObj = new fabric.Group(objects, obj);

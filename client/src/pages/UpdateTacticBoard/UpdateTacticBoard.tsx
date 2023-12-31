@@ -64,7 +64,6 @@ const UpdateTacticBoard = (): JSX.Element => {
       // API is finished loading, due to sending data to Server every time the Page is switched
       // we need to stop the this method by counting firstAPICall up and checking the amount on
       // load of the page API is called twice.
-      console.log("API finished");
       setFirstAPICall(firstAPICall + 1);
       setMaxPages(tacticBoard.pages.length);
       loadFromJson(tacticBoard.pages[0]);
@@ -90,8 +89,6 @@ const UpdateTacticBoard = (): JSX.Element => {
     newPage?: boolean,
     removePage?: boolean,
   ) => {
-    console.log(page);
-    console.log(currentPage);
     if (newPage && removePage) return;
     if (!tacticBoard) return;
     const updatedTacticBoard: TacticBoard = cloneDeep(tacticBoard);
@@ -168,7 +165,6 @@ const UpdateTacticBoard = (): JSX.Element => {
 
   const onSave = () => {
     if (!tacticBoard) return;
-    console.log(getAllObjectsJson());
     const updatedTacticBoard: TacticBoard = cloneDeep(tacticBoard);
     updatedTacticBoard.pages[currentPage - 1] = {
       ...getAllObjectsJson(),

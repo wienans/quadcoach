@@ -2,7 +2,6 @@ import { useFabricJs } from "../FabricJsContext";
 import { SpeedDial, SpeedDialAction } from "@mui/material";
 import { fabric } from "fabric";
 import { v4 as uuidv4 } from "uuid";
-import { useState } from "react";
 import { cloneDeep } from "lodash";
 
 export type TacticsBoardSpeedDialProps = {

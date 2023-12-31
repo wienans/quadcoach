@@ -272,7 +272,6 @@ const TacticsBoard = (): JSX.Element => {
 
                       mediaRecorder.onstop = function () {
                         downloadVideo(chunks);
-                        console.log(chunks);
                         chunks = [];
                       };
 
