@@ -122,7 +122,7 @@ export const exerciseApiSlice = quadcoachApi.injectEndpoints({
         const urlParamsString = urlParams.toString();
 
         return {
-          url: `/api/tags${
+          url: `/api/tags/exercises${
             urlParamsString === "" ? "" : `?${urlParamsString}`
           }`,
           method: "get",

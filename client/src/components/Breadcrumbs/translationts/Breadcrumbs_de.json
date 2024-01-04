@@ -1,0 +1,12 @@
+{
+  "dashboard": "Dashboard",
+  "exercises": "Übungen",
+  "addExercise": "Übung hinzufügen",
+  "exercise": "Übung {{exerciseName}}",
+  "updateExercise": "Übung bearbeiten",
+  "tacticBoards" : "Taktik Tafeln",
+  "updateTacticBoard" : "Taktik Tafel bearbeiten",
+  "addTacticBoard" : "Taktik Tafel hinzufügen",
+  "tacticBoard" : "Taktik Tafel",
+  "componentsTest": "Komponententest"
+}

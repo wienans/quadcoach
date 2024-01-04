@@ -13,8 +13,7 @@ import {
   ToggleButtonGroup,
   useMediaQuery,
 } from "@mui/material";
-import { useLocation, useNavigate } from "react-router-dom";
-import { useUpdateBreadcrumbs } from "../../components/Layout/hooks";
+import { useNavigate } from "react-router-dom";
 import {
   SoftTypography,
   SoftInput,
@@ -53,7 +52,6 @@ const defaultExerciseFilter: ExerciseFilter = {
 
 const ExerciseList = () => {
   const { t } = useTranslation("ExerciseList");
-  const location = useLocation().pathname;
   const navigate = useNavigate();
   const isUpMd = useMediaQuery((theme: Theme) => theme.breakpoints.up("md"));
 
@@ -64,8 +62,6 @@ const ExerciseList = () => {
     if (isUpMd) return;
     setViewType(ViewType.Cards);
   }, [isUpMd]);
-
-  const isDashboard = location === "/";
 
   const [exerciseFilter, setExerciseFilter] = useState<ExerciseFilter>(
     defaultExerciseFilter,
@@ -79,13 +75,6 @@ const ExerciseList = () => {
         [exerciseFilterProperty]: event.target.value,
       });
     };
-
-  useUpdateBreadcrumbs(
-    isDashboard
-      ? t("ExerciseList:dashboardBreadcrumb")
-      : t("ExerciseList:dashboardBreadcrumb"),
-    [],
-  );
 
   const [
     getExercises,

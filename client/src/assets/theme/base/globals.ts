@@ -32,14 +32,15 @@ const globals: ComponentsOverrides<Theme>["MuiCssBaseline"] = {
     padding: 0,
   },
   "a, a:link, a:visited": {
-    textDecoration: "none !important",
+    textDecoration: "none",
   },
   "a.link, .link, a.link:link, .link:link, a.link:visited, .link:visited": {
     color: `${(dark as SimplePaletteColorOptions).main} !important`,
     transition: "color 150ms ease-in !important",
   },
-  "a.link:hover, .link:hover, a.link:focus, .link:focus": {
+  "a:hover, a.link:hover, .link:hover, a.link:focus, .link:focus": {
     color: `${(info as SimplePaletteColorOptions).main} !important`,
+    textDecoration: "underline",
   },
 };
 

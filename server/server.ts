@@ -4,6 +4,7 @@ import cors from "cors";
 
 import Exercise from "./models/exercise";
 import User from "./models/user";
+import TacticBoard from "./models/tacticboard";
 
 // Read out Port or use Default
 const PORT = process.env.PORT || 3001;
@@ -81,56 +82,72 @@ app.get("/api/exercises", async (req, res) => {
 });
 
 app.delete("/api/exercise/:id", async (req, res) => {
-  const result = await Exercise.deleteOne({ _id: req.params.id });
-  if (result) {
-    res.send(result);
+  if (mongoose.isValidObjectId(req.params.id)) {
+    const result = await Exercise.deleteOne({ _id: req.params.id });
+    if (result) {
+      res.send(result);
+    } else {
+      res.send({ result: "No Record Found" });
+    }
   } else {
     res.send({ result: "No Record Found" });
   }
 });
 
 app.get("/api/exercise/:id", async (req, res) => {
-  const result = await Exercise.findOne({ _id: req.params.id });
-  if (result) {
-    res.send(result);
+  if (mongoose.isValidObjectId(req.params.id)) {
+    const result = await Exercise.findOne({ _id: req.params.id });
+    if (result) {
+      res.send(result);
+    } else {
+      res.send({ result: "No Record Found" });
+    }
   } else {
     res.send({ result: "No Record Found" });
   }
 });
 
 app.get("/api/exercise/:id/relatedExercises", async (req, res) => {
-  const exerciseToGetRealted = await Exercise.findOne({
-    _id: req.params.id,
-  }).exec();
-  if (!exerciseToGetRealted) {
-    res.send({ result: "No Record Found" });
-    return;
-  }
+  if (mongoose.isValidObjectId(req.params.id)) {
+    const exerciseToGetRealted = await Exercise.findOne({
+      _id: req.params.id,
+    }).exec();
+    if (!exerciseToGetRealted) {
+      res.send({ result: "No Record Found" });
+      return;
+    }
 
-  if (
-    !exerciseToGetRealted.related_to ||
-    exerciseToGetRealted.related_to.length === 0
-  ) {
-    res.send([]);
-    return;
-  }
+    if (
+      !exerciseToGetRealted.related_to ||
+      exerciseToGetRealted.related_to.length === 0
+    ) {
+      res.send([]);
+      return;
+    }
 
-  const result = await Exercise.find({
-    $or: exerciseToGetRealted.related_to.map((r) => ({ _id: r._id })),
-  });
-  if (result) {
-    res.send(result);
+    const result = await Exercise.find({
+      $or: exerciseToGetRealted.related_to.map((r) => ({ _id: r._id })),
+    });
+    if (result) {
+      res.send(result);
+    } else {
+      res.send({ result: "No Record Found" });
+    }
   } else {
     res.send({ result: "No Record Found" });
   }
 });
 
 app.put("/api/exercise/:id", async (req, res) => {
-  const result = await Exercise.updateOne(
-    { _id: req.params.id },
-    { $set: req.body }
-  );
-  res.send(result);
+  if (mongoose.isValidObjectId(req.params.id)) {
+    const result = await Exercise.updateOne(
+      { _id: req.params.id },
+      { $set: req.body }
+    );
+    res.send(result);
+  } else {
+    res.send({ result: "No Record Found" });
+  }
 });
 
 app.get("/api/search/:key", async (req, res) => {
@@ -153,7 +170,7 @@ app.get("/api/search/:key", async (req, res) => {
   }
 });
 
-app.get("/api/tags", async (req, res) => {
+app.get("/api/tags/exercises", async (req, res) => {
   let queryString: string = JSON.stringify(req.query);
 
   // Rebuild querry string
@@ -193,6 +210,90 @@ app.get("/api/materials", async (req, res) => {
     let regex: RegExp = new RegExp(
       querry["materialName"]["$regex"],
       querry["materialName"]["$options"]
+    );
+    let filtered: string[] = result.filter((item) => item.match(regex));
+    res.send(filtered);
+  } else {
+    res.send(result);
+  }
+});
+
+app.post("/api/tacticboards", async (req, res) => {
+  let tacticboard = new TacticBoard(req.body);
+  const result = await tacticboard.save();
+  if (!result) {
+    console.error("Couldn't create Tacticboard");
+  }
+  res.send(result);
+});
+
+app.get("/api/tacticboards", async (req, res) => {
+  let queryString: string = JSON.stringify(req.query);
+
+  queryString = queryString.replace(
+    /\b(gte|gt|lte|lt|eq|ne|regex|options|in|nin)\b/g,
+    (match) => `$${match}`
+  );
+
+  const exercises = await TacticBoard.find(JSON.parse(queryString));
+
+  res.send(exercises);
+});
+
+app.delete("/api/tacticboards/:id", async (req, res) => {
+  if (mongoose.isValidObjectId(req.params.id)) {
+    const result = await TacticBoard.deleteOne({ _id: req.params.id });
+    if (result) {
+      res.send(result);
+    } else {
+      res.send({ result: "No Record Found" });
+    }
+  } else {
+    res.send({ result: "No Record Found" });
+  }
+});
+
+app.put("/api/tacticboards/:id", async (req, res) => {
+  if (mongoose.isValidObjectId(req.params.id)) {
+    const result = await TacticBoard.updateOne(
+      { _id: req.params.id },
+      { $set: req.body }
+    );
+    res.send(result);
+  } else {
+    res.send({ result: "No Record Found" });
+  }
+});
+
+app.get("/api/tacticboards/:id", async (req, res) => {
+  if (mongoose.isValidObjectId(req.params.id)) {
+    const result = await TacticBoard.findOne({ _id: req.params.id });
+    if (result) {
+      res.send(result);
+    } else {
+      res.send({ result: "No Record Found" });
+    }
+  } else {
+    res.send({ result: "No Record Found" });
+  }
+});
+
+app.get("/api/tags/tacticboards", async (req, res) => {
+  let queryString: string = JSON.stringify(req.query);
+  // Rebuild querry string
+  queryString = queryString.replace(
+    /\b(gte|gt|lte|lt|eq|ne|regex|options|in|nin)\b/g,
+    (match) => `$${match}`
+  );
+  let querry = JSON.parse(queryString);
+  // gets all distinct values of tags
+  const result: string[] = await TacticBoard.distinct("tags");
+
+  if (querry["tagName"] != undefined) {
+    // Apply Regex, "i" for case insensitive
+    let regex: RegExp = new RegExp(
+      querry["tagName"]["$regex"],
+      querry["tagName"]["$options"]
     );
     let filtered: string[] = result.filter((item) => item.match(regex));
     res.send(filtered);

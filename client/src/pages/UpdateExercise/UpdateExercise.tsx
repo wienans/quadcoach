@@ -1,9 +1,8 @@
 import "./translations";
 import { useParams, useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { Alert, Grid } from "@mui/material";
 import { SoftButton, SoftTypography } from "../../components";
-import { useUpdateBreadcrumbs } from "../../components/Layout/hooks";
 import ExerciseEditForm from "../../components/ExerciseEditForm";
 import { ExerciseWithOutId } from "../../api/quadcoachApi/domain";
 import {
@@ -15,21 +14,10 @@ import {
 import { ExerciseExtendWithRelatedExercises } from "../../components/ExerciseEditForm/ExerciseEditForm";
 import { useTranslation } from "react-i18next";
 
-const defaultEBreadcrumbRoutes = [{ title: "Exercises", to: "exercises" }];
-
 const UpdateExercise = () => {
   const { t } = useTranslation("UpdateExercise");
   const { id: exerciseId } = useParams();
   const navigate = useNavigate();
-
-  const [breadcrumbRoutes, setBreadcrumbRoutes] = useState([
-    ...defaultEBreadcrumbRoutes,
-  ]);
-
-  useUpdateBreadcrumbs(
-    t("UpdateExercise:updateExerciseBreadcrumb"),
-    breadcrumbRoutes,
-  );
 
   const {
     data: exercise,
@@ -45,15 +33,6 @@ const UpdateExercise = () => {
   } = useGetRelatedExercisesQuery(exerciseId || "", {
     skip: exerciseId == null,
   });
-
-  useEffect(() => {
-    const routes = [...defaultEBreadcrumbRoutes];
-    if (exercise) {
-      routes.push({ title: exercise.name, to: `exercises/${exercise._id}` });
-    }
-
-    setBreadcrumbRoutes(routes);
-  }, [exercise]);
 
   const [
     updateExercise,

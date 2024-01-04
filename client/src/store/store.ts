@@ -3,7 +3,7 @@ import logger from "redux-logger";
 import { LayoutReducer } from "../components/Layout";
 import { quadcoachApi } from "../api";
 
-const middleware = [logger, quadcoachApi.middleware];
+const middleware = [quadcoachApi.middleware];
 
 export const store = configureStore({
   reducer: {

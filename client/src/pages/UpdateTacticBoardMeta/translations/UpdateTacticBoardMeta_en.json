@@ -1,0 +1,28 @@
+{
+    "title": "Update Tactic Board Meta Data",
+    "info": {
+        "title": "Meta Data",
+        "name": {
+            "label": "Name",
+            "placeholder": "Name",
+            "missing": "Please enter a name"
+        },
+        "isPrivate": {
+            "label": "Private Tactic Board"
+        },
+        "backgroundImage": {
+            "label": "Tactic Board Background"
+        },
+        "tags": {
+            "label": "Tags"
+        }
+        
+    },
+    "board":{
+        "title": "Preview"
+    },
+    "editBoardBtn": "Edit Tactic Board",
+    "updateBoardBtn": "Save & Exit Tactic Board",
+    "deleteBoardBtn": "Delete Tactic Board"
+}
+  
