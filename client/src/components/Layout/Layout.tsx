@@ -7,7 +7,7 @@ import HomeIcon from "@mui/icons-material/Home";
 import PlaylistAddIcon from "@mui/icons-material/PlaylistAdd";
 import ListIcon from "@mui/icons-material/List";
 import { DashboardLayout } from "../LayoutContainers";
-import DashboardNavbar from "../LayoutContainers/DashboardNavbar";
+import DashboardNavbar from "../LayoutContainers/DashboardLayout/DashboardNavbar";
 import { Box } from "@mui/material";
 import GitHubIcon from "@mui/icons-material/GitHub";
 
@@ -60,8 +60,6 @@ const Layout = () => {
     <>
       <Sidenav
         color="info"
-        brand={brand}
-        brandName="QuadCoach"
         routes={sidebarNavRoutes}
       />
       <DashboardLayout>

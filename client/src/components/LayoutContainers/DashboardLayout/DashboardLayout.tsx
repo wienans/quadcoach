@@ -17,7 +17,7 @@ Coded by www.creative-tim.com
 import PropTypes from "prop-types";
 
 // Soft UI Dashboard React components
-import SoftBox from "../SoftBox";
+import SoftBox from "../../SoftBox";
 import { ReactNode } from "react";
 
 // Soft UI Dashboard React context
@@ -33,9 +33,9 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
       sx={{
         p: 3,
         position: "relative",
-        display: "flex",
-        flexDirection: "column",
-        height: "100vh",
+        // display: "flex",
+        // flexDirection: "column",
+        // height: "100vh",
       }}
     >
       {children}

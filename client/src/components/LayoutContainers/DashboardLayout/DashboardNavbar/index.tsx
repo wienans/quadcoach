@@ -24,7 +24,7 @@ import Menu from "@mui/material/Menu";
 import Icon from "@mui/material/Icon";
 
 // Soft UI Dashboard React components
-import { SoftBox, Breadcrumbs } from "../..";
+import { SoftBox, Breadcrumbs, SoftTypography } from "../../..";
 
 // Custom styles for DashboardNavbar
 import { navbar, navbarContainer, navbarRow } from "./styles";
@@ -33,27 +33,14 @@ import TranslateIcon from "@mui/icons-material/Translate";
 
 // import AuthApi from "../../../api/auth";
 import { createSelector } from "@reduxjs/toolkit";
-import { setMiniSideNav, setTransparentNavbar } from "../../Layout/layoutSlice";
-import { useAppDispatch, useAppSelector } from "../../../store/hooks";
-import { RootState } from "../../../store/store";
-import { MenuItem } from "@mui/material";
-import { useTranslation } from "react-i18next";
-
-type Language = {
-  code: string;
-  label: string;
-};
-
-const languages: Language[] = [
-  {
-    code: "de",
-    label: "Deutsch",
-  },
-  {
-    code: "en",
-    label: "English",
-  },
-];
+import { setTransparentNavbar } from "../../../Layout/layoutSlice";
+import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
+import { RootState } from "../../../../store/store";
+import Logo from "../../../../assets/images/firstLogo.svg";
+import NavbarMainControls from "../../../NavbarMainControls";
+import QuickNavigation from "./QuickNavigation";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import BackButton from "./BackButton";
 
 // create a selector when selecting two or properties at once for better performance
 const selectMiniSidenav = (state: RootState) => state.layout.miniSidenav;
@@ -82,21 +69,12 @@ export type DashboardNavbarProps = {
 
 const DashboardNavbar = ({ absolute, light }: DashboardNavbarProps) => {
   const dispatch = useAppDispatch();
-  const { i18n } = useTranslation();
   const [navbarType, setNavbarType] = useState<
     "fixed" | "absolute" | "sticky" | "static" | "relative" | undefined
   >();
-  const { miniSidenav, transparentNavbar, fixedNavbar } = useAppSelector(
+  const { transparentNavbar, fixedNavbar } = useAppSelector(
     dashboardNavbarSelector,
   );
-
-  const [openLangugageMenu, setOpenLanguageMenu] = useState<
-    HTMLButtonElement | undefined
-  >();
-
-  const currentLanguageCode =
-    languages.find((language) => language.code === i18n.language)?.code ??
-    languages[0].code;
 
   useEffect(() => {
     // Setting the navbar type
@@ -128,47 +106,6 @@ const DashboardNavbar = ({ absolute, light }: DashboardNavbarProps) => {
     return () => window.removeEventListener("scroll", handleTransparentNavbar);
   }, [dispatch, fixedNavbar]);
 
-  const handleMiniSidenav = () => {
-    dispatch(setMiniSideNav(!miniSidenav));
-  };
-  // const handleConfiguratorOpen = () => { dispatch(setOpenSettingsMenu(!openSettingsMenu)) }
-  const handleOpenLanguageMenu = (event: MouseEvent<HTMLButtonElement>) =>
-    setOpenLanguageMenu(event.currentTarget);
-  const handleCloseLanguageMenu = () => {
-    setOpenLanguageMenu(undefined);
-  };
-
-  const handleLanguageMenuItemClicked = (newLanguageCode: string) => () => {
-    i18n.changeLanguage(newLanguageCode);
-    handleCloseLanguageMenu();
-  };
-
-  // Render the notifications menu
-  const renderLanguageMenu = () => (
-    <Menu
-      anchorEl={openLangugageMenu}
-      anchorReference={undefined}
-      anchorOrigin={{
-        vertical: "bottom",
-        horizontal: "left",
-      }}
-      open={Boolean(openLangugageMenu)}
-      onClose={handleCloseLanguageMenu}
-      sx={{ mt: 2 }}
-    >
-      {languages.map((language) => (
-        <MenuItem
-          key={language.code}
-          selected={language.code === currentLanguageCode}
-          disabled={language.code === currentLanguageCode}
-          onClick={handleLanguageMenuItemClicked(language.code)}
-        >
-          {language.label}
-        </MenuItem>
-      ))}
-    </Menu>
-  );
-
   return (
     <AppBar
       position={absolute ? "absolute" : navbarType}
@@ -176,33 +113,44 @@ const DashboardNavbar = ({ absolute, light }: DashboardNavbarProps) => {
       sx={(theme) => navbar(theme, { transparentNavbar, absolute, light })}
     >
       <Toolbar sx={(theme) => navbarContainer(theme)}>
+        <BackButton
+          sx={{
+            flexGrow: 1,
+            display: {
+              xs: "flex",
+              md: "none",
+            },
+          }}
+        />
         <SoftBox
-          color="inherit"
-          mb={{ xs: 1, md: 0 }}
-          sx={(theme) => navbarRow(theme, { isMini: false })}
+          sx={{
+            flexGrow: {
+              xs: 1,
+              md: 0,
+            },
+          }}
         >
-          <Breadcrumbs light={light} />
+          <img src={Logo} />
         </SoftBox>
-        <SoftBox sx={(theme) => navbarRow(theme, { isMini: false })}>
-          <SoftBox color={light ? "white" : "inherit"}>
-            <IconButton
-              size="small"
-              color="inherit"
-              onClick={handleOpenLanguageMenu}
-            >
-              <TranslateIcon />
-            </IconButton>
-            <IconButton
-              size="small"
-              color="inherit"
-              onClick={handleMiniSidenav}
-            >
-              <Icon className={light ? "text-white" : "text-dark"}>
-                {miniSidenav ? "menu_open" : "menu"}
-              </Icon>
-            </IconButton>
-            {renderLanguageMenu()}
-          </SoftBox>
+        <SoftBox
+          sx={{
+            display: {
+              xs: "none",
+              md: "flex",
+            },
+            ml: 1,
+            // flexGrow: 1,
+          }}
+        >
+          <Breadcrumbs />
+          {/* <QuickNavigation /> */}
+        </SoftBox>
+        <SoftBox
+          sx={{
+            marginLeft: "auto",
+          }}
+        >
+          <NavbarMainControls />
         </SoftBox>
       </Toolbar>
     </AppBar>

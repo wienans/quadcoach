@@ -22,7 +22,6 @@ import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import TimelapseIcon from "@mui/icons-material/Timelapse";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import OpenInBrowserIcon from "@mui/icons-material/OpenInBrowser";
 import PeopleIcon from "@mui/icons-material/People";
 import { SoftBox, SoftButton, SoftTypography } from "../../../components";
 import TagIcon from "@mui/icons-material/Tag";
@@ -71,17 +70,18 @@ const ExerciseCard = ({
   return (
     <Card>
       <CardHeader
+        sx={{
+          display: "flex",
+          overflow: "hidden",
+          "& .MuiCardHeader-content": {
+            overflow: "hidden",
+          },
+        }}
         avatar={
           <ExerciseAvatar exercise={exercise} exerciseType={exerciseType} />
         }
         title={exercise.name}
-        action={
-          <Tooltip title={t("ExerciseList:cardView.openExercise")}>
-            <IconButton onClick={onOpenExerciseClick}>
-              <OpenInBrowserIcon />
-            </IconButton>
-          </Tooltip>
-        }
+        titleTypographyProps={{ noWrap: true }}
       />
       <CardContent sx={{ height: "194px", position: "relative" }}>
         {availableVideoUrl != null ? (
@@ -128,8 +128,6 @@ const ExerciseCard = ({
           <Chip
             avatar={
               <PeopleIcon />
-              // <FunctionsIcon />
-              // <NumbersIcon />
             }
             label={exercise.persons}
             sx={{ mr: 1 }}
@@ -176,7 +174,7 @@ const ExerciseCard = ({
       <Collapse in={moreInformationExpanded} timeout="auto" unmountOnExit>
         <CardContent>
           <List sx={{ width: "100%" }} component="nav">
-            {/* <ListItem>
+            <ListItem>
               <ListItemAvatar>
                 <Avatar>
                   <PeopleIcon />
@@ -186,7 +184,7 @@ const ExerciseCard = ({
                 primary={exercise.persons}
                 secondary={t("ExerciseList:cardView.personsAmount")}
               />
-            </ListItem> */}
+            </ListItem>
             <ListItem>
               <ListItemAvatar>
                 <Avatar>

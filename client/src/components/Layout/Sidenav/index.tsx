@@ -40,6 +40,7 @@ import { RootState } from "../../../store/store";
 import { DrawerProps, Palette, PaletteColor } from "@mui/material";
 import { PickByType } from "../../../helpers/typeHelpers";
 import { useTranslation } from "react-i18next";
+import Logo from "../../../assets/images/firstLogo.svg";
 
 // Soft UI Dashboard React context
 // import { useSoftUIController, setMiniSidenav } from "context";
@@ -108,18 +109,10 @@ export type SidebarNavRoute =
 
 export interface SidenavProps extends Omit<DrawerProps, "color"> {
   color: keyof PickByType<Palette, PaletteColor>;
-  brand: string;
-  brandName: string;
   routes: SidebarNavRoute[];
 }
 
-const Sidenav = ({
-  color,
-  brand,
-  brandName,
-  routes,
-  ...rest
-}: SidenavProps) => {
+const Sidenav = ({ color, routes, ...rest }: SidenavProps) => {
   const { t } = useTranslation();
   const dispatch = useAppDispatch();
   const { miniSidenav } = useAppSelector(sidenavSelector);
@@ -231,20 +224,22 @@ const Sidenav = ({
           </SoftTypography>
         </SoftBox>
         <SoftBox component={NavLink} to="/" display="flex" alignItems="center">
-          {brand && (
-            <SoftBox
-              component="img"
-              src={brand}
-              alt="Soft UI Logo"
-              width="2rem"
-            />
-          )}
-          <SoftBox
-            width={!brandName ? "100%" : undefined}
-            sx={(theme) => sidenavLogoLabel(theme, { miniSidenav })}
-          >
-            <SoftTypography component="h6" variant="button" fontWeight="medium">
-              {brandName}
+          <SoftBox component="img" src={Logo} alt="Soft UI Logo" width="2rem" />
+          <SoftBox sx={(theme) => sidenavLogoLabel(theme, { miniSidenav })}>
+            <SoftTypography
+              variant="h6"
+              noWrap
+              sx={{
+                mr: 2,
+                display: "flex",
+                fontFamily: "monospace",
+                fontWeight: 700,
+                letterSpacing: ".3rem",
+                color: "inherit",
+                textDecoration: "none",
+              }}
+            >
+              QuadCoach
             </SoftTypography>
           </SoftBox>
         </SoftBox>

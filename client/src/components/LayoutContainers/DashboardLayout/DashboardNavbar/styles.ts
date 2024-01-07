@@ -72,32 +72,35 @@ function navbar(theme: Theme, ownerState: OwnerState) {
       }),
     },
 
-    "& .MuiToolbar-root": {
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "center",
+    // "& .MuiToolbar-root": {
+    //   display: "flex",
+    //   justifyContent: "space-between",
+    //   alignItems: "center",
 
-      [breakpoints.up("sm")]: {
-        minHeight: "auto",
-        padding: `${pxToRem(4)} ${pxToRem(16)}`,
-      },
-    },
+    //   [breakpoints.up("sm")]: {
+    //     minHeight: "auto",
+    //     padding: `${pxToRem(4)} ${pxToRem(16)}`,
+    //   },
+    // },
   };
 }
 
 const navbarContainer = ({ breakpoints }: Theme) => ({
-  flexDirection: "column",
-  alignItems: "flex-start",
-  justifyContent: "space-between",
-  pt: 0.5,
-  pb: 0.5,
+  // maxWidth:"100%",
+  display: "flex",
+  alignContent: "center",
+  // flexDirection: "column",
+  // alignItems: "flex-start",
+  // justifyContent: "space-between",
+  // pt: 0.5,
+  // pb: 0.5,
 
-  [breakpoints.up("md")]: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingTop: "0",
-    paddingBottom: "0",
-  },
+  // [breakpoints.up("md")]: {
+  //   flexDirection: "row",
+  //   alignItems: "center",
+  //   paddingTop: "0",
+  //   paddingBottom: "0",
+  // },
 });
 
 export type NavbarRowProps = {
@@ -105,20 +108,18 @@ export type NavbarRowProps = {
 };
 
 const navbarRow = ({ breakpoints }: Theme, { isMini }: NavbarRowProps) => ({
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "space-between",
-  width: "100%",
-
-  [breakpoints.up("md")]: {
-    justifyContent: isMini ? "space-between" : "stretch",
-    width: isMini ? "100%" : "max-content",
-  },
-
-  [breakpoints.up("xl")]: {
-    justifyContent: "stretch !important",
-    width: "max-content !important",
-  },
+  // display: "flex",
+  // alignItems: "center",
+  // justifyContent: "space-between",
+  // width: "100%",
+  // [breakpoints.up("md")]: {
+  //   justifyContent: isMini ? "space-between" : "stretch",
+  //   width: isMini ? "100%" : "max-content",
+  // },
+  // [breakpoints.up("xl")]: {
+  //   justifyContent: "stretch !important",
+  //   width: "max-content !important",
+  // },
 });
 
 const navbarIconButton = ({ typography: { size }, breakpoints }: Theme) => ({

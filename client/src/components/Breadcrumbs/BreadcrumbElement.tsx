@@ -28,8 +28,13 @@ const BreadcrumbElement = ({
   }
 
   return (
-    <Link href={path}>
-      <TitleElement title={title} light={false} />
+    <Link
+      href={path}
+      fontWeight="regular"
+      textTransform="capitalize"
+      fontSize="medium"
+    >
+      {title}
     </Link>
   );
 };

@@ -18,13 +18,22 @@ import "./translationts";
 import { Link } from "react-router-dom";
 
 // @mui material components
-import { Breadcrumbs as MuiBreadcrumbs } from "@mui/material";
+import { Breadcrumbs as MuiBreadcrumbs, styled } from "@mui/material";
 import Icon from "@mui/material/Icon";
 
 // Soft UI Dashboard React components
 import { SoftBox, SoftTypography } from "..";
 import BreadcrumbElementWrapper from "./BreadcrumbElementWrapper";
 import { useBreadcrumbsToRender } from "./hooks";
+
+const StyledBreadcrumbs = styled(MuiBreadcrumbs)`
+  .MuiBreadcrumbs-li {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    // flex: 1;
+  }
+`;
 
 export type BreadcrumbRoute = {
   title: string;
@@ -38,28 +47,32 @@ export type BreadcrumbsProps = {
 const Breadcrumbs = ({ light }: BreadcrumbsProps) => {
   const breadcrumbsToRender = useBreadcrumbsToRender();
   const breadcrumbsToRenderLength = breadcrumbsToRender.length;
-
+  
   return (
-    <SoftBox mr={{ xs: 0, xl: 8 }}>
+    <SoftBox
+      sx={
+        {
+          // width: "100%",
+        }
+      }
+    >
       <MuiBreadcrumbs
         sx={{
+          display: "flex",
+          alignItems: "center",
+          "& .MuiBreadcrumbs-li": {
+            display: "flex",
+            alignItems: "center",
+            overflowX: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+          },
           "& .MuiBreadcrumbs-separator": {
             color: ({ palette: { white, grey } }) =>
               light ? white.main : grey[600],
           },
         }}
       >
-        <Link to="/">
-          <SoftTypography
-            component="span"
-            variant="body2"
-            color={light ? "white" : "dark"}
-            opacity={light ? 0.8 : 0.5}
-            sx={{ lineHeight: 0 }}
-          >
-            <Icon>home</Icon>
-          </SoftTypography>
-        </Link>
         {breadcrumbsToRender.map((route, index) => (
           <BreadcrumbElementWrapper
             isLastElement={index === breadcrumbsToRenderLength - 1}

@@ -11,7 +11,8 @@ const LastElement = ({ light, title }: LastElementProps): JSX.Element => (
     fontWeight="regular"
     textTransform="capitalize"
     color={light ? "white" : "dark"}
-    sx={{ lineHeight: 0 }}
+    textOverflow="ellipsis"
+    fontSize="medium"
   >
     {title}
   </SoftTypography>

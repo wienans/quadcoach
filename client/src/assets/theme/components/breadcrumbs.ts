@@ -32,10 +32,6 @@ const breadcrumbs: {
   variants?: ComponentsVariants["MuiBreadcrumbs"];
 } = {
   styleOverrides: {
-    li: {
-      lineHeight: 0,
-    },
-
     separator: {
       fontSize: size!.sm,
       color: grey![600],
