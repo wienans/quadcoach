@@ -6,10 +6,10 @@ import {
   GridRowParams,
 } from "@mui/x-data-grid";
 import { Alert, LinearProgress, styled } from "@mui/material";
-import { SoftBox } from "../../../components";
 import { Chip } from "@mui/material";
-import { Exercise } from "../../../api/quadcoachApi/domain";
 import { useTranslation } from "react-i18next";
+import { SoftBox } from "../../../../components";
+import { Exercise } from "../../../../api/quadcoachApi/domain";
 
 const NoRowsAlert = () => {
   const { t } = useTranslation("ExerciseList");

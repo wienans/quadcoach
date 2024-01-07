@@ -11,16 +11,16 @@ import {
   LinearProgress,
   Skeleton,
 } from "@mui/material";
-import { SoftBox, SoftButton, SoftTypography } from "../../components";
+import { SoftBox, SoftButton, SoftTypography } from "../../../../components";
 import { Chip } from "@mui/material";
 import CopyrightIcon from "@mui/icons-material/Copyright";
 import ReactPlayer from "react-player";
-import { Exercise } from "../../api/quadcoachApi/domain";
+import { Exercise } from "../../../../api/quadcoachApi/domain";
 import {
   useDeleteExerciseMutation,
   useGetExerciseQuery,
   useGetRelatedExercisesQuery,
-} from "../exerciseApi";
+} from "../../../exerciseApi";
 import { useTranslation } from "react-i18next";
 import { TFunction } from "i18next";
 

@@ -1,10 +1,10 @@
 import { useNavigate } from "react-router-dom";
 import { Grid } from "@mui/material";
-import { SoftBox, SoftButton, SoftTypography } from "../../components";
-import ExerciseEditForm from "../../components/ExerciseEditForm";
-import { ExerciseWithOutId } from "../../api/quadcoachApi/domain";
+import { SoftBox, SoftButton, SoftTypography } from "../../../components";
+import ExerciseEditForm from "../../../components/ExerciseEditForm";
+import { ExerciseWithOutId } from "../../../api/quadcoachApi/domain";
 import { useEffect } from "react";
-import { useAddExerciseMutation } from "../exerciseApi";
+import { useAddExerciseMutation } from "../../exerciseApi";
 import { useTranslation } from "react-i18next";
 import "./translations";
 

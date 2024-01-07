@@ -1,9 +1,9 @@
 {
   "dashboard": "Dashboard",
   "exercises": "Übungen",
-  "addExercise": "Übung hinzufügen",
-  "exercise": "Übung {{exerciseName}}",
-  "updateExercise": "Übung bearbeiten",
+  "addExercise": "hinzufügen",
+  "exercise": "Übung",
+  "updateExercise": "bearbeiten",
   "tacticBoards" : "Taktik Tafeln",
   "updateTacticBoard" : "Taktik Tafel bearbeiten",
   "addTacticBoard" : "Taktik Tafel hinzufügen",

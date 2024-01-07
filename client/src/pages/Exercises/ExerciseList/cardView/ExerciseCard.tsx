@@ -15,7 +15,6 @@ import {
   Tooltip,
   styled,
 } from "@mui/material";
-import { Exercise } from "../../../api/quadcoachApi/domain";
 import ExerciseAvatar from "./ExerciseAvatar";
 import CircleIcon from "@mui/icons-material/Circle";
 import { useTranslation } from "react-i18next";
@@ -23,14 +22,15 @@ import { useState } from "react";
 import TimelapseIcon from "@mui/icons-material/Timelapse";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import PeopleIcon from "@mui/icons-material/People";
-import { SoftBox, SoftButton, SoftTypography } from "../../../components";
+import { SoftBox, SoftButton, SoftTypography } from "../../../../components";
 import TagIcon from "@mui/icons-material/Tag";
 import { Cone, Head, RelationOneToMany } from "mdi-material-ui";
 import ReactPlayer from "react-player";
 import {
   ExerciseType,
   getExerciseType,
-} from "../../../helpers/exerciseHelpers";
+} from "../../../../helpers/exerciseHelpers";
+import { Exercise } from "../../../../api/quadcoachApi/domain";
 
 interface ExpandMoreProps extends IconButtonProps {
   expand: boolean;
@@ -126,9 +126,7 @@ const ExerciseCard = ({
       <CardActions disableSpacing>
         <Tooltip title={t("ExerciseList:cardView.personAmount")}>
           <Chip
-            avatar={
-              <PeopleIcon />
-            }
+            avatar={<PeopleIcon />}
             label={exercise.persons}
             sx={{ mr: 1 }}
           />

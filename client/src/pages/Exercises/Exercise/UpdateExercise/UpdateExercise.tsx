@@ -2,16 +2,16 @@ import "./translations";
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { Alert, Grid } from "@mui/material";
-import { SoftButton, SoftTypography } from "../../components";
-import ExerciseEditForm from "../../components/ExerciseEditForm";
-import { ExerciseWithOutId } from "../../api/quadcoachApi/domain";
+import { SoftButton, SoftTypography } from "../../../../components";
+import ExerciseEditForm from "../../../../components/ExerciseEditForm";
+import { ExerciseWithOutId } from "../../../../api/quadcoachApi/domain";
 import {
   useDeleteExerciseMutation,
   useGetExerciseQuery,
   useGetRelatedExercisesQuery,
   useUpdateExerciseMutation,
-} from "../exerciseApi";
-import { ExerciseExtendWithRelatedExercises } from "../../components/ExerciseEditForm/ExerciseEditForm";
+} from "../../../exerciseApi";
+import { ExerciseExtendWithRelatedExercises } from "../../../../components/ExerciseEditForm/ExerciseEditForm";
 import { useTranslation } from "react-i18next";
 
 const UpdateExercise = () => {

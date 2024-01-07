@@ -19,7 +19,8 @@ const routes = [
           type: RouteHandleType.dashboard,
         },
         async lazy() {
-          const ExerciseListRoot = (await import("../ExerciseList")).default;
+          const ExerciseListRoot = (await import("../Exercises"))
+            .ExerciseListRoot;
           return {
             element: <ExerciseListRoot />,
           };
@@ -32,31 +33,20 @@ const routes = [
           type: RouteHandleType.exercises,
         },
         async lazy() {
-          const ExerciseListRoot = (await import("../ExerciseList")).default;
+          const ExerciseListRoot = (await import("../Exercises"))
+            .ExerciseListRoot;
           return {
             element: <ExerciseListRoot />,
           };
         },
         children: [
-          // {
-          //   index: true,
-          //   handle: {
-          //     type: RouteHandleType.exercises,
-          //   },
-          //   async lazy() {
-          //     const ExerciseList = (await import("../ExerciseList")).default;
-          //     return {
-          //       element: <ExerciseList />,
-          //     };
-          //   },
-          // },
           {
             path: "add",
             handle: {
               type: RouteHandleType.addExercise,
             },
             async lazy() {
-              const AddExercise = (await import("../AddExercise")).default;
+              const AddExercise = (await import("../Exercises")).AddExercise;
               return {
                 element: <AddExercise />,
               };
@@ -68,24 +58,26 @@ const routes = [
               type: RouteHandleType.exercise,
             },
             async lazy() {
-              const Exercise = (await import("../Exercise")).default;
+              const ExerciseRoot = (await import("../Exercises")).ExerciseRoot;
               return {
-                element: <Exercise />,
+                element: <ExerciseRoot />,
               };
             },
-          },
-          {
-            path: ":id/update",
-            handle: {
-              type: RouteHandleType.updateExercise,
-            },
-            async lazy() {
-              const UpdateExercise = (await import("../UpdateExercise"))
-                .default;
-              return {
-                element: <UpdateExercise />,
-              };
-            },
+            children: [
+              {
+                path: "update",
+                handle: {
+                  type: RouteHandleType.updateExercise,
+                },
+                async lazy() {
+                  const UpdateExercise = (await import("../Exercises"))
+                    .UpdateExercise;
+                  return {
+                    element: <UpdateExercise />,
+                  };
+                },
+              },
+            ],
           },
         ],
       },

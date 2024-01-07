@@ -19,8 +19,7 @@ import {
   SoftInput,
   SoftBox,
   SoftButton,
-} from "../../components";
-import { useLazyGetExercisesQuery } from "../exerciseApi";
+} from "../../../components";
 import { useTranslation } from "react-i18next";
 import FilterAltIcon from "@mui/icons-material/FilterAlt";
 import GridViewIcon from "@mui/icons-material/GridView";
@@ -28,6 +27,7 @@ import ListIcon from "@mui/icons-material/List";
 import ExercisesListView from "./listView/ExercisesListView";
 import ExercisesCardView from "./cardView/ExercisesCardView";
 import AddIcon from "@mui/icons-material/Add";
+import { useLazyGetExercisesQuery } from "../../exerciseApi";
 
 const maxPersons = 100;
 

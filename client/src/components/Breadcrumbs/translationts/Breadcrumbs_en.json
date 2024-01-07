@@ -1,9 +1,9 @@
 {
   "dashboard": "Dashboard",
   "exercises": "Exercises",
-  "addExercise": "Add exercise",
-  "exercise": "Exercise {{exerciseName}}",
-  "updateExercise": "Edit exercise",
+  "addExercise": "add",
+  "exercise": "Exercise",
+  "updateExercise": "edit",
   "tacticBoards" : "Tactic Boards",
   "updateTacticBoard" : "Edit Tactic Board",
   "addTacticBoard" : "Add Tactic Board",

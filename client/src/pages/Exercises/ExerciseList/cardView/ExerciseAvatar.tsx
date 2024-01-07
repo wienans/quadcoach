@@ -1,10 +1,10 @@
 import { Avatar, Tooltip } from "@mui/material";
-import { Exercise } from "../../../api/quadcoachApi/domain";
+import { Exercise } from "../../../../api/quadcoachApi/domain";
 import { useTranslation } from "react-i18next";
 import {
   ExerciseType,
   getExerciseType,
-} from "../../../helpers/exerciseHelpers";
+} from "../../../../helpers/exerciseHelpers";
 
 export type ExerciseAvatarProps = {
   exercise: Exercise;

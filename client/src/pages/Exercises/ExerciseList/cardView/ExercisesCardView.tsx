@@ -1,5 +1,5 @@
 import { Alert, Grid } from "@mui/material";
-import { Exercise } from "../../../api/quadcoachApi/domain";
+import { Exercise } from "../../../../api/quadcoachApi/domain";
 import { useTranslation } from "react-i18next";
 import ExerciseLoadingCard from "./ExerciseLoadingCard";
 import ExerciseCard from "./ExerciseCard";
