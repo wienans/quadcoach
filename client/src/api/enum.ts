@@ -8,4 +8,6 @@ export enum TagType {
   user = "user",
   tag = "tag",
   material = "material",
+  tacticboard = "tacticboard",
+  tacticboardTag = "tacticboardTag",
 }

@@ -1,0 +1,23 @@
+{
+  "columns": {
+    "name": "Name",
+    "tags": "Stichwörter"
+  },
+  "title": "Taktik Tafel Liste",
+  "filter": {
+    "title": "Filter",
+    "name": "Suche Taktik Tafel",
+    "tags": {
+      "title": "Stichwörter",
+      "placeholder": "Suche Stichwort"
+    },
+    "apply": "Filter anwenden"
+  },
+  "errorLoadingTacticBoards": "Es ist ein Fehler beim Laden der Taktik Tafeln aufgetreten.",
+  "noTacticBoardsFound": "Keine Taktik Tafeln gefunden",
+  "cardView": {
+    "openTacticBoard": "Taktik Tafel öffnen",
+    "tags": "Stichwörter"
+  },
+  "addTacticBoard": "Taktik Tafel hinzufügen"
+}

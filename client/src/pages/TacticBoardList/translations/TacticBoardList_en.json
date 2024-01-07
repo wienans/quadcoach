@@ -1,0 +1,23 @@
+{
+  "columns": {
+    "name": "Name",
+    "tags": "Tags"
+  },
+  "title": "Tactic Board list",
+  "filter": {
+    "title": "Filter",
+    "name": "Search Tactic Board",
+    "tags": {
+      "title": "Tags",
+      "placeholder": "Search tag"
+    },
+    "apply": "Apply filter"
+  },
+  "errorLoadingTacticBoards": "An error occurred while loading tactic boards.",
+  "noTacticBoardsFound": "No tactic board found",
+  "cardView": {
+    "openTacticBoard": "Open tactic board",
+    "tags": "Tags"
+  },
+  "addTacticBoard": "Add tactic board"
+}
