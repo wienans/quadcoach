@@ -54,6 +54,11 @@
       "placeholder": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
       "notValid": "Bitte gib eine gültige URL ein."
     },
+    "tacticboard": {
+      "label": "Taktik Tafel",
+      "placeholder": "",
+      "notValid": ""
+    },
     "coachingPoints": {
       "label": "Coaching Punkte",
       "placeholder": "Coaching Punkte"
