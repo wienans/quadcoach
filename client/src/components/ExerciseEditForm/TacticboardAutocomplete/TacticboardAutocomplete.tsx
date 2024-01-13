@@ -1,12 +1,15 @@
 import { Autocomplete, CircularProgress, TextField } from "@mui/material";
-import { useState } from "react";
+import { FocusEvent, SyntheticEvent, useState } from "react";
 import { TacticBoard } from "../../../api/quadcoachApi/domain";
 import { useGetTacticBoardsQuery } from "../../../pages/tacticboardApi";
 
 export type TacticboardAutocompleteProps = {
-  value: TacticBoard | undefined;
-  onChange: () => void;
-  onBlur: () => void;
+  value: string | undefined;
+  onChange: (
+    event: SyntheticEvent<Element, Event>,
+    value: TacticBoard | null,
+  ) => void;
+  onBlur: (event: FocusEvent<HTMLDivElement> | undefined) => void;
 };
 
 const TacticboardAutocomplete = ({
@@ -25,10 +28,18 @@ const TacticboardAutocomplete = ({
       id="related-text"
       options={tacticboards ?? []}
       getOptionLabel={(option) => option.name ?? ""}
-      isOptionEqualToValue={(option, value) => option._id === value._id}
+      isOptionEqualToValue={(option, value) => {
+        if (value != null && value != undefined) {
+          return option._id === value._id;
+        } else {
+          return false;
+        }
+      }}
       inputValue={searchValue}
       onInputChange={(_event, newValue) => setSearchValue(newValue)}
-      value={value}
+      value={
+        tacticboards?.find((obj: TacticBoard) => obj["_id"] === value) ?? null
+      }
       onChange={onChange}
       onBlur={onBlur}
       loading={isTacticboardsLoading}

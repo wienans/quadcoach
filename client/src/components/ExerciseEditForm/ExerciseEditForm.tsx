@@ -7,16 +7,7 @@ import {
   useFormik,
 } from "formik";
 import * as Yup from "yup";
-import {
-  Autocomplete,
-  Chip,
-  CircularProgress,
-  FormGroup,
-  FormHelperText,
-  Grid,
-  Skeleton,
-  TextField,
-} from "@mui/material";
+import { Chip, FormGroup, FormHelperText, Grid, Skeleton } from "@mui/material";
 import SoftTypography from "../SoftTypography";
 import SoftInput from "../SoftInput";
 import { SoftBox, SoftButton } from "..";
@@ -150,7 +141,9 @@ const ExerciseEditForm = ({
       const updatedBlocks = cloneDeep(description_blocks);
       console.log(description_blocks);
       updatedBlocks.forEach((block) => {
-        block.tactics_board = block.tacticboard?._id;
+        if (block.tactics_board == "") {
+          block.tactics_board = undefined;
+        }
       });
       console.log(updatedBlocks);
       const exercise: ExercisePartialId = {
@@ -663,17 +656,24 @@ const ExerciseEditForm = ({
                                   <TacticboardAutocomplete
                                     value={
                                       formik.values.description_blocks[index]
-                                        .tacticboard || null
+                                        .tactics_board || ""
                                     }
                                     onChange={(
                                       _,
                                       value: TacticBoard | null,
                                     ) => {
                                       console.log(value);
-                                      formik.setFieldValue(
-                                        `description_blocks[${index}].tacticboard`,
-                                        value,
-                                      );
+                                      if (value != null) {
+                                        formik.setFieldValue(
+                                          `description_blocks[${index}].tactics_board`,
+                                          value?._id,
+                                        );
+                                      } else {
+                                        formik.setFieldValue(
+                                          `description_blocks[${index}].tactics_board`,
+                                          "",
+                                        );
+                                      }
                                     }}
                                     onBlur={formik.handleBlur}
                                   />
