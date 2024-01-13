@@ -24,8 +24,8 @@ import {
   Block,
   Exercise,
   ExercisePartialId,
+  TacticBoard,
 } from "../../api/quadcoachApi/domain";
-import { useGetTacticBoardsQuery } from "../../pages/tacticboardApi";
 import AddRelatedExercisesDialog from "./AddRelatedExercisesDialog";
 import AddTagDialog from "./AddTagDialog";
 import AddMaterialDialog from "./AddMaterialDialog";
@@ -86,11 +86,6 @@ const ExerciseEditForm = ({
   const [openTagDialog, setOpenTagDialog] = useState<boolean>(false);
   const [openMaterialDialog, setOpenMaterialDialog] = useState<boolean>(false);
   const [openRelatedDialog, setOpenRelatedDialog] = useState<boolean>(false);
-  const [searchValue, setSearchValue] = useState<string>("");
-  const { data: tacticboards, isLoading: isTacticboardsLoading } =
-    useGetTacticBoardsQuery({
-      nameRegex: searchValue !== "" ? searchValue : undefined,
-    });
 
   const formik = useFormik<ExerciseExtendWithRelatedExercises>({
     // enableReinitialize : use this flag when initial values needs to be changed
@@ -129,7 +124,7 @@ const ExerciseEditForm = ({
           ),
           coaching_points: Yup.string(),
           timeMin: Yup.number(),
-          tactics_board: Yup.object(),
+          tactics_board: Yup.string(),
         }),
       ),
       relatedToExercises: Yup.array().of(Yup.object()),
@@ -665,56 +660,22 @@ const ExerciseEditForm = ({
                                       "ExerciseEditForm:block.tacticboard.label",
                                     )}
                                   </SoftTypography>
-                                  {/* <TacticboardAutocomplete
+                                  <TacticboardAutocomplete
                                     value={
                                       formik.values.description_blocks[index]
-                                        .tacticboard
+                                        .tacticboard || null
                                     }
-                                    onChange={formik.handleChange}
+                                    onChange={(
+                                      _,
+                                      value: TacticBoard | null,
+                                    ) => {
+                                      console.log(value);
+                                      formik.setFieldValue(
+                                        `description_blocks[${index}].tacticboard`,
+                                        value,
+                                      );
+                                    }}
                                     onBlur={formik.handleBlur}
-                                  /> */}
-                                  <Autocomplete
-                                    id="related-text"
-                                    options={tacticboards ?? []}
-                                    getOptionLabel={(option) =>
-                                      option.name ?? ""
-                                    }
-                                    isOptionEqualToValue={(option, value) =>
-                                      option._id === value._id
-                                    }
-                                    inputValue={searchValue}
-                                    onInputChange={(_event, newValue) =>
-                                      setSearchValue(newValue)
-                                    }
-                                    value={
-                                      formik.values.description_blocks[index]
-                                        .tacticboard
-                                    }
-                                    onChange={formik.handleChange}
-                                    onBlur={formik.handleBlur}
-                                    loading={isTacticboardsLoading}
-                                    renderInput={(params) => (
-                                      <TextField
-                                        {...params}
-                                        autoFocus
-                                        id="name"
-                                        fullWidth
-                                        InputProps={{
-                                          ...params.InputProps,
-                                          endAdornment: (
-                                            <>
-                                              {isTacticboardsLoading ? (
-                                                <CircularProgress
-                                                  color="inherit"
-                                                  size={20}
-                                                />
-                                              ) : null}
-                                              {params.InputProps.endAdornment}
-                                            </>
-                                          ),
-                                        }}
-                                      />
-                                    )}
                                   />
                                   {Boolean(
                                     getDescriptionBlockFormikError(
