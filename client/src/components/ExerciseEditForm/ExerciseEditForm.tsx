@@ -139,13 +139,12 @@ const ExerciseEditForm = ({
       );
       const related_to = relatedToExercises?.map((r) => r._id);
       const updatedBlocks = cloneDeep(description_blocks);
-      console.log(description_blocks);
+      // switch "" to undefined so we don't have error on Server
       updatedBlocks.forEach((block) => {
         if (block.tactics_board == "") {
           block.tactics_board = undefined;
         }
       });
-      console.log(updatedBlocks);
       const exercise: ExercisePartialId = {
         name,
         persons: persons > calculate_persons ? persons : calculate_persons,
@@ -662,7 +661,6 @@ const ExerciseEditForm = ({
                                       _,
                                       value: TacticBoard | null,
                                     ) => {
-                                      console.log(value);
                                       if (value != null) {
                                         formik.setFieldValue(
                                           `description_blocks[${index}].tactics_board`,
