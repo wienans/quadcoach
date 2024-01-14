@@ -19,6 +19,8 @@
   "block": {
     "title": "Block {{blockNumber}}",
     "minutes": "Zeit: {{minutes}} Minuten",
+    "tacticboard": "Taktik Tafel",
+    "visitTacticboard": "Taktik Tafel ansehen",
     "description": "Beschreibung:",
     "coachingPoints": "Coaching-Punkte:"
   }

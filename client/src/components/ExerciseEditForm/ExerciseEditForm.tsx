@@ -15,13 +15,15 @@ import {
   Block,
   Exercise,
   ExercisePartialId,
+  TacticBoard,
 } from "../../api/quadcoachApi/domain";
 import AddRelatedExercisesDialog from "./AddRelatedExercisesDialog";
 import AddTagDialog from "./AddTagDialog";
 import AddMaterialDialog from "./AddMaterialDialog";
-import { uniqBy } from "lodash";
+import { cloneDeep, uniqBy } from "lodash";
 import "./translations";
 import { useTranslation } from "react-i18next";
+import TacticboardAutocomplete from "./TacticboardAutocomplete";
 
 const exerciseShape = shape({
   name: string,
@@ -113,6 +115,7 @@ const ExerciseEditForm = ({
           ),
           coaching_points: Yup.string(),
           timeMin: Yup.number(),
+          tactics_board: Yup.string(),
         }),
       ),
       relatedToExercises: Yup.array().of(Yup.object()),
@@ -135,6 +138,13 @@ const ExerciseEditForm = ({
         0,
       );
       const related_to = relatedToExercises?.map((r) => r._id);
+      const updatedBlocks = cloneDeep(description_blocks);
+      // switch "" to undefined so we don't have error on Server
+      updatedBlocks.forEach((block) => {
+        if (block.tactics_board == "") {
+          block.tactics_board = undefined;
+        }
+      });
       const exercise: ExercisePartialId = {
         name,
         persons: persons > calculate_persons ? persons : calculate_persons,
@@ -144,7 +154,7 @@ const ExerciseEditForm = ({
         materials,
         tags,
         related_to,
-        description_blocks,
+        description_blocks: updatedBlocks,
       };
       onSubmit(exercise);
     },
@@ -630,6 +640,51 @@ const ExerciseEditForm = ({
                                       {getDescriptionBlockFormikError(
                                         index,
                                         "video_url",
+                                      )}
+                                    </FormHelperText>
+                                  )}
+                                </FormGroup>
+                              </Grid>
+                              <Grid item xs={12} p={1}>
+                                <FormGroup>
+                                  <SoftTypography variant="body2">
+                                    {t(
+                                      "ExerciseEditForm:block.tacticboard.label",
+                                    )}
+                                  </SoftTypography>
+                                  <TacticboardAutocomplete
+                                    value={
+                                      formik.values.description_blocks[index]
+                                        .tactics_board || ""
+                                    }
+                                    onChange={(
+                                      _,
+                                      value: TacticBoard | null,
+                                    ) => {
+                                      if (value != null) {
+                                        formik.setFieldValue(
+                                          `description_blocks[${index}].tactics_board`,
+                                          value?._id,
+                                        );
+                                      } else {
+                                        formik.setFieldValue(
+                                          `description_blocks[${index}].tactics_board`,
+                                          "",
+                                        );
+                                      }
+                                    }}
+                                    onBlur={formik.handleBlur}
+                                  />
+                                  {Boolean(
+                                    getDescriptionBlockFormikError(
+                                      index,
+                                      "tactics_board",
+                                    ),
+                                  ) && (
+                                    <FormHelperText error>
+                                      {getDescriptionBlockFormikError(
+                                        index,
+                                        "tactics_board",
                                       )}
                                     </FormHelperText>
                                   )}

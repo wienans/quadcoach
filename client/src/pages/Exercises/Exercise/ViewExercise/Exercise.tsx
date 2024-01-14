@@ -1,5 +1,5 @@
 import "./translations";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { useEffect } from "react";
 import {
   Alert,
@@ -342,6 +342,30 @@ const Exercise = () => {
                   controls
                   light
                 />
+              </SoftBox>
+              <SoftBox
+                mt={3}
+                display={
+                  el.tactics_board && el.tactics_board != "" ? "block" : "none"
+                }
+              >
+                <SoftTypography
+                  variant="h5"
+                  fontWeight="bold"
+                  textTransform="uppercase"
+                >
+                  {t("Exercise:block.tacticboard")}
+                </SoftTypography>
+
+                <SoftTypography
+                  component={Link}
+                  to={`/tacticboards/${el.tactics_board}`}
+                  variant="button"
+                  fontWeight="bold"
+                  textGradient
+                >
+                  {t("Exercise:block.visitTacticboard")}
+                </SoftTypography>
               </SoftBox>
               <SoftBox mt={3}>
                 <SoftTypography
