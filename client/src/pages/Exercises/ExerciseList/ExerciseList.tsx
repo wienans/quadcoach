@@ -7,11 +7,13 @@ import {
   CardHeader,
   Collapse,
   Grid,
+  IconButton,
   Slider,
   Theme,
   ToggleButton,
   ToggleButtonGroup,
   useMediaQuery,
+  useScrollTrigger,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import {
@@ -27,6 +29,7 @@ import ListIcon from "@mui/icons-material/List";
 import ExercisesListView from "./listView/ExercisesListView";
 import ExercisesCardView from "./cardView/ExercisesCardView";
 import AddIcon from "@mui/icons-material/Add";
+import ArrowCircleUpIcon from "@mui/icons-material/ArrowCircleUp";
 import { useLazyGetExercisesQuery } from "../../exerciseApi";
 
 const maxPersons = 100;
@@ -53,7 +56,12 @@ const defaultExerciseFilter: ExerciseFilter = {
 const ExerciseList = () => {
   const { t } = useTranslation("ExerciseList");
   const navigate = useNavigate();
+
   const isUpMd = useMediaQuery((theme: Theme) => theme.breakpoints.up("md"));
+  const scrollTrigger = useScrollTrigger({
+    disableHysteresis: true,
+    threshold: 100,
+  });
 
   const [showFilters, setShowFilters] = useState<boolean>(false);
   const [viewType, setViewType] = useState<ViewType>(ViewType.Cards);
@@ -116,7 +124,33 @@ const ExerciseList = () => {
 
   return (
     <SoftBox sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
-      <Card>
+      <Card
+        sx={(theme) => ({
+          position: "sticky",
+          top: theme.spacing(1),
+          zIndex: 1,
+          ...(scrollTrigger
+            ? {
+                backgroundColor: theme.palette.transparent.main,
+                boxShadow: theme.boxShadows.navbarBoxShadow,
+                backdropFilter: `saturate(200%) blur(${theme.functions.pxToRem(
+                  30,
+                )})`,
+              }
+            : {
+                backgroundColor: theme.functions.rgba(
+                  theme.palette.white.main,
+                  0.8,
+                ),
+                boxShadow: "none",
+                backdropFilter: "none",
+              }),
+          transition: theme.transitions.create("all", {
+            easing: theme.transitions.easing.easeInOut,
+            duration: theme.transitions.duration.standard,
+          }),
+        })}
+      >
         <CardHeader
           title={
             <SoftTypography variant="h3">
@@ -210,29 +244,31 @@ const ExerciseList = () => {
           </CardContent>
         </Collapse>
       </Card>
-      <SoftBox sx={{ mt: 2, display: "flex" }}>
-        <SoftButton
-          startIcon={isUpMd && <AddIcon />}
-          color="secondary"
-          href="/exercises/add"
-        >
-          {isUpMd ? t("ExerciseList:addExercise") : <AddIcon />}
-        </SoftButton>
-        <ToggleButtonGroup
-          value={viewType}
-          exclusive
-          onChange={onViewTypeChange}
-          aria-label="text alignment"
-          sx={{ marginLeft: "auto" }}
-        >
-          <ToggleButton value={ViewType.Cards} aria-label="Kartenansicht">
-            <GridViewIcon />
-          </ToggleButton>
-          <ToggleButton value={ViewType.List} aria-label="Listenansicht">
-            <ListIcon />
-          </ToggleButton>
-        </ToggleButtonGroup>
-      </SoftBox>
+      {isUpMd && (
+        <SoftBox sx={{ mt: 2, display: "flex" }}>
+          <SoftButton
+            startIcon={<AddIcon />}
+            color="secondary"
+            href="/exercises/add"
+          >
+            {t("ExerciseList:addExercise")}
+          </SoftButton>
+          <ToggleButtonGroup
+            value={viewType}
+            exclusive
+            onChange={onViewTypeChange}
+            aria-label="text alignment"
+            sx={{ marginLeft: "auto" }}
+          >
+            <ToggleButton value={ViewType.Cards} aria-label="Kartenansicht">
+              <GridViewIcon />
+            </ToggleButton>
+            <ToggleButton value={ViewType.List} aria-label="Listenansicht">
+              <ListIcon />
+            </ToggleButton>
+          </ToggleButtonGroup>
+        </SoftBox>
+      )}
       {isExercisesError && (
         <Alert color="error" sx={{ mt: 2 }}>
           {" "}
@@ -251,13 +287,24 @@ const ExerciseList = () => {
         </Card>
       )}
       {!isExercisesError && viewType === ViewType.Cards && (
-        <SoftBox sx={{ mt: 2, flexGrow: 1, overflowY: "auto", p: 2 }}>
-          <ExercisesCardView
-            isExercisesLoading={isExercisesLoading}
-            onOpenExerciseClick={onOpenExerciseClick}
-            exercises={exercises}
-          />
-        </SoftBox>
+        <>
+          <SoftBox sx={{ mt: 2, flexGrow: 1, overflowY: "auto", p: 2 }}>
+            <ExercisesCardView
+              isExercisesLoading={isExercisesLoading}
+              onOpenExerciseClick={onOpenExerciseClick}
+              exercises={exercises}
+              scrollTrigger={scrollTrigger}
+            />
+          </SoftBox>
+          {scrollTrigger && isUpMd && (
+            <IconButton
+              onClick={() => window.scrollTo(0, 0)}
+              sx={{ position: "fixed", bottom: 16, right: 16 }}
+            >
+              <ArrowCircleUpIcon />
+            </IconButton>
+          )}
+        </>
       )}
     </SoftBox>
   );

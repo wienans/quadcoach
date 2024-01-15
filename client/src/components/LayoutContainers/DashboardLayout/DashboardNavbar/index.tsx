@@ -105,12 +105,11 @@ const DashboardNavbar = ({ absolute, light }: DashboardNavbarProps) => {
     // Remove event listener on cleanup
     return () => window.removeEventListener("scroll", handleTransparentNavbar);
   }, [dispatch, fixedNavbar]);
-
+  console.log("absolute", absolute ? "y" : "n");
   return (
     <AppBar
-      position={absolute ? "absolute" : navbarType}
-      color="inherit"
-      sx={(theme) => navbar(theme, { transparentNavbar, absolute, light })}
+      position={"relative"}
+      color="transparent"
     >
       <Toolbar sx={(theme) => navbarContainer(theme)}>
         <BackButton
