@@ -5,10 +5,7 @@ import {
   RouteHandle,
   RouteHandleType,
 } from "../../../../pages/routes/routeTypes";
-import {
-  SystemStyleObject,
-  SxProps,
-} from "@mui/system/styleFunctionSx/styleFunctionSx";
+import { SystemStyleObject } from "@mui/system/styleFunctionSx/styleFunctionSx";
 import { SoftBox } from "../../..";
 
 type BackButtonInfo = {
@@ -25,7 +22,7 @@ const getBackButtonHrefProps = (
   const lastRouteMatch = routeMatches[routeMatchesLength - 1];
 
   if (!lastRouteMatch) return;
-  
+
   switch (lastRouteMatch.handle.type) {
     case RouteHandleType.updateExercise: {
       const exerciseRoute = routeMatches.find(

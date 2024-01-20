@@ -12,8 +12,10 @@ import {
   ListItem,
   ListItemAvatar,
   ListItemText,
+  Theme,
   Tooltip,
   styled,
+  useMediaQuery,
 } from "@mui/material";
 import ExerciseAvatar from "./ExerciseAvatar";
 import CircleIcon from "@mui/icons-material/Circle";
@@ -58,6 +60,7 @@ const ExerciseCard = ({
   onOpenExerciseClick,
 }: ExerciseCardProps): JSX.Element => {
   const { t } = useTranslation("ExerciseList");
+  const isUpSm = useMediaQuery((theme: Theme) => theme.breakpoints.up("sm"));
   const [moreInformationExpanded, setMoreInformationExpanded] =
     useState<boolean>(false);
   // TODO: Maybe we should add to exercise a picture or video url, which could be used to show exercise.
@@ -68,7 +71,11 @@ const ExerciseCard = ({
   const exerciseType = getExerciseType(exercise);
 
   return (
-    <Card>
+    <Card
+      sx={(theme) => ({
+        boxShadow: theme.boxShadows.md,
+      })}
+    >
       <CardHeader
         sx={{
           display: "flex",
@@ -131,32 +138,36 @@ const ExerciseCard = ({
             sx={{ mr: 1 }}
           />
         </Tooltip>
-        <Tooltip title={t("ExerciseList:cardView.beaterAmount")}>
-          <Chip
-            avatar={
-              <Avatar
-                sx={{ backgroundColor: "black.main", color: "black.main" }}
-              >
-                <CircleIcon sx={{ color: "black.main" }} />
-              </Avatar>
-            }
-            label={exercise.beaters}
-            sx={{ mr: 1 }}
-          />
-        </Tooltip>
-        <Tooltip title={t("ExerciseList:cardView.chaserAmount")}>
-          <Chip
-            avatar={
-              <Avatar
-                sx={{ backgroundColor: "white.main", color: "white.main" }}
-              >
-                <CircleIcon sx={{ color: "white.main" }} />
-              </Avatar>
-            }
-            label={exercise.chasers}
-            sx={{ mr: 1 }}
-          />
-        </Tooltip>
+        {isUpSm && (
+          <>
+            <Tooltip title={t("ExerciseList:cardView.beaterAmount")}>
+              <Chip
+                avatar={
+                  <Avatar
+                    sx={{ backgroundColor: "black.main", color: "black.main" }}
+                  >
+                    <CircleIcon sx={{ color: "black.main" }} />
+                  </Avatar>
+                }
+                label={exercise.beaters}
+                sx={{ mr: 1 }}
+              />
+            </Tooltip>
+            <Tooltip title={t("ExerciseList:cardView.chaserAmount")}>
+              <Chip
+                avatar={
+                  <Avatar
+                    sx={{ backgroundColor: "white.main", color: "white.main" }}
+                  >
+                    <CircleIcon sx={{ color: "white.main" }} />
+                  </Avatar>
+                }
+                label={exercise.chasers}
+                sx={{ mr: 1 }}
+              />
+            </Tooltip>
+          </>
+        )}
         <Tooltip title={t("ExerciseList:cardView.timeInMinutes")}>
           <Chip avatar={<TimelapseIcon />} label={exercise.time_min} />
         </Tooltip>
