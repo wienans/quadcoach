@@ -3,22 +3,15 @@ import {
   DataGrid,
   GridColDef,
   GridEventListener,
-  GridPagination,
   GridPaginationModel,
   GridRowParams,
-  GridSlotsComponentsProps,
-  gridPageCountSelector,
-  useGridApiContext,
-  useGridSelector,
 } from "@mui/x-data-grid";
 import {
   Alert,
   LinearProgress,
-  TablePaginationProps,
   styled,
 } from "@mui/material";
-import { Chip, Box } from "@mui/material";
-import MuiPagination from "@mui/material/Pagination";
+import { Chip } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { SoftBox } from "../../../../components";
 import { Exercise } from "../../../../api/quadcoachApi/domain";
@@ -46,45 +39,6 @@ const StyledDataGrid = styled(DataGrid)({
     cursor: "pointer",
   },
 }) as typeof DataGrid;
-
-const Pagination = ({
-  page,
-  onPageChange,
-  className,
-}: Pick<TablePaginationProps, "page" | "onPageChange" | "className">) => {
-  const apiRef = useGridApiContext();
-  const pageCount = useGridSelector(apiRef, gridPageCountSelector);
-  return <span>Hallo</span>;
-  return (
-    <Box>
-      <span>Hallo</span>
-      <MuiPagination
-        color="primary"
-        className={className}
-        count={pageCount}
-        page={page + 1}
-        onChange={(event, newPage) => {
-          onPageChange(event as any, newPage - 1);
-        }}
-      />
-    </Box>
-  );
-};
-
-const CustomPagination = (props: any) => {
-  return <GridPagination ActionsComponent={Pagination} {...props} />;
-};
-
-const CustomFooter = (props: GridSlotsComponentsProps) => {
-  return <CustomPagination />;
-  return (
-    <Box sx={{ display: "flex", width: "100%" }}>
-      <Box sx={{ ml: "auto" }}>
-        <CustomPagination />
-      </Box>
-    </Box>
-  );
-};
 
 export type ExercisesListViewProps = {
   exercises?: Exercise[];
@@ -154,8 +108,6 @@ const ExercisesListView = ({
       slots={{
         loadingOverlay: LinearProgress,
         noRowsOverlay: NoRowsAlert,
-        // pagination: CustomPagination,
-        // footer: CustomFooter,
       }}
       loading={isExercisesLoading}
       getRowId={(row) => row._id}

@@ -21,7 +21,7 @@ import Toolbar from "@mui/material/Toolbar";
 import { SoftBox, Breadcrumbs } from "../../..";
 
 // Custom styles for DashboardNavbar
-import Logo from "../../../../assets/images/firstLogo.svg";
+import Logo from "../../../../assets/images/logo.svg";
 import NavbarMainControls from "../../../NavbarMainControls";
 import BackButton from "./BackButton";
 

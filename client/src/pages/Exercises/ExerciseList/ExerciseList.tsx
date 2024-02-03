@@ -276,15 +276,13 @@ const ExerciseList = () => {
         </Alert>
       )}
       {!isExercisesError && viewType === ViewType.List && (
-        // <Card sx={{ mt: 2 }}>
-        //   <CardContent>
-            <ExercisesListView
-              isExercisesLoading={isExercisesLoading}
-              onOpenExerciseClick={onOpenExerciseClick}
-              exercises={exercises}
-            />
-        //   </CardContent>
-        // </Card>
+        <SoftBox sx={{ mt: 2 }}>
+          <ExercisesListView
+            isExercisesLoading={isExercisesLoading}
+            onOpenExerciseClick={onOpenExerciseClick}
+            exercises={exercises}
+          />
+        </SoftBox>
       )}
       {!isExercisesError && viewType === ViewType.Cards && (
         <>

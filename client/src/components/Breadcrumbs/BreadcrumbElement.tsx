@@ -33,6 +33,10 @@ const BreadcrumbElement = ({
       fontWeight="regular"
       textTransform="capitalize"
       fontSize="medium"
+      maxWidth="100px"
+      overflow="hidden"
+      textOverflow="ellipsis"
+      whiteSpace="nowrap"
     >
       {title}
     </Link>

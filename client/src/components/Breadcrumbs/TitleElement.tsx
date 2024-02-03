@@ -14,6 +14,10 @@ const TitleElement = ({ title, light }: TitleElementProps) => (
     color={light ? "white" : "dark"}
     opacity={light ? 0.8 : 0.5}
     fontSize="medium"
+    maxWidth="100px"
+    overflow="hidden"
+    textOverflow="ellipsis"
+    whiteSpace="nowrap"
   >
     {title}
   </SoftTypography>

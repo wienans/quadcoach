@@ -13,6 +13,12 @@ const LastElement = ({ light, title }: LastElementProps): JSX.Element => (
     color={light ? "white" : "dark"}
     textOverflow="ellipsis"
     fontSize="medium"
+    maxWidth="100px"
+    overflow="hidden"
+    whiteSpace="nowrap"
+    sx={{
+      textOverflow: "ellipsis",
+    }}
   >
     {title}
   </SoftTypography>

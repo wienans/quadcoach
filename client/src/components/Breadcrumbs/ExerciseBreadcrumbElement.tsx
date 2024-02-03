@@ -27,7 +27,7 @@ const ExerciseBreadcrumbElement = ({
     <BreadcrumbElement
       isLastElement={isLastElement}
       isLoading={isExerciseLoading}
-      title={t("Breadcrumbs:exercise", { exerciseName: exercise?.name })}
+      title={exercise?.name ?? t("Breadcrumbs:exercise")}
       path={route.pathname}
     />
   );

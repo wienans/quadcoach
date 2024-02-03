@@ -40,7 +40,7 @@ import { RootState } from "../../../store/store";
 import { DrawerProps, Palette, PaletteColor } from "@mui/material";
 import { PickByType } from "../../../helpers/typeHelpers";
 import { useTranslation } from "react-i18next";
-import Logo from "../../../assets/images/firstLogo.svg";
+import Logo from "../../../assets/images/logo.svg";
 
 // Soft UI Dashboard React context
 // import { useSoftUIController, setMiniSidenav } from "context";
