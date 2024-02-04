@@ -14,7 +14,7 @@ export const exerciseApiSlice = quadcoachApi.injectEndpoints({
   endpoints: (builder) => ({
     getExercise: builder.query<Exercise, string>({
       query: (exerciseId: string) => ({
-        url: `/api/exercise/${exerciseId}`,
+        url: `/api/exercises/${exerciseId}`,
         method: "get",
       }),
       providesTags: (result) =>
@@ -33,7 +33,7 @@ export const exerciseApiSlice = quadcoachApi.injectEndpoints({
     updateExercise: builder.mutation<Exercise, Exercise>({
       query(data) {
         return {
-          url: `/api/exercise/${data._id}`,
+          url: `/api/exercises/${data._id}`,
           method: "put",
           data,
         };
@@ -56,7 +56,7 @@ export const exerciseApiSlice = quadcoachApi.injectEndpoints({
     deleteExercise: builder.mutation<void, string>({
       query(exerciseId) {
         return {
-          url: `/api/exercise/${exerciseId}`,
+          url: `/api/exercises/${exerciseId}`,
           method: "delete",
         };
       },
@@ -70,7 +70,7 @@ export const exerciseApiSlice = quadcoachApi.injectEndpoints({
     addExercise: builder.mutation<Exercise, Omit<Exercise, "_id">>({
       query(data) {
         return {
-          url: "/api/add-exercise",
+          url: "/api/exercises",
           method: "post",
           data,
         };
@@ -92,7 +92,7 @@ export const exerciseApiSlice = quadcoachApi.injectEndpoints({
     }),
     getRelatedExercises: builder.query<Exercise[], string>({
       query: (exerciseId: string) => ({
-        url: `/api/exercise/${exerciseId}/relatedExercises`,
+        url: `/api/exercises/${exerciseId}/relatedExercises`,
         method: "get",
       }),
       providesTags: (result) =>
