@@ -12,6 +12,8 @@ import logger, { logEvents } from "./middleware/logger";
 import errorHandler from "./middleware/errorHandler";
 import cookieParser from "cookie-parser";
 
+import userRoutes from "./routes/userRoutes";
+
 // Read out Port or use Default
 const PORT = process.env.PORT || 3001;
 
@@ -52,6 +54,8 @@ mongoose
   });
 
 // API's
+app.use("/api/user", userRoutes);
+
 app.get("/api", (req, res) => {
   res.json({ message: "Hello from server!" });
 });
@@ -61,23 +65,6 @@ app.post("/api/add-exercise", async (req, res) => {
   const result = await exercise.save();
   if (!result) {
     console.error("Couldn't create Exercise");
-  }
-  res.send(result);
-});
-
-app.get("/api/all-exercises", async (req, res) => {
-  const result = await Exercise.find();
-  if (!result) {
-    console.error("Couldn't find all exercises");
-  }
-  res.send(result);
-});
-
-app.post("/api/register", async (req, res) => {
-  let user = new User(req.body);
-  const result = await user.save();
-  if (!result) {
-    console.error("Couldn't save User");
   }
   res.send(result);
 });

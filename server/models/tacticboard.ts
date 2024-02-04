@@ -52,6 +52,7 @@ interface ITacticBoard {
   isPrivate?: boolean;
   tags?: Types.Array<string>;
   creator?: string;
+  user?: Types.ObjectId;
   pages?: Types.Array<ITacticPage>;
 }
 
@@ -206,6 +207,10 @@ const tacticBoardSchema = new Schema<ITacticBoard>(
     },
     creator: {
       type: String,
+    },
+    user: {
+      type: Types.ObjectId,
+      ref: "users",
     },
   },
   { timestamps: true }
