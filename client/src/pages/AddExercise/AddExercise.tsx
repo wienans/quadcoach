@@ -24,7 +24,7 @@ const AddExercise = () => {
   useEffect(() => {
     if (!isAddExerciseSuccess) return;
 
-    navigate("/");
+    navigate("/exercises");
   }, [isAddExerciseSuccess, navigate]);
 
   const onSubmit = (values: ExerciseWithOutId) => {
