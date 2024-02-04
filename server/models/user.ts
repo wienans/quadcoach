@@ -5,6 +5,8 @@ interface IUser {
   name: string;
   email: string;
   password: string;
+  roles: string[];
+  active: boolean;
 }
 
 const userSchema = new Schema<IUser>({
@@ -19,6 +21,14 @@ const userSchema = new Schema<IUser>({
   password: {
     type: String,
     required: true,
+  },
+  roles: {
+    type: [String],
+    default: ["user"],
+  },
+  active: {
+    type: Boolean,
+    default: true,
   },
 });
 

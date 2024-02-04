@@ -1,10 +1,16 @@
 import express from "express";
 import mongoose from "mongoose";
+
 import cors from "cors";
+import corsOptions from "./config/corsOptions";
 
 import Exercise from "./models/exercise";
 import User from "./models/user";
 import TacticBoard from "./models/tacticboard";
+
+import logger, { logEvents } from "./middleware/logger";
+import errorHandler from "./middleware/errorHandler";
+import cookieParser from "cookie-parser";
 
 // Read out Port or use Default
 const PORT = process.env.PORT || 3001;
@@ -21,6 +27,14 @@ const MONGO_PASSWORD = process.env.MONGO_PASSWORD;
 const MONGO_DB = process.env.MONGO_DB;
 
 const dbURI = `mongodb://${MONGO_USER}:${MONGO_PASSWORD}@quadcoach-mongodb:27017/${MONGO_DB}?retryWrites=true&w=majority`;
+
+// Middleware
+app.use(logger);
+app.use(express.json());
+app.use(cookieParser());
+app.use(cors(corsOptions));
+app.use(errorHandler);
+
 mongoose
   .connect(dbURI)
   .then((result) => {
@@ -29,13 +43,13 @@ mongoose
         console.log(`Server listening on ${PORT}`);
       });
   })
-  .catch((err) => console.log(err));
-
-// Middleware
-app.use(express.json());
-app.use(cors());
-
-app.use(express.static("dist"));
+  .catch((err) => {
+    console.log(err);
+    logEvents(
+      `${err.no}: ${err.code}\t${err.syscall}\t${err.hostname}`,
+      "mongoErrLog.log"
+    );
+  });
 
 // API's
 app.get("/api", (req, res) => {
