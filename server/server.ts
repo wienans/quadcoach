@@ -13,6 +13,7 @@ import errorHandler from "./middleware/errorHandler";
 import cookieParser from "cookie-parser";
 
 import userRoutes from "./routes/userRoutes";
+import tacticboardRoutes from "./routes/tacticboardRoutes";
 
 // Read out Port or use Default
 const PORT = process.env.PORT || 3001;
@@ -55,7 +56,7 @@ mongoose
 
 // API's
 app.use("/api/user", userRoutes);
-
+app.use("/api/tacticboards", tacticboardRoutes);
 app.get("/api", (req, res) => {
   res.json({ message: "Hello from server!" });
 });
@@ -216,66 +217,6 @@ app.get("/api/materials", async (req, res) => {
     res.send(filtered);
   } else {
     res.send(result);
-  }
-});
-
-app.post("/api/tacticboards", async (req, res) => {
-  let tacticboard = new TacticBoard(req.body);
-  const result = await tacticboard.save();
-  if (!result) {
-    console.error("Couldn't create Tacticboard");
-  }
-  res.send(result);
-});
-
-app.get("/api/tacticboards", async (req, res) => {
-  let queryString: string = JSON.stringify(req.query);
-
-  queryString = queryString.replace(
-    /\b(gte|gt|lte|lt|eq|ne|regex|options|in|nin)\b/g,
-    (match) => `$${match}`
-  );
-
-  const exercises = await TacticBoard.find(JSON.parse(queryString));
-
-  res.send(exercises);
-});
-
-app.delete("/api/tacticboards/:id", async (req, res) => {
-  if (mongoose.isValidObjectId(req.params.id)) {
-    const result = await TacticBoard.deleteOne({ _id: req.params.id });
-    if (result) {
-      res.send(result);
-    } else {
-      res.send({ result: "No Record Found" });
-    }
-  } else {
-    res.send({ result: "No Record Found" });
-  }
-});
-
-app.put("/api/tacticboards/:id", async (req, res) => {
-  if (mongoose.isValidObjectId(req.params.id)) {
-    const result = await TacticBoard.updateOne(
-      { _id: req.params.id },
-      { $set: req.body }
-    );
-    res.send(result);
-  } else {
-    res.send({ result: "No Record Found" });
-  }
-});
-
-app.get("/api/tacticboards/:id", async (req, res) => {
-  if (mongoose.isValidObjectId(req.params.id)) {
-    const result = await TacticBoard.findOne({ _id: req.params.id });
-    if (result) {
-      res.send(result);
-    } else {
-      res.send({ result: "No Record Found" });
-    }
-  } else {
-    res.send({ result: "No Record Found" });
   }
 });
 
