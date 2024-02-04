@@ -58,17 +58,9 @@ mongoose
 app.use("/api/user", userRoutes);
 app.use("/api/tacticboards", tacticboardRoutes);
 app.use("/api/exercises", exerciseRoutes);
+
 app.get("/api", (req, res) => {
   res.json({ message: "Hello from server!" });
-});
-
-app.post("/api/add-exercise", async (req, res) => {
-  let exercise = new Exercise(req.body);
-  const result = await exercise.save();
-  if (!result) {
-    console.error("Couldn't create Exercise");
-  }
-  res.send(result);
 });
 
 app.get("/api/search/:key", async (req, res) => {
@@ -91,30 +83,6 @@ app.get("/api/search/:key", async (req, res) => {
   }
 });
 
-app.get("/api/tags/exercises", async (req, res) => {
-  let queryString: string = JSON.stringify(req.query);
-
-  // Rebuild querry string
-  queryString = queryString.replace(
-    /\b(gte|gt|lte|lt|eq|ne|regex|options|in|nin)\b/g,
-    (match) => `$${match}`
-  );
-  let querry = JSON.parse(queryString);
-  // gets all distinct values of tags
-  const result: string[] = await Exercise.distinct("tags");
-  if (querry["tagName"] != undefined) {
-    // Apply Regex, "i" for case insensitive
-    let regex: RegExp = new RegExp(
-      querry["tagName"]["$regex"],
-      querry["tagName"]["$options"]
-    );
-    let filtered: string[] = result.filter((item) => item.match(regex));
-    res.send(filtered);
-  } else {
-    res.send(result);
-  }
-});
-
 app.get("/api/materials", async (req, res) => {
   let queryString: string = JSON.stringify(req.query);
 
@@ -131,6 +99,30 @@ app.get("/api/materials", async (req, res) => {
     let regex: RegExp = new RegExp(
       querry["materialName"]["$regex"],
       querry["materialName"]["$options"]
+    );
+    let filtered: string[] = result.filter((item) => item.match(regex));
+    res.send(filtered);
+  } else {
+    res.send(result);
+  }
+});
+
+app.get("/api/tags/exercises", async (req, res) => {
+  let queryString: string = JSON.stringify(req.query);
+
+  // Rebuild querry string
+  queryString = queryString.replace(
+    /\b(gte|gt|lte|lt|eq|ne|regex|options|in|nin)\b/g,
+    (match) => `$${match}`
+  );
+  let querry = JSON.parse(queryString);
+  // gets all distinct values of tags
+  const result: string[] = await Exercise.distinct("tags");
+  if (querry["tagName"] != undefined) {
+    // Apply Regex, "i" for case insensitive
+    let regex: RegExp = new RegExp(
+      querry["tagName"]["$regex"],
+      querry["tagName"]["$options"]
     );
     let filtered: string[] = result.filter((item) => item.match(regex));
     res.send(filtered);
