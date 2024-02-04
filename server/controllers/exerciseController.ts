@@ -1,13 +1,10 @@
-import User from "../models/user";
 import asyncHandler from "express-async-handler";
-import bcrypt from "bcrypt";
 import { Request, Response } from "express";
-import TacticBoard from "../models/tacticboard";
 import Exercise from "../models/exercise";
 import mongoose from "mongoose";
-// @desc Get all users
-// @route GET /users
-// @access Private
+
+// @route GET
+// @access public
 export const getAllExercises = asyncHandler(
   async (req: Request, res: Response) => {
     let queryString: string = JSON.stringify(req.query);
@@ -23,9 +20,8 @@ export const getAllExercises = asyncHandler(
   }
 );
 
-// @desc Get users by ID
-// @route GET /users
-// @access Private
+// @route GET
+// @access Public
 export const getById = asyncHandler(async (req: Request, res: Response) => {
   if (mongoose.isValidObjectId(req.params.id)) {
     const result = await Exercise.findOne({ _id: req.params.id });
@@ -39,9 +35,8 @@ export const getById = asyncHandler(async (req: Request, res: Response) => {
   }
 });
 
-// @desc Create new user
-// @route POST /users
-// @access Private
+// @route POST
+// @access Public
 export const createNewExercise = asyncHandler(
   async (req: Request, res: Response) => {
     let exercise = new Exercise(req.body);
@@ -53,8 +48,7 @@ export const createNewExercise = asyncHandler(
   }
 );
 
-// @desc Update a user
-// @route PATCH /users
+// @route PATCH
 // @access Private
 export const updateById = asyncHandler(async (req: Request, res: Response) => {
   if (mongoose.isValidObjectId(req.params.id)) {
@@ -68,8 +62,7 @@ export const updateById = asyncHandler(async (req: Request, res: Response) => {
   }
 });
 
-// @desc Delete a user
-// @route DELETE /users
+// @route DELETE
 // @access Private
 export const deleteById = asyncHandler(async (req: Request, res: Response) => {
   if (mongoose.isValidObjectId(req.params.id)) {
@@ -84,9 +77,8 @@ export const deleteById = asyncHandler(async (req: Request, res: Response) => {
   }
 });
 
-// @desc Delete a user
-// @route DELETE /users
-// @access Private
+// @route GET
+// @access Public
 export const getRelatedById = asyncHandler(
   async (req: Request, res: Response) => {
     if (mongoose.isValidObjectId(req.params.id)) {
