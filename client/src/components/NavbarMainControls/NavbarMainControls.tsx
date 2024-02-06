@@ -23,7 +23,13 @@ const languages: Language[] = [
   },
 ];
 
-const NavbarMainControls = (): JSX.Element => {
+export type NavbarMainControlsProps = {
+  light: boolean;
+};
+
+const NavbarMainControls = ({
+  light,
+}: NavbarMainControlsProps): JSX.Element => {
   const dispatch = useAppDispatch();
   const { i18n } = useTranslation();
 
@@ -58,10 +64,24 @@ const NavbarMainControls = (): JSX.Element => {
         justifyContent: "space-between",
       }}
     >
-      <IconButton size="small" color="inherit" onClick={handleOpenLanguageMenu}>
+      <IconButton
+        size="small"
+        color="inherit"
+        onClick={handleOpenLanguageMenu}
+        sx={(theme) => ({
+          color: light ? theme.palette.white.main : theme.palette.black.main,
+        })}
+      >
         <TranslateIcon />
       </IconButton>
-      <IconButton size="small" color="inherit" onClick={handleMiniSidenav}>
+      <IconButton
+        size="small"
+        color="inherit"
+        onClick={handleMiniSidenav}
+        sx={(theme) => ({
+          color: light ? theme.palette.white.main : theme.palette.black.main,
+        })}
+      >
         <Icon className="text-dark">{miniSidenav ? "menu_open" : "menu"}</Icon>
       </IconButton>
       <Menu

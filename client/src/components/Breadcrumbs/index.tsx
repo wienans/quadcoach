@@ -14,26 +14,13 @@ Coded by www.creative-tim.com
 */
 import "./translationts";
 
-// react-router-dom components
-import { Link } from "react-router-dom";
-
 // @mui material components
-import { Breadcrumbs as MuiBreadcrumbs, styled } from "@mui/material";
-import Icon from "@mui/material/Icon";
+import { Breadcrumbs as MuiBreadcrumbs } from "@mui/material";
 
 // Soft UI Dashboard React components
-import { SoftBox, SoftTypography } from "..";
+import { SoftBox } from "..";
 import BreadcrumbElementWrapper from "./BreadcrumbElementWrapper";
 import { useBreadcrumbsToRender } from "./hooks";
-
-const StyledBreadcrumbs = styled(MuiBreadcrumbs)`
-  .MuiBreadcrumbs-li {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    // flex: 1;
-  }
-`;
 
 export type BreadcrumbRoute = {
   title: string;
@@ -47,15 +34,9 @@ export type BreadcrumbsProps = {
 const Breadcrumbs = ({ light }: BreadcrumbsProps) => {
   const breadcrumbsToRender = useBreadcrumbsToRender();
   const breadcrumbsToRenderLength = breadcrumbsToRender.length;
-  
+
   return (
-    <SoftBox
-      sx={
-        {
-          // width: "100%",
-        }
-      }
-    >
+    <SoftBox>
       <MuiBreadcrumbs
         sx={{
           display: "flex",
@@ -78,6 +59,7 @@ const Breadcrumbs = ({ light }: BreadcrumbsProps) => {
             isLastElement={index === breadcrumbsToRenderLength - 1}
             route={route}
             key={route.handle.type}
+            light={light}
           />
         ))}
       </MuiBreadcrumbs>

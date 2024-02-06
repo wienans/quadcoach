@@ -1,15 +1,10 @@
 import "./translations";
 import Sidenav, { SidebarNavRoute } from "./Sidenav";
-import brand from "../../assets/images/logo-ct.png";
 import { Outlet } from "react-router-dom";
 
 import HomeIcon from "@mui/icons-material/Home";
-import PlaylistAddIcon from "@mui/icons-material/PlaylistAdd";
 import DeveloperBoardIcon from "@mui/icons-material/DeveloperBoard";
 import ListIcon from "@mui/icons-material/List";
-import { DashboardLayout } from "../LayoutContainers";
-import DashboardNavbar from "../LayoutContainers/DashboardLayout/DashboardNavbar";
-import { Box } from "@mui/material";
 import GitHubIcon from "@mui/icons-material/GitHub";
 
 const sidebarNavRoutes: SidebarNavRoute[] = [
@@ -59,24 +54,8 @@ const sidebarNavRoutes: SidebarNavRoute[] = [
 const Layout = () => {
   return (
     <>
-      <Sidenav
-        color="info"
-        routes={sidebarNavRoutes}
-      />
-      <DashboardLayout>
-        <DashboardNavbar />
-        <Box
-          sx={(theme) => ({
-            px: 1,
-            [theme.breakpoints.up("sm")]: {
-              px: 2,
-            },
-            flexGrow: 1,
-          })}
-        >
-          <Outlet />
-        </Box>
-      </DashboardLayout>
+      <Sidenav color="info" routes={sidebarNavRoutes} />
+      <Outlet />
     </>
   );
 };

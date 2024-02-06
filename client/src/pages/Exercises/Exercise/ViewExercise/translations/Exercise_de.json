@@ -7,15 +7,26 @@
   "deleteExercise": "Übung löschen",
   "errorDeletingExercise": "Es ist ein Fehler beim Löschen der Übung aufgetreten.",
   "errorLoadingRelatedExercises": "Es ist ein Fehler beim Laden der zugehörigen Übungen aufgetreten.",
-  "info": "Info",
-  "materials": "Materialien:",
-  "tags": "Stichwörter:",
-  "realtedToExercises": "Zugehörige Übungen:",
-  "personNumber": "Personenanzahl:",
-  "beaterNumber": "Beateranzahl:",
-  "chaserNumber": "Chaseranzahl:",
-  "time": "Zeit:",
-  "minutesValue": "{{value}} Min",
+  "info": {
+    "title": "Info",
+    "personNumber": "Personen",
+    "beaterNumber": "Beater",
+    "chaserNumber": "Chaser",
+    "time": "Zeit",
+    "minutesValue": "{{value}} Min"
+  },
+  "materials": {
+    "title": "Materialien",
+    "none": "Keine Materialien benötigt"
+  },
+  "tags": {
+    "title": "Stichwörter",
+    "none": "Keine Stichwörter verfügbar"
+  },
+  "realtedToExercises": {
+    "title": "Zugehörige Übungen:",
+    "none": "Keine zugehörigen Übungen verfügbar"
+  },
   "block": {
     "title": "Block {{blockNumber}}",
     "minutes": "Zeit: {{minutes}} Minuten",

@@ -1,12 +1,9 @@
 import { IconButton, Theme, Tooltip, useMediaQuery } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { UIMatch, useMatches } from "react-router-dom";
-import {
-  RouteHandle,
-  RouteHandleType,
-} from "../../../../pages/routes/routeTypes";
-import { SystemStyleObject } from "@mui/system/styleFunctionSx/styleFunctionSx";
-import { SoftBox } from "../../..";
+import { RouteHandle, RouteHandleType } from "../../pages/routes/routeTypes";
+import { SxProps } from "@mui/system/styleFunctionSx/styleFunctionSx";
+import { SoftBox } from "..";
 
 type BackButtonInfo = {
   href: string;
@@ -49,10 +46,14 @@ const getBackButtonHrefProps = (
 };
 
 export type BackButtonProps = {
-  sx?: SystemStyleObject<Theme>;
+  sx?: SxProps<Theme>;
+  light: boolean;
 };
 
-const BackButton = ({ sx }: BackButtonProps): JSX.Element | undefined => {
+const BackButton = ({
+  sx,
+  light,
+}: BackButtonProps): JSX.Element | undefined => {
   const isUpXs = useMediaQuery((theme: Theme) => theme.breakpoints.up("xs"));
   const routeMatches = (
     useMatches() as UIMatch<unknown, RouteHandle>[]
@@ -65,7 +66,12 @@ const BackButton = ({ sx }: BackButtonProps): JSX.Element | undefined => {
   return (
     <SoftBox sx={sx}>
       <Tooltip title={backButtonInfo.tooltip}>
-        <IconButton href={backButtonInfo.href}>
+        <IconButton
+          href={backButtonInfo.href}
+          sx={(theme) => ({
+            color: light ? theme.palette.white.main : theme.palette.black.main,
+          })}
+        >
           <ArrowBackIcon />
         </IconButton>
       </Tooltip>

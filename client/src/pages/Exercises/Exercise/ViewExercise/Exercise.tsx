@@ -1,19 +1,33 @@
 import "./translations";
-import { useParams, useNavigate, Link } from "react-router-dom";
-import { useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 import {
   Alert,
   Box,
   Card,
-  CardActions,
-  CardContent,
   Grid,
-  LinearProgress,
   Skeleton,
+  Link,
+  useTheme,
+  useMediaQuery,
+  IconButton,
+  Tooltip,
+  Theme,
+  CardHeader,
+  CardContent,
+  List,
+  ListItem,
+  ListItemText,
+  BottomNavigationAction,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  ListItemButton,
+  CardMedia,
+  CardActions,
 } from "@mui/material";
 import { SoftBox, SoftButton, SoftTypography } from "../../../../components";
 import { Chip } from "@mui/material";
-import CopyrightIcon from "@mui/icons-material/Copyright";
 import ReactPlayer from "react-player";
 import { Exercise } from "../../../../api/quadcoachApi/domain";
 import {
@@ -22,48 +36,34 @@ import {
   useGetRelatedExercisesQuery,
 } from "../../../exerciseApi";
 import { useTranslation } from "react-i18next";
-import { TFunction } from "i18next";
+import { ProfileLayout } from "../../../../components/LayoutContainers";
+import { getExerciseTypeHeaderBackgroundImage } from "../../../../components/LayoutContainers/ProfileLayout";
+import {
+  ExerciseType,
+  getExerciseType,
+} from "../../../../helpers/exerciseHelpers";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import ContentPasteIcon from "@mui/icons-material/ContentPaste";
 
 type ExerciseValue = {
   labelResourceKey: string;
-  getElement: (
-    exercise: Exercise,
-    t: TFunction<"Exercise", undefined>,
-  ) => JSX.Element;
+  getValue: (exercise: Exercise) => string;
 };
 
-const values: ExerciseValue[] = [
+const personValues: ExerciseValue[] = [
   {
-    labelResourceKey: "personNumber",
-    getElement: (exercise) => (
-      <SoftTypography variant="button" fontWeight="regular" color="text">
-        {exercise.persons}
-      </SoftTypography>
-    ),
+    labelResourceKey: "Exercise:info.personNumber",
+    getValue: (exercise) => exercise.persons.toString(),
   },
   {
-    labelResourceKey: "beaterNumber",
-    getElement: (exercise) => (
-      <SoftTypography variant="button" fontWeight="regular" color="text">
-        {exercise.beaters}
-      </SoftTypography>
-    ),
+    labelResourceKey: "Exercise:info.beaterNumber",
+    getValue: (exercise) => exercise.beaters.toString(),
   },
   {
-    labelResourceKey: "chaserNumber",
-    getElement: (exercise) => (
-      <SoftTypography variant="button" fontWeight="regular" color="text">
-        {exercise.chasers}
-      </SoftTypography>
-    ),
-  },
-  {
-    labelResourceKey: "time",
-    getElement: (exercise, t) => (
-      <SoftTypography variant="button" fontWeight="regular" color="text">
-        {t("Exercise:minutesValue", { value: exercise.time_min })}
-      </SoftTypography>
-    ),
+    labelResourceKey: "Exercise:info.chaserNumber",
+    getValue: (exercise) => exercise.chasers.toString(),
   },
 ];
 
@@ -71,6 +71,11 @@ const Exercise = () => {
   const { t } = useTranslation("Exercise");
   const { id: exerciseId } = useParams();
   const navigate = useNavigate();
+  const theme = useTheme();
+
+  const isUpXl = useMediaQuery((theme: Theme) => theme.breakpoints.up("xl"));
+  const isUpMd = useMediaQuery((theme: Theme) => theme.breakpoints.up("md"));
+
   const {
     data: exercise,
     isLoading: isExerciseLoading,
@@ -78,6 +83,7 @@ const Exercise = () => {
   } = useGetExerciseQuery(exerciseId || "", {
     skip: exerciseId == null,
   });
+
   const {
     data: relatedExercises,
     isLoading: isRelatedExercisesLoading,
@@ -85,6 +91,23 @@ const Exercise = () => {
   } = useGetRelatedExercisesQuery(exerciseId || "", {
     skip: exerciseId == null,
   });
+
+  const [exerciseType, setExerciseType] = useState<ExerciseType | undefined>();
+  const [headerBackgroundImage, setHeaderBackgroundImage] = useState<
+    string | undefined
+  >();
+
+  useEffect(() => {
+    setExerciseType(exercise ? getExerciseType(exercise) : undefined);
+  }, [exercise]);
+
+  useEffect(() => {
+    setHeaderBackgroundImage(
+      exerciseType && exercise
+        ? getExerciseTypeHeaderBackgroundImage(exerciseType, theme)
+        : undefined,
+    );
+  }, [exercise, exerciseType, theme]);
 
   const update = async () => {
     navigate(`/exercises/${exerciseId}/update`);
@@ -135,33 +158,15 @@ const Exercise = () => {
   }
 
   return (
-    <>
-      <Card
-        sx={{
-          backdropFilter: `saturate(200%) blur(30px)`,
-          backgroundColor: ({ functions: { rgba }, palette: { white } }) =>
-            rgba(white.main, 0.8),
-          boxShadow: ({ boxShadows: { navbarBoxShadow } }) => navbarBoxShadow,
-          position: "relative",
-          py: 2,
-          px: 2,
-        }}
-      >
-        <CardContent>
-          <Grid container spacing={3} alignItems="center">
-            <Grid item>
-              <SoftBox height="100%" mt={0.5} lineHeight={1}>
-                <SoftTypography variant="h4" fontWeight="bold">
-                  {exercise.name}
-                </SoftTypography>
-              </SoftBox>
-            </Grid>
-            <Grid item sx={{ ml: "auto" }}>
-              <SoftButton
-                onClick={update}
-                color="primary"
-                sx={{ marginRight: 1 }}
-              >
+    <ProfileLayout
+      title={exercise?.name}
+      headerBackgroundImage={headerBackgroundImage}
+      isDataLoading={isExerciseLoading}
+      headerAction={
+        <SoftBox display="flex">
+          {isUpXl ? (
+            <>
+              <SoftButton onClick={update} color="primary" sx={{ mr: 1 }}>
                 {t("Exercise:updateExercise")}
               </SoftButton>
               <SoftButton
@@ -171,239 +176,334 @@ const Exercise = () => {
               >
                 {t("Exercise:deleteExercise")}
               </SoftButton>
+            </>
+          ) : (
+            isUpMd && (
+              <>
+                <Tooltip title={t("Exercise:updateExercise")}>
+                  <IconButton onClick={update} color="primary" sx={{ mr: 1 }}>
+                    <EditIcon />
+                  </IconButton>
+                </Tooltip>
+                <Tooltip title={t("Exercise:deleteExercise")}>
+                  <IconButton
+                    onClick={onDeleteExerciseClick}
+                    color="error"
+                    disabled={!exercise || isDeleteExerciseLoading}
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+                </Tooltip>
+              </>
+            )
+          )}
+        </SoftBox>
+      }
+      showScrollToTopButton={(scrollTrigger) => scrollTrigger && isUpMd}
+      bottomNavigation={
+        !isUpMd && (
+          <>
+            <Tooltip title={t("Exercise:updateExercise")}>
+              <BottomNavigationAction icon={<EditIcon />} onClick={update} />
+            </Tooltip>
+            <Tooltip title={t("Exercise:deleteExercise")}>
+              <BottomNavigationAction
+                icon={<DeleteIcon />}
+                onClick={onDeleteExerciseClick}
+                disabled={!exercise || isDeleteExerciseLoading}
+              />
+            </Tooltip>
+          </>
+        )
+      }
+    >
+      {() => (
+        <>
+          {isDeleteExerciseError && (
+            <Alert color="error" sx={{ mt: 5, mb: 3 }}>
+              {t("Exercise:errorDeletingExercise")}
+            </Alert>
+          )}
+          {isRelatedExercisesError && (
+            <Alert color="error" sx={{ mt: 5, mb: 3 }}>
+              {t("Exercise:errorLoadingRelatedExercises")}
+            </Alert>
+          )}
+          <Card sx={{ height: "100%" }}>
+            <CardHeader title={t("Exercise:info.title")} />
+            <CardContent>
+              <List
+                sx={{
+                  width: "100%",
+                }}
+              >
+                <Grid container spacing={2}>
+                  {personValues.map(({ labelResourceKey, getValue }) => (
+                    <Grid item xs={6} md={3} key={labelResourceKey}>
+                      <ListItem>
+                        <ListItemText
+                          primary={getValue(exercise)}
+                          secondary={t(labelResourceKey)}
+                        />
+                      </ListItem>
+                    </Grid>
+                  ))}
+                  <Grid item xs={6} md={3}>
+                    <ListItem>
+                      <ListItemText
+                        primary={t("Exercise:info.minutesValue", {
+                          value: exercise.time_min,
+                        })}
+                        secondary={t("Exercise:info.time")}
+                      />
+                    </ListItem>
+                  </Grid>
+                </Grid>
+              </List>
+            </CardContent>
+          </Card>
+          <Grid container spacing={2} sx={{ my: 3 }}>
+            <Grid item xs={12} lg={4}>
+              <Accordion>
+                <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                  {t("Exercise:materials.title")}
+                </AccordionSummary>
+                <AccordionDetails>
+                  {exercise.materials?.some((el) => el !== "") ? (
+                    <List
+                      sx={{
+                        width: "100%",
+                      }}
+                    >
+                      {exercise.materials
+                        .filter((el) => el !== "")
+                        .map((el, index) => (
+                          <ListItem key={el + index}>
+                            <ListItemText primary={el} />
+                          </ListItem>
+                        ))}
+                    </List>
+                  ) : (
+                    t("Exercise:materials.none")
+                  )}
+                </AccordionDetails>
+              </Accordion>
+            </Grid>
+            <Grid item xs={12} lg={4}>
+              <Accordion>
+                <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                  {t("Exercise:tags.title")}
+                </AccordionSummary>
+                <AccordionDetails>
+                  {exercise.tags?.some((el) => el !== "") ? (
+                    <List
+                      sx={{
+                        width: "100%",
+                      }}
+                    >
+                      {exercise.tags
+                        .filter((el) => el !== "")
+                        .map((el, index) => (
+                          <ListItem key={el + index}>
+                            <ListItemText primary={el} />
+                          </ListItem>
+                        ))}
+                    </List>
+                  ) : (
+                    t("Exercise:tags.none")
+                  )}
+                </AccordionDetails>
+              </Accordion>
+            </Grid>
+            <Grid item xs={12} lg={4}>
+              <Accordion>
+                <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                  {t("Exercise:realtedToExercises.title")}
+                </AccordionSummary>
+                <AccordionDetails>
+                  {isRelatedExercisesLoading ? (
+                    <List
+                      sx={{
+                        width: "100%",
+                      }}
+                    >
+                      {Array.from(Array(5).keys()).map((k) => (
+                        <ListItem key={k}>
+                          <ListItemText
+                            primary={<Skeleton variant="text" width="100%" />}
+                          />
+                        </ListItem>
+                      ))}
+                    </List>
+                  ) : (relatedExercises?.length ?? 0) > 0 ? (
+                    <List
+                      sx={{
+                        width: "100%",
+                      }}
+                    >
+                      {relatedExercises?.map((relatedExercise) => (
+                        <ListItem key={relatedExercise._id}>
+                          <ListItemButton
+                            onClick={() => {
+                              handleChipClick(relatedExercise._id);
+                            }}
+                          >
+                            <ListItemText primary={relatedExercise.name} />
+                          </ListItemButton>
+                        </ListItem>
+                      ))}
+                    </List>
+                  ) : (
+                    t("Exercise:realtedToExercises.none")
+                  )}
+                </AccordionDetails>
+              </Accordion>
             </Grid>
           </Grid>
-        </CardContent>
-        {(isDeleteExerciseLoading || isRelatedExercisesLoading) && (
-          <CardActions>
-            <LinearProgress />
-          </CardActions>
-        )}
-      </Card>
-      {isDeleteExerciseError && (
-        <Alert color="error" sx={{ mt: 5, mb: 3 }}>
-          {t("Exercise:errorDeletingExercise")}
-        </Alert>
-      )}
-      {isRelatedExercisesError && (
-        <Alert color="error" sx={{ mt: 5, mb: 3 }}>
-          {t("Exercise:errorLoadingRelatedExercises")}
-        </Alert>
-      )}
-      <SoftBox mt={5} mb={3}>
-        <Card sx={{ height: "100%" }}>
-          <SoftBox p={2}>
-            <SoftTypography
-              variant="h5"
-              fontWeight="bold"
-              textTransform="uppercase"
-            >
-              {t("Exercise:info")}
-            </SoftTypography>
-            <SoftBox>
-              <Grid container spacing={2}>
-                {values.map(({ labelResourceKey, getElement }) => (
-                  <Grid item xs={6} sm={3} key={labelResourceKey}>
-                    <SoftBox display="flex" py={1} pr={2}>
-                      <SoftTypography
-                        variant="button"
-                        fontWeight="bold"
-                        textTransform="capitalize"
-                        mr={2}
-                      >
-                        {t(labelResourceKey)}
-                      </SoftTypography>
-                      {getElement(exercise, t)}
-                    </SoftBox>
-                  </Grid>
-                ))}
-              </Grid>
-            </SoftBox>
-            <SoftBox>
-              <SoftTypography
-                variant="button"
-                fontWeight="bold"
-                textTransform="capitalize"
-                mr={2}
-              >
-                {t("Exercise:materials")}
-              </SoftTypography>
-              {exercise.materials
-                ?.filter((el) => el !== "")
-                .map((el, index) => (
-                  <Chip
-                    size="small"
-                    key={el + index}
-                    label={el}
-                    sx={{ margin: "2px" }}
-                    variant={"outlined"}
-                  />
-                ))}
-            </SoftBox>
-            <SoftBox>
-              <SoftTypography
-                variant="button"
-                fontWeight="bold"
-                textTransform="capitalize"
-                mr={2}
-              >
-                {t("Exercise:tags")}
-              </SoftTypography>
-              {exercise.tags
-                ?.filter((el) => el !== "")
-                .map((el, index) => (
-                  <Chip
-                    size="small"
-                    key={el + index}
-                    label={el}
-                    sx={{ margin: "2px" }}
-                    variant={"outlined"}
-                  />
-                ))}
-            </SoftBox>
-            <SoftBox>
-              <SoftTypography
-                variant="button"
-                fontWeight="bold"
-                textTransform="capitalize"
-                mr={2}
-              >
-                {t("Exercise:realtedToExercises")}
-              </SoftTypography>
-              {isRelatedExercisesLoading ? (
-                <Box sx={{ display: "flex" }}>
-                  {Array.from(Array(5).keys()).map((k) => (
-                    <Skeleton
-                      key={k}
-                      variant="rounded"
-                      width={30}
-                      sx={{ mr: 1 }}
-                    />
-                  ))}
-                </Box>
-              ) : (
-                relatedExercises?.map((relatedExercise) => (
-                  <Chip
-                    size="small"
-                    key={relatedExercise._id}
-                    label={relatedExercise.name}
-                    sx={{ margin: "2px" }}
-                    variant={"outlined"}
-                    onClick={() => {
-                      handleChipClick(relatedExercise._id);
-                    }}
-                  />
-                ))
-              )}
-            </SoftBox>
-            <SoftBox textAlign={"right"}>
-              <SoftTypography
-                variant="button"
-                fontWeight="regular"
-                textTransform="capitalize"
-                mr={2}
-                align={"right"}
-              >
-                <CopyrightIcon /> {exercise.creator}
-              </SoftTypography>
-            </SoftBox>
-          </SoftBox>
-        </Card>
-      </SoftBox>
-      {exercise.description_blocks?.map((el, index) => {
-        return (
-          <SoftBox mt={3} mb={3} key={el._id}>
-            <Card sx={{ height: "100%", padding: 2 }}>
-              <SoftBox mb={2}>
-                <SoftTypography
-                  variant="h5"
-                  fontWeight="bold"
-                  textTransform="uppercase"
-                >
-                  {t("Exercise:block.title", { blockNumber: index + 1 })}
-                </SoftTypography>
-                <SoftTypography
-                  variant="button"
-                  textTransform="capitalize"
-                  mr={2}
-                >
-                  {t("Exercise:block.minutes", { minutes: el.time_min })}
-                </SoftTypography>
-              </SoftBox>
-              <SoftBox
-                display={el.video_url != "" ? "block" : "none"}
-                sx={{ paddingTop: "56.26%", position: "relative" }}
-              >
-                <ReactPlayer
-                  style={{ position: "absolute", top: "0px", left: "0px" }}
-                  url={el.video_url}
-                  width="100%"
-                  height="100%"
-                  controls
-                  light
+          {exercise.description_blocks?.map((el, index) => {
+            return (
+              <Card sx={{ my: 3 }} key={el._id}>
+                <CardHeader
+                  title={t("Exercise:block.title", { blockNumber: index + 1 })}
+                  subheader={t("Exercise:block.minutes", {
+                    minutes: el.time_min,
+                  })}
+                  sx={{
+                    pb: 0,
+                  }}
                 />
-              </SoftBox>
-              <SoftBox
-                mt={3}
-                display={
-                  el.tactics_board && el.tactics_board != "" ? "block" : "none"
-                }
-              >
-                <SoftTypography
-                  variant="h5"
-                  fontWeight="bold"
-                  textTransform="uppercase"
+                {el.video_url != "" && (
+                  <CardMedia
+                    sx={{
+                      // position: "relative",
+                      height: "160px",
+                    }}
+                  >
+                    <ReactPlayer
+                      // style={{ position: "absolute", top: "0px", left: "0px" }}
+                      url={el.video_url}
+                      width="100%"
+                      height="100%"
+                      controls
+                      light
+                    />
+                  </CardMedia>
+                )}
+                {[el.description, el.coaching_points].some((x) => x !== "") && (
+                  <CardContent>
+                    {el.description !== "" && (
+                      <>
+                        <SoftTypography variant="body1">
+                          {t("Exercise:block.description")}
+                        </SoftTypography>
+                        <SoftTypography variant="body2">
+                          {el.description}
+                        </SoftTypography>
+                      </>
+                    )}
+                    {el.coaching_points !== "" && (
+                      <>
+                        <SoftTypography variant="body1">
+                          {t("Exercise:block.coachingPoints")}
+                        </SoftTypography>
+                        <SoftTypography variant="body2">
+                          {el.coaching_points}
+                        </SoftTypography>
+                      </>
+                    )}
+                  </CardContent>
+                )}
+                {el.tactics_board && el.tactics_board != "" && (
+                  <CardActions disableSpacing>
+                    <IconButton href={`/tacticboards/${el.tactics_board}`}>
+                      <ContentPasteIcon />
+                    </IconButton>
+                  </CardActions>
+                )}
+                {/* <SoftBox mb={2}>
+                  <SoftTypography
+                    variant="button"
+                    textTransform="capitalize"
+                    mr={2}
+                  >
+                    {t("Exercise:block.minutes", { minutes: el.time_min })}
+                  </SoftTypography>
+                </SoftBox>
+                <SoftBox
+                  display={el.video_url != "" ? "block" : "none"}
+                  sx={{ paddingTop: "56.26%", position: "relative" }}
                 >
-                  {t("Exercise:block.tacticboard")}
-                </SoftTypography>
+                  <ReactPlayer
+                    style={{ position: "absolute", top: "0px", left: "0px" }}
+                    url={el.video_url}
+                    width="100%"
+                    height="100%"
+                    controls
+                    light
+                  />
+                </SoftBox>
+                <SoftBox
+                  mt={3}
+                  display={
+                    el.tactics_board && el.tactics_board != ""
+                      ? "block"
+                      : "none"
+                  }
+                >
+                  <SoftTypography
+                    variant="h5"
+                    fontWeight="bold"
+                    textTransform="uppercase"
+                  >
+                    {t("Exercise:block.tacticboard")}
+                  </SoftTypography>
 
-                <SoftTypography
-                  component={Link}
-                  to={`/tacticboards/${el.tactics_board}`}
-                  variant="button"
-                  fontWeight="bold"
-                  textGradient
-                >
-                  {t("Exercise:block.visitTacticboard")}
-                </SoftTypography>
-              </SoftBox>
-              <SoftBox mt={3}>
-                <SoftTypography
-                  variant="h5"
-                  fontWeight="bold"
-                  textTransform="uppercase"
-                >
-                  {t("Exercise:block.description")}
-                </SoftTypography>
-                <SoftTypography
-                  variant="body2"
-                  textTransform="capitalize"
-                  mr={2}
-                >
-                  {el.description}
-                </SoftTypography>
-              </SoftBox>
-              <SoftBox mt={3}>
-                <SoftTypography
-                  variant="h5"
-                  fontWeight="bold"
-                  textTransform="uppercase"
-                >
-                  {t("Exercise:block.coachingPoints")}
-                </SoftTypography>
-                <SoftTypography
-                  variant="body2"
-                  textTransform="capitalize"
-                  mr={2}
-                >
-                  {el.coaching_points}
-                </SoftTypography>
-              </SoftBox>
-            </Card>
-          </SoftBox>
-        );
-      })}
-    </>
+                  <Link
+                    href={`/tacticboards/${el.tactics_board}`}
+                    variant="button"
+                    fontWeight="bold"
+                  >
+                    {t("Exercise:block.visitTacticboard")}
+                  </Link>
+                </SoftBox>
+                <SoftBox mt={3}>
+                  <SoftTypography
+                    variant="h5"
+                    fontWeight="bold"
+                    textTransform="uppercase"
+                  >
+                    {t("Exercise:block.description")}
+                  </SoftTypography>
+                  <SoftTypography
+                    variant="body2"
+                    textTransform="capitalize"
+                    mr={2}
+                  >
+                    {el.description}
+                  </SoftTypography>
+                </SoftBox>
+                <SoftBox mt={3}>
+                  <SoftTypography
+                    variant="h5"
+                    fontWeight="bold"
+                    textTransform="uppercase"
+                  >
+                    {t("Exercise:block.coachingPoints")}
+                  </SoftTypography>
+                  <SoftTypography
+                    variant="body2"
+                    textTransform="capitalize"
+                    mr={2}
+                  >
+                    {el.coaching_points}
+                  </SoftTypography>
+                </SoftBox> */}
+              </Card>
+            );
+          })}
+        </>
+      )}
+    </ProfileLayout>
   );
 };
 

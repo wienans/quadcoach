@@ -7,15 +7,26 @@
   "deleteExercise": "Delete exercise",
   "errorDeletingExercise": "An error occurred while deleting exercise.",
   "errorLoadingRelatedExercises": "An error occurred while loading related exercises.",
-  "info": "Info",
-  "materials": "Materials:",
-  "tags": "Tags:",
-  "realtedToExercises": "Related exercises:",
-  "personNumber": "Person number:",
-  "beaterNumber": "Beater number:",
-  "chaserNumber": "Chaser number:",
-  "time": "Time:",
-  "minutesValue": "{{value}} Min",
+  "info": {
+    "title": "Info",
+    "personNumber": "Persons",
+    "beaterNumber": "Beaters",
+    "chaserNumber": "Chasers",
+    "time": "Time",
+    "minutesValue": "{{value}} Min"
+  },
+  "materials": {
+    "title": "Materials",
+    "none": "No materials needed"
+  },
+  "tags": {
+    "title": "Tags",
+    "none": "No tags available"
+  },
+  "realtedToExercises": {
+    "title": "Related exercises",
+    "none": "No related exercises available"
+  },
   "block": {
     "title": "Block {{blockNumber}}",
     "minutes": "Time: {{minutes}} minutes",

@@ -18,14 +18,18 @@ import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 
 // Soft UI Dashboard React components
-import { SoftBox, Breadcrumbs } from "../../..";
+import { SoftBox, Breadcrumbs } from "..";
 
 // Custom styles for DashboardNavbar
-import Logo from "../../../../assets/images/logo.svg";
-import NavbarMainControls from "../../../NavbarMainControls";
+import Logo from "../../assets/images/logo.svg";
+import NavbarMainControls from "../NavbarMainControls";
 import BackButton from "./BackButton";
 
-const DashboardNavbar = () => (
+export type NavbarProps = {
+  light: boolean;
+};
+
+const Navbar = ({ light }: NavbarProps) => (
   <AppBar position={"relative"} color="transparent">
     <Toolbar
       sx={{
@@ -41,6 +45,7 @@ const DashboardNavbar = () => (
             md: "none",
           },
         }}
+        light={light}
       />
       <SoftBox
         sx={{
@@ -50,7 +55,14 @@ const DashboardNavbar = () => (
           },
         }}
       >
-        <img src={Logo} />
+        <img
+          src={Logo}
+          style={{
+            filter: light
+              ? "invert(100%) sepia(0%) saturate(7481%) hue-rotate(347deg) brightness(102%) contrast(100%)"
+              : "invert(0%) sepia(90%) saturate(7500%) hue-rotate(347deg) brightness(105%) contrast(111%)",
+          }}
+        />
       </SoftBox>
       <SoftBox
         sx={{
@@ -61,17 +73,17 @@ const DashboardNavbar = () => (
           ml: 1,
         }}
       >
-        <Breadcrumbs />
+        <Breadcrumbs light={light} />
       </SoftBox>
       <SoftBox
         sx={{
           marginLeft: "auto",
         }}
       >
-        <NavbarMainControls />
+        <NavbarMainControls light={light} />
       </SoftBox>
     </Toolbar>
   </AppBar>
 );
 
-export default DashboardNavbar;
+export default Navbar;

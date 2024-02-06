@@ -51,6 +51,7 @@ const colors: PaletteOptions = {
   white: {
     main: "#ffffff",
     focus: "#ffffff",
+    light: "#fffff7",
   },
 
   black: {

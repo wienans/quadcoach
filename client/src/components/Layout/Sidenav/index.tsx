@@ -32,7 +32,6 @@ import SidenavCollapse from "./SidenavCollapse";
 
 // Custom styles for the Sidenav
 import SidenavRoot from "./SidenavRoot";
-import sidenavLogoLabel from "./styles/sidenav";
 import { createSelector } from "@reduxjs/toolkit";
 import { setMiniSideNav } from "../layoutSlice";
 import { useAppDispatch, useAppSelector } from "../../../store/hooks";
@@ -223,25 +222,19 @@ const Sidenav = ({ color, routes, ...rest }: SidenavProps) => {
             <Icon sx={{ fontWeight: "bold" }}>close</Icon>
           </SoftTypography>
         </SoftBox>
-        <SoftBox component={NavLink} to="/" display="flex" alignItems="center">
-          <SoftBox component="img" src={Logo} alt="Soft UI Logo" width="2rem" />
-          <SoftBox sx={(theme) => sidenavLogoLabel(theme, { miniSidenav })}>
-            <SoftTypography
-              variant="h6"
-              noWrap
-              sx={{
-                mr: 2,
-                display: "flex",
-                fontFamily: "monospace",
-                fontWeight: 700,
-                letterSpacing: ".3rem",
-                color: "inherit",
-                textDecoration: "none",
-              }}
-            >
-              QuadCoach
-            </SoftTypography>
-          </SoftBox>
+        <SoftBox
+          component={NavLink}
+          to="/"
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+        >
+          <SoftBox
+            component="img"
+            src={Logo}
+            alt="QuadCoach Logo"
+            height="100%"
+          />
         </SoftBox>
       </SoftBox>
       <Divider />

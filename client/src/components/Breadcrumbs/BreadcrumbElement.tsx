@@ -7,6 +7,7 @@ export type BreadcrumbElementProps = {
   path?: string;
   isLastElement: boolean;
   isLoading: boolean;
+  light: boolean;
 };
 
 const BreadcrumbElement = ({
@@ -14,17 +15,27 @@ const BreadcrumbElement = ({
   path,
   isLastElement,
   isLoading,
+  light,
 }: BreadcrumbElementProps): JSX.Element => {
   if (isLoading) {
-    return <Skeleton variant="text" width={100} height={24} />;
+    return (
+      <Skeleton
+        variant="text"
+        width={100}
+        height={24}
+        sx={(theme) => ({
+          color: light ? theme.palette.white.main : theme.palette.black.main,
+        })}
+      />
+    );
   }
 
   if (isLastElement) {
-    return <LastElement light={false} title={title} />;
+    return <LastElement light={light} title={title} />;
   }
 
   if (!path) {
-    return <TitleElement title={title} light={false} />;
+    return <TitleElement title={title} light={light} />;
   }
 
   return (
@@ -37,6 +48,9 @@ const BreadcrumbElement = ({
       overflow="hidden"
       textOverflow="ellipsis"
       whiteSpace="nowrap"
+      sx={(theme) => ({
+        color: light ? theme.palette.white.main : theme.palette.black.main,
+      })}
     >
       {title}
     </Link>

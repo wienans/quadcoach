@@ -1,51 +1,59 @@
-/**
-=========================================================
-* Soft UI Dashboard React - v4.0.0
-=========================================================
-
-* Product Page: https://www.creative-tim.com/product/soft-ui-dashboard-react
-* Copyright 2022 Creative Tim (https://www.creative-tim.com)
-
-Coded by www.creative-tim.com
-
- =========================================================
-
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-*/
-
-// prop-types is a library for typechecking of props.
-import PropTypes from "prop-types";
-
-// Soft UI Dashboard React components
 import SoftBox from "../../SoftBox";
 import { ReactNode } from "react";
-
-// Soft UI Dashboard React context
-// import { useSoftUIController, setLayout } from "context";
+import Navbar from "../../Navbar";
+import { useScrollTrigger, IconButton } from "@mui/material";
+import ArrowCircleUpIcon from "@mui/icons-material/ArrowCircleUp";
 
 export type DashboardLayoutProps = {
-  children: ReactNode;
+  children: (scrollTrigger: boolean) => ReactNode;
+  header: (scrollTrigger: boolean) => ReactNode;
+  showScrollToTopButton?: (scrollTrigger: boolean) => boolean;
 };
 
-const DashboardLayout = ({ children }: DashboardLayoutProps) => {
+const DashboardLayout = ({
+  children,
+  header,
+  showScrollToTopButton,
+}: DashboardLayoutProps) => {
+  const scrollTrigger = useScrollTrigger({
+    disableHysteresis: true,
+    threshold: 100,
+  });
+
   return (
     <SoftBox
       sx={{
         p: 3,
         position: "relative",
-        // display: "flex",
-        // flexDirection: "column",
-        // height: "100vh",
       }}
     >
-      {children}
+      <Navbar light={false} />
+      <SoftBox
+        sx={(theme) => ({
+          px: 1,
+          [theme.breakpoints.up("sm")]: {
+            px: 2,
+          },
+          flexGrow: 1,
+        })}
+      >
+        <SoftBox
+          sx={{ display: "flex", flexDirection: "column", height: "100%" }}
+        >
+          {header(scrollTrigger)}
+          {children(scrollTrigger)}
+        </SoftBox>
+      </SoftBox>
+      {showScrollToTopButton?.(scrollTrigger) && (
+        <IconButton
+          onClick={() => window.scrollTo(0, 0)}
+          sx={{ position: "fixed", bottom: 16, right: 16 }}
+        >
+          <ArrowCircleUpIcon />
+        </IconButton>
+      )}
     </SoftBox>
   );
-};
-
-// Typechecking props for the DashboardLayout
-DashboardLayout.propTypes = {
-  children: PropTypes.node.isRequired,
 };
 
 export default DashboardLayout;
