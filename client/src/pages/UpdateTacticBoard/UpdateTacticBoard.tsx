@@ -1,7 +1,16 @@
 import "./translations";
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
-import { Alert, Grid, Skeleton, Stack, ToggleButton } from "@mui/material";
+import {
+  Alert,
+  Box,
+  Card,
+  CardActions,
+  CardHeader,
+  Grid,
+  Skeleton,
+  Stack,
+} from "@mui/material";
 import { useTranslation } from "react-i18next";
 import {
   useUpdateTacticBoardMutation,
@@ -22,6 +31,7 @@ import cloneDeep from "lodash/cloneDeep";
 import "../fullscreen.css";
 import FullscreenIcon from "@mui/icons-material/Fullscreen";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import { DashboardLayout } from "../../components/LayoutContainers";
 
 const UpdateTacticBoard = (): JSX.Element => {
   const { t } = useTranslation("UpdateTacticBoard");
@@ -59,6 +69,7 @@ const UpdateTacticBoard = (): JSX.Element => {
   const [playerANumbers, setPlayerANumbers] = useState<number[]>([0]);
   const [playerBNumbers, setPlayerBNumbers] = useState<number[]>([0]);
   const [firstAPICall, setFirstAPICall] = useState<number>(0);
+  const [isFullScreen, setIsFullScreen] = useState<boolean>(false);
 
   useEffect(() => {
     if (
@@ -89,6 +100,18 @@ const UpdateTacticBoard = (): JSX.Element => {
     isTacticBoardError,
     isTacticBoardLoading,
   ]);
+
+  useEffect(() => {
+    const handleFullScreenChange = () => {
+      setIsFullScreen(document.fullscreenElement != null);
+    };
+
+    document.addEventListener("fullscreenchange", handleFullScreenChange);
+
+    return () => {
+      document.removeEventListener("fullscreenchange", handleFullScreenChange);
+    };
+  }, []);
 
   const onLoadPage = (
     page: number,
@@ -211,6 +234,142 @@ const UpdateTacticBoard = (): JSX.Element => {
   };
 
   return (
+    <DashboardLayout
+      header={(scrollTrigger) => (
+        <Card
+          sx={(theme) => ({
+            position: "sticky",
+            top: theme.spacing(1),
+            zIndex: 1,
+            ...(scrollTrigger
+              ? {
+                  backgroundColor: theme.palette.transparent.main,
+                  boxShadow: theme.boxShadows.navbarBoxShadow,
+                  backdropFilter: `saturate(200%) blur(${theme.functions.pxToRem(
+                    30,
+                  )})`,
+                }
+              : {
+                  backgroundColor: theme.functions.rgba(
+                    theme.palette.white.main,
+                    0.8,
+                  ),
+                  boxShadow: "none",
+                  backdropFilter: "none",
+                }),
+            transition: theme.transitions.create("all", {
+              easing: theme.transitions.easing.easeInOut,
+              duration: theme.transitions.duration.standard,
+            }),
+          })}
+        >
+          <CardHeader
+            title={
+              <SoftTypography variant="h3">
+                {t("UpdateTacticBoard:titel")}
+              </SoftTypography>
+            }
+          />
+          <CardActions
+            disableSpacing
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "flex-start",
+            }}
+          >
+            <SoftButton
+              iconOnly
+              onClick={() => {
+                onSave();
+                navigate(`/tacticboards/${tacticBoardId}/update`);
+              }}
+              size="large"
+              sx={{ mr: 1 }}
+            >
+              <ArrowBackIcon />
+            </SoftButton>
+            <TacticsBoardToolBar
+              editMode={editMode}
+              setEditMode={setEditMode}
+              setPage={setPage}
+              currentPage={currentPage}
+              setMaxPages={setMaxPages}
+              maxPages={maxPages}
+              onSave={onSave}
+              onLoadPage={onLoadPage}
+              disabled={isTacticBoardLoading}
+              onDelete={onDelete}
+              handleFullScreen={handleFullScreen}
+            />
+          </CardActions>
+        </Card>
+      )}
+    >
+      {() => (
+        <>
+          {isTacticBoardError ? (
+            <SoftBox justifyContent="center" display="flex">
+              <Alert color="error">{"Error"}</Alert>
+            </SoftBox>
+          ) : (
+            <Box ref={refFullScreenContainer}>
+              {isFullScreen && (
+                <Card>
+                  <CardActions>
+                    <TacticsBoardToolBar
+                      editMode={editMode}
+                      setEditMode={setEditMode}
+                      setPage={setPage}
+                      currentPage={currentPage}
+                      setMaxPages={setMaxPages}
+                      maxPages={maxPages}
+                      onSave={onSave}
+                      onLoadPage={onLoadPage}
+                      disabled={isTacticBoardLoading}
+                      onDelete={onDelete}
+                      handleFullScreen={handleFullScreen}
+                    />
+                  </CardActions>
+                </Card>
+              )}
+              {isTacticBoardLoading ? (
+                <Skeleton variant="rectangular" width={"100%"} height={100} />
+              ) : (
+                <Box
+                  ref={refContainer}
+                  sx={{ display: "flex", justifyContent: "center" }}
+                >
+                  <TacticsBoardSpeedDialBalls editMode={editMode} />
+                  <TacticsBoardSpeedDial
+                    teamB={false}
+                    editMode={editMode}
+                    playerNumbers={playerANumbers}
+                    setPlayerNumbers={setPlayerANumbers}
+                  />
+                  <>
+                    <FabricJsCanvas
+                      initialHight={686}
+                      initialWidth={1220}
+                      containerRef={refContainer}
+                    />
+                  </>
+                  <TacticsBoardSpeedDial
+                    teamB={true}
+                    editMode={editMode}
+                    playerNumbers={playerBNumbers}
+                    setPlayerNumbers={setPlayerBNumbers}
+                  />
+                </Box>
+              )}
+            </Box>
+          )}
+        </>
+      )}
+    </DashboardLayout>
+  );
+
+  return (
     <div onKeyDown={handleKeyDown} tabIndex={0}>
       {isTacticBoardError ? (
         <Grid item xs={12} justifyContent="center" display="flex">
@@ -228,7 +387,7 @@ const UpdateTacticBoard = (): JSX.Element => {
           >
             <Stack spacing={2} direction="row" sx={{ marginBottom: 2 }}>
               <SoftButton
-                iconOnly={true}
+                iconOnly
                 onClick={() => {
                   onSave();
                   navigate(`/tacticboards/${tacticBoardId}/update`);
@@ -262,7 +421,7 @@ const UpdateTacticBoard = (): JSX.Element => {
                   />
                 </Grid>
                 <Grid item xs={2}>
-                  <SoftButton iconOnly={true} onClick={handleFullScreen}>
+                  <SoftButton iconOnly onClick={handleFullScreen}>
                     <FullscreenIcon />
                   </SoftButton>
                 </Grid>
