@@ -36,6 +36,7 @@ import ListIcon from "@mui/icons-material/List";
 import TacticBoardListView from "./listView/TacticBoardListView";
 import TacticBoardCardView from "./cardView/TacticBoardCardView";
 import AddIcon from "@mui/icons-material/Add";
+import { DashboardLayout } from "../../components/LayoutContainers";
 
 enum ViewType {
   List = "List",
@@ -151,133 +152,166 @@ const TacticBoardList = () => {
   };
 
   return (
-    <SoftBox sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
-      <Card>
-        <CardHeader
-          title={
-            <SoftTypography variant="h3">
-              {t("TacticBoardList:title")}
-            </SoftTypography>
-          }
-          action={
-            <SoftBox display="flex" flexDirection="row" alignItems="center">
-              {isUpMd && (
-                <SoftInput
-                  id="outlined-basic"
-                  placeholder={t("TacticBoardList:filter.name")}
-                  value={tacticBoardFilter.searchValue}
-                  onChange={onTacticBoardFilterValueChange("searchValue")}
-                  sx={(theme) => ({
-                    minWidth: "200px",
-                    mr: 1,
-                    [theme.breakpoints.up("lg")]: {
-                      minWidth: "300px",
-                    },
-                  })}
-                />
-              )}
-              <ToggleButton
-                value={showFilters ? "shown" : "hide"}
-                selected={showFilters}
-                onChange={() => {
-                  setShowFilters(!showFilters);
-                }}
-              >
-                <FilterAltIcon />
-              </ToggleButton>
+    <DashboardLayout
+      header={(scrollTrigger) => (
+        <Card
+          sx={(theme) => ({
+            position: "sticky",
+            top: theme.spacing(1),
+            zIndex: 1,
+            ...(scrollTrigger
+              ? {
+                  backgroundColor: theme.palette.transparent.main,
+                  boxShadow: theme.boxShadows.navbarBoxShadow,
+                  backdropFilter: `saturate(200%) blur(${theme.functions.pxToRem(
+                    30,
+                  )})`,
+                }
+              : {
+                  backgroundColor: theme.functions.rgba(
+                    theme.palette.white.main,
+                    0.8,
+                  ),
+                  boxShadow: "none",
+                  backdropFilter: "none",
+                }),
+            transition: theme.transitions.create("all", {
+              easing: theme.transitions.easing.easeInOut,
+              duration: theme.transitions.duration.standard,
+            }),
+          })}
+        >
+          <CardHeader
+            title={
+              <SoftTypography variant="h3">
+                {t("TacticBoardList:title")}
+              </SoftTypography>
+            }
+            action={
+              <SoftBox display="flex" flexDirection="row" alignItems="center">
+                {isUpMd && (
+                  <SoftInput
+                    id="outlined-basic"
+                    placeholder={t("TacticBoardList:filter.name")}
+                    value={tacticBoardFilter.searchValue}
+                    onChange={onTacticBoardFilterValueChange("searchValue")}
+                    sx={(theme) => ({
+                      minWidth: "200px",
+                      mr: 1,
+                      [theme.breakpoints.up("lg")]: {
+                        minWidth: "300px",
+                      },
+                    })}
+                  />
+                )}
+                <ToggleButton
+                  value={showFilters ? "shown" : "hide"}
+                  selected={showFilters}
+                  onChange={() => {
+                    setShowFilters(!showFilters);
+                  }}
+                >
+                  <FilterAltIcon />
+                </ToggleButton>
+              </SoftBox>
+            }
+          />
+          {!isUpMd && (
+            <SoftBox display="flex" alignItems="center" sx={{ pb: 2, px: 2 }}>
+              <SoftInput
+                id="outlined-basic"
+                placeholder={t("TacticBoardList:filter.name")}
+                value={tacticBoardFilter.searchValue}
+                onChange={onTacticBoardFilterValueChange("searchValue")}
+              />
             </SoftBox>
-          }
-        />
-        {!isUpMd && (
-          <SoftBox display="flex" alignItems="center" sx={{ pb: 2, px: 2 }}>
-            <SoftInput
-              id="outlined-basic"
-              placeholder={t("TacticBoardList:filter.name")}
-              value={tacticBoardFilter.searchValue}
-              onChange={onTacticBoardFilterValueChange("searchValue")}
-            />
-          </SoftBox>
-        )}
-        <Collapse in={showFilters} timeout="auto" unmountOnExit>
-          <CardContent sx={{ p: 2 }}>
-            <Grid container spacing={2} sx={{ pl: 2, width: "100%" }}>
-              <Grid
-                item
-                xs={12}
-                md={6}
-                sx={{ display: "flex", flexDirection: "column" }}
-              >
-                <SoftTypography variant="body2">
-                  {t("TacticBoardList:filter.tags.title")}
-                </SoftTypography>
-                <SoftInput
-                  id="outlined-basic"
-                  placeholder={t("TacticBoardList:filter.tags.placeholder")}
-                  value={tacticBoardFilter.tagString}
-                  onChange={onTacticBoardFilterValueChange("tagString")}
-                  sx={{ width: "100%" }}
-                />
+          )}
+          <Collapse in={showFilters} timeout="auto" unmountOnExit>
+            <CardContent sx={{ p: 2 }}>
+              <Grid container spacing={2} sx={{ pl: 2, width: "100%" }}>
+                <Grid
+                  item
+                  xs={12}
+                  md={6}
+                  sx={{ display: "flex", flexDirection: "column" }}
+                >
+                  <SoftTypography variant="body2">
+                    {t("TacticBoardList:filter.tags.title")}
+                  </SoftTypography>
+                  <SoftInput
+                    id="outlined-basic"
+                    placeholder={t("TacticBoardList:filter.tags.placeholder")}
+                    value={tacticBoardFilter.tagString}
+                    onChange={onTacticBoardFilterValueChange("tagString")}
+                    sx={{ width: "100%" }}
+                  />
+                </Grid>
               </Grid>
-            </Grid>
-          </CardContent>
-        </Collapse>
-      </Card>
-      <SoftBox sx={{ mt: 2, display: "flex" }}>
-        <SoftButton
-          startIcon={isUpMd && <AddIcon />}
-          color="secondary"
-          onClick={() => {
-            setOpenAddTacticBoardDialog(true);
-          }}
-        >
-          {isUpMd ? t("TacticBoardList:addTacticBoard") : <AddIcon />}
-        </SoftButton>
-        <AddTacticBoardDialog
-          isOpen={openAddTacticBoardDialog}
-          onConfirm={(name) => handleAddTacticBoard(name)}
-        />
-        <ToggleButtonGroup
-          value={viewType}
-          exclusive
-          onChange={onViewTypeChange}
-          aria-label="text alignment"
-          sx={{ marginLeft: "auto" }}
-        >
-          <ToggleButton value={ViewType.Cards} aria-label="Kartenansicht">
-            <GridViewIcon />
-          </ToggleButton>
-          <ToggleButton value={ViewType.List} aria-label="Listenansicht">
-            <ListIcon />
-          </ToggleButton>
-        </ToggleButtonGroup>
-      </SoftBox>
-      {isTacticBoardsError && (
-        <Alert color="error" sx={{ mt: 2 }}>
-          {" "}
-          {t("TacticBoardList:errorLoadingTacticBoards")}
-        </Alert>
-      )}
-      {!isTacticBoardsError && viewType === ViewType.List && (
-        <Card sx={{ mt: 2 }}>
-          <CardContent>
-            <TacticBoardListView
-              isTacticBoardsLoading={isTacticBoardsLoading}
-              onOpenTacticBoardClick={onOpenTacticBoardClick}
-              tacticBoards={tacticBoards}
-            />
-          </CardContent>
+            </CardContent>
+          </Collapse>
         </Card>
       )}
-      {!isTacticBoardsError && viewType === ViewType.Cards && (
-        <SoftBox sx={{ mt: 2, flexGrow: 1, overflowY: "auto", p: 2 }}>
-          <TacticBoardCardView
-            isTacticBoardsLoading={isTacticBoardsLoading}
-            onOpenTacticBoardClick={onOpenTacticBoardClick}
-            tacticBoards={tacticBoards}
-          />
-        </SoftBox>
+    >
+      {(scrollTrigger) => (
+        <>
+          <SoftBox sx={{ mt: 2, display: "flex" }}>
+            <SoftButton
+              startIcon={isUpMd && <AddIcon />}
+              color="secondary"
+              onClick={() => {
+                setOpenAddTacticBoardDialog(true);
+              }}
+            >
+              {isUpMd ? t("TacticBoardList:addTacticBoard") : <AddIcon />}
+            </SoftButton>
+            <AddTacticBoardDialog
+              isOpen={openAddTacticBoardDialog}
+              onConfirm={(name) => handleAddTacticBoard(name)}
+            />
+            <ToggleButtonGroup
+              value={viewType}
+              exclusive
+              onChange={onViewTypeChange}
+              aria-label="text alignment"
+              sx={{ marginLeft: "auto" }}
+            >
+              <ToggleButton value={ViewType.Cards} aria-label="Kartenansicht">
+                <GridViewIcon />
+              </ToggleButton>
+              <ToggleButton value={ViewType.List} aria-label="Listenansicht">
+                <ListIcon />
+              </ToggleButton>
+            </ToggleButtonGroup>
+          </SoftBox>
+          {isTacticBoardsError && (
+            <Alert color="error" sx={{ mt: 2 }}>
+              {" "}
+              {t("TacticBoardList:errorLoadingTacticBoards")}
+            </Alert>
+          )}
+          {!isTacticBoardsError && viewType === ViewType.List && (
+            <Card sx={{ mt: 2 }}>
+              <CardContent>
+                <TacticBoardListView
+                  isTacticBoardsLoading={isTacticBoardsLoading}
+                  onOpenTacticBoardClick={onOpenTacticBoardClick}
+                  tacticBoards={tacticBoards}
+                />
+              </CardContent>
+            </Card>
+          )}
+          {!isTacticBoardsError && viewType === ViewType.Cards && (
+            <SoftBox sx={{ mt: 2, flexGrow: 1, overflowY: "auto", p: 2 }}>
+              <TacticBoardCardView
+                isTacticBoardsLoading={isTacticBoardsLoading}
+                onOpenTacticBoardClick={onOpenTacticBoardClick}
+                tacticBoards={tacticBoards}
+              />
+            </SoftBox>
+          )}
+        </>
       )}
-    </SoftBox>
+    </DashboardLayout>
   );
 };
 

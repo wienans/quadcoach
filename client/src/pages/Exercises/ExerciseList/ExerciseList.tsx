@@ -274,7 +274,6 @@ const ExerciseList = () => {
           )}
           {isExercisesError && (
             <Alert color="error" sx={{ mt: 2 }}>
-              {" "}
               {t("ExerciseList:errorLoadingExercises")}
             </Alert>
           )}
