@@ -123,7 +123,7 @@ const Exercise = () => {
   };
   useEffect(() => {
     if (!isDeleteExerciseSuccess) return;
-    navigate("/");
+    navigate("/exercises");
   }, [isDeleteExerciseSuccess, navigate]);
 
   const handleChipClick = (id: string) => {

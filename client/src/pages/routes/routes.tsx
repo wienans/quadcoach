@@ -19,10 +19,9 @@ const routes = [
           type: RouteHandleType.dashboard,
         },
         async lazy() {
-          const ExerciseListRoot = (await import("../Exercises"))
-            .ExerciseListRoot;
+          const Home = (await import("../Home")).default;
           return {
-            element: <ExerciseListRoot />,
+            element: <Home />,
           };
         },
       },

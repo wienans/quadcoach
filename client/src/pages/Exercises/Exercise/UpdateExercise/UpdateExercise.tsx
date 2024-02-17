@@ -62,7 +62,7 @@ const UpdateExercise = () => {
   };
   useEffect(() => {
     if (!isDeleteExerciseSuccess) return;
-    navigate("/");
+    navigate("/exercises");
   }, [isDeleteExerciseSuccess, navigate]);
 
   const onSubmit = (updatedExercise: ExerciseWithOutId) => {

@@ -18,6 +18,7 @@ interface IExercise {
   tags?: Types.Array<string>;
   coaching_points?: string; // unused for block model only backwards compatible
   creator?: string;
+  user?: Types.ObjectId;
   description_blocks?: Types.DocumentArray<IBlock>;
   related_to?: Types.Array<Types.ObjectId>;
 }
@@ -68,6 +69,10 @@ const exerciseSchema = new Schema<IExercise>(
     },
     creator: {
       type: String,
+    },
+    user: {
+      type: Types.ObjectId,
+      ref: "users",
     },
     description_blocks: {
       type: [blockSchema],
