@@ -6,7 +6,7 @@ import ArrowCircleUpIcon from "@mui/icons-material/ArrowCircleUp";
 
 export type DashboardLayoutProps = {
   children: (scrollTrigger: boolean) => ReactNode;
-  header: (scrollTrigger: boolean) => ReactNode;
+  header?: (scrollTrigger: boolean) => ReactNode;
   showScrollToTopButton?: (scrollTrigger: boolean) => boolean;
 };
 
@@ -40,7 +40,7 @@ const DashboardLayout = ({
         <SoftBox
           sx={{ display: "flex", flexDirection: "column", height: "100%" }}
         >
-          {header(scrollTrigger)}
+          {header && header(scrollTrigger)}
           {children(scrollTrigger)}
         </SoftBox>
       </SoftBox>
