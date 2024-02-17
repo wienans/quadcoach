@@ -3,11 +3,9 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import {
   Alert,
-  Box,
   Card,
   Grid,
   Skeleton,
-  Link,
   useTheme,
   useMediaQuery,
   IconButton,
@@ -23,11 +21,9 @@ import {
   AccordionSummary,
   AccordionDetails,
   ListItemButton,
-  CardMedia,
   CardActions,
 } from "@mui/material";
-import { SoftBox, SoftButton, SoftTypography } from "../../../../components";
-import { Chip } from "@mui/material";
+import { SoftBox, SoftButton } from "../../../../components";
 import ReactPlayer from "react-player";
 import { Exercise } from "../../../../api/quadcoachApi/domain";
 import {
@@ -362,7 +358,7 @@ const Exercise = () => {
           </Grid>
           {exercise.description_blocks?.map((el, index) => {
             return (
-              <Card sx={{ my: 3 }} key={el._id}>
+              <Card sx={{ my: 3, display: "flex" }} key={el._id}>
                 <CardHeader
                   title={t("Exercise:block.title", { blockNumber: index + 1 })}
                   subheader={t("Exercise:block.minutes", {
@@ -373,45 +369,42 @@ const Exercise = () => {
                   }}
                 />
                 {el.video_url != "" && (
-                  <CardMedia
-                    sx={{
-                      // position: "relative",
-                      height: "160px",
-                    }}
-                  >
-                    <ReactPlayer
-                      // style={{ position: "absolute", top: "0px", left: "0px" }}
-                      url={el.video_url}
-                      width="100%"
-                      height="100%"
-                      controls
-                      light
-                    />
-                  </CardMedia>
+                  <Accordion defaultExpanded>
+                    <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                      Video
+                    </AccordionSummary>
+                    <AccordionDetails
+                      sx={{
+                        position: "relative",
+                        minHeight: "160px",
+                      }}
+                    >
+                      <ReactPlayer
+                        style={{ position: "absolute", left: 0, top: 0 }}
+                        url={el.video_url}
+                        width="100%"
+                        height="100%"
+                        controls
+                        light
+                      />
+                    </AccordionDetails>
+                  </Accordion>
                 )}
-                {[el.description, el.coaching_points].some((x) => x !== "") && (
-                  <CardContent>
-                    {el.description !== "" && (
-                      <>
-                        <SoftTypography variant="body1">
-                          {t("Exercise:block.description")}
-                        </SoftTypography>
-                        <SoftTypography variant="body2">
-                          {el.description}
-                        </SoftTypography>
-                      </>
-                    )}
-                    {el.coaching_points !== "" && (
-                      <>
-                        <SoftTypography variant="body1">
-                          {t("Exercise:block.coachingPoints")}
-                        </SoftTypography>
-                        <SoftTypography variant="body2">
-                          {el.coaching_points}
-                        </SoftTypography>
-                      </>
-                    )}
-                  </CardContent>
+                {el.description && el.description != "" && (
+                  <Accordion defaultExpanded>
+                    <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                      {t("Exercise:block.description")}
+                    </AccordionSummary>
+                    <AccordionDetails>{el.description}</AccordionDetails>
+                  </Accordion>
+                )}
+                {el.coaching_points && el.coaching_points != "" && (
+                  <Accordion defaultExpanded>
+                    <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                      {t("Exercise:block.coachingPoints")}
+                    </AccordionSummary>
+                    <AccordionDetails>{el.coaching_points}</AccordionDetails>
+                  </Accordion>
                 )}
                 {el.tactics_board && el.tactics_board != "" && (
                   <CardActions disableSpacing>
@@ -420,84 +413,6 @@ const Exercise = () => {
                     </IconButton>
                   </CardActions>
                 )}
-                {/* <SoftBox mb={2}>
-                  <SoftTypography
-                    variant="button"
-                    textTransform="capitalize"
-                    mr={2}
-                  >
-                    {t("Exercise:block.minutes", { minutes: el.time_min })}
-                  </SoftTypography>
-                </SoftBox>
-                <SoftBox
-                  display={el.video_url != "" ? "block" : "none"}
-                  sx={{ paddingTop: "56.26%", position: "relative" }}
-                >
-                  <ReactPlayer
-                    style={{ position: "absolute", top: "0px", left: "0px" }}
-                    url={el.video_url}
-                    width="100%"
-                    height="100%"
-                    controls
-                    light
-                  />
-                </SoftBox>
-                <SoftBox
-                  mt={3}
-                  display={
-                    el.tactics_board && el.tactics_board != ""
-                      ? "block"
-                      : "none"
-                  }
-                >
-                  <SoftTypography
-                    variant="h5"
-                    fontWeight="bold"
-                    textTransform="uppercase"
-                  >
-                    {t("Exercise:block.tacticboard")}
-                  </SoftTypography>
-
-                  <Link
-                    href={`/tacticboards/${el.tactics_board}`}
-                    variant="button"
-                    fontWeight="bold"
-                  >
-                    {t("Exercise:block.visitTacticboard")}
-                  </Link>
-                </SoftBox>
-                <SoftBox mt={3}>
-                  <SoftTypography
-                    variant="h5"
-                    fontWeight="bold"
-                    textTransform="uppercase"
-                  >
-                    {t("Exercise:block.description")}
-                  </SoftTypography>
-                  <SoftTypography
-                    variant="body2"
-                    textTransform="capitalize"
-                    mr={2}
-                  >
-                    {el.description}
-                  </SoftTypography>
-                </SoftBox>
-                <SoftBox mt={3}>
-                  <SoftTypography
-                    variant="h5"
-                    fontWeight="bold"
-                    textTransform="uppercase"
-                  >
-                    {t("Exercise:block.coachingPoints")}
-                  </SoftTypography>
-                  <SoftTypography
-                    variant="body2"
-                    textTransform="capitalize"
-                    mr={2}
-                  >
-                    {el.coaching_points}
-                  </SoftTypography>
-                </SoftBox> */}
               </Card>
             );
           })}

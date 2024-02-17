@@ -10,7 +10,7 @@ import {
   Theme,
   useScrollTrigger,
 } from "@mui/material";
-import { ReactNode } from "react";
+import { ReactNode, useRef } from "react";
 import { SoftBox, SoftTypography } from "../..";
 import Navbar from "../../Navbar";
 import curved0 from "../../../assets/images/curved-images/curved0.jpg";
@@ -47,9 +47,11 @@ const ProfileLayout = ({
   isDataLoading = false,
 }: ProfileLayoutProps): JSX.Element => {
   const dispatch = useAppDispatch();
+
+  const titleCardRef = useRef<HTMLDivElement>(null);
   const scrollTrigger = useScrollTrigger({
     disableHysteresis: true,
-    threshold: 100,
+    threshold: titleCardRef?.current?.getBoundingClientRect().height ?? 100,
   });
   const miniSidenav = useAppSelector((state) => state.layout.miniSidenav);
 
@@ -82,6 +84,7 @@ const ProfileLayout = ({
         <Navbar light />
       </SoftBox>
       <Card
+        ref={titleCardRef}
         sx={(theme) => ({
           backdropFilter: `saturate(200%) blur(30px)`,
           backgroundColor: ({ functions: { rgba }, palette: { white } }) =>
