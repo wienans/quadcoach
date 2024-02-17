@@ -252,7 +252,7 @@ const TacticBoardList = () => {
         </Card>
       )}
     >
-      {(scrollTrigger) => (
+      {() => (
         <>
           <SoftBox sx={{ mt: 2, display: "flex" }}>
             <SoftButton
