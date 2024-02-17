@@ -1,4 +1,5 @@
 {
+  "title": "Übung bearbeiten",
   "updateExerciseBreadcrumb": "bearbeiten",
   "errorUpdatingExercise": "Es ist ein Fehler beim Speichern der Übungsänderungen aufgetreten.",
   "errorLoadingExercise": "Es ist ein Fehler beim Laden der Übung aufgetreten.",

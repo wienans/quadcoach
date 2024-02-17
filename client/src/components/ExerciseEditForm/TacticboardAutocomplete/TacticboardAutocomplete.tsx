@@ -10,12 +10,14 @@ export type TacticboardAutocompleteProps = {
     value: TacticBoard | null,
   ) => void;
   onBlur: (event: FocusEvent<HTMLDivElement> | undefined) => void;
+  autoFocus?: boolean;
 };
 
 const TacticboardAutocomplete = ({
   value,
   onChange,
   onBlur,
+  autoFocus,
 }: TacticboardAutocompleteProps): JSX.Element => {
   const [searchValue, setSearchValue] = useState<string>("");
   const { data: tacticboards, isLoading: isTacticboardsLoading } =
@@ -46,7 +48,7 @@ const TacticboardAutocomplete = ({
       renderInput={(params) => (
         <TextField
           {...params}
-          autoFocus
+          autoFocus={autoFocus}
           id="name"
           fullWidth
           InputProps={{

@@ -1,4 +1,5 @@
 {
+  "title": "Update exercise",
   "updateExerciseBreadcrumb": "update",
   "errorUpdatingExercise": "An error occurred while saving exercise changes.",
   "errorLoadingExercise": "An error occurred while loading exercise.",
