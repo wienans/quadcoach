@@ -1,12 +1,18 @@
 import "./translations";
 import { useFabricJs } from "../FabricJsContext";
 import { useState } from "react";
-import { Grid, Stack, Pagination, ToggleButton } from "@mui/material";
+import {
+  Pagination,
+  ToggleButton,
+  ButtonGroup,
+} from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 import DeleteIcon from "@mui/icons-material/Delete";
 import DrawIcon from "@mui/icons-material/Draw";
 import EditIcon from "@mui/icons-material/Edit";
+import { SoftBox, SoftButton } from "..";
+import FullscreenIcon from "@mui/icons-material/Fullscreen";
 
 export type TacticsBoardToolBarProps = {
   editMode: boolean;
@@ -19,6 +25,7 @@ export type TacticsBoardToolBarProps = {
   onSave: () => void;
   onDelete: () => void;
   onLoadPage: (page: number, newPage?: boolean, removePage?: boolean) => void;
+  handleFullScreen: () => void;
 };
 
 const TacticsBoardToolBar = ({
@@ -31,6 +38,7 @@ const TacticsBoardToolBar = ({
   disabled,
   onLoadPage,
   onDelete,
+  handleFullScreen,
 }: TacticsBoardToolBarProps): JSX.Element => {
   const { setSelection, setDrawMode } = useFabricJs();
   const handleChange = (_: React.ChangeEvent<unknown>, value: number) => {
@@ -39,82 +47,90 @@ const TacticsBoardToolBar = ({
   };
   const [drawingEnabled, enableDrawing] = useState<boolean>(false);
   return (
-    <div>
-      <Grid container spacing={2} alignItems="center">
-        <Grid item xs={1}></Grid>
-        <Grid item xs={4}>
-          <ToggleButton
-            value="edit"
-            selected={editMode}
-            disabled={disabled}
-            onChange={() => {
-              setEditMode(!editMode);
-              setSelection(!editMode);
-              if (!editMode == false) {
-                enableDrawing(false);
-                setDrawMode(false);
-              }
-            }}
-          >
-            <EditIcon fontSize="medium" />
-          </ToggleButton>
-          <ToggleButton
-            value="delete"
-            disabled={!editMode || disabled}
-            onClick={onDelete}
-          >
-            <DeleteIcon fontSize="medium" />
-          </ToggleButton>
-          <ToggleButton
-            value="drawing"
-            selected={drawingEnabled}
-            disabled={!editMode || disabled}
-            onChange={() => {
-              setDrawMode(!drawingEnabled);
-              enableDrawing(!drawingEnabled);
-            }}
-          >
-            <DrawIcon fontSize="medium" />
-          </ToggleButton>
-        </Grid>
-        <Grid item xs={7}>
-          <Stack spacing={2} direction="row">
-            <ToggleButton
-              value="remove-page"
-              disabled={disabled || maxPages == 1 || currentPage != maxPages}
-              onClick={() => {
-                if (maxPages > 1) {
-                  setMaxPages(maxPages - 1);
-                  setPage(currentPage - 1);
-                  onLoadPage(currentPage - 1, false, true);
-                }
-              }}
-            >
-              <RemoveIcon />
-            </ToggleButton>
-            <Pagination
-              count={maxPages}
-              siblingCount={0}
-              boundaryCount={0}
-              page={currentPage}
-              disabled={disabled}
-              onChange={handleChange}
-            />
-            <ToggleButton
-              value="add-page"
-              disabled={disabled || currentPage != maxPages}
-              onClick={() => {
-                setMaxPages(maxPages + 1);
-                setPage(currentPage + 1);
-                onLoadPage(currentPage + 1, true, false);
-              }}
-            >
-              <AddIcon />
-            </ToggleButton>
-          </Stack>
-        </Grid>
-      </Grid>
-    </div>
+    <SoftBox
+      display="flex"
+      justifyContent="space-evenly"
+      alignContent="center"
+      width="100%"
+    >
+      <ButtonGroup>
+        <ToggleButton
+          value="edit"
+          selected={editMode}
+          disabled={disabled}
+          onChange={() => {
+            setEditMode(!editMode);
+            setSelection(!editMode);
+            if (!editMode == false) {
+              enableDrawing(false);
+              setDrawMode(false);
+            }
+          }}
+        >
+          <EditIcon fontSize="medium" />
+        </ToggleButton>
+        <ToggleButton
+          value="drawing"
+          selected={drawingEnabled}
+          disabled={!editMode || disabled}
+          onChange={() => {
+            setDrawMode(!drawingEnabled);
+            enableDrawing(!drawingEnabled);
+          }}
+        >
+          <DrawIcon fontSize="medium" />
+        </ToggleButton>
+        <SoftButton
+          disabled={!editMode || disabled}
+          onClick={onDelete}
+          iconOnly
+          size="large"
+        >
+          <DeleteIcon fontSize="medium" />
+        </SoftButton>
+      </ButtonGroup>
+      <SoftBox display="flex" alignItems="center" justifyContent="center">
+        <SoftButton
+          disabled={disabled || maxPages == 1 || currentPage != maxPages}
+          onClick={() => {
+            if (maxPages > 1) {
+              setMaxPages(maxPages - 1);
+              setPage(currentPage - 1);
+              onLoadPage(currentPage - 1, false, true);
+            }
+          }}
+          iconOnly
+          size="large"
+        >
+          <RemoveIcon />
+        </SoftButton>
+        <Pagination
+          count={maxPages}
+          siblingCount={0}
+          boundaryCount={0}
+          page={currentPage}
+          disabled={disabled}
+          onChange={handleChange}
+        />
+        <SoftButton
+          disabled={disabled || currentPage != maxPages}
+          onClick={() => {
+            setMaxPages(maxPages + 1);
+            setPage(currentPage + 1);
+            onLoadPage(currentPage + 1, true, false);
+          }}
+          iconOnly
+          size="large"
+        >
+          <AddIcon />
+        </SoftButton>
+      </SoftBox>
+      <SoftBox display="flex" alignItems="center" justifyContent="center">
+        <SoftButton iconOnly onClick={handleFullScreen} size="large">
+          <FullscreenIcon />
+        </SoftButton>
+      </SoftBox>
+    </SoftBox>
   );
 };
 

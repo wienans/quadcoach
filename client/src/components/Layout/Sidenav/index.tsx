@@ -32,7 +32,6 @@ import SidenavCollapse from "./SidenavCollapse";
 
 // Custom styles for the Sidenav
 import SidenavRoot from "./SidenavRoot";
-import sidenavLogoLabel from "./styles/sidenav";
 import { createSelector } from "@reduxjs/toolkit";
 import { setMiniSideNav } from "../layoutSlice";
 import { useAppDispatch, useAppSelector } from "../../../store/hooks";
@@ -40,6 +39,7 @@ import { RootState } from "../../../store/store";
 import { DrawerProps, Palette, PaletteColor } from "@mui/material";
 import { PickByType } from "../../../helpers/typeHelpers";
 import { useTranslation } from "react-i18next";
+import Logo from "../../../assets/images/logo.svg";
 
 // Soft UI Dashboard React context
 // import { useSoftUIController, setMiniSidenav } from "context";
@@ -108,18 +108,10 @@ export type SidebarNavRoute =
 
 export interface SidenavProps extends Omit<DrawerProps, "color"> {
   color: keyof PickByType<Palette, PaletteColor>;
-  brand: string;
-  brandName: string;
   routes: SidebarNavRoute[];
 }
 
-const Sidenav = ({
-  color,
-  brand,
-  brandName,
-  routes,
-  ...rest
-}: SidenavProps) => {
+const Sidenav = ({ color, routes, ...rest }: SidenavProps) => {
   const { t } = useTranslation();
   const dispatch = useAppDispatch();
   const { miniSidenav } = useAppSelector(sidenavSelector);
@@ -230,23 +222,19 @@ const Sidenav = ({
             <Icon sx={{ fontWeight: "bold" }}>close</Icon>
           </SoftTypography>
         </SoftBox>
-        <SoftBox component={NavLink} to="/" display="flex" alignItems="center">
-          {brand && (
-            <SoftBox
-              component="img"
-              src={brand}
-              alt="Soft UI Logo"
-              width="2rem"
-            />
-          )}
+        <SoftBox
+          component={NavLink}
+          to="/"
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+        >
           <SoftBox
-            width={!brandName ? "100%" : undefined}
-            sx={(theme) => sidenavLogoLabel(theme, { miniSidenav })}
-          >
-            <SoftTypography component="h6" variant="button" fontWeight="medium">
-              {brandName}
-            </SoftTypography>
-          </SoftBox>
+            component="img"
+            src={Logo}
+            alt="QuadCoach Logo"
+            height="100%"
+          />
         </SoftBox>
       </SoftBox>
       <Divider />

@@ -17,6 +17,8 @@
     "@mui/icons-material": "^5.14.9",
     "@mui/material": "^5.14.10",
     "@mui/x-data-grid": "^6.15.0",
+    "@phosphor-icons/react": "^2.0.15",
+    "@react-spring/web": "^9.7.3",
     "@reduxjs/toolkit": "^1.9.7",
     "@types/chroma-js": "^2.4.1",
     "@types/lodash": "^4.14.199",

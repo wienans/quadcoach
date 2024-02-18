@@ -27,7 +27,6 @@ const link: {
   variants?: ComponentsVariants["MuiLink"];
 } = {
   defaultProps: {
-    underline: "none",
     color: "inherit",
     component: LinkBehavior,
   } as LinkProps,

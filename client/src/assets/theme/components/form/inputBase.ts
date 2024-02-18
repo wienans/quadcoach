@@ -42,8 +42,7 @@ const inputBase: {
     root: {
       display: "grid !important",
       placeItems: "center !important",
-      width: "100% !important",
-      height: "auto !important",
+      height: "auto",
       padding: `${pxToRem(8)} ${pxToRem(12)}`,
       fontSize: `${size!.sm} !important`,
       fontWeight: `${fontWeightRegular} !important`,
@@ -61,7 +60,6 @@ const inputBase: {
     },
 
     input: {
-      width: "100% !important",
       height: `${pxToRem(22)}`,
       padding: "0 !important",
 

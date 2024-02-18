@@ -171,6 +171,9 @@ If you are developing a production application, we recommend updating the config
 - Optionally add `plugin:@typescript-eslint/stylistic-type-checked`
 - Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and add `plugin:react/recommended` & `plugin:react/jsx-runtime` to the `extends` list
 
+## FavIcon 
+FavIcon was created by using [realfavicongenerator](https://realfavicongenerator.net/).
+
 # License
 
 This Front-End is based on the [SoftUI Version 4.0.1](https://github.com/creativetimofficial/soft-ui-dashboard-react/tree/4.0.1) by [Creative Tim under MIT LICENSE](./LICENSE-Creative-Tim.md). The Software was changed, extended and refactored and all Changes are Licensed under the [Repository License](../LICENSE)

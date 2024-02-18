@@ -7,11 +7,13 @@ import BreadcrumbElement from "./BreadcrumbElement";
 export type BreadcrumbElementProps = {
   route: UIMatch<unknown, RouteHandle>;
   isLastElement: boolean;
+  light: boolean;
 };
 
 const BreadcrumbElementWrapper = ({
   route,
   isLastElement,
+  light,
 }: BreadcrumbElementProps): JSX.Element | undefined => {
   const { t } = useTranslation("Layout");
 
@@ -21,6 +23,7 @@ const BreadcrumbElementWrapper = ({
         <ExerciseBreadcrumbElement
           route={route}
           isLastElement={isLastElement}
+          light={light}
         />
       );
     case RouteHandleType.layout:
@@ -32,6 +35,7 @@ const BreadcrumbElementWrapper = ({
           isLoading={false}
           title={t(`Breadcrumbs:${route.handle.type}`)}
           path={route.pathname}
+          light={light}
         />
       );
   }

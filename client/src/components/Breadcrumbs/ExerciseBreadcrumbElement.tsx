@@ -7,11 +7,13 @@ import { RouteHandle } from "../../pages/routes/routeTypes";
 export type ExerciseBreadcrumbElementProps = {
   route: UIMatch<unknown, RouteHandle>;
   isLastElement: boolean;
+  light: boolean;
 };
 
 const ExerciseBreadcrumbElement = ({
   route,
   isLastElement,
+  light,
 }: ExerciseBreadcrumbElementProps): JSX.Element => {
   const { t } = useTranslation("Breadcrumbs");
   const { id: exerciseId } = route.params;
@@ -27,8 +29,9 @@ const ExerciseBreadcrumbElement = ({
     <BreadcrumbElement
       isLastElement={isLastElement}
       isLoading={isExerciseLoading}
-      title={t("Breadcrumbs:exercise", { exerciseName: exercise?.name })}
+      title={exercise?.name ?? t("Breadcrumbs:exercise")}
       path={route.pathname}
+      light={light}
     />
   );
 };
