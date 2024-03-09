@@ -2,10 +2,12 @@ import { IconButton, Menu, MenuItem } from "@mui/material";
 import { SoftBox } from "..";
 import TranslateIcon from "@mui/icons-material/Translate";
 import Icon from "@mui/material/Icon";
+import LogoutIcon from "@mui/icons-material/Logout";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { setMiniSideNav } from "../Layout/layoutSlice";
 import { MouseEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useSendLogoutMutation } from "../../pages/authApi";
 
 type Language = {
   code: string;
@@ -42,6 +44,7 @@ const NavbarMainControls = ({
     languages.find((language) => language.code === i18n.language)?.code ??
     languages[0].code;
 
+  const [sendLogout] = useSendLogoutMutation();
   const handleMiniSidenav = () => {
     dispatch(setMiniSideNav(!miniSidenav));
   };
@@ -64,6 +67,16 @@ const NavbarMainControls = ({
         justifyContent: "space-between",
       }}
     >
+      <IconButton
+        size="small"
+        color="inherit"
+        onClick={sendLogout}
+        sx={(theme) => ({
+          color: light ? theme.palette.white.main : theme.palette.black.main,
+        })}
+      >
+        <LogoutIcon />
+      </IconButton>
       <IconButton
         size="small"
         color="inherit"

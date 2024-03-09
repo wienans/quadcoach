@@ -159,6 +159,18 @@ const routes = [
           };
         },
       },
+      {
+        path: "/login",
+        handle: {
+          type: RouteHandleType.dashboard,
+        },
+        async lazy() {
+          const Login = (await import("../Login")).default;
+          return {
+            element: <Login />,
+          };
+        },
+      },
     ],
   },
 ];

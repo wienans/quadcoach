@@ -1,0 +1,17 @@
+{
+  "title": "Einloggen",
+  "info": {
+    "email": {
+      "label": "E-Mail",
+      "placeholder": "E-Mail",
+      "missing": "Bitte gib einen E-Mail ein."
+    },
+    "password": {
+      "label": "Passwort",
+      "placeholder": "Passwort",
+      "missing": "Bitte gib ein Passwort ein."
+    }
+  },
+  "loginBtn": "Einloggen",
+  "loginErr": "E-Mail oder Passwort falsch. Bitte versuche es erneut."
+}

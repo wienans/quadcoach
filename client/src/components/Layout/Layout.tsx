@@ -4,6 +4,7 @@ import { Outlet } from "react-router-dom";
 
 import HomeIcon from "@mui/icons-material/Home";
 import DeveloperBoardIcon from "@mui/icons-material/DeveloperBoard";
+import LoginIcon from "@mui/icons-material/Login";
 import ListIcon from "@mui/icons-material/List";
 import GitHubIcon from "@mui/icons-material/GitHub";
 
@@ -41,6 +42,20 @@ const sidebarNavRoutes: SidebarNavRoute[] = [
   {
     type: "divider",
     key: "divider-1",
+  },
+  {
+    type: "collapse",
+    nameResourceKey: "Layout:routes.login",
+    key: "login",
+    route: "/login",
+    icon: <LoginIcon />,
+    noCollapse: true,
+    protected: true,
+    regExp: new RegExp("\\/login$"),
+  },
+  {
+    type: "divider",
+    key: "divider-2",
   },
   {
     type: "collapse",

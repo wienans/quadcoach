@@ -2,6 +2,7 @@ import { configureStore } from "@reduxjs/toolkit";
 import logger from "redux-logger";
 import { LayoutReducer } from "../components/Layout";
 import { quadcoachApi } from "../api";
+import authReducer from "../api/auth/authSlice";
 
 const middleware = [quadcoachApi.middleware];
 
@@ -9,6 +10,7 @@ export const store = configureStore({
   reducer: {
     layout: LayoutReducer,
     [quadcoachApi.reducerPath]: quadcoachApi.reducer,
+    auth: authReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

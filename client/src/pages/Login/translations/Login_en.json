@@ -1,0 +1,17 @@
+{
+  "title": "Login",
+  "info": {
+    "email": {
+      "label": "E-Mail",
+      "placeholder": "E-Mail",
+      "missing": "Please enter a E-Mail."
+    },
+    "password": {
+      "label": "Password",
+      "placeholder": "Password",
+      "missing": "Please enter a password."
+    }
+  },
+  "loginBtn": "Login",
+  "loginErr": "Wrong E-Mail or Password. Please try again."
+}
