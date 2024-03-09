@@ -87,6 +87,7 @@ const TacticBoardList = () => {
       data: tacticBoards,
       isError: isTacticBoardsError,
       isLoading: isTacticBoardsLoading,
+      error,
     },
   ] = useLazyGetTacticBoardsQuery();
 
@@ -283,9 +284,13 @@ const TacticBoardList = () => {
               </ToggleButton>
             </ToggleButtonGroup>
           </SoftBox>
-          {isTacticBoardsError && (
+          {isTacticBoardsError && error?.status === 403 && (
             <Alert color="error" sx={{ mt: 2 }}>
-              {" "}
+              {t("TacticBoardList:loginRequired")}
+            </Alert>
+          )}
+          {isTacticBoardsError && error?.status != 403 && (
+            <Alert color="error" sx={{ mt: 2 }}>
               {t("TacticBoardList:errorLoadingTacticBoards")}
             </Alert>
           )}
