@@ -1,5 +1,5 @@
 import { quadcoachApi } from "../api";
-import { logOut } from "../api/auth/authSlice";
+import { logOut, setCredentials } from "../api/auth/authSlice";
 
 export const authApiSlice = quadcoachApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -32,6 +32,15 @@ export const authApiSlice = quadcoachApi.injectEndpoints({
         url: "/api/auth/refresh",
         method: "get",
       }),
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          const { accessToken } = data;
+          dispatch(setCredentials(accessToken));
+        } catch (err) {
+          console.log(err);
+        }
+      },
     }),
   }),
 });

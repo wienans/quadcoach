@@ -13,3 +13,4 @@ export { default as TacticsBoardToolBar } from "./TacticsBoardToolBar";
 export { default as TacticsBoardSpeedDial } from "./TacticsBoardSpeedDial";
 export { default as TacticsBoardSpeedDialBalls } from "./TacticsBoardSpeedDialBalls";
 export { default as AddTacticBoardDialog } from "./AddTacticBoardDialog";
+export { default as PresistLogin } from "./PresistLogin";

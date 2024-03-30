@@ -7,6 +7,7 @@ import DeveloperBoardIcon from "@mui/icons-material/DeveloperBoard";
 import LoginIcon from "@mui/icons-material/Login";
 import ListIcon from "@mui/icons-material/List";
 import GitHubIcon from "@mui/icons-material/GitHub";
+import { PresistLogin } from "..";
 
 const sidebarNavRoutes: SidebarNavRoute[] = [
   {
@@ -70,7 +71,7 @@ const Layout = () => {
   return (
     <>
       <Sidenav color="info" routes={sidebarNavRoutes} />
-      <Outlet />
+      <PresistLogin />
     </>
   );
 };
