@@ -25,6 +25,10 @@ const verifyJWT = (req: Request, res: Response, next: NextFunction) => {
     req.email = decoded.email;
     // @ts-ignore
     req.roles = decoded.roles;
+    // @ts-ignore
+    req.name = decoded.name;
+    // @ts-ignore
+    req.id = decoded.id;
     next();
   } catch (e) {
     if (e) return res.status(403).json({ message: "Forbidden" });

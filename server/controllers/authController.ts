@@ -40,7 +40,9 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
   const accessToken = jwt.sign(
     {
       UserInfo: {
+        id: foundUser.id,
         email: foundUser.email,
+        name: foundUser.name,
         roles: foundUser.roles,
       },
     },
@@ -102,7 +104,9 @@ export const refresh = asyncHandler(
       const accessToken = jwt.sign(
         {
           UserInfo: {
+            id: foundUser.id,
             email: foundUser.email,
+            name: foundUser.name,
             roles: foundUser.roles,
           },
         },

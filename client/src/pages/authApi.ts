@@ -36,7 +36,7 @@ export const authApiSlice = quadcoachApi.injectEndpoints({
         try {
           const { data } = await queryFulfilled;
           const { accessToken } = data;
-          dispatch(setCredentials(accessToken));
+          dispatch(setCredentials({ accessToken: accessToken }));
         } catch (err) {
           console.log(err);
         }
