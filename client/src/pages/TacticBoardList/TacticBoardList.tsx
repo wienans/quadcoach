@@ -37,6 +37,7 @@ import TacticBoardListView from "./listView/TacticBoardListView";
 import TacticBoardCardView from "./cardView/TacticBoardCardView";
 import AddIcon from "@mui/icons-material/Add";
 import { DashboardLayout } from "../../components/LayoutContainers";
+import { useAuth } from "../../store/hooks";
 
 enum ViewType {
   List = "List",
@@ -57,6 +58,8 @@ const TacticBoardList = () => {
   const { t } = useTranslation("TacticBoardList");
   const navigate = useNavigate();
   const isUpMd = useMediaQuery((theme: Theme) => theme.breakpoints.up("md"));
+
+  const { userName, userId, userStatus } = useAuth();
 
   const [showFilters, setShowFilters] = useState<boolean>(false);
   const [viewType, setViewType] = useState<ViewType>(ViewType.Cards);
@@ -132,6 +135,8 @@ const TacticBoardList = () => {
       const newTacticBoard: TacticBoardWithOutId = {
         name: name,
         isPrivate: false,
+        creator: userName,
+        user: userId,
         pages: [emptyPage],
       };
 

@@ -13,10 +13,18 @@ export const getAllTacticboards = asyncHandler(
       /\b(gte|gt|lte|lt|eq|ne|regex|options|in|nin)\b/g,
       (match) => `$${match}`
     );
+    let parseObject = JSON.parse(queryString);
 
-    const exercises = await TacticBoard.find(JSON.parse(queryString));
+    parseObject.$or = [{ isPrivate: false }];
+    //@ts-ignore
+    if (req.UserInfo.id) {
+      //@ts-ignore
+      parseObject.$or.push({ isPrivate: true, user: req.UserInfo.id });
+    }
 
-    res.send(exercises);
+    const boards = await TacticBoard.find(parseObject);
+
+    res.send(boards);
   }
 );
 
@@ -25,13 +33,24 @@ export const getAllTacticboards = asyncHandler(
 export const getById = asyncHandler(async (req: Request, res: Response) => {
   if (mongoose.isValidObjectId(req.params.id)) {
     const result = await TacticBoard.findOne({ _id: req.params.id });
+
     if (result) {
+      if (
+        result.isPrivate &&
+        result.user &&
+        // @ts-ignore
+        (!req.UserInfo.id || req.UserInfo.id != result.user?.toString())
+      ) {
+        res.status(403).json({ message: "Forbidden" });
+        return;
+      }
+
       res.send(result);
     } else {
-      res.send({ result: "No Record Found" });
+      res.status(404).json({ result: "No Record Found" });
     }
   } else {
-    res.send({ result: "No Record Found" });
+    res.status(404).json({ result: "No Record Found" });
   }
 });
 
