@@ -284,12 +284,7 @@ const TacticBoardList = () => {
               </ToggleButton>
             </ToggleButtonGroup>
           </SoftBox>
-          {isTacticBoardsError && error?.status === 403 && (
-            <Alert color="error" sx={{ mt: 2 }}>
-              {t("TacticBoardList:loginRequired")}
-            </Alert>
-          )}
-          {isTacticBoardsError && error?.status != 403 && (
+          {isTacticBoardsError && (
             <Alert color="error" sx={{ mt: 2 }}>
               {t("TacticBoardList:errorLoadingTacticBoards")}
             </Alert>

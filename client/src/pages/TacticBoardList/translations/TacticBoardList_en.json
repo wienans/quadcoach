@@ -14,7 +14,6 @@
     "apply": "Apply filter"
   },
   "errorLoadingTacticBoards": "An error occurred while loading tactic boards.",
-  "loginRequired": "Please Login",
   "noTacticBoardsFound": "No tactic board found",
   "cardView": {
     "openTacticBoard": "Open tactic board",
