@@ -10,6 +10,13 @@ export const authApiSlice = quadcoachApi.injectEndpoints({
         data,
       }),
     }),
+    register: builder.mutation({
+      query: (data) => ({
+        url: "/api/auth/register",
+        method: "post",
+        data,
+      }),
+    }),
     sendLogout: builder.mutation({
       query: () => ({
         url: "/api/auth/logout",
@@ -17,9 +24,7 @@ export const authApiSlice = quadcoachApi.injectEndpoints({
       }),
       async onQueryStarted(_, { dispatch, queryFulfilled }) {
         try {
-          //const { data } =
           await queryFulfilled;
-          //console.log(data)
           dispatch(logOut());
           dispatch(quadcoachApi.util.resetApiState());
         } catch (err) {
@@ -45,5 +50,9 @@ export const authApiSlice = quadcoachApi.injectEndpoints({
   }),
 });
 
-export const { useLoginMutation, useSendLogoutMutation, useRefreshMutation } =
-  authApiSlice;
+export const {
+  useLoginMutation,
+  useRegisterMutation,
+  useSendLogoutMutation,
+  useRefreshMutation,
+} = authApiSlice;

@@ -68,6 +68,35 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
   res.json({ accessToken });
 });
 
+// @desc Register
+// @route POST /auth/register
+// @access Public
+export const register = asyncHandler(async (req: Request, res: Response) => {
+  const { name, email, password } = req.body;
+
+  if (!name || !email || !password) {
+    res.status(400).json({ message: "All fields are required" });
+    return;
+  }
+
+  // Check for duplicate email in the db
+  const duplicate = await User.findOne({ email }).lean().exec();
+  if (duplicate) {
+    res.status(409).json({ message: "Duplicate e-mail" });
+    return;
+  }
+
+  // Hash password, with 10 salt rounds
+  const hashedPwd = await bcrypt.hash(password, 10);
+  const userObject = { name, email, password: hashedPwd };
+  const user = await User.create(userObject);
+  if (user) {
+    res.status(201).json({ message: `New user ${email} created` });
+  } else {
+    res.status(400).json({ message: "Invalid user data received" });
+  }
+});
+
 // @desc Refresh
 // @route GET /auth/refresh
 // @access Public - because access token has expired

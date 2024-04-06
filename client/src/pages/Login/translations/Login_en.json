@@ -13,5 +13,6 @@
     }
   },
   "loginBtn": "Login",
+  "registerBtn": "Register",
   "loginErr": "Wrong E-Mail or Password. Please try again."
 }

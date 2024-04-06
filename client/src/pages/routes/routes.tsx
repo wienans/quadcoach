@@ -171,6 +171,18 @@ const routes = [
           };
         },
       },
+      {
+        path: "/register",
+        handle: {
+          type: RouteHandleType.dashboard,
+        },
+        async lazy() {
+          const Register = (await import("../Register")).default;
+          return {
+            element: <Register />,
+          };
+        },
+      },
     ],
   },
 ];

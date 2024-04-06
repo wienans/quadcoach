@@ -74,7 +74,6 @@ export const axiosBaseReauthQuery =
           };
         } catch (axiosErrorRefresh) {
           const errRefresh = axiosErrorRefresh as AxiosError;
-          console.log("Login expired");
           return {
             error: {
               status: errRefresh.response?.status,
@@ -85,7 +84,6 @@ export const axiosBaseReauthQuery =
           };
         }
       }
-      console.log("Other Error Code");
       return {
         error: {
           status: err.response?.status,

@@ -18,7 +18,6 @@ const PresistLogin = (): JSX.Element => {
       // React 18 Strict Mode
 
       const verifyRefreshToken = async () => {
-        console.log("verifying refresh token");
         try {
           //const response =
           await refresh();

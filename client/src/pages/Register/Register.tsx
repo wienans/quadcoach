@@ -9,53 +9,65 @@ import {
 import { useTranslation } from "react-i18next";
 
 import { useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
-import { setCredentials } from "../../api/auth/authSlice";
-import { useLoginMutation } from "../authApi";
+import { useRegisterMutation } from "../authApi";
 
 import { FormikProvider, useFormik } from "formik";
 import * as Yup from "yup";
 
 import { DashboardLayout } from "../../components/LayoutContainers";
 
-type LoginFields = {
+type RegisterFields = {
+  name: string;
   email: string;
   password: string;
+  confirmpassword: string;
 };
 
-const Login = (): JSX.Element => {
-  const { t } = useTranslation("Login");
+const Register = (): JSX.Element => {
+  const { t } = useTranslation("Register");
   const navigate = useNavigate();
-  const dispatch = useDispatch();
 
-  const [login, { isLoading: isLoginLoading, isError: isLoginError }] =
-    useLoginMutation();
+  const [register, { isLoading: isRegisterLoading, isError: isRegisterError }] =
+    useRegisterMutation();
 
-  const formik = useFormik<LoginFields>({
+  const formik = useFormik<RegisterFields>({
     // enableReinitialize : use this flag when initial values needs to be changed
     enableReinitialize: true,
 
     initialValues: {
+      name: "",
       email: "",
       password: "",
+      confirmpassword: "",
     },
 
     validationSchema: Yup.object({
-      email: Yup.string().required("Login:info.email.missing"),
-      password: Yup.string().required("Login:info.password.missing"),
+      name: Yup.string().required("Register:info.name.missing"),
+      email: Yup.string()
+        .email("Register:info.email.valid")
+        .required("Register:info.email.missing"),
+      password: Yup.string()
+        .matches(
+          /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])(?=.{8,})/,
+          "Register:info.password.valid",
+        )
+        .required("Register:info.password.missing"),
+      confirmpassword: Yup.string().oneOf(
+        [Yup.ref("password")],
+        "Register:info.confirmpassword.missing",
+      ),
     }),
 
     onSubmit: async (values) => {
-      const { email, password } = values;
+      const { name, email, password } = values;
 
-      const result = await login({
+      const result = await register({
+        name: name,
         email: email,
         password: password,
       });
       // @ts-ignore
       if (result.data) {
-        // @ts-ignore
-        dispatch(setCredentials({ accessToken: result.data.accessToken }));
         navigate("/");
       }
     },
@@ -85,13 +97,38 @@ const Login = (): JSX.Element => {
               }}
             >
               <SoftBox sx={{ m: 2, p: 2 }}>
-                <SoftTypography variant="h3">{t("Login:title")}</SoftTypography>
+                <SoftTypography variant="h3">
+                  {t("Register:title")}
+                </SoftTypography>
               </SoftBox>
               <Grid item xs={12}>
                 <Grid item xs={12} p={1}>
                   <FormGroup>
                     <SoftTypography variant="body2">
-                      {t("Login:info.email.label")}
+                      {t("Register:info.name.label")}
+                    </SoftTypography>
+                    <SoftInput
+                      error={formik.touched.name && Boolean(formik.errors.name)}
+                      name="name"
+                      required
+                      id="outlined-basic"
+                      placeholder={t("Register:info.name.placeholder")}
+                      value={formik.values.name}
+                      onChange={formik.handleChange}
+                      fullWidth
+                      onBlur={formik.handleBlur}
+                    />
+                    {formik.touched.name && Boolean(formik.errors.name) && (
+                      <FormHelperText error>
+                        {translateError(formik.errors.name)}
+                      </FormHelperText>
+                    )}
+                  </FormGroup>
+                </Grid>
+                <Grid item xs={12} p={1}>
+                  <FormGroup>
+                    <SoftTypography variant="body2">
+                      {t("Register:info.email.label")}
                     </SoftTypography>
                     <SoftInput
                       error={
@@ -100,7 +137,7 @@ const Login = (): JSX.Element => {
                       name="email"
                       required
                       id="outlined-basic"
-                      placeholder={t("Login:info.email.placeholder")}
+                      placeholder={t("Register:info.email.placeholder")}
                       value={formik.values.email}
                       onChange={formik.handleChange}
                       fullWidth
@@ -116,17 +153,18 @@ const Login = (): JSX.Element => {
                 <Grid item xs={12} p={1}>
                   <FormGroup>
                     <SoftTypography variant="body2">
-                      {t("Login:info.password.label")}
+                      {t("Register:info.password.label")}
                     </SoftTypography>
                     <SoftInput
                       error={
-                        formik.touched.email && Boolean(formik.errors.email)
+                        formik.touched.password &&
+                        Boolean(formik.errors.password)
                       }
                       name="password"
                       required
                       id="outlined-basic"
                       type="password"
-                      placeholder={t("Login:info.password.placeholder")}
+                      placeholder={t("Register:info.password.placeholder")}
                       value={formik.values.password}
                       onChange={formik.handleChange}
                       fullWidth
@@ -140,11 +178,41 @@ const Login = (): JSX.Element => {
                       )}
                   </FormGroup>
                 </Grid>
-                {isLoginError && (
+                <Grid item xs={12} p={1}>
+                  <FormGroup>
+                    <SoftTypography variant="body2">
+                      {t("Register:info.confirmpassword.label")}
+                    </SoftTypography>
+                    <SoftInput
+                      error={
+                        formik.touched.confirmpassword &&
+                        Boolean(formik.errors.confirmpassword)
+                      }
+                      name="confirmpassword"
+                      required
+                      id="outlined-basic"
+                      type="password"
+                      placeholder={t(
+                        "Register:info.confirmpassword.placeholder",
+                      )}
+                      value={formik.values.confirmpassword}
+                      onChange={formik.handleChange}
+                      fullWidth
+                      onBlur={formik.handleBlur}
+                    />
+                    {formik.touched.confirmpassword &&
+                      Boolean(formik.errors.confirmpassword) && (
+                        <FormHelperText error>
+                          {translateError(formik.errors.confirmpassword)}
+                        </FormHelperText>
+                      )}
+                  </FormGroup>
+                </Grid>
+                {isRegisterError && (
                   <Grid item xs={12} justifyContent="center" display="flex">
                     <Alert color="error" sx={{ mt: 2 }}>
                       {" "}
-                      {t("Login:loginErr")}
+                      {t("Register:registerErr")}
                     </Alert>
                   </Grid>
                 )}
@@ -153,18 +221,9 @@ const Login = (): JSX.Element => {
                     sx={{ marginRight: 1 }}
                     type="submit"
                     color="primary"
-                    disabled={isLoginLoading}
+                    disabled={isRegisterLoading}
                   >
-                    {t("Login:loginBtn")}
-                  </SoftButton>
-                  <SoftButton
-                    sx={{ marginRight: 1 }}
-                    type="button"
-                    color="secondary"
-                    disabled={isLoginLoading}
-                    onClick={() => navigate("/register")}
-                  >
-                    {t("Login:registerBtn")}
+                    {t("Register:registerBtn")}
                   </SoftButton>
                 </Grid>
               </Grid>
@@ -176,4 +235,4 @@ const Login = (): JSX.Element => {
   );
 };
 
-export default Login;
+export default Register;

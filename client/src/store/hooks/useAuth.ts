@@ -20,7 +20,6 @@ type AuthInfo = {
 };
 
 const useAuth = (): AuthInfo => {
-  useSelector((state: RootState) => console.log(state));
   const token = useSelector((state: RootState) => selectCurrentToken(state));
   let isAdmin = false;
   let status = "User";
@@ -34,10 +33,8 @@ const useAuth = (): AuthInfo => {
     if (isAdmin) {
       status = "Admin";
     }
-    console.log({ id, name, email, roles, isAdmin, status });
     return { id, name, email, roles, isAdmin, status };
   }
-  console.log("Not Logged in");
   return {
     id: "",
     name: "",
