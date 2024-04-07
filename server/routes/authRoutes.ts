@@ -12,4 +12,6 @@ router.route("/refresh").get(authController.refresh);
 
 router.route("/logout").post(authController.logout);
 
+router.route("/verifyEmail").post(authController.verifyEmail);
+
 export default router;

@@ -47,6 +47,13 @@ export const authApiSlice = quadcoachApi.injectEndpoints({
         }
       },
     }),
+    verifyEmail: builder.mutation({
+      query: (data) => ({
+        url: "/api/auth/verifyEmail",
+        method: "post",
+        data,
+      }),
+    }),
   }),
 });
 
@@ -55,4 +62,5 @@ export const {
   useRegisterMutation,
   useSendLogoutMutation,
   useRefreshMutation,
+  useVerifyEmailMutation,
 } = authApiSlice;

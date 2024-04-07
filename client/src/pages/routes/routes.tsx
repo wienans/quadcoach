@@ -183,6 +183,18 @@ const routes = [
           };
         },
       },
+      {
+        path: "/verifyEmail",
+        handle: {
+          type: RouteHandleType.dashboard,
+        },
+        async lazy() {
+          const VerifyEmail = (await import("../VerifyEmail")).default;
+          return {
+            element: <VerifyEmail />,
+          };
+        },
+      },
     ],
   },
 ];
