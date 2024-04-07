@@ -15,7 +15,7 @@ export const getAllUsers = asyncHandler(async (req: Request, res: Response) => {
     /\b(gte|gt|lte|lt|eq|ne|regex|options|in|nin)\b/g,
     (match) => `$${match}`
   );
-  
+
   const users = await User.find().select("-password").lean();
   if (!users?.length) {
     res.status(400).json({ message: "No users found" });
@@ -70,7 +70,12 @@ export const createNewUser = asyncHandler(
 
     // Hash password, with 10 salt rounds
     const hashedPwd = await bcrypt.hash(password, 10);
-    const userObject = { name, email, password: hashedPwd, roles };
+    const userObject = {
+      name,
+      email,
+      password: hashedPwd,
+      roles,
+    };
     const user = await User.create(userObject);
     if (user) {
       res.status(201).json({ message: `New user ${email} created` });

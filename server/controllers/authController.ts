@@ -5,6 +5,7 @@ import asyncHandler from "express-async-handler";
 import User from "../models/user";
 import { logEvents } from "../middleware/logger";
 import validator from "validator";
+import crypto from "crypto";
 
 // @desc Login
 // @route POST /auth
@@ -92,7 +93,12 @@ export const register = asyncHandler(async (req: Request, res: Response) => {
 
   // Hash password, with 10 salt rounds
   const hashedPwd = await bcrypt.hash(password, 10);
-  const userObject = { name, email, password: hashedPwd };
+  const userObject = {
+    name,
+    email,
+    password: hashedPwd,
+    emailToken: crypto.randomBytes(64).toString("hex"),
+  };
   const user = await User.create(userObject);
   if (user) {
     res.status(201).json({ message: `New user ${email} created` });
@@ -173,3 +179,26 @@ export const logout = (req: Request, res: Response) => {
   });
   res.json({ message: "Cookie cleared" });
 };
+
+// @desc Verify Email
+// @route POST /auth/verifyEmail
+// @access Public
+export const verifyEmail = asyncHandler(async (req: Request, res: Response) => {
+  const emailToken = req.body.emailToken;
+
+  if (!emailToken) {
+    res.status(400).json({ message: "Email Token Required" });
+    return;
+  }
+  const user = await User.findOne({ emailToken, isVerified: false });
+  if (!user) {
+    res
+      .status(404)
+      .json({ message: "Invalid Email Token, or already verified" });
+    return;
+  }
+  user.isVerified = true;
+  user.emailToken = "";
+  await user.save();
+  res.status(200).json({ message: "Email Verified" });
+});
