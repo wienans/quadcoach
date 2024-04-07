@@ -1,12 +1,12 @@
 import express from "express";
 import * as authController from "../controllers/authController";
-import loginLimiter from "../middleware/loginLimiter";
+import rateLimiter from "../middleware/rateLimiter";
 
 const router = express.Router();
 
-router.route("/").post(loginLimiter, authController.login);
+router.route("/").post(rateLimiter, authController.login);
 
-router.route("/register").post(authController.register);
+router.route("/register").post(rateLimiter, authController.register);
 
 router.route("/refresh").get(authController.refresh);
 

@@ -4,6 +4,7 @@ import { Request, Response, NextFunction } from "express";
 import asyncHandler from "express-async-handler";
 import User from "../models/user";
 import { logEvents } from "../middleware/logger";
+import validator from "validator";
 
 // @desc Login
 // @route POST /auth
@@ -78,7 +79,10 @@ export const register = asyncHandler(async (req: Request, res: Response) => {
     res.status(400).json({ message: "All fields are required" });
     return;
   }
-
+  if (!validator.isEmail(email)) {
+    res.status(400).json({ message: "Invalid email" });
+    return;
+  }
   // Check for duplicate email in the db
   const duplicate = await User.findOne({ email }).lean().exec();
   if (duplicate) {
