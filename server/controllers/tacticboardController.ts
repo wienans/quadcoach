@@ -21,6 +21,16 @@ export const getAllTacticboards = asyncHandler(
       //@ts-ignore
       parseObject.$or.push({ isPrivate: true, user: req.UserInfo.id });
     }
+    //@ts-ignore
+    if (
+      //@ts-ignore
+      req.UserInfo.roles.includes("Admin") ||
+      //@ts-ignore
+      req.UserInfo.roles.includes("admin")
+    ) {
+      //@ts-ignore
+      parseObject.$or.push({ isPrivate: true });
+    }
 
     const boards = await TacticBoard.find(parseObject);
 
@@ -39,7 +49,11 @@ export const getById = asyncHandler(async (req: Request, res: Response) => {
         result.isPrivate &&
         result.user &&
         // @ts-ignore
-        (!req.UserInfo.id || req.UserInfo.id != result.user?.toString())
+        (!req.UserInfo.id || req.UserInfo.id != result.user?.toString()) &&
+        // @ts-ignore
+        !req.UserInfo.roles.includes("Admin") &&
+        // @ts-ignore
+        !req.UserInfo.roles.includes("admin")
       ) {
         res.status(403).json({ message: "Forbidden" });
         return;
@@ -58,12 +72,17 @@ export const getById = asyncHandler(async (req: Request, res: Response) => {
 // @access public
 export const createNewTacticboard = asyncHandler(
   async (req: Request, res: Response) => {
-    let tacticboard = new TacticBoard(req.body);
-    const result = await tacticboard.save();
-    if (!result) {
-      console.error("Couldn't create Tacticboard");
+    // @ts-ignore
+    if (req.UserInfo.id != "") {
+      let tacticboard = new TacticBoard(req.body);
+      const result = await tacticboard.save();
+      if (!result) {
+        console.error("Couldn't create Tacticboard");
+      }
+      res.send(result);
+    } else {
+      res.status(403).json({ message: "Forbidden" });
     }
-    res.send(result);
   }
 );
 
@@ -71,11 +90,29 @@ export const createNewTacticboard = asyncHandler(
 // @access Private
 export const updateById = asyncHandler(async (req: Request, res: Response) => {
   if (mongoose.isValidObjectId(req.params.id)) {
-    const result = await TacticBoard.updateOne(
-      { _id: req.params.id },
-      { $set: req.body }
-    );
-    res.send(result);
+    const findResult = await TacticBoard.findOne({ _id: req.params.id });
+    if (findResult) {
+      console.log(findResult.user);
+      if (
+        findResult.user &&
+        // @ts-ignore
+        (!req.UserInfo.id || req.UserInfo.id != findResult.user?.toString()) &&
+        // @ts-ignore
+        !req.UserInfo.roles.includes("Admin") &&
+        // @ts-ignore
+        !req.UserInfo.roles.includes("admin")
+      ) {
+        res.status(403).json({ message: "Forbidden" });
+        return;
+      }
+      const result = await TacticBoard.updateOne(
+        { _id: req.params.id },
+        { $set: req.body }
+      );
+      res.send(result);
+    } else {
+      res.send({ result: "No Record Found" });
+    }
   } else {
     res.send({ result: "No Record Found" });
   }
@@ -85,8 +122,21 @@ export const updateById = asyncHandler(async (req: Request, res: Response) => {
 // @access Private
 export const deleteById = asyncHandler(async (req: Request, res: Response) => {
   if (mongoose.isValidObjectId(req.params.id)) {
-    const result = await TacticBoard.deleteOne({ _id: req.params.id });
-    if (result) {
+    const findResult = await TacticBoard.findOne({ _id: req.params.id });
+    if (findResult) {
+      if (
+        findResult.user &&
+        // @ts-ignore
+        (!req.UserInfo.id || req.UserInfo.id != findResult.user?.toString()) &&
+        // @ts-ignore
+        !req.UserInfo.roles.includes("Admin") &&
+        // @ts-ignore
+        !req.UserInfo.roles.includes("admin")
+      ) {
+        res.status(403).json({ message: "Forbidden" });
+        return;
+      }
+      const result = await TacticBoard.deleteOne({ _id: req.params.id });
       res.send(result);
     } else {
       res.send({ result: "No Record Found" });

@@ -32,6 +32,7 @@ import "../fullscreen.css";
 import FullscreenIcon from "@mui/icons-material/Fullscreen";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { DashboardLayout } from "../../components/LayoutContainers";
+import { useAuth } from "../../store/hooks";
 
 const UpdateTacticBoard = (): JSX.Element => {
   const { t } = useTranslation("UpdateTacticBoard");
@@ -70,6 +71,14 @@ const UpdateTacticBoard = (): JSX.Element => {
   const [playerBNumbers, setPlayerBNumbers] = useState<number[]>([0]);
   const [firstAPICall, setFirstAPICall] = useState<number>(0);
   const [isFullScreen, setIsFullScreen] = useState<boolean>(false);
+  const [isPriviliged, setIsPrivileged] = useState<boolean>(false);
+
+  const {
+    name: userName,
+    id: userId,
+    status: userStatus,
+    roles: userRoles,
+  } = useAuth();
 
   useEffect(() => {
     if (
@@ -112,6 +121,16 @@ const UpdateTacticBoard = (): JSX.Element => {
       document.removeEventListener("fullscreenchange", handleFullScreenChange);
     };
   }, []);
+
+  useEffect(() => {
+    if (
+      userId == tacticBoard?.user ||
+      userRoles.includes("Admin") ||
+      userRoles.includes("admin")
+    ) {
+      setIsPrivileged(true);
+    }
+  }, [userId, tacticBoard, userRoles]);
 
   const onLoadPage = (
     page: number,
@@ -270,49 +289,57 @@ const UpdateTacticBoard = (): JSX.Element => {
               </SoftTypography>
             }
           />
-          <CardActions
-            disableSpacing
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "flex-start",
-            }}
-          >
-            <SoftButton
-              iconOnly
-              onClick={() => {
-                onSave();
-                navigate(`/tacticboards/${tacticBoardId}/update`);
+          {isPriviliged && (
+            <CardActions
+              disableSpacing
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "flex-start",
               }}
-              size="large"
-              sx={{ mr: 1 }}
             >
-              <ArrowBackIcon />
-            </SoftButton>
-            <TacticsBoardToolBar
-              editMode={editMode}
-              setEditMode={setEditMode}
-              setPage={setPage}
-              currentPage={currentPage}
-              setMaxPages={setMaxPages}
-              maxPages={maxPages}
-              onSave={onSave}
-              onLoadPage={onLoadPage}
-              disabled={isTacticBoardLoading}
-              onDelete={onDelete}
-              handleFullScreen={handleFullScreen}
-            />
-          </CardActions>
+              <SoftButton
+                iconOnly
+                onClick={() => {
+                  onSave();
+                  navigate(`/tacticboards/${tacticBoardId}/update`);
+                }}
+                size="large"
+                sx={{ mr: 1 }}
+              >
+                <ArrowBackIcon />
+              </SoftButton>
+              <TacticsBoardToolBar
+                editMode={editMode}
+                setEditMode={setEditMode}
+                setPage={setPage}
+                currentPage={currentPage}
+                setMaxPages={setMaxPages}
+                maxPages={maxPages}
+                onSave={onSave}
+                onLoadPage={onLoadPage}
+                disabled={isTacticBoardLoading}
+                onDelete={onDelete}
+                handleFullScreen={handleFullScreen}
+              />
+            </CardActions>
+          )}
         </Card>
       )}
     >
       {() => (
         <>
-          {isTacticBoardError ? (
+          {isTacticBoardError && (
             <SoftBox justifyContent="center" display="flex">
               <Alert color="error">{"Error"}</Alert>
             </SoftBox>
-          ) : (
+          )}
+          {!isPriviliged && !isTacticBoardLoading && !isTacticBoardError && (
+            <Grid item xs={12} justifyContent="center" display="flex">
+              <Alert color="error">{"Not Authorized"}</Alert>
+            </Grid>
+          )}
+          {!isTacticBoardError && !isTacticBoardLoading && isPriviliged && (
             <Box ref={refFullScreenContainer}>
               {isFullScreen && (
                 <Card>

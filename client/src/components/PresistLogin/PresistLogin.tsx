@@ -36,28 +36,31 @@ const PresistLogin = (): JSX.Element => {
     };
   }, []);
 
-  // if (isLoading) {
-  //   console.log("loading");
-  //   return <Outlet />;
-  // } else if (isError) {
-  //   console.log("error");
-  //   return <Outlet />;
-  // } else if (isSuccess && trueSuccess) {
-  //   //persist: yes, token: yes
-  //   console.log("success");
-  //   return <Outlet />;
-  // } else if (token && isUninitialized) {
-  //   //persist: yes, token: yes
-  //   console.log("token and uninit");
-  //   console.log(isUninitialized);
-  //   return <Outlet />;
-  // } else if (!token && isUninitialized) {
-  //   //persist: yes, token: yes
-  //   console.log("no token and uninit");
-  //   console.log(isUninitialized);
-  //   return <Outlet />;
-  // }
-  return <Outlet />;
+  if (isError) {
+    // Error no Login verification
+    return <Outlet />;
+  } else if (isSuccess && trueSuccess) {
+    // Successfull login verification
+    console.log("Login Successfull");
+    return <Outlet />;
+  } else if (!token && isUninitialized && trueSuccess) {
+    // Fix after Logout
+    return <Outlet />;
+  } else if (token && isUninitialized && trueSuccess) {
+    // Login after Logout
+    console.log("Login after Logout Successfull");
+    return <Outlet />;
+  } else {
+    // console.log(
+    //   trueSuccess,
+    //   isUninitialized,
+    //   isLoading,
+    //   isSuccess,
+    //   isError,
+    //   token,
+    // );
+    return <></>;
+  }
 };
 
 export default PresistLogin;

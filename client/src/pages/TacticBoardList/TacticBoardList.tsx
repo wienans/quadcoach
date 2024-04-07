@@ -59,7 +59,7 @@ const TacticBoardList = () => {
   const navigate = useNavigate();
   const isUpMd = useMediaQuery((theme: Theme) => theme.breakpoints.up("md"));
 
-  const { userName, userId, userStatus } = useAuth();
+  const { name: userName, id: userId, status: userStatus } = useAuth();
 
   const [showFilters, setShowFilters] = useState<boolean>(false);
   const [viewType, setViewType] = useState<ViewType>(ViewType.Cards);
@@ -261,15 +261,17 @@ const TacticBoardList = () => {
       {() => (
         <>
           <SoftBox sx={{ mt: 2, display: "flex" }}>
-            <SoftButton
-              startIcon={isUpMd && <AddIcon />}
-              color="secondary"
-              onClick={() => {
-                setOpenAddTacticBoardDialog(true);
-              }}
-            >
-              {isUpMd ? t("TacticBoardList:addTacticBoard") : <AddIcon />}
-            </SoftButton>
+            {userStatus != null && (
+              <SoftButton
+                startIcon={isUpMd && <AddIcon />}
+                color="secondary"
+                onClick={() => {
+                  setOpenAddTacticBoardDialog(true);
+                }}
+              >
+                {isUpMd ? t("TacticBoardList:addTacticBoard") : <AddIcon />}
+              </SoftButton>
+            )}
             <AddTacticBoardDialog
               isOpen={openAddTacticBoardDialog}
               onConfirm={(name) => handleAddTacticBoard(name)}
