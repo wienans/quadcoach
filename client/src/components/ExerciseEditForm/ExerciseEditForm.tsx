@@ -24,6 +24,7 @@ import { cloneDeep, uniqBy } from "lodash";
 import "./translations";
 import { useTranslation } from "react-i18next";
 import TacticboardAutocomplete from "./TacticboardAutocomplete";
+import { useAuth } from "../../store/hooks";
 
 const exerciseShape = shape({
   name: string,
@@ -73,6 +74,8 @@ const ExerciseEditForm = ({
   isLoadingInitialValues = false,
 }: ExerciseEditFormProps) => {
   const { t } = useTranslation("ExerciseEditForm");
+
+  const { name: userName, id: userId, status: userStatus } = useAuth();
 
   const [openTagDialog, setOpenTagDialog] = useState<boolean>(false);
   const [openMaterialDialog, setOpenMaterialDialog] = useState<boolean>(false);
@@ -152,6 +155,8 @@ const ExerciseEditForm = ({
         beaters,
         chasers,
         materials,
+        creator: userName,
+        user: userId,
         tags,
         related_to,
         description_blocks: updatedBlocks,

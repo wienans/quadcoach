@@ -1,6 +1,6 @@
 import "./translations";
 import { useParams, useNavigate } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Alert, Card, CardHeader, Grid } from "@mui/material";
 import { SoftButton, SoftTypography } from "../../../../components";
 import ExerciseEditForm from "../../../../components/ExerciseEditForm";
@@ -14,12 +14,20 @@ import {
 import { ExerciseExtendWithRelatedExercises } from "../../../../components/ExerciseEditForm/ExerciseEditForm";
 import { useTranslation } from "react-i18next";
 import { DashboardLayout } from "../../../../components/LayoutContainers";
+import { useAuth } from "../../../../store/hooks";
 
 const UpdateExercise = () => {
   const { t } = useTranslation("UpdateExercise");
   const { id: exerciseId } = useParams();
   const navigate = useNavigate();
+  const [isPrivileged, setIsPrivileged] = useState<boolean | null>(null);
 
+  const {
+    name: userName,
+    id: userId,
+    status: userStatus,
+    roles: userRoles,
+  } = useAuth();
   const {
     data: exercise,
     isError: isExerciseError,
@@ -43,6 +51,7 @@ const UpdateExercise = () => {
       isSuccess: isUpdateExerciseSuccess,
     },
   ] = useUpdateExerciseMutation();
+
   useEffect(() => {
     if (!isUpdateExerciseSuccess || !exercise) return;
     navigate(`/exercises/${exercise._id}`);
@@ -64,6 +73,18 @@ const UpdateExercise = () => {
     if (!isDeleteExerciseSuccess) return;
     navigate("/exercises");
   }, [isDeleteExerciseSuccess, navigate]);
+
+  useEffect(() => {
+    if (
+      userId == exercise?.user ||
+      userRoles.includes("Admin") ||
+      userRoles.includes("admin")
+    ) {
+      setIsPrivileged(true);
+    } else {
+      setIsPrivileged(false);
+    }
+  }, [exercise, userId, userStatus, userRoles]);
 
   const onSubmit = (updatedExercise: ExerciseWithOutId) => {
     if (!exercise) return;
@@ -123,65 +144,75 @@ const UpdateExercise = () => {
       )}
     >
       {() => (
-        <ExerciseEditForm
-          extraRows={(isValid) => (
-            <>
-              {isUpdateExerciseError && (
-                <Grid item xs={12} justifyContent="center" display="flex">
-                  <Alert color="error">
-                    {t("UpdateExercise:errorUpdatingExercise")}
-                  </Alert>
-                </Grid>
+        <>
+          {}
+          {isPrivileged == true && (
+            <ExerciseEditForm
+              extraRows={(isValid) => (
+                <>
+                  {isUpdateExerciseError && (
+                    <Grid item xs={12} justifyContent="center" display="flex">
+                      <Alert color="error">
+                        {t("UpdateExercise:errorUpdatingExercise")}
+                      </Alert>
+                    </Grid>
+                  )}
+                  {isExerciseError && (
+                    <Grid item xs={12} justifyContent="center" display="flex">
+                      <Alert color="error">
+                        {t("UpdateExercise:errorLoadingExercise")}
+                      </Alert>
+                    </Grid>
+                  )}
+                  {isDeleteExerciseError && (
+                    <Grid item xs={12} justifyContent="center" display="flex">
+                      <Alert color="error">
+                        {t("UpdateExercise:errorDeletingExercise")}
+                      </Alert>
+                    </Grid>
+                  )}
+                  {isRelatedToExercisesError && (
+                    <Grid item xs={12} justifyContent="center" display="flex">
+                      <Alert color="error">
+                        {t("UpdateExercise:errorLoadingRelatedExercises")}
+                      </Alert>
+                    </Grid>
+                  )}
+                  <Grid item xs={12} justifyContent="center" display="flex">
+                    <SoftButton
+                      color="primary"
+                      sx={{ marginRight: 1 }}
+                      type="submit"
+                      disabled={
+                        !isValid || isUpdateExerciseLoading || isExerciseLoading
+                      }
+                    >
+                      {t("UpdateExercise:updateExercise")}
+                    </SoftButton>
+                    <SoftButton
+                      onClick={onDeleteExerciseClick}
+                      color="error"
+                      type="button"
+                      disabled={isDeleteExerciseLoading}
+                    >
+                      {t("UpdateExercise:deleteExercise")}
+                    </SoftButton>
+                  </Grid>
+                </>
               )}
-              {isExerciseError && (
-                <Grid item xs={12} justifyContent="center" display="flex">
-                  <Alert color="error">
-                    {t("UpdateExercise:errorLoadingExercise")}
-                  </Alert>
-                </Grid>
-              )}
-              {isDeleteExerciseError && (
-                <Grid item xs={12} justifyContent="center" display="flex">
-                  <Alert color="error">
-                    {t("UpdateExercise:errorDeletingExercise")}
-                  </Alert>
-                </Grid>
-              )}
-              {isRelatedToExercisesError && (
-                <Grid item xs={12} justifyContent="center" display="flex">
-                  <Alert color="error">
-                    {t("UpdateExercise:errorLoadingRelatedExercises")}
-                  </Alert>
-                </Grid>
-              )}
-              <Grid item xs={12} justifyContent="center" display="flex">
-                <SoftButton
-                  color="primary"
-                  sx={{ marginRight: 1 }}
-                  type="submit"
-                  disabled={
-                    !isValid || isUpdateExerciseLoading || isExerciseLoading
-                  }
-                >
-                  {t("UpdateExercise:updateExercise")}
-                </SoftButton>
-                <SoftButton
-                  onClick={onDeleteExerciseClick}
-                  color="error"
-                  type="button"
-                  disabled={isDeleteExerciseLoading}
-                >
-                  {t("UpdateExercise:deleteExercise")}
-                </SoftButton>
-              </Grid>
-            </>
+              initialValues={combinedExercise}
+              onSubmit={onSubmit}
+              isLoadingInitialValues={
+                isExerciseLoading || isRelatedToExercisesLoading
+              }
+            />
           )}
-          initialValues={combinedExercise}
-          onSubmit={onSubmit}
-          isLoadingInitialValues={
-            isExerciseLoading || isRelatedToExercisesLoading
-          }
-        />
+          {isPrivileged == false && (
+            <Alert sx={{ mt: 2 }} severity="error">
+              {t("UpdateExercise:unauthorized")}
+            </Alert>
+          )}
+        </>
       )}
     </DashboardLayout>
   );

@@ -1,4 +1,5 @@
 {
   "errorWhileAdding": "Es ist ein Fehler beim Speichern der Übung aufgetreten.",
-  "addExcercise": "Übung hinzufügen"
+  "addExcercise": "Übung hinzufügen",
+  "unauthorized": "Kein Zugriff, bitte logge dich ein"
 }
