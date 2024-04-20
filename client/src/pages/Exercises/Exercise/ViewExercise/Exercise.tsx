@@ -43,7 +43,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ContentPasteIcon from "@mui/icons-material/ContentPaste";
 import { useAuth } from "../../../../store/hooks";
-
+import Markdown from "react-markdown";
 type ExerciseValue = {
   labelResourceKey: string;
   getValue: (exercise: Exercise) => string;
@@ -422,7 +422,9 @@ const Exercise = () => {
                     <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                       {t("Exercise:block.description")}
                     </AccordionSummary>
-                    <AccordionDetails>{el.description}</AccordionDetails>
+                    <AccordionDetails>
+                      <Markdown>{el.description}</Markdown>
+                    </AccordionDetails>
                   </Accordion>
                 )}
                 {el.coaching_points && el.coaching_points != "" && (

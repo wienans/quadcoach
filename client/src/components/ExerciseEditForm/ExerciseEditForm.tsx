@@ -26,6 +26,12 @@ import { useTranslation } from "react-i18next";
 import TacticboardAutocomplete from "./TacticboardAutocomplete";
 import { useAuth } from "../../store/hooks";
 
+import MDEditor, { selectWord } from "@uiw/react-md-editor";
+// No import is required in the WebPack.
+import "@uiw/react-md-editor/markdown-editor.css";
+// No import is required in the WebPack.
+import "@uiw/react-markdown-preview/markdown.css";
+
 const exerciseShape = shape({
   name: string,
   time_min: number,
@@ -702,7 +708,7 @@ const ExerciseEditForm = ({
                                       "ExerciseEditForm:block.description.label",
                                     )}
                                   </SoftTypography>
-                                  <SoftInput
+                                  {/* <SoftInput
                                     error={Boolean(
                                       getDescriptionBlockFormikError(
                                         index,
@@ -722,6 +728,21 @@ const ExerciseEditForm = ({
                                     fullWidth
                                     multiline
                                     minRows={5}
+                                    onBlur={formik.handleBlur}
+                                  /> */}
+                                  <MDEditor
+                                    height={200}
+                                    value={
+                                      formik.values.description_blocks[index]
+                                        .description
+                                    }
+                                    onChange={(value) => {
+                                      console.log(value);
+                                      formik.setFieldValue(
+                                        `description_blocks[${index}].description`,
+                                        value,
+                                      );
+                                    }}
                                     onBlur={formik.handleBlur}
                                   />
                                   {Boolean(
