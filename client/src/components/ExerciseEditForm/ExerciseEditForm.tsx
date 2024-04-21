@@ -81,7 +81,7 @@ const ExerciseEditForm = ({
 }: ExerciseEditFormProps) => {
   const { t } = useTranslation("ExerciseEditForm");
 
-  const { name: userName, id: userId, status: userStatus } = useAuth();
+  const { name: userName, id: userId } = useAuth();
 
   const [openTagDialog, setOpenTagDialog] = useState<boolean>(false);
   const [openMaterialDialog, setOpenMaterialDialog] = useState<boolean>(false);
@@ -90,7 +90,7 @@ const ExerciseEditForm = ({
   const formik = useFormik<ExerciseExtendWithRelatedExercises>({
     // enableReinitialize : use this flag when initial values needs to be changed
     enableReinitialize: true,
-
+    validateOnChange: false,
     initialValues: {
       name: initialValues?.name ?? "",
       persons: initialValues?.persons ?? 0,
@@ -708,36 +708,13 @@ const ExerciseEditForm = ({
                                       "ExerciseEditForm:block.description.label",
                                     )}
                                   </SoftTypography>
-                                  {/* <SoftInput
-                                    error={Boolean(
-                                      getDescriptionBlockFormikError(
-                                        index,
-                                        "description",
-                                      ),
-                                    )}
-                                    name={`description_blocks[${index}].description`}
-                                    id="outlined-basic"
-                                    placeholder={t(
-                                      "ExerciseEditForm:block.description.placeholder",
-                                    )}
-                                    value={
-                                      formik.values.description_blocks[index]
-                                        .description
-                                    }
-                                    onChange={formik.handleChange}
-                                    fullWidth
-                                    multiline
-                                    minRows={5}
-                                    onBlur={formik.handleBlur}
-                                  /> */}
                                   <MDEditor
-                                    height={200}
+                                    height={300}
                                     value={
                                       formik.values.description_blocks[index]
                                         .description
                                     }
                                     onChange={(value) => {
-                                      console.log(value);
                                       formik.setFieldValue(
                                         `description_blocks[${index}].description`,
                                         value,
@@ -767,26 +744,18 @@ const ExerciseEditForm = ({
                                       "ExerciseEditForm:block.coachingPoints.label",
                                     )}
                                   </SoftTypography>
-                                  <SoftInput
-                                    error={Boolean(
-                                      getDescriptionBlockFormikError(
-                                        index,
-                                        "coaching_points",
-                                      ),
-                                    )}
-                                    name={`description_blocks[${index}].coaching_points`}
-                                    id="outlined-basic"
-                                    placeholder={t(
-                                      "ExerciseEditForm:block.coachingPoints.placeholder",
-                                    )}
+                                  <MDEditor
+                                    height={300}
                                     value={
                                       formik.values.description_blocks[index]
                                         .coaching_points
                                     }
-                                    onChange={formik.handleChange}
-                                    fullWidth
-                                    multiline
-                                    minRows={5}
+                                    onChange={(value) => {
+                                      formik.setFieldValue(
+                                        `description_blocks[${index}].coaching_points`,
+                                        value,
+                                      );
+                                    }}
                                     onBlur={formik.handleBlur}
                                   />
                                   {Boolean(

@@ -44,6 +44,7 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ContentPasteIcon from "@mui/icons-material/ContentPaste";
 import { useAuth } from "../../../../store/hooks";
 import Markdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 type ExerciseValue = {
   labelResourceKey: string;
   getValue: (exercise: Exercise) => string;
@@ -422,8 +423,10 @@ const Exercise = () => {
                     <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                       {t("Exercise:block.description")}
                     </AccordionSummary>
-                    <AccordionDetails>
-                      <Markdown>{el.description}</Markdown>
+                    <AccordionDetails sx={{ ml: 2 }}>
+                      <Markdown remarkPlugins={[remarkGfm]}>
+                        {el.description}
+                      </Markdown>
                     </AccordionDetails>
                   </Accordion>
                 )}
@@ -432,7 +435,11 @@ const Exercise = () => {
                     <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                       {t("Exercise:block.coachingPoints")}
                     </AccordionSummary>
-                    <AccordionDetails>{el.coaching_points}</AccordionDetails>
+                    <AccordionDetails sx={{ ml: 2 }}>
+                      <Markdown remarkPlugins={[remarkGfm]}>
+                        {el.coaching_points}
+                      </Markdown>
+                    </AccordionDetails>
                   </Accordion>
                 )}
                 {el.tactics_board && el.tactics_board != "" && (
