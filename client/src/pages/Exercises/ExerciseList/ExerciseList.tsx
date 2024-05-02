@@ -29,7 +29,7 @@ import ExercisesCardView from "./cardView/ExercisesCardView";
 import AddIcon from "@mui/icons-material/Add";
 import { useLazyGetExercisesQuery } from "../../exerciseApi";
 import { DashboardLayout } from "../../../components/LayoutContainers";
-
+import { useAuth } from "../../../store/hooks";
 const maxPersons = 100;
 
 enum ViewType {
@@ -59,6 +59,7 @@ const ExerciseList = () => {
 
   const [showFilters, setShowFilters] = useState<boolean>(false);
   const [viewType, setViewType] = useState<ViewType>(ViewType.Cards);
+  const { status: userStatus } = useAuth();
 
   useEffect(() => {
     if (isUpMd) return;
@@ -249,13 +250,15 @@ const ExerciseList = () => {
         <>
           {isUpMd && (
             <SoftBox sx={{ mt: 2, display: "flex" }}>
-              <SoftButton
-                startIcon={<AddIcon />}
-                color="secondary"
-                href="/exercises/add"
-              >
-                {t("ExerciseList:addExercise")}
-              </SoftButton>
+              {userStatus != null && (
+                <SoftButton
+                  startIcon={<AddIcon />}
+                  color="secondary"
+                  href="/exercises/add"
+                >
+                  {t("ExerciseList:addExercise")}
+                </SoftButton>
+              )}
               <ToggleButtonGroup
                 value={viewType}
                 exclusive
