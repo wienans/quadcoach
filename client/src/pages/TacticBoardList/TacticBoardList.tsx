@@ -87,6 +87,7 @@ const TacticBoardList = () => {
       data: tacticBoards,
       isError: isTacticBoardsError,
       isLoading: isTacticBoardsLoading,
+      error,
     },
   ] = useLazyGetTacticBoardsQuery();
 
@@ -285,7 +286,6 @@ const TacticBoardList = () => {
           </SoftBox>
           {isTacticBoardsError && (
             <Alert color="error" sx={{ mt: 2 }}>
-              {" "}
               {t("TacticBoardList:errorLoadingTacticBoards")}
             </Alert>
           )}

@@ -1,0 +1,29 @@
+{
+  "title": "Register",
+  "info": {
+    "name": {
+      "label": "Name",
+      "placeholder": "Anzeigename",
+      "missing": "Bitte gib einen Anzeigenamen ein."
+    },
+    "email": {
+      "label": "E-Mail",
+      "valid": "E-Mail muss eine gültige E-Mail sein.",
+      "placeholder": "E-Mail",
+      "missing": "Bitte gib einen E-Mail ein."
+    },
+    "password": {
+      "label": "Passwort",
+      "valid": "Muss 8 Zeichen enthalten, ein Großbuch, ein Kleinbuch, eine Zahl und ein Sonderzeichen",
+      "placeholder": "Passwort",
+      "missing": "Bitte gib ein Passwort ein."
+    },
+    "confirmpassword": {
+      "label": "Passwort bestätigen",
+      "placeholder": "Passwort",
+      "missing": "Gib das selbe Passwort erneut ein."
+    }
+  },
+  "registerBtn": "Registerieren",
+  "registerErr": "E-Mail bereits registriert. Bitte versuche es erneut."
+}

@@ -3,7 +3,7 @@ import { Card } from "@mui/material";
 import { SoftBox, SoftTypography } from "../../components";
 import { useTranslation } from "react-i18next";
 
-import logo from "../../../public/logo.svg";
+import Logo from "../../assets/images/logo.svg";
 import { DashboardLayout } from "../../components/LayoutContainers";
 
 const Home = () => {
@@ -21,7 +21,7 @@ const Home = () => {
             }}
           >
             <img
-              src={logo}
+              src={Logo}
               alt="Logo"
               style={{ width: "250px", margin: "50px 0" }}
             />

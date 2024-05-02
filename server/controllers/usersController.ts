@@ -9,6 +9,13 @@ import mongoose from "mongoose";
 // @route GET /users
 // @access Private
 export const getAllUsers = asyncHandler(async (req: Request, res: Response) => {
+  let queryString: string = JSON.stringify(req.query);
+
+  queryString = queryString.replace(
+    /\b(gte|gt|lte|lt|eq|ne|regex|options|in|nin)\b/g,
+    (match) => `$${match}`
+  );
+  
   const users = await User.find().select("-password").lean();
   if (!users?.length) {
     res.status(400).json({ message: "No users found" });

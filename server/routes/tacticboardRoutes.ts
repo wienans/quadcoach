@@ -1,6 +1,6 @@
 import express from "express";
 import * as tacticboardController from "../controllers/tacticboardController";
-
+import verifyJWT from "../middleware/verifyJWT";
 const router = express.Router();
 
 router
