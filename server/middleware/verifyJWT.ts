@@ -22,16 +22,29 @@ const verifyJWT = (req: Request, res: Response, next: NextFunction) => {
   try {
     const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
     // @ts-ignore
-    req.email = decoded.email;
+    req.UserInfo = {};
     // @ts-ignore
-    req.roles = decoded.roles;
+    req.UserInfo.email = decoded.UserInfo.email;
     // @ts-ignore
-    req.name = decoded.name;
+    req.UserInfo.roles = decoded.UserInfo.roles;
     // @ts-ignore
-    req.id = decoded.id;
+    req.UserInfo.name = decoded.UserInfo.name;
+    // @ts-ignore
+    req.UserInfo.id = decoded.UserInfo.id;
+
     next();
   } catch (e) {
-    if (e) return res.status(403).json({ message: "Forbidden" });
+    // @ts-ignore
+    req.UserInfo = {};
+    // @ts-ignore
+    req.UserInfo.email = "";
+    // @ts-ignore
+    req.UserInfo.roles = [];
+    // @ts-ignore
+    req.UserInfo.name = "";
+    // @ts-ignore
+    req.UserInfo.id = "";
+    next();
   }
 };
 

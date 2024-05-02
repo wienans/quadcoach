@@ -33,18 +33,16 @@ const TacticBoardCardView = ({
         ))}
       {!isTacticBoardsLoading &&
         tacticBoards?.map((tacticBoard) => {
-          if (tacticBoard.isPrivate != true) {
-            return (
-              <Grid item xs={12} md={6} xl={4} xxl={3} key={tacticBoard._id}>
-                <TacticBoardCard
-                  tacticBoard={tacticBoard}
-                  onOpenTacticBoardClick={() =>
-                    onOpenTacticBoardClick(tacticBoard._id)
-                  }
-                />
-              </Grid>
-            );
-          }
+          return (
+            <Grid item xs={12} md={6} xl={4} xxl={3} key={tacticBoard._id}>
+              <TacticBoardCard
+                tacticBoard={tacticBoard}
+                onOpenTacticBoardClick={() =>
+                  onOpenTacticBoardClick(tacticBoard._id)
+                }
+              />
+            </Grid>
+          );
         })}
     </Grid>
   );

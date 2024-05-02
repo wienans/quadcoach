@@ -1,6 +1,6 @@
 import "./translations";
 import { useNavigate, useParams } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Alert,
   Grid,
@@ -41,6 +41,7 @@ import * as Yup from "yup";
 import AddTagDialog from "./AddTagDialog";
 import { cloneDeep } from "lodash";
 import { DashboardLayout } from "../../components/LayoutContainers";
+import { useAuth } from "../../store/hooks";
 
 const UpdateTacticBoardMeta = (): JSX.Element => {
   const { t } = useTranslation("UpdateTacticBoardMeta");
@@ -48,6 +49,14 @@ const UpdateTacticBoardMeta = (): JSX.Element => {
   const { id: tacticBoardId } = useParams();
 
   const [openTagDialog, setOpenTagDialog] = useState<boolean>(false);
+  const [isPriviliged, setIsPrivileged] = useState<boolean>(false);
+
+  const {
+    name: userName,
+    id: userId,
+    status: userStatus,
+    roles: userRoles,
+  } = useAuth();
 
   const {
     data: tacticBoard,
@@ -137,6 +146,16 @@ const UpdateTacticBoardMeta = (): JSX.Element => {
     setOpenTagDialog(false);
   };
 
+  useEffect(() => {
+    if (
+      userId == tacticBoard?.user ||
+      userRoles.includes("Admin") ||
+      userRoles.includes("admin")
+    ) {
+      setIsPrivileged(true);
+    }
+  }, [userId, tacticBoard, userRoles]);
+
   return (
     <FormikProvider value={formik}>
       <DashboardLayout
@@ -193,6 +212,13 @@ const UpdateTacticBoardMeta = (): JSX.Element => {
                   <Alert color="error">{"Error Loading"}</Alert>
                 </Grid>
               )}
+              {!isPriviliged &&
+                !isTacticBoardLoading &&
+                !isTacticBoardError && (
+                  <Grid item xs={12} justifyContent="center" display="flex">
+                    <Alert color="error">{"Not Authorized"}</Alert>
+                  </Grid>
+                )}
               {isTacticBoardLoading && (
                 <>
                   <Grid item xs={12}>
@@ -218,7 +244,7 @@ const UpdateTacticBoardMeta = (): JSX.Element => {
                   </Grid>
                 </>
               )}
-              {!isTacticBoardError && !isTacticBoardLoading && (
+              {!isTacticBoardError && !isTacticBoardLoading && isPriviliged && (
                 <>
                   <Grid item xs={12}>
                     <SoftBox
@@ -273,7 +299,6 @@ const UpdateTacticBoardMeta = (): JSX.Element => {
                                 checked={formik.values.isPrivate}
                                 onChange={formik.handleChange}
                                 name="isPrivate"
-                                disabled={true}
                               />
                             }
                             label={
