@@ -23,7 +23,7 @@ import {
 import {
   useLazyGetTacticBoardsQuery,
   useAddTacticBoardMutation,
-} from "../tacticboardApi";
+} from "../../api/quadcoachApi/tacticboardApi";
 import {
   TacticBoardWithOutId,
   TacticBoard,

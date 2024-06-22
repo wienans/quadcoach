@@ -1,6 +1,6 @@
 import { Autocomplete, CircularProgress, TextField } from "@mui/material";
 import { useState } from "react";
-import { useGetAllTacticBoardTagsQuery } from "../../../pages/tacticboardApi";
+import { useGetAllTacticBoardTagsQuery } from "../../../api/quadcoachApi/tacticboardApi";
 
 export type TagAutocompleteProps = {
   selectedTags: string[];

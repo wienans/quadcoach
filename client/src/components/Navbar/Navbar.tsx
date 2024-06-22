@@ -30,7 +30,7 @@ export type NavbarProps = {
 };
 
 const Navbar = ({ light }: NavbarProps) => (
-  <AppBar position={"relative"} color="transparent">
+  <AppBar position="relative" color="transparent">
     <Toolbar
       sx={{
         display: "flex",
@@ -54,6 +54,8 @@ const Navbar = ({ light }: NavbarProps) => (
             md: 0,
           },
         }}
+        component="a"
+        href="/"
       >
         <img
           src={Logo}

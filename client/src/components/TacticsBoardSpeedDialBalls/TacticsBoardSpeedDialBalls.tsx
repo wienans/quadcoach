@@ -1,7 +1,7 @@
-import { useFabricJs } from "../FabricJsContext";
 import { SpeedDial, SpeedDialAction } from "@mui/material";
 import SportsVolleyballIcon from "@mui/icons-material/SportsVolleyball";
 import { fabric } from "fabric";
+import { useTacticBoardFabricJs } from "../../hooks";
 import { v4 as uuidv4 } from "uuid";
 
 export type TacticsBoardSpeedDialProps = {
@@ -11,7 +11,7 @@ export type TacticsBoardSpeedDialProps = {
 const TacticsBoardSpeedDial = ({
   editMode,
 }: TacticsBoardSpeedDialProps): JSX.Element => {
-  const { addObject } = useFabricJs();
+  const { addObject } = useTacticBoardFabricJs();
   const handleAddBall = (ballColor: string) => {
     const circle = new fabric.Circle({
       radius: 10,

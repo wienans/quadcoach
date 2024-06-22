@@ -12,23 +12,33 @@ import {
   Grid,
   Pagination,
   Skeleton,
+  Theme,
+  useMediaQuery,
 } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import {
   SoftTypography,
   FabricJsCanvas,
   SoftButton,
+  SoftBox,
 } from "../../components";
 import FullscreenIcon from "@mui/icons-material/Fullscreen";
 import EditIcon from "@mui/icons-material/Edit";
-import { useGetTacticBoardQuery } from "../../pages/tacticboardApi";
-import { useFabricJs } from "../../components/FabricJsContext/useFabricJs";
+import { useGetTacticBoardQuery } from "../../api/quadcoachApi/tacticboardApi";
 import PlayCircleIcon from "@mui/icons-material/PlayCircle";
 import PauseCircleIcon from "@mui/icons-material/PauseCircle";
 import MovieIcon from "@mui/icons-material/Movie";
 import "../fullscreen.css";
 import { DashboardLayout } from "../../components/LayoutContainers";
 import { TacticBoard } from "../../api/quadcoachApi/domain";
+import { useTacticBoardFabricJs } from "../../hooks";
+import { TacticBoardFabricJsContextProvider } from "../../contexts";
+import Navbar from "../../components/Navbar";
+import TacticBoardItemsDrawerNav from "./TacticBoardItemsDrawerNav";
+import { tacticBoardItemsDrawerWidth } from "./TacticBoardItemsDrawerNav/TacticBoardItemsDrawerNav";
+import { useAppSelector } from "../../store/hooks";
+import TacticBoardTopMenu from "./TacticBoardTopMenu/TacticBoardTopMenu";
+import TacticBoardTopItemsMenu from "./TacticBoardTopItemsMenu";
 let mediaRecorder: MediaRecorder;
 
 type TacticBoardActionsProps = {
@@ -105,8 +115,14 @@ const TacticBoardActions = ({
 
 const TacticsBoard = (): JSX.Element => {
   const { t } = useTranslation("TacticBoard");
+  const isUpSm = useMediaQuery((theme: Theme) => theme.breakpoints.up("sm"));
   const { id: tacticBoardId } = useParams();
-  const { canvas, loadFromJson, setSelection, getAllObjects } = useFabricJs();
+  const {
+    canvasFabric: canvas,
+    loadFromTaticPage: loadFromJson,
+    setSelection,
+    getAllObjects,
+  } = useTacticBoardFabricJs();
   const navigate = useNavigate();
   const refFullScreenContainer = useRef<HTMLDivElement>(null);
   const {
@@ -122,6 +138,11 @@ const TacticsBoard = (): JSX.Element => {
   const [isAnimating, setIsAnimating] = useState<boolean>(false);
   const [isRecording, setIsRecording] = useState<boolean>(false);
   const [isFullScreen, setIsFullScreen] = useState<boolean>(false);
+
+  const tacticBoardItemsDrawerOpen = useAppSelector(
+    (state) => state.tacticBoard.tacticBoardItemsDrawerOpen,
+  );
+  const isEditMode = useAppSelector((state) => state.tacticBoard.isEditMode);
 
   const onLoadPage = useCallback(
     (page: number) => {
@@ -308,6 +329,95 @@ const TacticsBoard = (): JSX.Element => {
   }, []);
 
   return (
+    <SoftBox
+      sx={{
+        p: 3,
+        position: "relative",
+        height: "100%",//"100vh",
+        maxHeight: "100%",//"100vh",
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
+      <Navbar light={false} />
+      {(isTacticBoardError || (!isTacticBoardLoading && !tacticBoard)) && (
+        <SoftBox sx={{ px: 3 }}>
+          <Alert color="error">
+            {t("TacticBoard:loadingTacticBoardError")}
+          </Alert>
+        </SoftBox>
+      )}
+      {isTacticBoardLoading && (
+        <>
+          <SoftBox sx={{ px: 3, mb: 1 }}>
+            <Skeleton variant="rectangular" width="100%" height={64} />
+          </SoftBox>
+          <SoftBox
+            sx={{
+              display: "flex",
+              flexGrow: 1,
+              px: 3,
+            }}
+          >
+            <Skeleton variant="rectangular" width="100%" height="100%" />
+          </SoftBox>
+        </>
+      )}
+      {!isTacticBoardError && !isTacticBoardLoading && tacticBoard && (
+        <SoftBox
+          sx={{
+            display: "flex",
+            flexGrow: 1,
+            maxHeight: "100%",
+            flexDirection: "column",
+          }}
+        >
+          <TacticBoardTopMenu
+            isTacticBoardLoading={isTacticBoardLoading}
+            tacticBoard={tacticBoard}
+          />
+          <SoftBox
+            sx={{
+              display: "flex",
+              flexGrow: 1,
+              px: 3,
+            }}
+          >
+            <TacticBoardItemsDrawerNav />
+            <SoftBox
+              sx={{
+                display: "flex",
+                flexGrow: 1,
+                flexDirection: "column",
+                minHeight: 0,
+              }}
+            >
+              {isEditMode && <TacticBoardTopItemsMenu />}
+              <SoftBox
+                component="main"
+                sx={{
+                  display: "flex",
+                  minHeight: 0,
+                  flexGrow: 1,
+                  width: isUpSm
+                    ? `calc(100% - ${
+                        tacticBoardItemsDrawerOpen
+                          ? `${tacticBoardItemsDrawerWidth}px`
+                          : "0"
+                      })`
+                    : "100%",
+                }}
+              >
+                <FabricJsCanvas initialHight={686} initialWidth={1220} />
+              </SoftBox>
+            </SoftBox>
+          </SoftBox>
+        </SoftBox>
+      )}
+    </SoftBox>
+  );
+
+  return (
     <DashboardLayout
       header={(scrollTrigger) => (
         <Card
@@ -340,7 +450,7 @@ const TacticsBoard = (): JSX.Element => {
           <CardHeader
             title={
               <SoftTypography variant="h3">
-                {`${t("TacticBoard:titel")}${
+                {`${t("TacticBoard:title")}${
                   tacticBoard ? `: ${tacticBoard.name}` : ""
                 }`}
               </SoftTypography>
@@ -363,7 +473,14 @@ const TacticsBoard = (): JSX.Element => {
       )}
     >
       {() => (
-        <Box ref={refFullScreenContainer}>
+        <Box
+          ref={refFullScreenContainer}
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            flexGrow: 1,
+          }}
+        >
           {isFullScreen && !isTacticBoardLoading && (
             <Card>
               <TacticBoardActions
@@ -388,19 +505,16 @@ const TacticsBoard = (): JSX.Element => {
             <Skeleton variant="rectangular" width={"100%"} height={100} />
           )}
           {!isTacticBoardError && !isTacticBoardLoading && (
-            <Box
-              ref={refContainer}
-              sx={{
-                width: "100%",
-                display: "flex",
-                justifyContent: "center",
-              }}
-            >
-              <FabricJsCanvas
-                initialHight={686}
-                initialWidth={1220}
-                containerRef={refContainer}
-              />
+            // <Box
+            //   ref={refContainer}
+            //   sx={{
+            //     width: "100%",
+            //     display: "flex",
+            //     justifyContent: "center",
+            //   }}
+            // >
+            <Box sx={{ flexGrow: 1, display: "flex" }}>
+              <FabricJsCanvas initialHight={686} initialWidth={1220} />
             </Box>
           )}
         </Box>
@@ -409,4 +523,12 @@ const TacticsBoard = (): JSX.Element => {
   );
 };
 
-export default TacticsBoard;
+const TacticsBoardWrapper = (): JSX.Element => {
+  return (
+    <TacticBoardFabricJsContextProvider>
+      <TacticsBoard />
+    </TacticBoardFabricJsContextProvider>
+  );
+};
+
+export default TacticsBoardWrapper;

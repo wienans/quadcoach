@@ -1,11 +1,6 @@
 import "./translations";
-import { useFabricJs } from "../FabricJsContext";
 import { useState } from "react";
-import {
-  Pagination,
-  ToggleButton,
-  ButtonGroup,
-} from "@mui/material";
+import { Pagination, ToggleButton, ButtonGroup } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -13,6 +8,7 @@ import DrawIcon from "@mui/icons-material/Draw";
 import EditIcon from "@mui/icons-material/Edit";
 import { SoftBox, SoftButton } from "..";
 import FullscreenIcon from "@mui/icons-material/Fullscreen";
+import { useTacticBoardFabricJs } from "../../hooks";
 
 export type TacticsBoardToolBarProps = {
   editMode: boolean;
@@ -40,7 +36,7 @@ const TacticsBoardToolBar = ({
   onDelete,
   handleFullScreen,
 }: TacticsBoardToolBarProps): JSX.Element => {
-  const { setSelection, setDrawMode } = useFabricJs();
+  const { setSelection, setDrawMode } = useTacticBoardFabricJs();
   const handleChange = (_: React.ChangeEvent<unknown>, value: number) => {
     setPage(value);
     onLoadPage(value);

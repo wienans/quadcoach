@@ -30,7 +30,11 @@
   "block": {
     "title": "Block {{blockNumber}}",
     "minutes": "Time: {{minutes}} minutes",
-    "tacticboard": "Tacticboard",
+    "tacticboard": {
+      "title": "Tacticboard",
+      "isError": "An error occurred while loading tacticboard.",
+      "notFound": "Connected tacticboard was not found."
+    },
     "visitTacticboard": "show Tacticboard",
     "description": "Description:",
     "coachingPoints": "Coaching points:"

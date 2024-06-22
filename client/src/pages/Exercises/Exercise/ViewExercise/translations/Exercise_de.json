@@ -30,7 +30,11 @@
   "block": {
     "title": "Block {{blockNumber}}",
     "minutes": "Zeit: {{minutes}} Minuten",
-    "tacticboard": "Taktik Tafel",
+    "tacticboard": {
+      "title": "Taktik Tafel",
+      "isError": "Es ist ein Fehler beim Laden der Taktiktafel aufgetreten.",
+      "notFound": "Zugeordnete Taktik Tafel konnte nicht gefunden werden."
+    },
     "visitTacticboard": "Taktik Tafel ansehen",
     "description": "Beschreibung:",
     "coachingPoints": "Coaching-Punkte:"

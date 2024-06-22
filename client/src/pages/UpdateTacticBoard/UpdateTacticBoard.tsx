@@ -15,7 +15,7 @@ import { useTranslation } from "react-i18next";
 import {
   useUpdateTacticBoardMutation,
   useGetTacticBoardQuery,
-} from "../../pages/tacticboardApi";
+} from "../../api/quadcoachApi/tacticboardApi";
 import { TacticBoard, TacticPage } from "../../api/quadcoachApi/domain";
 import {
   SoftTypography,
@@ -26,12 +26,13 @@ import {
   TacticsBoardSpeedDialBalls,
   SoftButton,
 } from "../../components";
-import { useFabricJs } from "../../components/FabricJsContext/useFabricJs";
 import cloneDeep from "lodash/cloneDeep";
 import "../fullscreen.css";
 import FullscreenIcon from "@mui/icons-material/Fullscreen";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { DashboardLayout } from "../../components/LayoutContainers";
+import { useTacticBoardFabricJs } from "../../hooks";
+import { TacticBoardFabricJsContextProvider } from "../../contexts";
 
 const UpdateTacticBoard = (): JSX.Element => {
   const { t } = useTranslation("UpdateTacticBoard");
@@ -39,11 +40,11 @@ const UpdateTacticBoard = (): JSX.Element => {
   const { id: tacticBoardId } = useParams();
   const {
     getAllObjectsJson,
-    loadFromJson,
+    loadFromTaticPage: loadFromJson,
     setControls,
     getActiveObjects,
     removeActiveObjects,
-  } = useFabricJs();
+  } = useTacticBoardFabricJs();
   const {
     data: tacticBoard,
     isError: isTacticBoardError,
@@ -351,7 +352,7 @@ const UpdateTacticBoard = (): JSX.Element => {
                     <FabricJsCanvas
                       initialHight={686}
                       initialWidth={1220}
-                      containerRef={refContainer}
+                      // containerRef={refContainer}
                     />
                   </>
                   <TacticsBoardSpeedDial
@@ -449,7 +450,7 @@ const UpdateTacticBoard = (): JSX.Element => {
                       <FabricJsCanvas
                         initialHight={686}
                         initialWidth={1220}
-                        containerRef={refContainer}
+                        // containerRef={refContainer}
                       />
                     </>
                   )}
@@ -474,4 +475,12 @@ const UpdateTacticBoard = (): JSX.Element => {
   );
 };
 
-export default UpdateTacticBoard;
+const UpdateTacticBoardWrapper = (): JSX.Element => {
+  return (
+    <TacticBoardFabricJsContextProvider>
+      <UpdateTacticBoard />
+    </TacticBoardFabricJsContextProvider>
+  );
+};
+
+export default UpdateTacticBoardWrapper;

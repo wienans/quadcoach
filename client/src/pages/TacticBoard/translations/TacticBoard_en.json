@@ -1,5 +1,28 @@
 {
-    "titel": "Tacitc Board",
-    "editBtn": "Edit Tactic Board"
+  "title": "Tactic Board",
+  "loadingTacticBoardError": "An error occurred while loading tactic board.",
+  "topMenu": {
+    "isEditModeButton": {
+      "tooltip": "Button for switching between view and edit mode.",
+      "tooltip_editMode": "Save changes and switch to view mode.",
+      "tooltip_viewMode": "Open edit mode."
+    },
+    "itemsMenuButton": {
+      "tooltip": "Button to open and close items menu.",
+      "tooltip_open": "Close items menu.",
+      "tooltip_closed": "Open items menu."
+    },
+    "renameTacticBoadButton": {
+      "tooltip": "Open dialog to rename tactic board."
+    }
+  },
+  "itemsDrawer": {
+    "title": "Items menu",
+    "PersonItemsSection": {
+      "title": "Persons"
+    },
+    "BallItemsSection": {
+      "title": "Balls"
+    }
+  }
 }
-  
