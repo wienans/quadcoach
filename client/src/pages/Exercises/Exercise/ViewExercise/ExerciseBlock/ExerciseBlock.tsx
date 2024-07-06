@@ -13,6 +13,8 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ReactPlayer from "react-player";
 import ContentPasteIcon from "@mui/icons-material/ContentPaste";
 import TacticBoardInBlockWrapper from "./TacticBoardInBlock";
+import remarkGfm from "remark-gfm";
+import Markdown from "react-markdown";
 
 export type ExerciseBlockProps = {
   block: Block;
@@ -78,7 +80,9 @@ const ExerciseBlock = ({
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
             {t("Exercise:block.description")}
           </AccordionSummary>
-          <AccordionDetails>{block.description}</AccordionDetails>
+          <AccordionDetails sx={{ ml: 2 }}>
+            <Markdown remarkPlugins={[remarkGfm]}>{block.description}</Markdown>
+          </AccordionDetails>
         </Accordion>
       )}
       {block.coaching_points && block.coaching_points != "" && (
@@ -86,7 +90,11 @@ const ExerciseBlock = ({
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
             {t("Exercise:block.coachingPoints")}
           </AccordionSummary>
-          <AccordionDetails>{block.coaching_points}</AccordionDetails>
+          <AccordionDetails sx={{ ml: 2 }}>
+            <Markdown remarkPlugins={[remarkGfm]}>
+              {block.coaching_points}
+            </Markdown>
+          </AccordionDetails>
         </Accordion>
       )}
       {block.tactics_board && block.tactics_board != "" && (
