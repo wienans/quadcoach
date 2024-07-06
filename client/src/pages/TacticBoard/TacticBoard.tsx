@@ -39,12 +39,15 @@ import { tacticBoardItemsDrawerWidth } from "./TacticBoardItemsDrawerNav/TacticB
 import { useAppSelector } from "../../store/hooks";
 import TacticBoardTopMenu from "./TacticBoardTopMenu/TacticBoardTopMenu";
 import TacticBoardTopItemsMenu from "./TacticBoardTopItemsMenu";
+import { useAuth } from "../../store/hooks";
+
 let mediaRecorder: MediaRecorder;
 
 type TacticBoardActionsProps = {
   tacticBoard: TacticBoard | undefined;
   isAnimating: boolean;
   isRecording: boolean;
+  isPriviliged: boolean;
   currentPage: number;
   onPageChange: (page: number) => void;
   onEditTacticBoardClick: () => void;
@@ -57,6 +60,7 @@ const TacticBoardActions = ({
   tacticBoard,
   isAnimating,
   isRecording,
+  isPriviliged,
   currentPage,
   onPageChange,
   onEditTacticBoardClick,
@@ -81,13 +85,15 @@ const TacticBoardActions = ({
       sx={{ mr: 1 }}
     />
     <ButtonGroup size="small" aria-label="Small button group">
-      <SoftButton
-        iconOnly={true}
-        disabled={isAnimating || isRecording}
-        onClick={onEditTacticBoardClick}
-      >
-        <EditIcon />
-      </SoftButton>
+      {isPriviliged && (
+        <SoftButton
+          iconOnly={true}
+          disabled={isAnimating || isRecording}
+          onClick={onEditTacticBoardClick}
+        >
+          <EditIcon />
+        </SoftButton>
+      )}
       <SoftButton
         iconOnly={true}
         disabled={isRecording}
@@ -138,11 +144,19 @@ const TacticsBoard = (): JSX.Element => {
   const [isAnimating, setIsAnimating] = useState<boolean>(false);
   const [isRecording, setIsRecording] = useState<boolean>(false);
   const [isFullScreen, setIsFullScreen] = useState<boolean>(false);
+  const [isPriviliged, setIsPrivileged] = useState<boolean>(false);
 
   const tacticBoardItemsDrawerOpen = useAppSelector(
     (state) => state.tacticBoard.tacticBoardItemsDrawerOpen,
   );
   const isEditMode = useAppSelector((state) => state.tacticBoard.isEditMode);
+
+  const {
+    name: userName,
+    id: userId,
+    status: userStatus,
+    roles: userRoles,
+  } = useAuth();
 
   const onLoadPage = useCallback(
     (page: number) => {
@@ -328,6 +342,16 @@ const TacticsBoard = (): JSX.Element => {
     };
   }, []);
 
+  useEffect(() => {
+    if (
+      userId == tacticBoard?.user ||
+      userRoles.includes("Admin") ||
+      userRoles.includes("admin")
+    ) {
+      setIsPrivileged(true);
+    }
+  }, [userId, tacticBoard, userRoles]);
+
   return (
     <SoftBox
       sx={{
@@ -461,6 +485,7 @@ const TacticsBoard = (): JSX.Element => {
               currentPage={currentPage}
               isAnimating={isAnimating}
               isRecording={isRecording}
+              isPriviliged={isPriviliged}
               onAnimateClick={onAnimateClick}
               onEditTacticBoardClick={onEditTacticBoardClick}
               onFullScreenClick={onFullScreenClick}

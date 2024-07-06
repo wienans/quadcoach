@@ -93,7 +93,7 @@ const TacticBoardsListView = ({
       }}
       loading={isTacticBoardsLoading}
       getRowId={(row) => row._id}
-      rows={tacticBoards?.filter((item) => !item.isPrivate) || []}
+      rows={tacticBoards || []}
       columns={columns2}
       initialState={{
         pagination: {

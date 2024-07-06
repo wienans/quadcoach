@@ -39,12 +39,17 @@ export const getById = asyncHandler(async (req: Request, res: Response) => {
 // @access Public
 export const createNewExercise = asyncHandler(
   async (req: Request, res: Response) => {
-    let exercise = new Exercise(req.body);
-    const result = await exercise.save();
-    if (!result) {
-      console.error("Couldn't create Exercise");
+    // @ts-ignore
+    if (req.UserInfo.id != "") {
+      let exercise = new Exercise(req.body);
+      const result = await exercise.save();
+      if (!result) {
+        console.error("Couldn't create Exercise");
+      }
+      res.send(result);
+    } else {
+      res.status(403).json({ message: "Forbidden" });
     }
-    res.send(result);
   }
 );
 
@@ -52,11 +57,28 @@ export const createNewExercise = asyncHandler(
 // @access Private
 export const updateById = asyncHandler(async (req: Request, res: Response) => {
   if (mongoose.isValidObjectId(req.params.id)) {
-    const result = await Exercise.updateOne(
-      { _id: req.params.id },
-      { $set: req.body }
-    );
-    res.send(result);
+    const findResult = await Exercise.findOne({ _id: req.params.id });
+    if (findResult) {
+      if (
+        findResult.user &&
+        // @ts-ignore
+        (!req.UserInfo.id || req.UserInfo.id != findResult.user?.toString()) &&
+        // @ts-ignore
+        !req.UserInfo.roles.includes("Admin") &&
+        // @ts-ignore
+        !req.UserInfo.roles.includes("admin")
+      ) {
+        res.status(403).json({ message: "Forbidden" });
+        return;
+      }
+      const result = await Exercise.updateOne(
+        { _id: req.params.id },
+        { $set: req.body }
+      );
+      res.send(result);
+    } else {
+      res.send({ result: "No Record Found" });
+    }
   } else {
     res.send({ result: "No Record Found" });
   }
@@ -66,8 +88,21 @@ export const updateById = asyncHandler(async (req: Request, res: Response) => {
 // @access Private
 export const deleteById = asyncHandler(async (req: Request, res: Response) => {
   if (mongoose.isValidObjectId(req.params.id)) {
-    const result = await Exercise.deleteOne({ _id: req.params.id });
-    if (result) {
+    const findResult = await Exercise.findOne({ _id: req.params.id });
+    if (findResult) {
+      if (
+        findResult.user &&
+        // @ts-ignore
+        (!req.UserInfo.id || req.UserInfo.id != findResult.user?.toString()) &&
+        // @ts-ignore
+        !req.UserInfo.roles.includes("Admin") &&
+        // @ts-ignore
+        !req.UserInfo.roles.includes("admin")
+      ) {
+        res.status(403).json({ message: "Forbidden" });
+        return;
+      }
+      const result = await Exercise.deleteOne({ _id: req.params.id });
       res.send(result);
     } else {
       res.send({ result: "No Record Found" });

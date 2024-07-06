@@ -15,6 +15,15 @@ We use Vite + React as Toolchain for Frontend development and NPM and Nodemon as
 
 To overcome CORS Erros we use the Vite Proxy functionallity and on Production we serve the build Vite React app directly from the Backend.
 
+### SECRET Environment file
+
+add a `secret.env` file in your root folder and add the `ACCESS_TOKEN_SECRET` and `REFRESH_TOKEN_SECRET` environment variables.
+You can create the Secret with the following command in a "node terminal"
+
+```node.js
+require("crypto").randomBytes(64).toString("hex");
+```
+
 ### Docker
 
 The docker compose will mount the client and server folder as volume so that nodemon and vite can read the changes on the host machine and update the page to make development easy.
@@ -42,12 +51,12 @@ docker image rm quadcoach-backend quadcoach-frontend
 ### vs code extensions
 
 - For showing errors of eslint while coding using eslint extension
-Name: ESLint
-Id: dbaeumer.vscode-eslint
-Description: Integrates ESLint JavaScript into VS Code.
-Version: 2.4.2
-Publisher: Microsoft
-VS Marketplace Link: https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint
+  Name: ESLint
+  Id: dbaeumer.vscode-eslint
+  Description: Integrates ESLint JavaScript into VS Code.
+  Version: 2.4.2
+  Publisher: Microsoft
+  VS Marketplace Link: https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint
 
 ## Production Environment
 

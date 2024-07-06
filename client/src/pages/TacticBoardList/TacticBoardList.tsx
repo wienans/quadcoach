@@ -37,6 +37,7 @@ import TacticBoardListView from "./listView/TacticBoardListView";
 import TacticBoardCardView from "./cardView/TacticBoardCardView";
 import AddIcon from "@mui/icons-material/Add";
 import { DashboardLayout } from "../../components/LayoutContainers";
+import { useAuth } from "../../store/hooks";
 
 enum ViewType {
   List = "List",
@@ -57,6 +58,8 @@ const TacticBoardList = () => {
   const { t } = useTranslation("TacticBoardList");
   const navigate = useNavigate();
   const isUpMd = useMediaQuery((theme: Theme) => theme.breakpoints.up("md"));
+
+  const { name: userName, id: userId, status: userStatus } = useAuth();
 
   const [showFilters, setShowFilters] = useState<boolean>(false);
   const [viewType, setViewType] = useState<ViewType>(ViewType.Cards);
@@ -87,6 +90,7 @@ const TacticBoardList = () => {
       data: tacticBoards,
       isError: isTacticBoardsError,
       isLoading: isTacticBoardsLoading,
+      error,
     },
   ] = useLazyGetTacticBoardsQuery();
 
@@ -131,6 +135,8 @@ const TacticBoardList = () => {
       const newTacticBoard: TacticBoardWithOutId = {
         name: name,
         isPrivate: false,
+        creator: userName,
+        user: userId,
         pages: [emptyPage],
       };
 
@@ -255,15 +261,17 @@ const TacticBoardList = () => {
       {() => (
         <>
           <SoftBox sx={{ mt: 2, display: "flex" }}>
-            <SoftButton
-              startIcon={isUpMd && <AddIcon />}
-              color="secondary"
-              onClick={() => {
-                setOpenAddTacticBoardDialog(true);
-              }}
-            >
-              {isUpMd ? t("TacticBoardList:addTacticBoard") : <AddIcon />}
-            </SoftButton>
+            {userStatus != null && (
+              <SoftButton
+                startIcon={isUpMd && <AddIcon />}
+                color="secondary"
+                onClick={() => {
+                  setOpenAddTacticBoardDialog(true);
+                }}
+              >
+                {isUpMd ? t("TacticBoardList:addTacticBoard") : <AddIcon />}
+              </SoftButton>
+            )}
             <AddTacticBoardDialog
               isOpen={openAddTacticBoardDialog}
               onConfirm={(name) => handleAddTacticBoard(name)}
@@ -285,7 +293,6 @@ const TacticBoardList = () => {
           </SoftBox>
           {isTacticBoardsError && (
             <Alert color="error" sx={{ mt: 2 }}>
-              {" "}
               {t("TacticBoardList:errorLoadingTacticBoards")}
             </Alert>
           )}

@@ -6,5 +6,6 @@
   "errorDeletingExercise": "An error occurred while deleting exercise.",
   "errorLoadingRelatedExercises": "An error occurred while loading related exercises.",
   "deleteExercise": "Delete exercise",
-  "updateExercise": "Update exercise"
+  "updateExercise": "Update exercise",
+  "unauthorized": "No access, please login"
 }

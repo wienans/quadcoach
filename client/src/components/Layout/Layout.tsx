@@ -1,11 +1,10 @@
 import "./translations";
 import Sidenav, { SidebarNavRoute } from "./Sidenav";
-import { Outlet } from "react-router-dom";
-
 import HomeIcon from "@mui/icons-material/Home";
 import DeveloperBoardIcon from "@mui/icons-material/DeveloperBoard";
 import ListIcon from "@mui/icons-material/List";
 import GitHubIcon from "@mui/icons-material/GitHub";
+import { PresistLogin } from "..";
 
 const sidebarNavRoutes: SidebarNavRoute[] = [
   {
@@ -55,7 +54,7 @@ const Layout = () => {
   return (
     <>
       <Sidenav color="info" routes={sidebarNavRoutes} />
-      <Outlet />
+      <PresistLogin />
     </>
   );
 };

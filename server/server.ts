@@ -14,6 +14,7 @@ import cookieParser from "cookie-parser";
 import userRoutes from "./routes/userRoutes";
 import tacticboardRoutes from "./routes/tacticboardRoutes";
 import exerciseRoutes from "./routes/exerciseRoutes";
+import authRoutes from "./routes/authRoutes";
 
 // Read out Port or use Default
 const PORT = process.env.PORT || 3001;
@@ -56,6 +57,7 @@ mongoose
 
 // API's
 app.use("/api/user", userRoutes);
+app.use("/api/auth", authRoutes);
 app.use("/api/tacticboards", tacticboardRoutes);
 app.use("/api/exercises", exerciseRoutes);
 

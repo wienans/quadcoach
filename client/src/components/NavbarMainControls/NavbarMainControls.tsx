@@ -1,11 +1,17 @@
+import "./translations";
 import { IconButton, Menu, MenuItem } from "@mui/material";
-import { SoftBox } from "..";
+import { SoftBox, SoftTypography } from "..";
 import TranslateIcon from "@mui/icons-material/Translate";
 import Icon from "@mui/material/Icon";
+import LogoutIcon from "@mui/icons-material/Logout";
+import LoginIcon from "@mui/icons-material/Login";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { setMiniSideNav } from "../Layout/layoutSlice";
 import { MouseEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useSendLogoutMutation } from "../../pages/authApi";
+import { useAuth } from "../../store/hooks";
+import { useNavigate } from "react-router-dom";
 
 type Language = {
   code: string;
@@ -37,11 +43,16 @@ const NavbarMainControls = ({
   const [openLangugageMenu, setOpenLanguageMenu] = useState<
     HTMLButtonElement | undefined
   >();
+  const { t } = useTranslation("NavbarMainControls");
+  const { name, status } = useAuth();
+
+  const navigate = useNavigate();
 
   const currentLanguageCode =
     languages.find((language) => language.code === i18n.language)?.code ??
     languages[0].code;
 
+  const [sendLogout] = useSendLogoutMutation();
   const handleMiniSidenav = () => {
     dispatch(setMiniSideNav(!miniSidenav));
   };
@@ -64,6 +75,40 @@ const NavbarMainControls = ({
         justifyContent: "space-between",
       }}
     >
+      {status != null && (
+        <>
+          <SoftTypography sx={{ mr: 1 }} variant="body2">
+            {t("NavbarMainControls:welcome", { name: name })}
+          </SoftTypography>
+          <IconButton
+            size="small"
+            color="inherit"
+            onClick={() => {
+              sendLogout();
+              navigate("/");
+            }}
+            sx={(theme) => ({
+              color: light
+                ? theme.palette.white.main
+                : theme.palette.black.main,
+            })}
+          >
+            <LogoutIcon />
+          </IconButton>
+        </>
+      )}
+      {status === null && (
+        <IconButton
+          size="small"
+          color="inherit"
+          onClick={() => navigate("/login")}
+          sx={(theme) => ({
+            color: light ? theme.palette.white.main : theme.palette.black.main,
+          })}
+        >
+          <LoginIcon />
+        </IconButton>
+      )}
       <IconButton
         size="small"
         color="inherit"

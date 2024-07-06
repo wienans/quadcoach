@@ -17,6 +17,7 @@ import AddIcon from "@mui/icons-material/Add";
 import ArrowCircleUpIcon from "@mui/icons-material/ArrowCircleUp";
 import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
 import { setMiniSideNav } from "../../../../components/Layout/layoutSlice";
+import { useAuth } from "../../../../store/hooks";
 
 export type ExercisesCardViewProps = {
   exercises?: Exercise[];
@@ -34,7 +35,7 @@ const ExercisesCardView = ({
   const dispatch = useAppDispatch();
   const { t } = useTranslation("ExerciseList");
   const isUpMd = useMediaQuery((theme: Theme) => theme.breakpoints.up("md"));
-
+  const { status: userStatus } = useAuth();
   const miniSidenav = useAppSelector((state) => state.layout.miniSidenav);
   const handleMiniSidenav = () => {
     dispatch(setMiniSideNav(!miniSidenav));
@@ -72,7 +73,12 @@ const ExercisesCardView = ({
               icon={<Icon>{miniSidenav ? "menu_open" : "menu"}</Icon>}
               onClick={handleMiniSidenav}
             />
-            <BottomNavigationAction icon={<AddIcon />} href="/exercises/add" />
+            {userStatus != null && (
+              <BottomNavigationAction
+                icon={<AddIcon />}
+                href="/exercises/add"
+              />
+            )}
             {scrollTrigger && (
               <Fade in={scrollTrigger}>
                 <BottomNavigationAction

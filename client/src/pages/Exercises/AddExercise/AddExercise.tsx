@@ -1,16 +1,24 @@
 import { useNavigate } from "react-router-dom";
-import { Card, CardHeader, Grid } from "@mui/material";
+import { Alert, Card, CardHeader, Grid } from "@mui/material";
 import { SoftBox, SoftButton, SoftTypography } from "../../../components";
 import ExerciseEditForm from "../../../components/ExerciseEditForm";
 import { ExerciseWithOutId } from "../../../api/quadcoachApi/domain";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useAddExerciseMutation } from "../../exerciseApi";
 import { useTranslation } from "react-i18next";
 import "./translations";
 import { DashboardLayout } from "../../../components/LayoutContainers";
+import { useAuth } from "../../../store/hooks";
 
 const AddExercise = () => {
   const { t } = useTranslation("AddExercise");
+  const [isPrivileged, setIsPrivileged] = useState(false);
+  const {
+    name: userName,
+    id: userId,
+    status: userStatus,
+    roles: userRoles,
+  } = useAuth();
 
   const navigate = useNavigate();
   const [
@@ -27,6 +35,16 @@ const AddExercise = () => {
 
     navigate("/exercises");
   }, [isAddExerciseSuccess, navigate]);
+
+  useEffect(() => {
+    if (
+      userStatus != null ||
+      userRoles.includes("Admin") ||
+      userRoles.includes("admin")
+    ) {
+      setIsPrivileged(true);
+    }
+  }, [userStatus, userRoles]);
 
   const onSubmit = (values: ExerciseWithOutId) => {
     addExercise(values);
@@ -73,29 +91,38 @@ const AddExercise = () => {
       )}
     >
       {() => (
-        <ExerciseEditForm
-          extraRows={() => (
-            <>
-              {isAddExerciseError && (
-                <Grid item xs={12} justifyContent="center" display="flex">
-                  <SoftBox bgColor="error">
-                    {t("AddExercise:errorWhileAdding")}
-                  </SoftBox>
-                </Grid>
+        <>
+          {isPrivileged == true && (
+            <ExerciseEditForm
+              extraRows={() => (
+                <>
+                  {isAddExerciseError && (
+                    <Grid item xs={12} justifyContent="center" display="flex">
+                      <SoftBox bgColor="error">
+                        {t("AddExercise:errorWhileAdding")}
+                      </SoftBox>
+                    </Grid>
+                  )}
+                  <Grid item xs={12} justifyContent="center" display="flex">
+                    <SoftButton
+                      type="submit"
+                      color="primary"
+                      disabled={isAddExerciseLoading}
+                    >
+                      {t("AddExercise:addExcercise")}
+                    </SoftButton>
+                  </Grid>
+                </>
               )}
-              <Grid item xs={12} justifyContent="center" display="flex">
-                <SoftButton
-                  type="submit"
-                  color="primary"
-                  disabled={isAddExerciseLoading}
-                >
-                  {t("AddExercise:addExcercise")}
-                </SoftButton>
-              </Grid>
-            </>
+              onSubmit={onSubmit}
+            />
           )}
-          onSubmit={onSubmit}
-        />
+          {isPrivileged == false && (
+            <Alert sx={{ mt: 2 }} severity="error">
+              {t("AddExercise:unauthorized")}
+            </Alert>
+          )}
+        </>
       )}
     </DashboardLayout>
   );

@@ -29,11 +29,44 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ExerciseBlock from "./ExerciseBlock";
 import ExerciseInfo from "./ExerciseInfo";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import ContentPasteIcon from "@mui/icons-material/ContentPaste";
+import { useAuth } from "../../../../store/hooks";
+import Markdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+
+type ExerciseValue = {
+  labelResourceKey: string;
+  getValue: (exercise: Exercise) => string;
+};
+
+const personValues: ExerciseValue[] = [
+  {
+    labelResourceKey: "Exercise:info.personNumber",
+    getValue: (exercise) => exercise.persons.toString(),
+  },
+  {
+    labelResourceKey: "Exercise:info.beaterNumber",
+    getValue: (exercise) => exercise.beaters.toString(),
+  },
+  {
+    labelResourceKey: "Exercise:info.chaserNumber",
+    getValue: (exercise) => exercise.chasers.toString(),
+  },
+];
 
 const Exercise = () => {
   const { t } = useTranslation("Exercise");
   const { id: exerciseId } = useParams();
   const navigate = useNavigate();
+  const [isPrivileged, setIsPrivileged] = useState<boolean>(false);
+  const {
+    name: userName,
+    id: userId,
+    status: userStatus,
+    roles: userRoles,
+  } = useAuth();
+
   const theme = useTheme();
 
   const isUpXl = useMediaQuery((theme: Theme) => theme.breakpoints.up("xl"));
@@ -71,6 +104,16 @@ const Exercise = () => {
         : undefined,
     );
   }, [exercise, exerciseType, theme]);
+
+  useEffect(() => {
+    if (
+      userId == exercise?.user ||
+      userRoles.includes("Admin") ||
+      userRoles.includes("admin")
+    ) {
+      setIsPrivileged(true);
+    }
+  }, [exercise, userId, userRoles]);
 
   const update = async () => {
     navigate(`/exercises/${exerciseId}/update`);
@@ -126,41 +169,49 @@ const Exercise = () => {
       headerBackgroundImage={headerBackgroundImage}
       isDataLoading={isExerciseLoading}
       headerAction={
-        <SoftBox display="flex">
-          {isUpXl ? (
-            <>
-              <SoftButton onClick={update} color="primary" sx={{ mr: 1 }}>
-                {t("Exercise:updateExercise")}
-              </SoftButton>
-              <SoftButton
-                onClick={onDeleteExerciseClick}
-                color="error"
-                disabled={!exercise || isDeleteExerciseLoading}
-              >
-                {t("Exercise:deleteExercise")}
-              </SoftButton>
-            </>
-          ) : (
-            isUpMd && (
-              <>
-                <Tooltip title={t("Exercise:updateExercise")}>
-                  <IconButton onClick={update} color="primary" sx={{ mr: 1 }}>
-                    <EditIcon />
-                  </IconButton>
-                </Tooltip>
-                <Tooltip title={t("Exercise:deleteExercise")}>
-                  <IconButton
+        <>
+          {isPrivileged && (
+            <SoftBox display="flex">
+              {isUpXl ? (
+                <>
+                  <SoftButton onClick={update} color="primary" sx={{ mr: 1 }}>
+                    {t("Exercise:updateExercise")}
+                  </SoftButton>
+                  <SoftButton
                     onClick={onDeleteExerciseClick}
                     color="error"
                     disabled={!exercise || isDeleteExerciseLoading}
                   >
-                    <DeleteIcon />
-                  </IconButton>
-                </Tooltip>
-              </>
-            )
+                    {t("Exercise:deleteExercise")}
+                  </SoftButton>
+                </>
+              ) : (
+                isUpMd && (
+                  <>
+                    <Tooltip title={t("Exercise:updateExercise")}>
+                      <IconButton
+                        onClick={update}
+                        color="primary"
+                        sx={{ mr: 1 }}
+                      >
+                        <EditIcon />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title={t("Exercise:deleteExercise")}>
+                      <IconButton
+                        onClick={onDeleteExerciseClick}
+                        color="error"
+                        disabled={!exercise || isDeleteExerciseLoading}
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    </Tooltip>
+                  </>
+                )
+              )}
+            </SoftBox>
           )}
-        </SoftBox>
+        </>
       }
       showScrollToTopButton={(scrollTrigger) => scrollTrigger && isUpMd}
       bottomNavigation={

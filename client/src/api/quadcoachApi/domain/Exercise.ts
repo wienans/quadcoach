@@ -12,6 +12,7 @@ type Exercise = {
   tags?: string[];
   coaching_points?: string; // unused for block model only backwards compatible
   creator?: string;
+  user?: string;
   description_blocks: Block[];
   related_to?: string[];
 };

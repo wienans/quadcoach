@@ -23,6 +23,7 @@ services:
     container_name: quadcoach-backend
     env_file:
       - env.env
+      - secret.env
     build:
       context: server
     ports:
