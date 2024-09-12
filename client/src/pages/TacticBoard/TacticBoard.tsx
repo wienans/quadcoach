@@ -115,13 +115,14 @@ const TacticBoardActions = ({
 
 const TacticsBoard = (): JSX.Element => {
   const { t } = useTranslation("TacticBoard");
-  const isUpSm = useMediaQuery((theme: Theme) => theme.breakpoints.up("sm"));
+  const isUpSm = useMediaQuery((theme: Theme) => theme.breakpoints.up("xxxl"));
   const { id: tacticBoardId } = useParams();
   const {
-    canvasFabric: canvas,
-    loadFromTaticPage: loadFromJson,
+    canvasFabricRef: canvas,
+    loadFromTacticPage: loadFromJson,
     setSelection,
     getAllObjects,
+    getAllObjectsJson,
   } = useTacticBoardFabricJs();
   const navigate = useNavigate();
   const refFullScreenContainer = useRef<HTMLDivElement>(null);
@@ -408,7 +409,15 @@ const TacticsBoard = (): JSX.Element => {
                     : "100%",
                 }}
               >
-                <FabricJsCanvas initialHight={686} initialWidth={1220} />
+                <div
+                  style={{
+                    // maxWidth: "fit-content",
+                    marginLeft: "auto",
+                    marginRight: "auto",
+                  }}
+                >
+                  <FabricJsCanvas initialHight={686} initialWidth={200} />
+                </div>
               </SoftBox>
             </SoftBox>
           </SoftBox>

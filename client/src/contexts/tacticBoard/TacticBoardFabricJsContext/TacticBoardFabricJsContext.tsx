@@ -40,7 +40,7 @@ export interface TacticBoardFabricJsContextProps {
   getAllObjectsJson: () => object;
   getActiveObjects: () => fabric.Object[];
   setSelection: (selection: boolean) => void;
-  loadFromTaticPage: (page: TacticPage) => void;
+  loadFromTacticPage: (page: TacticPage) => void;
   setDrawMode: (drawMode: boolean) => void;
   setControls: (controls: boolean) => void;
   zoomSettings: ZoomSettings;
@@ -89,11 +89,14 @@ const TacticBoardFabricJsContextProvider: FC<{ children: ReactNode }> = ({
     [initializeWorkarea, initializeZoomEvents],
   );
 
-  const setContainerRef = useCallback((instance: HTMLDivElement | null) => {
-    containerRef.current = instance;
+  const setContainerRef = useCallback(
+    (instance: HTMLDivElement | null) => {
+      containerRef.current = instance;
 
-    initializeContainerResizeObserver();
-  }, [initializeContainerResizeObserver]);
+      initializeContainerResizeObserver();
+    },
+    [initializeContainerResizeObserver],
+  );
 
   const addObject = useCallback((object: fabric.Object) => {
     canvasFabricRef.current?.add(object);
@@ -146,44 +149,48 @@ const TacticBoardFabricJsContextProvider: FC<{ children: ReactNode }> = ({
     });
   }, []);
 
-  const loadFromTaticPage = useCallback((page: TacticPage) => {
-    // const canvasFabric = canvasFabricRef.current;
-    // if (!canvasFabric) return;
-    // canvasFabric.remove(...canvasFabric.getObjects());
-    // // canvasFabric.getObjects().forEach((obj) => {
-    // //   canvasFabric.remove(obj);
-    // // });
-    // canvasFabric.setBackgroundImage(
-    //   page.backgroundImage.src,
-    //   canvasFabric.renderAll.bind(canvasFabric),
-    // );
-    // page.objects?.forEach((obj) => {
-    //   if (obj.type == "circle") {
-    //     const addObj = new fabric.Circle(obj);
-    //     canvasFabric.add(addObj);
-    //   } else if (obj.type == "rect") {
-    //     const addObj = new fabric.Rect(obj);
-    //     canvasFabric.add(addObj);
-    //   } else if (obj.type == "path") {
-    //     const addObj = new fabric.Path(obj.path?.toString(), obj as object);
-    //     canvasFabric.add(addObj);
-    //   } else if (obj.type == "group") {
-    //     const objects: fabric.Object[] = [];
-    //     obj.objects?.forEach((obj) => {
-    //       if (obj.type == "circle") {
-    //         const addObj = new fabric.Circle(obj);
-    //         objects.push(addObj);
-    //       } else if (obj.type == "text") {
-    //         if (obj.text) {
-    //           const addObj = new fabric.Text(obj.text, obj);
-    //           objects.push(addObj);
-    //         }
-    //       }
-    //     });
-    //     const addObj = new fabric.Group(objects, obj);
-    //     canvasFabric.add(addObj);
-    //   }
+  const loadFromTacticPage = useCallback((page: TacticPage) => {
+    console.log("Load From Tactic Page", page);
+    console.log();
+    const canvasFabric = canvasFabricRef.current;
+    if (!canvasFabric) return;
+    canvasFabric.remove(...canvasFabric.getObjects());
+    // canvasFabric.getObjects().forEach((obj) => {
+    //   canvasFabric.remove(obj);
     // });
+    canvasFabric.setBackgroundImage(
+      page.backgroundImage.src,
+      canvasFabric.renderAll.bind(canvasFabric),
+    );
+    console.log(page);
+    page.objects?.forEach((obj) => {
+      console.log(obj);
+      if (obj.type == "circle") {
+        const addObj = new fabric.Circle(obj);
+        canvasFabric.add(addObj);
+      } else if (obj.type == "rect") {
+        const addObj = new fabric.Rect(obj);
+        canvasFabric.add(addObj);
+      } else if (obj.type == "path") {
+        const addObj = new fabric.Path(obj.path?.toString(), obj as object);
+        canvasFabric.add(addObj);
+      } else if (obj.type == "group") {
+        const objects: fabric.Object[] = [];
+        obj.objects?.forEach((obj) => {
+          if (obj.type == "circle") {
+            const addObj = new fabric.Circle(obj);
+            objects.push(addObj);
+          } else if (obj.type == "text") {
+            if (obj.text) {
+              const addObj = new fabric.Text(obj.text, obj);
+              objects.push(addObj);
+            }
+          }
+        });
+        const addObj = new fabric.Group(objects, obj);
+        canvasFabric.add(addObj);
+      }
+    });
   }, []);
 
   const setSelection = useCallback((selection: boolean) => {
@@ -214,7 +221,7 @@ const TacticBoardFabricJsContextProvider: FC<{ children: ReactNode }> = ({
         removeObject,
         removeActiveObjects,
         setSelection,
-        loadFromTaticPage,
+        loadFromTacticPage,
         setDrawMode,
         setControls,
         zoomSettings,
