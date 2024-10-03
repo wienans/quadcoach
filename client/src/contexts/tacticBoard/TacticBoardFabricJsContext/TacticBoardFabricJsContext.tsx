@@ -71,7 +71,7 @@ const TacticBoardFabricJsContextProvider: FC<{
     workarea,
     heightFirstResizing,
   );
-  const { initializeZoomEvents } = useZoomEvents(canvasFabricRef, zoomSettings);
+  //const { initializeZoomEvents } = useZoomEvents(canvasFabricRef, zoomSettings);
 
   const setCanvasRef = useCallback(
     (instance: HTMLCanvasElement | null) => {
@@ -87,9 +87,9 @@ const TacticBoardFabricJsContextProvider: FC<{
       );
 
       initializeWorkarea();
-      initializeZoomEvents();
+      // initializeZoomEvents();
     },
-    [initializeWorkarea, initializeZoomEvents],
+    [initializeWorkarea],
   );
 
   const setContainerRef = useCallback(
