@@ -424,13 +424,7 @@ const TacticsBoard = (): JSX.Element => {
                   display: "flex",
                   minHeight: 0,
                   flexGrow: 1,
-                  width: isUpSm
-                    ? `calc(100% - ${
-                        tacticBoardItemsDrawerOpen
-                          ? `${tacticBoardItemsDrawerWidth}px`
-                          : "0"
-                      })`
-                    : "100%",
+                  width: "100%",
                 }}
               >
                 <FabricJsCanvas initialHight={686} initialWidth={1220} />
