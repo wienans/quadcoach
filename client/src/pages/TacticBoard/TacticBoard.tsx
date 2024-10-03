@@ -121,7 +121,7 @@ const TacticBoardActions = ({
 
 const TacticsBoard = (): JSX.Element => {
   const { t } = useTranslation("TacticBoard");
-  const isUpSm = useMediaQuery((theme: Theme) => theme.breakpoints.up("sm"));
+  const isUpSm = useMediaQuery((theme: Theme) => theme.breakpoints.up("xxxl"));
   const { id: tacticBoardId } = useParams();
   const {
     canvasFabric: canvas,

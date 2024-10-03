@@ -26,6 +26,7 @@ export type BreakpointsValues = {
   lg: number;
   xl: number;
   xxl: number;
+  xxxl: number;
 };
 
 export type Breakpoints = {
@@ -40,6 +41,7 @@ const breakpoints: Breakpoints = {
     lg: 992,
     xl: 1200,
     xxl: 1400,
+    xxxl: 1550,
   },
 };
 

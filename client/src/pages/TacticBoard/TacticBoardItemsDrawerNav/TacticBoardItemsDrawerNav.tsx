@@ -13,7 +13,7 @@ export const tacticBoardItemsDrawerWidth = 240;
 const TacticBoardItemsDrawerNav = (): JSX.Element | null => {
   const dispatch = useAppDispatch();
   const { canvasFabricRef } = useTacticBoardFabricJs();
-  const isUpSm = useMediaQuery((theme: Theme) => theme.breakpoints.up("sm"));
+  const isUpSm = useMediaQuery((theme: Theme) => theme.breakpoints.up("xxxl"));
 
   const tacticBoardItemsDrawerOpen = useAppSelector(
     (state) => state.tacticBoard.tacticBoardItemsDrawerOpen,
@@ -73,7 +73,7 @@ const TacticBoardItemsDrawerNav = (): JSX.Element | null => {
             keepMounted: true, // Better open performance on mobile.
           }}
           sx={{
-            display: { xs: "block", sm: "none" },
+            display: { xs: "block", md: "block", xl: "block", xxl: "block" },
             "& .MuiDrawer-paper": {
               boxSizing: "border-box",
               width: tacticBoardItemsDrawerWidth,
