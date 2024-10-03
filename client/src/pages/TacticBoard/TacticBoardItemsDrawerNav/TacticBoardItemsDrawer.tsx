@@ -20,6 +20,7 @@ const TacticBoardItemsDrawer = (): JSX.Element => {
         }
       >
         <PersonItemsSection />
+        <PersonItemsSection />
         <BallItemsSection />
       </List>
     </SoftBox>

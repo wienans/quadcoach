@@ -128,6 +128,7 @@ const TacticsBoard = (): JSX.Element => {
     loadFromTacticPage: loadFromJson,
     setSelection,
     getAllObjects,
+    getAllObjectsJson,
   } = useTacticBoardFabricJs();
   const navigate = useNavigate();
   const refFullScreenContainer = useRef<HTMLDivElement>(null);
@@ -432,7 +433,15 @@ const TacticsBoard = (): JSX.Element => {
                     : "100%",
                 }}
               >
-                <FabricJsCanvas initialHight={686} initialWidth={1220} />
+                <div
+                  style={{
+                    maxWidth: "fit-content",
+                    marginLeft: "auto",
+                    marginRight: "auto",
+                  }}
+                >
+                  <FabricJsCanvas initialHight={686} initialWidth={1220} />
+                </div>
               </SoftBox>
             </SoftBox>
           </SoftBox>

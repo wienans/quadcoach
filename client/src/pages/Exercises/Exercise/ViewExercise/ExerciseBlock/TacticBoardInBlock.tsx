@@ -1,10 +1,13 @@
 import { Alert, Box, Skeleton } from "@mui/material";
 import { Block, TacticBoard } from "../../../../../api/quadcoachApi/domain";
 import { useTranslation } from "react-i18next";
-import { useLoadTacticBoard } from "../../../../../hooks";
+import {
+  useLoadTacticBoard,
+  useTacticBoardFabricJs,
+} from "../../../../../hooks";
 import { TacticBoardFabricJsContextProvider } from "../../../../../contexts";
 import { FabricJsCanvas } from "../../../../../components";
-import { useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 
 export type TacticBoardInBlockProps = {
   block: Block;
@@ -19,6 +22,26 @@ const TacticBoardInBlock = ({
   const { tacticBoard, isTacticBoardError, isTacticBoardLoading } =
     useLoadTacticBoard(tacticBoardId);
   // const refContainer = useRef<HTMLDivElement>(null);
+  const {
+    canvasFabricRef: canvas,
+    loadFromTacticPage: loadFromJson,
+    setSelection,
+    getAllObjects,
+    getAllObjectsJson,
+  } = useTacticBoardFabricJs();
+
+  useEffect(() => {
+    if (!isTacticBoardLoading && !isTacticBoardError && tacticBoard) {
+      loadFromJson(tacticBoard.pages[0]);
+      setSelection(false);
+    }
+  }, [
+    setSelection,
+    loadFromJson,
+    tacticBoard,
+    isTacticBoardError,
+    isTacticBoardLoading,
+  ]);
 
   if (!tacticBoardId) return;
   if (isTacticBoardError)
