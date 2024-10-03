@@ -358,8 +358,8 @@ const TacticsBoard = (): JSX.Element => {
       sx={{
         p: 3,
         position: "relative",
-        height: "100%",//"100vh",
-        maxHeight: "100%",//"100vh",
+        height: "100vh",
+        maxHeight: "100vh",
         display: "flex",
         flexDirection: "column",
       }}
@@ -433,15 +433,7 @@ const TacticsBoard = (): JSX.Element => {
                     : "100%",
                 }}
               >
-                <div
-                  style={{
-                    maxWidth: "fit-content",
-                    marginLeft: "auto",
-                    marginRight: "auto",
-                  }}
-                >
-                  <FabricJsCanvas initialHight={686} initialWidth={1220} />
-                </div>
+                <FabricJsCanvas initialHight={686} initialWidth={1220} />
               </SoftBox>
             </SoftBox>
           </SoftBox>
@@ -559,7 +551,7 @@ const TacticsBoard = (): JSX.Element => {
 
 const TacticsBoardWrapper = (): JSX.Element => {
   return (
-    <TacticBoardFabricJsContextProvider>
+    <TacticBoardFabricJsContextProvider heightFirstResizing={true}>
       <TacticsBoard />
     </TacticBoardFabricJsContextProvider>
   );

@@ -21,7 +21,8 @@ const canvasDefaultOptions: fabric.ICanvasOptions = {
   preserveObjectStacking: true,
   width: 1220,
   height: 686,
-  selection: true,
+  selection: false,
+  allowTouchScrolling: true,
 };
 
 export interface TacticBoardFabricJsContextProps {
@@ -50,9 +51,10 @@ export const TacticBoardFabricJsContext = createContext<
   TacticBoardFabricJsContextProps | undefined
 >(undefined);
 
-const TacticBoardFabricJsContextProvider: FC<{ children: ReactNode }> = ({
-  children,
-}) => {
+const TacticBoardFabricJsContextProvider: FC<{
+  children: ReactNode;
+  heightFirstResizing: boolean;
+}> = ({ children, heightFirstResizing }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const canvasFabricRef = useRef<fabric.Canvas | null>(null);
@@ -67,6 +69,7 @@ const TacticBoardFabricJsContextProvider: FC<{ children: ReactNode }> = ({
     containerRef,
     canvasFabricRef,
     workarea,
+    heightFirstResizing,
   );
   const { initializeZoomEvents } = useZoomEvents(canvasFabricRef, zoomSettings);
 

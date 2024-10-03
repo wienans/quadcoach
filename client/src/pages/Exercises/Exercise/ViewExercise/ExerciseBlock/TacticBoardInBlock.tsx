@@ -58,18 +58,7 @@ const TacticBoardInBlock = ({
       </Alert>
     );
 
-  return (
-    // <Box
-    //   ref={refContainer}
-    //   sx={{
-    //     width: "100%",
-    //     display: "flex",
-    //     justifyContent: "center",
-    //   }}
-    // >
-    <FabricJsCanvas initialHight={686} initialWidth={1220} />
-    // </Box>
-  );
+  return <FabricJsCanvas initialHight={686} initialWidth={1220} />;
 };
 
 export type TacticBoardInBlockWrapperProps = {
@@ -80,7 +69,7 @@ const TacticBoardInBlockWrapper = ({
   block,
 }: TacticBoardInBlockWrapperProps): JSX.Element => {
   return (
-    <TacticBoardFabricJsContextProvider>
+    <TacticBoardFabricJsContextProvider heightFirstResizing={false}>
       <TacticBoardInBlock block={block} />
     </TacticBoardFabricJsContextProvider>
   );
