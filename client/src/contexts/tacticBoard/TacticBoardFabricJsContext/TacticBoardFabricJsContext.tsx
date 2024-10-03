@@ -40,7 +40,7 @@ export interface TacticBoardFabricJsContextProps {
   getAllObjectsJson: () => object;
   getActiveObjects: () => fabric.Object[];
   setSelection: (selection: boolean) => void;
-  loadFromTaticPage: (page: TacticPage) => void;
+  loadFromTacticPage: (page: TacticPage) => void;
   setDrawMode: (drawMode: boolean) => void;
   setControls: (controls: boolean) => void;
   zoomSettings: ZoomSettings;
@@ -89,11 +89,14 @@ const TacticBoardFabricJsContextProvider: FC<{ children: ReactNode }> = ({
     [initializeWorkarea, initializeZoomEvents],
   );
 
-  const setContainerRef = useCallback((instance: HTMLDivElement | null) => {
-    containerRef.current = instance;
+  const setContainerRef = useCallback(
+    (instance: HTMLDivElement | null) => {
+      containerRef.current = instance;
 
-    initializeContainerResizeObserver();
-  }, [initializeContainerResizeObserver]);
+      initializeContainerResizeObserver();
+    },
+    [initializeContainerResizeObserver],
+  );
 
   const addObject = useCallback((object: fabric.Object) => {
     canvasFabricRef.current?.add(object);
@@ -214,7 +217,7 @@ const TacticBoardFabricJsContextProvider: FC<{ children: ReactNode }> = ({
         removeObject,
         removeActiveObjects,
         setSelection,
-        loadFromTaticPage,
+        loadFromTacticPage,
         setDrawMode,
         setControls,
         zoomSettings,

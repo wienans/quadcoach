@@ -124,8 +124,8 @@ const TacticsBoard = (): JSX.Element => {
   const isUpSm = useMediaQuery((theme: Theme) => theme.breakpoints.up("xxxl"));
   const { id: tacticBoardId } = useParams();
   const {
-    canvasFabric: canvas,
-    loadFromTaticPage: loadFromJson,
+    canvasFabricRef: canvas,
+    loadFromTacticPage: loadFromJson,
     setSelection,
     getAllObjects,
   } = useTacticBoardFabricJs();

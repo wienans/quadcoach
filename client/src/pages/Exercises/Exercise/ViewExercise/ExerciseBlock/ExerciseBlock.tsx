@@ -63,7 +63,7 @@ const ExerciseBlock = ({
       {Boolean(block.tactics_board) && (
         <Accordion defaultExpanded>
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-            Video
+            Tacticboard
           </AccordionSummary>
           <AccordionDetails
             sx={{
