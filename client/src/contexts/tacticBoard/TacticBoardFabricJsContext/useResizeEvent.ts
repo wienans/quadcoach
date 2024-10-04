@@ -1,15 +1,8 @@
 import { MutableRefObject, useCallback, useRef } from "react";
-import {
-  Workarea,
-  WorkareaLayout,
-  // isExtendedFabricObject
-} from "./types";
-import { workareaId } from "./useWorkarea";
 
 export const useContainerResizeEvent = (
   container: MutableRefObject<HTMLDivElement | null>,
   canvas: MutableRefObject<fabric.Canvas | null>,
-  workarea: MutableRefObject<Workarea | null>,
   hightFirstResizeing: boolean,
 ) => {
   const containerResizeObserverRef = useRef<ResizeObserver | null>(null);
@@ -41,7 +34,6 @@ export const useContainerResizeEvent = (
         if (calcHeight % 2) {
           calcHeight = calcHeight + 1;
         }
-
         canvas.current.setWidth(calcWidth).setHeight(calcHeight);
         canvas.current.setZoom(calcWidth / canvasDefaultWidth);
         canvas.current.requestRenderAll();

@@ -12,7 +12,6 @@ import {
 } from "react";
 import { fabric } from "fabric";
 import { TacticPage } from "../../../api/quadcoachApi/domain";
-import { useWorkarea } from "./useWorkarea";
 import { useContainerResizeEvent } from "./useResizeEvent";
 
 const canvasDefaultOptions: fabric.ICanvasOptions = {
@@ -56,31 +55,24 @@ const TacticBoardFabricJsContextProvider: FC<{
   const containerRef = useRef<HTMLDivElement | null>(null);
   const canvasFabricRef = useRef<fabric.Canvas | null>(null);
 
-  const { initializeWorkarea, workarea } = useWorkarea(canvasFabricRef);
   const { initializeContainerResizeObserver } = useContainerResizeEvent(
     containerRef,
     canvasFabricRef,
-    workarea,
     heightFirstResizing,
   );
 
-  const setCanvasRef = useCallback(
-    (instance: HTMLCanvasElement | null) => {
-      canvasRef.current = instance;
+  const setCanvasRef = useCallback((instance: HTMLCanvasElement | null) => {
+    canvasRef.current = instance;
 
-      if (canvasFabricRef.current) canvasFabricRef.current.dispose();
+    if (canvasFabricRef.current) canvasFabricRef.current.dispose();
 
-      if (!instance) return;
+    if (!instance) return;
 
-      canvasFabricRef.current = new fabric.Canvas(
-        canvasRef.current,
-        canvasDefaultOptions,
-      );
-
-      initializeWorkarea();
-    },
-    [initializeWorkarea],
-  );
+    canvasFabricRef.current = new fabric.Canvas(
+      canvasRef.current,
+      canvasDefaultOptions,
+    );
+  }, []);
 
   const setContainerRef = useCallback(
     (instance: HTMLDivElement | null) => {

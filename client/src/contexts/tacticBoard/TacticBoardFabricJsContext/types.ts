@@ -1,13 +1,7 @@
 import { fabric } from "fabric";
 import { v4 } from "uuid";
 
-export enum WorkareaLayout {
-  PORTRAIT = "PORTRAIT",
-  LANDSCAPE = "LANDSCAPE",
-}
-
 export enum ObjectType {
-  Workarea = "Workarea",
   Person = "Person",
 }
 
@@ -36,27 +30,6 @@ declare module "fabric/fabric-impl" {
 // ): object is ExtendedFabricObject => {
 //   return (object as ExtendedFabricObject).id !== undefined;
 // };
-
-export interface WorkareaOptions extends fabric.IImageOptions {
-  layout: WorkareaLayout;
-}
-
-export class Workarea extends fabric.Image {
-  public layout: WorkareaLayout;
-  /**
-   * Constructor
-   * @param element Image element
-   * @param [options] Options object
-   */
-  constructor(
-    element: string | HTMLImageElement | HTMLCanvasElement | HTMLVideoElement,
-    options?: WorkareaOptions,
-  ) {
-    const { layout, ...fabricImageOptions } = options || {};
-    super(element, fabricImageOptions);
-    this.layout = layout || WorkareaLayout.PORTRAIT;
-  }
-}
 
 export interface Team {
   name: string;
