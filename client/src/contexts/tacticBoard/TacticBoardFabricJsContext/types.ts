@@ -58,11 +58,6 @@ export class Workarea extends fabric.Image {
   }
 }
 
-export type ZoomSettings = {
-  minZoom: number;
-  maxZoom: number;
-};
-
 export interface Team {
   name: string;
   color: string;

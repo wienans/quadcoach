@@ -14,8 +14,6 @@ import { fabric } from "fabric";
 import { TacticPage } from "../../../api/quadcoachApi/domain";
 import { useWorkarea } from "./useWorkarea";
 import { useContainerResizeEvent } from "./useResizeEvent";
-import { ZoomSettings } from "./types";
-import { useZoomEvents } from "./useZoomEvents";
 
 const canvasDefaultOptions: fabric.ICanvasOptions = {
   preserveObjectStacking: true,
@@ -44,7 +42,6 @@ export interface TacticBoardFabricJsContextProps {
   loadFromTacticPage: (page: TacticPage) => void;
   setDrawMode: (drawMode: boolean) => void;
   setControls: (controls: boolean) => void;
-  zoomSettings: ZoomSettings;
 }
 
 export const TacticBoardFabricJsContext = createContext<
@@ -59,11 +56,6 @@ const TacticBoardFabricJsContextProvider: FC<{
   const containerRef = useRef<HTMLDivElement | null>(null);
   const canvasFabricRef = useRef<fabric.Canvas | null>(null);
 
-  const [zoomSettings, setZoomSettings] = useState<ZoomSettings>({
-    maxZoom: 500,
-    minZoom: 30,
-  });
-
   const { initializeWorkarea, workarea } = useWorkarea(canvasFabricRef);
   const { initializeContainerResizeObserver } = useContainerResizeEvent(
     containerRef,
@@ -71,7 +63,6 @@ const TacticBoardFabricJsContextProvider: FC<{
     workarea,
     heightFirstResizing,
   );
-  //const { initializeZoomEvents } = useZoomEvents(canvasFabricRef, zoomSettings);
 
   const setCanvasRef = useCallback(
     (instance: HTMLCanvasElement | null) => {
@@ -87,7 +78,6 @@ const TacticBoardFabricJsContextProvider: FC<{
       );
 
       initializeWorkarea();
-      // initializeZoomEvents();
     },
     [initializeWorkarea],
   );
@@ -227,7 +217,6 @@ const TacticBoardFabricJsContextProvider: FC<{
         loadFromTacticPage,
         setDrawMode,
         setControls,
-        zoomSettings,
       }}
     >
       {children}
