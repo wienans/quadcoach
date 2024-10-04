@@ -13,7 +13,7 @@ export const useContainerResizeEvent = (
   const resize = useCallback(
     (nextWidth: number, nextHeight: number): void => {
       if (!canvas.current) return;
-      const adjustedWidth = nextWidth - 50;
+      const adjustedWidth = nextWidth - 20;
       const adjustedHeight = nextHeight - 10 < 240 ? 160 : nextHeight - 10;
       if (hightFirstResizeing) {
         // Height First Resizing considers Heigth so that it is in frame

@@ -12,8 +12,22 @@
       "tooltip_open": "Close items menu.",
       "tooltip_closed": "Open items menu."
     },
+    "deleteButton": {
+      "tooltip": "Deletes the tactic board"
+    },
+    "drawingButton": {
+      "tooltip_enable": "Enables the drawing mode",
+      "tooltip_disable": "Disables the drawing mode"
+    },
+    "objectDeleteButton": {
+      "tooltip": "Deletes the current selected Object"
+    },
     "renameTacticBoadButton": {
       "tooltip": "Open dialog to rename tactic board."
+    },
+    "pagination": {
+      "tooltip_removePage": "Removes current tactic board page",
+      "tooltip_addPage": "Adds a new tactic board page"
     }
   },
   "itemsDrawer": {

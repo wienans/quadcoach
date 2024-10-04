@@ -107,16 +107,6 @@ const TacticBoardFabricJsContextProvider: FC<{
     return canvasFabricRef.current?.getObjects() ?? [];
   }, []);
 
-  // const getAllObjectsJson = useCallback(() => {
-  //   if (canvasFabric) {
-  //     const json = canvasFabric.toJSON(["uuid"]) as unknown as TacticPage;
-  //     if (json.backgroundImage) {
-  //       json.backgroundImage.src = new URL(json.backgroundImage.src).pathname;
-  //     }
-  //     return json;
-  //   }
-  //   return {};
-  // }, [canvasFabric]);
   const getAllObjectsJson = useCallback(() => {
     const canvasFabric = canvasFabricRef.current;
     if (!canvasFabric) return {};

@@ -17,6 +17,8 @@ const allowedOrigins = [
   "http://127.0.0.1:5173",
   "http://192.168.0.34:5173",
   "https://192.168.0.34:5173",
+  "http://192.168.0.30:5173",
+  "https://192.168.0.30:5173",
 ];
 
 export default allowedOrigins;

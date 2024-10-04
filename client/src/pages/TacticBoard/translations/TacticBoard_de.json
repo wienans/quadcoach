@@ -12,8 +12,22 @@
       "tooltip_open": "Elemente-Menü schließen.",
       "tooltip_closed": "Elemente-Menü öffnen."
     },
+    "deleteButton": {
+      "tooltip": "Löscht die Taktik Tfale"
+    },
+    "drawingButton": {
+      "tooltip_enable": "Aktiviert den Zeichenmodus",
+      "tooltip_disable": "Deaktiviert den Zeichenmodus"
+    },
+    "objectDeleteButton": {
+      "tooltip": "Löscht das aktuelle ausgewählte Objekt"
+    },
     "renameTacticBoadButton": {
       "tooltip": "Dialog öffnen, um die Taktik Tafel umzubenennen."
+    },
+    "pagination": {
+      "tooltip_removePage": "Löscht die aktuelle Taktik Tafel Seite",
+      "tooltip_addPage": "Fügt eine nächste Taktik Tafel Seite hinzu"
     }
   },
   "itemsDrawer": {
