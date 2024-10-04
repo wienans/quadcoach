@@ -97,13 +97,6 @@ const ExerciseBlock = ({
           </AccordionDetails>
         </Accordion>
       )}
-      {block.tactics_board && block.tactics_board != "" && (
-        <CardActions disableSpacing>
-          <IconButton href={`/tacticboards/${block.tactics_board}`}>
-            <ContentPasteIcon />
-          </IconButton>
-        </CardActions>
-      )}
     </Card>
   );
 };

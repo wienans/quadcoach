@@ -1,6 +1,7 @@
 import {
   Alert,
   Box,
+  IconButton,
   Pagination,
   Skeleton,
   ToggleButton,
@@ -17,6 +18,7 @@ import { FabricJsCanvas, SoftBox } from "../../../../../components";
 import { useCallback, useEffect, useRef, useState } from "react";
 import PlayCircleIcon from "@mui/icons-material/PlayCircle";
 import PauseCircleIcon from "@mui/icons-material/PauseCircle";
+import ContentPasteIcon from "@mui/icons-material/ContentPaste";
 export type TacticBoardInBlockProps = {
   block: Block;
 };
@@ -167,6 +169,9 @@ const TacticBoardInBlock = ({
           disabled={isTacticBoardLoading || isAnimating}
           onChange={handleChange}
         />
+        <IconButton size="small" href={`/tacticboards/${block.tactics_board}`}>
+          <ContentPasteIcon />
+        </IconButton>
       </SoftBox>
       <FabricJsCanvas initialHight={686} initialWidth={1220} />
     </div>
