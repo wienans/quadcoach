@@ -42,6 +42,7 @@ type TacticBoardTopMenuProps = {
   onAnimateClick: () => void;
   isRecording: boolean;
   onRecordClick: () => void;
+  onDeleteTacticBoard: () => void;
 };
 
 const TacticBoardTopMenu = ({
@@ -58,6 +59,7 @@ const TacticBoardTopMenu = ({
   onAnimateClick,
   isRecording,
   onRecordClick,
+  onDeleteTacticBoard,
 }: TacticBoardTopMenuProps): JSX.Element => {
   const dispatch = useAppDispatch();
   const { t } = useTranslation("TacticBoard");
@@ -262,7 +264,7 @@ const TacticBoardTopMenu = ({
               value={false}
               size="small"
               selected={false}
-              onChange={() => {}}
+              onChange={onDeleteTacticBoard}
             >
               <DeleteIcon color="error" />
             </ToggleButton>

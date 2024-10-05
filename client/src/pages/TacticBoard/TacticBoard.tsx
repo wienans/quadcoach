@@ -26,6 +26,7 @@ import cloneDeep from "lodash/cloneDeep";
 import FullscreenIcon from "@mui/icons-material/Fullscreen";
 import EditIcon from "@mui/icons-material/Edit";
 import {
+  useDeleteTacticBoardMutation,
   useGetTacticBoardQuery,
   useUpdateTacticBoardMutation,
 } from "../../api/quadcoachApi/tacticboardApi";
@@ -156,6 +157,15 @@ const TacticsBoard = (): JSX.Element => {
     },
   ] = useUpdateTacticBoardMutation();
 
+  const [
+    deleteTacticBoard,
+    {
+      isError: isDeleteTacticBoardError,
+      isLoading: isDeleteTacticBoardLoading,
+      isSuccess: isDeleteTacticBoardSuccess,
+    },
+  ] = useDeleteTacticBoardMutation();
+
   const refContainer = useRef<HTMLDivElement>(null);
   const [currentPage, setPage] = useState<number>(1);
   const [maxPages, setMaxPages] = useState<number>(1);
@@ -250,6 +260,12 @@ const TacticsBoard = (): JSX.Element => {
     console.log(updatedTacticBoard);
     updateTacticBoard(updatedTacticBoard);
   }, [tacticBoard, currentPage, getAllObjectsJson, updateTacticBoard]);
+
+  const onDeleteTacticBoardClick = () => {
+    if (!tacticBoard) return;
+    deleteTacticBoard(tacticBoard._id);
+    navigate("/tacticboards");
+  };
 
   const onFullScreenClick = () => {
     const container = refFullScreenContainer.current;
@@ -503,6 +519,7 @@ const TacticsBoard = (): JSX.Element => {
             onAnimateClick={onAnimateClick}
             isRecording={isRecording}
             onRecordClick={onRecordClick}
+            onDeleteTacticBoard={onDeleteTacticBoardClick}
           />
           <SoftBox
             sx={{
