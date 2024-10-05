@@ -22,6 +22,12 @@
     "objectDeleteButton": {
       "tooltip": "Deletes the current selected Object"
     },
+    "isAnimatingButton": {
+      "tooltip": "Playbacks the tactic board"
+    },
+    "isRecordingButton": {
+      "tooltip": "Records a video of the Playback"
+    },
     "renameTacticBoadButton": {
       "tooltip": "Open dialog to rename tactic board."
     },

@@ -37,14 +37,13 @@ type TacticsObject = {
   fontFamily?: string;
   fontSize?: number;
   textAlign?: string;
+  objectType?: string;
 };
 
 type TacticPage = {
   version?: string;
   objects?: TacticsObject[];
   backgroundImage: TacticsBackImg;
-  playerANumbers?: number[];
-  playerBNumbers?: number[];
 };
 
 export default TacticPage;

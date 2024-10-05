@@ -9,53 +9,122 @@ import {
   SxProps,
   Theme,
 } from "@mui/material";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
 import PersonAddAlt1Icon from "@mui/icons-material/PersonAddAlt1";
 import CircleIcon from "@mui/icons-material/Circle";
 import { PersonType } from "../../../contexts/tacticBoard/TacticBoardFabricJsContext/types";
 import { useTranslation } from "react-i18next";
+import { fabric } from "fabric";
+import { v4 as uuidv4 } from "uuid";
+import { useTacticBoardFabricJs } from "../../../hooks";
+import { cloneDeep } from "lodash";
 
-const getPersonColor = (
-  personType: PersonType,
-  theme: Theme,
-): SxProps<Theme> | undefined => {
+const getFabricPersonColor = (personType: PersonType): string | undefined => {
   switch (personType) {
     case PersonType.Beater:
-      return {
-        color: theme.palette.black.main,
-      };
+      return "#000000";
     case PersonType.Chaser:
-      return {
-        color: theme.palette.white.main,
-      };
+      return "#ffffff";
     case PersonType.Keeper:
-      return {
-        color: "green",
-      };
+      return "#03fc35";
     case PersonType.Seeker:
-      return {
-        color: "yellow",
-      };
+      return "#fcfc00";
   }
 };
 
-const PersonItemsSection = (): JSX.Element => {
+const findNumberInArray = (array: number[]) => {
+  const clonedArray = cloneDeep(array);
+  clonedArray.sort(function (a, b) {
+    return a - b;
+  });
+
+  let lowest = -1;
+  for (let i = 0; i < clonedArray.length; ++i) {
+    if (clonedArray[i] != i) {
+      lowest = i;
+      break;
+    }
+  }
+  if (lowest == -1) {
+    lowest = clonedArray[clonedArray.length - 1] + 1;
+  }
+  return lowest;
+};
+const teamAInfo = {
+  color: "#3d85c6",
+};
+const teamBInfo = {
+  color: "#dd2d2d",
+};
+
+export type PersonItemsSectionProps = {
+  teamA: boolean;
+};
+
+const PersonItemsSection = ({
+  teamA,
+}: PersonItemsSectionProps): JSX.Element => {
   const { t } = useTranslation("TacticBoard");
+  const { addObject, getAllObjectsJson } = useTacticBoardFabricJs();
+
   const [open, setOpen] = useState<boolean>(true);
 
   const handleToggleOpen = () => setOpen(!open);
+  const getNextNumber = () => {
+    console.log("Start");
+    let numbers: number[] = [0];
+    getAllObjectsJson().objects.forEach((obj) => {
+      console.log("obj");
+      if (obj.objectType == (teamA ? "playerA" : "playerB")) {
+        console.log(obj.objectType);
+        console.log(obj.objects[1].text);
+        console.log([...numbers, parseInt(obj.objects[1].text)]);
+        numbers = [...numbers, parseInt(obj.objects[1].text)];
+      }
+    });
+    return findNumberInArray(numbers);
+  };
 
   const onPersonAddClick = (personType: PersonType) => () => {
     console.log(personType);
+
+    const circle = new fabric.Circle({
+      radius: 15,
+      left: teamA ? 250 : 1220 - 250 - 30,
+      top: 640,
+      stroke: getFabricPersonColor(personType), // Set the color of the stroke
+      strokeWidth: 3, // Set the width of the stroke
+      fill: teamA ? teamAInfo.color : teamBInfo.color,
+      uuid: uuidv4(),
+    });
+    const newNumber = getNextNumber();
+    const text = new fabric.Text(newNumber.toString(), {
+      left: teamA ? 250 + 16 : 1220 - 250 - 30 + 16,
+      top: 640 + 16,
+      fontFamily: "Arial",
+      fontSize: 20,
+      textAlign: "center",
+      originX: "center",
+      originY: "center",
+      uuid: uuidv4(),
+    });
+    const group = new fabric.Group([circle, text], {
+      uuid: uuidv4(),
+      objectType: teamA ? "playerA" : "playerB",
+      hasControls: false, // Disable resizing handles
+    });
+    addObject(group);
   };
 
   return (
     <>
       <ListItemButton onClick={handleToggleOpen}>
         <ListItemIcon>
-          <PersonAddAlt1Icon />
+          <PersonAddAlt1Icon
+            sx={{ color: teamA ? teamAInfo.color : teamBInfo.color }}
+          />
         </ListItemIcon>
         <ListItemText
           primary={t("TacticBoard:itemsDrawer.personItemsSection.title")}
@@ -71,11 +140,11 @@ const PersonItemsSection = (): JSX.Element => {
               onClick={onPersonAddClick(value)}
             >
               <ListItemAvatar>
-                <Avatar>
+                <Avatar color="black">
                   <CircleIcon
-                    sx={(theme) => ({
-                      ...getPersonColor(value, theme),
-                    })}
+                    sx={{
+                      color: getFabricPersonColor(value),
+                    }}
                   />
                 </Avatar>
               </ListItemAvatar>

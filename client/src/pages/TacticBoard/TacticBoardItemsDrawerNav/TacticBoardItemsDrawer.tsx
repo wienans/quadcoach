@@ -8,7 +8,7 @@ const TacticBoardItemsDrawer = (): JSX.Element => {
   const { t } = useTranslation("TacticBoard");
 
   return (
-    <SoftBox sx={theme => ({ height: "100%", bgcolor: "background.paper", })}>
+    <SoftBox sx={(theme) => ({ height: "100%", bgcolor: "background.paper" })}>
       <List
         sx={{ width: "100%", bgcolor: "background.paper" }}
         component="nav"
@@ -19,8 +19,8 @@ const TacticBoardItemsDrawer = (): JSX.Element => {
           </ListSubheader>
         }
       >
-        <PersonItemsSection />
-        <PersonItemsSection />
+        <PersonItemsSection teamA={true} />
+        <PersonItemsSection teamA={false} />
         <BallItemsSection />
       </List>
     </SoftBox>

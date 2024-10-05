@@ -163,6 +163,7 @@ const TacticsBoard = (): JSX.Element => {
   const [isRecording, setIsRecording] = useState<boolean>(false);
   const [isFullScreen, setIsFullScreen] = useState<boolean>(false);
   const [isPrivileged, setIsPrivileged] = useState<boolean>(false);
+  const [firstAPICall, setFirstAPICall] = useState<number>(0);
 
   const tacticBoardItemsDrawerOpen = useAppSelector(
     (state) => state.tacticBoard.tacticBoardItemsDrawerOpen,
@@ -177,27 +178,6 @@ const TacticsBoard = (): JSX.Element => {
   } = useAuth();
 
   const onDeleteActiveObject = () => {
-    getActiveObjects().forEach((obj) => {
-      if (obj._objects) {
-        let teamA = false;
-        let number = -1;
-        obj._objects.forEach((obj) => {
-          if (obj.type == "text") {
-            number = parseInt(obj.text);
-          }
-          if (obj.type == "circle") {
-            if (obj.fill == "purple") {
-              teamA = true;
-            }
-          }
-        });
-        if (teamA) {
-          //setPlayerANumbers(playerANumbers.filter((item) => item !== number));
-        } else {
-          //setPlayerBNumbers(playerBNumbers.filter((item) => item !== number));
-        }
-      }
-    });
     removeActiveObjects();
   };
 
@@ -206,48 +186,41 @@ const TacticsBoard = (): JSX.Element => {
       if (newPage && removePage) return;
       if (!tacticBoard) return;
       const updatedTacticBoard: TacticBoard = cloneDeep(tacticBoard);
-      if (newPage) {
-        // Save the last state of the old page
-        updatedTacticBoard.pages[page - 2] = {
-          ...getAllObjectsJson(),
-          playerANumbers: [1, 2, 3, 4, 5, 6],
-          playerBNumbers: [1, 2, 3, 4, 5, 6],
-        } as TacticPage;
-        // Copy the state of the old page to the new page
-        updatedTacticBoard.pages[page - 1] = {
-          ...getAllObjectsJson(),
-          playerANumbers: [1, 2, 3, 4, 5, 6],
-          playerBNumbers: [1, 2, 3, 4, 5, 6],
-        } as TacticPage;
-        //updateTacticBoard(updatedTacticBoard);
-      } else if (removePage) {
-        // Remove Last Page
-        updatedTacticBoard.pages.pop();
-        //updateTacticBoard(updatedTacticBoard);
-      } else if (page > currentPage) {
-        // Go to next page
-        updatedTacticBoard.pages[page - 2] = {
-          ...getAllObjectsJson(),
-          playerANumbers: [1, 2, 3, 4, 5, 6],
-          playerBNumbers: [1, 2, 3, 4, 5, 6],
-        } as TacticPage;
-        //updateTacticBoard(updatedTacticBoard);
-      } else if (page < currentPage) {
-        // go to previous page
-        updatedTacticBoard.pages[page] = {
-          ...getAllObjectsJson(),
-          playerANumbers: [1, 2, 3, 4, 5, 6],
-          playerBNumbers: [1, 2, 3, 4, 5, 6],
-        } as TacticPage;
-        //updateTacticBoard(updatedTacticBoard);
+      if (isPrivileged && isEditMode) {
+        if (newPage) {
+          // Save the last state of the old page
+          updatedTacticBoard.pages[page - 2] = {
+            ...getAllObjectsJson(),
+          } as TacticPage;
+          // Copy the state of the old page to the new page
+          updatedTacticBoard.pages[page - 1] = {
+            ...getAllObjectsJson(),
+          } as TacticPage;
+          console.log(updatedTacticBoard);
+          updateTacticBoard(updatedTacticBoard);
+        } else if (removePage) {
+          // Remove Last Page
+          updatedTacticBoard.pages.pop();
+          console.log(updatedTacticBoard);
+          updateTacticBoard(updatedTacticBoard);
+        } else if (page > currentPage) {
+          // Go to next page
+          updatedTacticBoard.pages[page - 2] = {
+            ...getAllObjectsJson(),
+          } as TacticPage;
+          console.log(updatedTacticBoard);
+          updateTacticBoard(updatedTacticBoard);
+        } else if (page < currentPage) {
+          // go to previous page
+          updatedTacticBoard.pages[page] = {
+            ...getAllObjectsJson(),
+          } as TacticPage;
+          console.log(updatedTacticBoard);
+          updateTacticBoard(updatedTacticBoard);
+        }
       }
       loadFromJson(updatedTacticBoard.pages[page - 1]);
-      // if (updatedTacticBoard.pages[page - 1].playerANumbers?.length != 0) {
-      //   setPlayerANumbers(updatedTacticBoard.pages[page - 1].playerANumbers);
-      // }
-      // if (updatedTacticBoard.pages[page - 1].playerBNumbers?.length != 0) {
-      //   setPlayerBNumbers(updatedTacticBoard.pages[page - 1].playerBNumbers);
-      // }
+
       if (isPrivileged && isEditMode) {
         setSelection(true);
       } else {
@@ -263,6 +236,7 @@ const TacticsBoard = (): JSX.Element => {
       isEditMode,
       setControls,
       getAllObjectsJson,
+      updateTacticBoard,
       setSelection,
     ],
   );
@@ -270,13 +244,12 @@ const TacticsBoard = (): JSX.Element => {
   const saveTacticBoard = useCallback(() => {
     if (!tacticBoard) return;
     const updatedTacticBoard: TacticBoard = cloneDeep(tacticBoard);
-    updatedTacticBoard.pages[0] = {
+    updatedTacticBoard.pages[currentPage - 1] = {
       ...getAllObjectsJson(),
-      playerANumbers: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-      playerBNumbers: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
     } as TacticPage;
+    console.log(updatedTacticBoard);
     updateTacticBoard(updatedTacticBoard);
-  }, [tacticBoard, updateTacticBoard, getAllObjectsJson]);
+  }, [tacticBoard, currentPage, getAllObjectsJson, updateTacticBoard]);
 
   const onFullScreenClick = () => {
     const container = refFullScreenContainer.current;
@@ -347,17 +320,27 @@ const TacticsBoard = (): JSX.Element => {
   };
 
   useEffect(() => {
-    if (!isTacticBoardLoading && !isTacticBoardError && tacticBoard) {
+    if (
+      !isTacticBoardLoading &&
+      !isTacticBoardError &&
+      tacticBoard &&
+      firstAPICall < 2
+    ) {
+      // API is finished loading, due to sending data to Server every time the Page is switched
+      // we need to stop the this method by counting firstAPICall up and checking the amount on
+      // load of the page API is called twice.
+      setFirstAPICall(firstAPICall + 1);
       loadFromJson(tacticBoard.pages[0]);
       setMaxPages(tacticBoard.pages.length);
       setSelection(false);
     }
   }, [
-    setSelection,
     loadFromJson,
     tacticBoard,
     isTacticBoardError,
     isTacticBoardLoading,
+    firstAPICall,
+    setSelection,
   ]);
   useEffect(() => {
     let interval: number;

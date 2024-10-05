@@ -145,14 +145,10 @@ const UpdateTacticBoard = (): JSX.Element => {
       // Save the last state of the old page
       updatedTacticBoard.pages[page - 2] = {
         ...getAllObjectsJson(),
-        playerANumbers: playerANumbers,
-        playerBNumbers: playerBNumbers,
       } as TacticPage;
       // Copy the state of the old page to the new page
       updatedTacticBoard.pages[page - 1] = {
         ...getAllObjectsJson(),
-        playerANumbers: playerANumbers,
-        playerBNumbers: playerBNumbers,
       } as TacticPage;
       updateTacticBoard(updatedTacticBoard);
     } else if (removePage) {
@@ -163,16 +159,12 @@ const UpdateTacticBoard = (): JSX.Element => {
       // Go to next page
       updatedTacticBoard.pages[page - 2] = {
         ...getAllObjectsJson(),
-        playerANumbers: playerANumbers,
-        playerBNumbers: playerBNumbers,
       } as TacticPage;
       updateTacticBoard(updatedTacticBoard);
     } else if (page < currentPage) {
       // go to previous page
       updatedTacticBoard.pages[page] = {
         ...getAllObjectsJson(),
-        playerANumbers: playerANumbers,
-        playerBNumbers: playerBNumbers,
       } as TacticPage;
       updateTacticBoard(updatedTacticBoard);
     }
@@ -247,8 +239,6 @@ const UpdateTacticBoard = (): JSX.Element => {
     const updatedTacticBoard: TacticBoard = cloneDeep(tacticBoard);
     updatedTacticBoard.pages[currentPage - 1] = {
       ...getAllObjectsJson(),
-      playerANumbers: playerANumbers,
-      playerBNumbers: playerBNumbers,
     } as TacticPage;
     updateTacticBoard(updatedTacticBoard);
   };

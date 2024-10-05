@@ -67,7 +67,7 @@ const TacticBoardTopMenu = ({
 
   const onToggleEditMode = () => {
     if (isPrivileged && isEditMode) {
-      //saveTacticBoard();
+      saveTacticBoard();
     }
     setSelection(!isEditMode);
     dispatch(setIsEditMode(!isEditMode));

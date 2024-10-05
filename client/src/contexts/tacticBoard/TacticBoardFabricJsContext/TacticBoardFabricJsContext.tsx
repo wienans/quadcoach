@@ -111,7 +111,10 @@ const TacticBoardFabricJsContextProvider: FC<{
     const canvasFabric = canvasFabricRef.current;
     if (!canvasFabric) return {};
 
-    const json = canvasFabric.toJSON(["uuid"]) as unknown as TacticPage;
+    const json = canvasFabric.toJSON([
+      "uuid",
+      "objectType",
+    ]) as unknown as TacticPage;
     if (json.backgroundImage) {
       json.backgroundImage.src = new URL(json.backgroundImage.src).pathname;
     }
