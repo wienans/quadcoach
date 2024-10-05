@@ -43,6 +43,9 @@
     },
     "BallItemsSection": {
       "title": "Balls"
+    },
+    "accessoryItemsSection": {
+      "title": "Accessories"
     }
   }
 }

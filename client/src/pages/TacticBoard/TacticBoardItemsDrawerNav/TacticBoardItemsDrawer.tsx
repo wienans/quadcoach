@@ -3,6 +3,7 @@ import { SoftBox } from "../../../components";
 import PersonItemsSection from "./PersonItemsSection";
 import { useTranslation } from "react-i18next";
 import BallItemsSection from "./BallItemsSection";
+import AccessoryItemSection from "./AccessoryItemSection";
 
 const TacticBoardItemsDrawer = (): JSX.Element => {
   const { t } = useTranslation("TacticBoard");
@@ -22,6 +23,7 @@ const TacticBoardItemsDrawer = (): JSX.Element => {
         <PersonItemsSection teamA={true} />
         <PersonItemsSection teamA={false} />
         <BallItemsSection />
+        <AccessoryItemSection />
       </List>
     </SoftBox>
   );

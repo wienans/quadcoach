@@ -18,6 +18,12 @@ export enum BallType {
   FlagRunner = "FlagRunner",
 }
 
+export enum AccessoryType {
+  RedCone = "RedCone",
+  YellowCone = "YellowCone",
+  BlueCone = "BlueCone",
+}
+
 declare module "fabric/fabric-impl" {
   export interface IObjectOptions {
     id?: string;

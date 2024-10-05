@@ -1,6 +1,8 @@
 import {
   Avatar,
   Collapse,
+  createSvgIcon,
+  Icon,
   List,
   ListItemAvatar,
   ListItemButton,
@@ -12,42 +14,46 @@ import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
 import SportsVolleyballIcon from "@mui/icons-material/SportsVolleyball";
 import CircleIcon from "@mui/icons-material/Circle";
-import { BallType } from "../../../contexts/tacticBoard/TacticBoardFabricJsContext/types";
+import { AccessoryType } from "../../../contexts/tacticBoard/TacticBoardFabricJsContext/types";
 import { useTranslation } from "react-i18next";
 import { fabric } from "fabric";
 import { v4 as uuidv4 } from "uuid";
 import { useTacticBoardFabricJs } from "../../../hooks";
 
-const getBallTypeColor = (ballType: BallType) => {
-  switch (ballType) {
-    case BallType.Dodgeball:
-      return "#808080";
-    case BallType.Volleyball:
-      return "#ffffff";
-    case BallType.FlagRunner:
-      return "#FFD700";
+const getAccesTypeSvg = (accessType: AccessoryType) => {
+  switch (accessType) {
+    case AccessoryType.RedCone:
+      return "/cone-red.svg";
+    case AccessoryType.BlueCone:
+      return "/cone-blue.svg";
+    case AccessoryType.YellowCone:
+      return "/cone-yellow.svg";
   }
 };
 
-const BallItemsSection = (): JSX.Element => {
+const AccessoryItemSection = (): JSX.Element => {
   const { t } = useTranslation("TacticBoard");
   const { addObject } = useTacticBoardFabricJs();
   const [open, setOpen] = useState<boolean>(true);
 
   const handleToggleOpen = () => setOpen(!open);
 
-  const onBallAddClick = (ballType: BallType) => () => {
-    const circle = new fabric.Circle({
-      radius: 10,
-      stroke: "#000000", // Set the color of the stroke
-      strokeWidth: 2, // Set the width of the stroke
-      left: 600,
-      top: 333,
-      fill: getBallTypeColor(ballType),
-      hasControls: false, // Disable resizing handles
-      uuid: uuidv4(),
-    });
-    addObject(circle);
+  const onAccessoryAddClick = (accessType: AccessoryType) => () => {
+    fabric.loadSVGFromURL(
+      getAccesTypeSvg(accessType),
+      function (objects, options) {
+        let obj = fabric.util.groupSVGElements(objects, {
+          ...options,
+          uuid: uuidv4(),
+        });
+        obj.scaleX = 0.04;
+        obj.scaleY = 0.04;
+        obj.left = 600;
+        obj.top = 333;
+        obj.hasControls = false;
+        addObject(obj);
+      },
+    );
   };
 
   return (
@@ -57,25 +63,30 @@ const BallItemsSection = (): JSX.Element => {
           <SportsVolleyballIcon />
         </ListItemIcon>
         <ListItemText
-          primary={t("TacticBoard:itemsDrawer.ballItemsSection.title")}
+          primary={t("TacticBoard:itemsDrawer.accessoryItemsSection.title")}
         />
         {open ? <ExpandLess /> : <ExpandMore />}
       </ListItemButton>
       <Collapse in={open} timeout="auto" unmountOnExit>
         <List component="div" disablePadding>
-          {Object.entries(BallType).map(([key, value]) => (
+          {Object.entries(AccessoryType).map(([key, value]) => (
             <ListItemButton
               sx={{ pl: 4 }}
               key={key}
-              onClick={onBallAddClick(value)}
+              onClick={onAccessoryAddClick(value)}
             >
               <ListItemAvatar>
                 <Avatar>
-                  <CircleIcon
-                    sx={{
-                      color: getBallTypeColor(value),
-                    }}
-                  />
+                  <Icon>
+                    <img
+                      src={getAccesTypeSvg(value)}
+                      style={{
+                        width: "28px",
+                        marginTop: "-4px",
+                        marginLeft: "-4px",
+                      }}
+                    />
+                  </Icon>
                 </Avatar>
               </ListItemAvatar>
               <ListItemText primary={value} />
@@ -87,4 +98,4 @@ const BallItemsSection = (): JSX.Element => {
   );
 };
 
-export default BallItemsSection;
+export default AccessoryItemSection;
