@@ -498,6 +498,7 @@ const TacticsBoard = (): JSX.Element => {
       )}
       {!isTacticBoardError && !isTacticBoardLoading && tacticBoard && (
         <SoftBox
+          ref={refFullScreenContainer}
           sx={{
             display: "flex",
             flexGrow: 1,
@@ -520,6 +521,8 @@ const TacticsBoard = (): JSX.Element => {
             isRecording={isRecording}
             onRecordClick={onRecordClick}
             onDeleteTacticBoard={onDeleteTacticBoardClick}
+            onFullScreenClick={onFullScreenClick}
+            isFullScreen={isFullScreen}
           />
           <SoftBox
             sx={{

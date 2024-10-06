@@ -16,6 +16,8 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import PlayCircleIcon from "@mui/icons-material/PlayCircle";
 import PauseCircleIcon from "@mui/icons-material/PauseCircle";
 import MovieIcon from "@mui/icons-material/Movie";
+import FullscreenIcon from "@mui/icons-material/Fullscreen";
+import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
 import { TacticBoard } from "../../../api/quadcoachApi/domain";
 import CategoryIcon from "@mui/icons-material/Category";
 import { useAppDispatch, useAppSelector, useAuth } from "../../../store/hooks";
@@ -27,6 +29,7 @@ import { useTranslation } from "react-i18next";
 import { SoftBox, SoftButton, SoftTypography } from "../../../components";
 import { useEffect, useState } from "react";
 import { useTacticBoardFabricJs } from "../../../hooks";
+import { FullscreenExit } from "mdi-material-ui";
 
 type TacticBoardTopMenuProps = {
   saveTacticBoard: () => void;
@@ -43,6 +46,8 @@ type TacticBoardTopMenuProps = {
   isRecording: boolean;
   onRecordClick: () => void;
   onDeleteTacticBoard: () => void;
+  onFullScreenClick: () => void;
+  isFullScreen: boolean;
 };
 
 const TacticBoardTopMenu = ({
@@ -60,6 +65,8 @@ const TacticBoardTopMenu = ({
   isRecording,
   onRecordClick,
   onDeleteTacticBoard,
+  onFullScreenClick,
+  isFullScreen,
 }: TacticBoardTopMenuProps): JSX.Element => {
   const dispatch = useAppDispatch();
   const { t } = useTranslation("TacticBoard");
@@ -232,6 +239,24 @@ const TacticBoardTopMenu = ({
           )}
         </SoftBox>
         {/* PAGINATION END */}
+        <Tooltip title={t("TacticBoard:topMenu.isFullscreenButton.tooltip")}>
+          <ToggleButton
+            disabled={isTacticBoardLoading || isRecording || isAnimating}
+            value={isFullScreen}
+            size="small"
+            selected={isFullScreen}
+            onChange={onFullScreenClick}
+            sx={{
+              mr: 1,
+            }}
+          >
+            {isFullScreen ? (
+              <FullscreenExitIcon color="primary" />
+            ) : (
+              <FullscreenIcon color="primary" />
+            )}
+          </ToggleButton>
+        </Tooltip>
         {/* EDIT/SAVE BUTTON START */}
         {isPrivileged && (
           <Tooltip
