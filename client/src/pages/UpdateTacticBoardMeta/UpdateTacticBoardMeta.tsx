@@ -23,7 +23,7 @@ import {
   useUpdateTacticBoardMutation,
   useGetTacticBoardQuery,
   useDeleteTacticBoardMutation,
-} from "../tacticboardApi";
+} from "../../api/quadcoachApi/tacticboardApi";
 import { TacticBoardPartialId } from "../../api/quadcoachApi/domain";
 import {
   SoftTypography,

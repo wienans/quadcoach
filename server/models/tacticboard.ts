@@ -33,6 +33,7 @@ interface IObject {
   fontFamily?: string;
   fontSize?: number;
   textAlign?: string;
+  objectType?: string;
 }
 interface IBackgroundImage {
   type: string;
@@ -44,8 +45,6 @@ interface ITacticPage {
   version?: string;
   objects?: Types.Array<IObject>;
   backgroundImage?: Types.Array<IBackgroundImage>;
-  playerANumbers?: number[];
-  playerBNumbers?: number[];
 }
 interface ITacticBoard {
   name?: string;
@@ -158,6 +157,9 @@ const objectSchema = new Schema<IObject>({
   textAlign: {
     type: String,
   },
+  objectType: {
+    type: String,
+  },
 });
 const backImgSchema = new Schema<IBackgroundImage>({
   type: {
@@ -182,12 +184,6 @@ const pagesSchema = new Schema<ITacticPage>({
   },
   backgroundImage: {
     type: backImgSchema,
-  },
-  playerANumbers: {
-    type: [Number],
-  },
-  playerBNumbers: {
-    type: [Number],
   },
 });
 const tacticBoardSchema = new Schema<ITacticBoard>(

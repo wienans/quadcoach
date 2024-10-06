@@ -99,15 +99,10 @@ const routes = [
               type: RouteHandleType.tacticBoard,
             },
             async lazy() {
-              const TacticBoard = (await import("../TacticBoard")).default;
-              const FabricJsContextProvider = (await import("../../components"))
-                .FabricJsContextProvider;
+              const TacticsBoardWrapper = (await import("../TacticBoard"))
+                .default;
               return {
-                element: (
-                  <FabricJsContextProvider>
-                    <TacticBoard />
-                  </FabricJsContextProvider>
-                ),
+                element: <TacticsBoardWrapper />,
               };
             },
           },
@@ -131,16 +126,11 @@ const routes = [
               type: RouteHandleType.updateTacticBoard,
             },
             async lazy() {
-              const UpdateTacticBoard = (await import("../UpdateTacticBoard"))
-                .default;
-              const FabricJsContextProvider = (await import("../../components"))
-                .FabricJsContextProvider;
+              const UpdateTacticBoardWrapper = (
+                await import("../UpdateTacticBoard")
+              ).default;
               return {
-                element: (
-                  <FabricJsContextProvider>
-                    <UpdateTacticBoard />
-                  </FabricJsContextProvider>
-                ),
+                element: <UpdateTacticBoardWrapper />,
               };
             },
           },

@@ -1,6 +1,6 @@
-import { quadcoachApi } from "../api";
-import { TagType } from "../api/enum";
-import { TacticBoard } from "../api/quadcoachApi/domain";
+import { quadcoachApi } from "..";
+import { TagType } from "../enum";
+import { TacticBoard } from "./domain";
 export type GetTacticBoardRequest = {
   nameRegex?: string;
   tagString?: string;

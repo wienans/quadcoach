@@ -5,6 +5,6 @@ COPY ./package.json ./package.json
 COPY ./models ./models
 COPY ./server.ts ./server.ts
 COPY ./tsconfig.json ./tsconfig.json
-RUN npm install
+RUN npm install --loglevel verbose
 EXPOSE 3001
 CMD ["npm", "run", "dev"]

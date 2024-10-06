@@ -25,6 +25,9 @@ const DashboardLayout = ({
       sx={{
         p: 3,
         position: "relative",
+        height: "100vh",
+        display: "flex",
+        flexDirection: "column",
       }}
     >
       <Navbar light={false} />

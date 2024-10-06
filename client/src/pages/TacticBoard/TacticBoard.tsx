@@ -12,20 +12,40 @@ import {
   Grid,
   Pagination,
   Skeleton,
+  Theme,
+  useMediaQuery,
 } from "@mui/material";
 import { useTranslation } from "react-i18next";
-import { SoftTypography, FabricJsCanvas, SoftButton } from "../../components";
+import {
+  SoftTypography,
+  FabricJsCanvas,
+  SoftButton,
+  SoftBox,
+} from "../../components";
+import cloneDeep from "lodash/cloneDeep";
 import FullscreenIcon from "@mui/icons-material/Fullscreen";
 import EditIcon from "@mui/icons-material/Edit";
-import { useGetTacticBoardQuery } from "../../pages/tacticboardApi";
-import { useFabricJs } from "../../components/FabricJsContext/useFabricJs";
+import {
+  useDeleteTacticBoardMutation,
+  useGetTacticBoardQuery,
+  useUpdateTacticBoardMutation,
+} from "../../api/quadcoachApi/tacticboardApi";
 import PlayCircleIcon from "@mui/icons-material/PlayCircle";
 import PauseCircleIcon from "@mui/icons-material/PauseCircle";
 import MovieIcon from "@mui/icons-material/Movie";
 import "../fullscreen.css";
 import { DashboardLayout } from "../../components/LayoutContainers";
-import { TacticBoard } from "../../api/quadcoachApi/domain";
+import { TacticBoard, TacticPage } from "../../api/quadcoachApi/domain";
+import { useTacticBoardFabricJs } from "../../hooks";
+import { TacticBoardFabricJsContextProvider } from "../../contexts";
+import Navbar from "../../components/Navbar";
+import TacticBoardItemsDrawerNav from "./TacticBoardItemsDrawerNav";
+import { tacticBoardItemsDrawerWidth } from "./TacticBoardItemsDrawerNav/TacticBoardItemsDrawerNav";
+import { useAppSelector } from "../../store/hooks";
+import TacticBoardTopMenu from "./TacticBoardTopMenu/TacticBoardTopMenu";
+import TacticBoardTopItemsMenu from "./TacticBoardTopItemsMenu";
 import { useAuth } from "../../store/hooks";
+
 let mediaRecorder: MediaRecorder;
 
 type TacticBoardActionsProps = {
@@ -106,8 +126,18 @@ const TacticBoardActions = ({
 
 const TacticsBoard = (): JSX.Element => {
   const { t } = useTranslation("TacticBoard");
+  const isUpSm = useMediaQuery((theme: Theme) => theme.breakpoints.up("xxxl"));
   const { id: tacticBoardId } = useParams();
-  const { canvas, loadFromJson, setSelection, getAllObjects } = useFabricJs();
+  const {
+    canvasFabricRef: canvasRef,
+    loadFromTacticPage: loadFromJson,
+    setSelection,
+    setControls,
+    getAllObjects,
+    getAllObjectsJson,
+    getActiveObjects,
+    removeActiveObjects,
+  } = useTacticBoardFabricJs();
   const navigate = useNavigate();
   const refFullScreenContainer = useRef<HTMLDivElement>(null);
   const {
@@ -118,12 +148,37 @@ const TacticsBoard = (): JSX.Element => {
     skip: tacticBoardId == null,
   });
 
+  const [
+    updateTacticBoard,
+    {
+      isError: isUpdateTacticBoardError,
+      isLoading: isUpdateTacticBoardLoading,
+      isSuccess: isUpdateTacticBoardSuccess,
+    },
+  ] = useUpdateTacticBoardMutation();
+
+  const [
+    deleteTacticBoard,
+    {
+      isError: isDeleteTacticBoardError,
+      isLoading: isDeleteTacticBoardLoading,
+      isSuccess: isDeleteTacticBoardSuccess,
+    },
+  ] = useDeleteTacticBoardMutation();
+
   const refContainer = useRef<HTMLDivElement>(null);
   const [currentPage, setPage] = useState<number>(1);
+  const [maxPages, setMaxPages] = useState<number>(1);
   const [isAnimating, setIsAnimating] = useState<boolean>(false);
   const [isRecording, setIsRecording] = useState<boolean>(false);
   const [isFullScreen, setIsFullScreen] = useState<boolean>(false);
-  const [isPriviliged, setIsPrivileged] = useState<boolean>(false);
+  const [isPrivileged, setIsPrivileged] = useState<boolean>(false);
+  const [firstAPICall, setFirstAPICall] = useState<number>(0);
+
+  const tacticBoardItemsDrawerOpen = useAppSelector(
+    (state) => state.tacticBoard.tacticBoardItemsDrawerOpen,
+  );
+  const isEditMode = useAppSelector((state) => state.tacticBoard.isEditMode);
 
   const {
     name: userName,
@@ -132,15 +187,85 @@ const TacticsBoard = (): JSX.Element => {
     roles: userRoles,
   } = useAuth();
 
+  const onDeleteActiveObject = () => {
+    removeActiveObjects();
+  };
+
   const onLoadPage = useCallback(
-    (page: number) => {
+    (page: number, newPage?: boolean, removePage?: boolean) => {
+      if (newPage && removePage) return;
       if (!tacticBoard) return;
-      // Show the new Page
-      loadFromJson(tacticBoard.pages[page - 1]);
-      setSelection(false);
+      const updatedTacticBoard: TacticBoard = cloneDeep(tacticBoard);
+      if (isPrivileged && isEditMode) {
+        if (newPage) {
+          // Save the last state of the old page
+          updatedTacticBoard.pages[page - 2] = {
+            ...getAllObjectsJson(),
+          } as TacticPage;
+          // Copy the state of the old page to the new page
+          updatedTacticBoard.pages[page - 1] = {
+            ...getAllObjectsJson(),
+          } as TacticPage;
+          console.log(updatedTacticBoard);
+          updateTacticBoard(updatedTacticBoard);
+        } else if (removePage) {
+          // Remove Last Page
+          updatedTacticBoard.pages.pop();
+          console.log(updatedTacticBoard);
+          updateTacticBoard(updatedTacticBoard);
+        } else if (page > currentPage) {
+          // Go to next page
+          updatedTacticBoard.pages[page - 2] = {
+            ...getAllObjectsJson(),
+          } as TacticPage;
+          console.log(updatedTacticBoard);
+          updateTacticBoard(updatedTacticBoard);
+        } else if (page < currentPage) {
+          // go to previous page
+          updatedTacticBoard.pages[page] = {
+            ...getAllObjectsJson(),
+          } as TacticPage;
+          console.log(updatedTacticBoard);
+          updateTacticBoard(updatedTacticBoard);
+        }
+      }
+      loadFromJson(updatedTacticBoard.pages[page - 1]);
+
+      if (isPrivileged && isEditMode) {
+        setSelection(true);
+      } else {
+        setSelection(false);
+      }
+      setControls(false);
     },
-    [loadFromJson, setSelection, tacticBoard],
+    [
+      tacticBoard,
+      currentPage,
+      loadFromJson,
+      isPrivileged,
+      isEditMode,
+      setControls,
+      getAllObjectsJson,
+      updateTacticBoard,
+      setSelection,
+    ],
   );
+
+  const saveTacticBoard = useCallback(() => {
+    if (!tacticBoard) return;
+    const updatedTacticBoard: TacticBoard = cloneDeep(tacticBoard);
+    updatedTacticBoard.pages[currentPage - 1] = {
+      ...getAllObjectsJson(),
+    } as TacticPage;
+    console.log(updatedTacticBoard);
+    updateTacticBoard(updatedTacticBoard);
+  }, [tacticBoard, currentPage, getAllObjectsJson, updateTacticBoard]);
+
+  const onDeleteTacticBoardClick = () => {
+    if (!tacticBoard) return;
+    deleteTacticBoard(tacticBoard._id);
+    navigate("/tacticboards");
+  };
 
   const onFullScreenClick = () => {
     const container = refFullScreenContainer.current;
@@ -187,7 +312,7 @@ const TacticsBoard = (): JSX.Element => {
   };
 
   const onRecordClick = () => {
-    const canvasStream = canvas?.lowerCanvasEl.captureStream(60);
+    const canvasStream = canvasRef.current?.lowerCanvasEl.captureStream(60);
     mediaRecorder = new MediaRecorder(canvasStream, {
       mimeType: "video/webm",
     });
@@ -211,18 +336,28 @@ const TacticsBoard = (): JSX.Element => {
   };
 
   useEffect(() => {
-    if (!isTacticBoardLoading && !isTacticBoardError && tacticBoard) {
+    if (
+      !isTacticBoardLoading &&
+      !isTacticBoardError &&
+      tacticBoard &&
+      firstAPICall < 2
+    ) {
+      // API is finished loading, due to sending data to Server every time the Page is switched
+      // we need to stop the this method by counting firstAPICall up and checking the amount on
+      // load of the page API is called twice.
+      setFirstAPICall(firstAPICall + 1);
       loadFromJson(tacticBoard.pages[0]);
+      setMaxPages(tacticBoard.pages.length);
       setSelection(false);
     }
   }, [
-    setSelection,
     loadFromJson,
     tacticBoard,
     isTacticBoardError,
     isTacticBoardLoading,
+    firstAPICall,
+    setSelection,
   ]);
-
   useEffect(() => {
     let interval: number;
     if (isAnimating && tacticBoard) {
@@ -234,16 +369,16 @@ const TacticsBoard = (): JSX.Element => {
             const targetObject = tacticBoard.pages[newPage - 1].objects?.find(
               (nextObject) => nextObject.uuid == obj.uuid,
             );
-            if (targetObject && canvas) {
+            if (targetObject && canvasRef.current) {
               obj.animate("left", targetObject.left, {
-                onChange: canvas.renderAll.bind(canvas),
+                onChange: canvasRef.current.renderAll.bind(canvasRef.current),
                 duration: 1000,
                 onComplete: () => {
                   onLoadPage(newPage);
                 },
               });
               obj.animate("top", targetObject.top, {
-                onChange: canvas.renderAll.bind(canvas),
+                onChange: canvasRef.current.renderAll.bind(canvasRef.current),
                 duration: 1000,
                 onComplete: () => {
                   onLoadPage(newPage);
@@ -258,7 +393,7 @@ const TacticsBoard = (): JSX.Element => {
 
     // Clean up the interval on component unmount or when the last page is reached
     return () => clearInterval(interval);
-  }, [isAnimating, onLoadPage, tacticBoard, getAllObjects, canvas]);
+  }, [isAnimating, onLoadPage, tacticBoard, getAllObjects, canvasRef]);
 
   useEffect(() => {
     let interval: number;
@@ -277,16 +412,16 @@ const TacticsBoard = (): JSX.Element => {
             const targetObject = tacticBoard.pages[newPage - 1].objects?.find(
               (nextObject) => nextObject.uuid == obj.uuid,
             );
-            if (targetObject && canvas) {
+            if (targetObject && canvasRef.current) {
               obj.animate("left", targetObject.left, {
-                onChange: canvas.renderAll.bind(canvas),
+                onChange: canvasRef.current.renderAll.bind(canvasRef.current),
                 duration: 1000,
                 onComplete: () => {
                   onLoadPage(newPage);
                 },
               });
               obj.animate("top", targetObject.top, {
-                onChange: canvas.renderAll.bind(canvas),
+                onChange: canvasRef.current.renderAll.bind(canvasRef.current),
                 duration: 1000,
                 onComplete: () => {
                   onLoadPage(newPage);
@@ -302,7 +437,7 @@ const TacticsBoard = (): JSX.Element => {
 
     // Clean up the interval on component unmount or when the last page is reached
     return () => clearInterval(interval);
-  }, [isRecording, onLoadPage, tacticBoard, getAllObjects, canvas]);
+  }, [isRecording, onLoadPage, tacticBoard, getAllObjects, canvasRef]);
 
   useEffect(() => {
     const handleFullScreenChange = () => {
@@ -325,6 +460,110 @@ const TacticsBoard = (): JSX.Element => {
       setIsPrivileged(true);
     }
   }, [userId, tacticBoard, userRoles]);
+
+  return (
+    <SoftBox
+      sx={{
+        p: 3,
+        position: "relative",
+        height: "100vh",
+        maxHeight: "100vh",
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
+      <Navbar light={false} />
+      {(isTacticBoardError || (!isTacticBoardLoading && !tacticBoard)) && (
+        <SoftBox sx={{ px: 3 }}>
+          <Alert color="error">
+            {t("TacticBoard:loadingTacticBoardError")}
+          </Alert>
+        </SoftBox>
+      )}
+      {isTacticBoardLoading && (
+        <>
+          <SoftBox sx={{ px: 3, mb: 1 }}>
+            <Skeleton variant="rectangular" width="100%" height={64} />
+          </SoftBox>
+          <SoftBox
+            sx={{
+              display: "flex",
+              flexGrow: 1,
+              px: 3,
+            }}
+          >
+            <Skeleton variant="rectangular" width="100%" height="100%" />
+          </SoftBox>
+        </>
+      )}
+      {!isTacticBoardError && !isTacticBoardLoading && tacticBoard && (
+        <SoftBox
+          ref={refFullScreenContainer}
+          sx={{
+            display: "flex",
+            flexGrow: 1,
+            maxHeight: "100%",
+            flexDirection: "column",
+          }}
+        >
+          <TacticBoardTopMenu
+            saveTacticBoard={saveTacticBoard}
+            isTacticBoardLoading={isTacticBoardLoading}
+            tacticBoard={tacticBoard}
+            isPrivileged={isPrivileged}
+            currentPage={currentPage}
+            onLoadPage={onLoadPage}
+            setPage={setPage}
+            setMaxPages={setMaxPages}
+            maxPages={maxPages}
+            isAnimating={isAnimating}
+            onAnimateClick={onAnimateClick}
+            isRecording={isRecording}
+            onRecordClick={onRecordClick}
+            onDeleteTacticBoard={onDeleteTacticBoardClick}
+            onFullScreenClick={onFullScreenClick}
+            isFullScreen={isFullScreen}
+          />
+          <SoftBox
+            sx={{
+              display: "flex",
+              flexGrow: 1,
+              px: 3,
+            }}
+          >
+            <TacticBoardItemsDrawerNav />
+            <SoftBox
+              sx={{
+                display: "flex",
+                flexGrow: 1,
+                flexDirection: "column",
+                minHeight: 0,
+              }}
+            >
+              {isEditMode && (
+                <TacticBoardTopItemsMenu
+                  isPrivileged={isPrivileged}
+                  isEditMode={isEditMode}
+                  onDelete={onDeleteActiveObject}
+                />
+              )}
+              <SoftBox
+                component="main"
+                sx={{
+                  display: "flex",
+                  minHeight: 0,
+                  flexGrow: 1,
+                  width: "100%",
+                }}
+              >
+                <FabricJsCanvas initialHight={686} initialWidth={1220} />
+              </SoftBox>
+            </SoftBox>
+          </SoftBox>
+        </SoftBox>
+      )}
+    </SoftBox>
+  );
 
   return (
     <DashboardLayout
@@ -359,7 +598,7 @@ const TacticsBoard = (): JSX.Element => {
           <CardHeader
             title={
               <SoftTypography variant="h3">
-                {`${t("TacticBoard:titel")}${
+                {`${t("TacticBoard:title")}${
                   tacticBoard ? `: ${tacticBoard.name}` : ""
                 }`}
               </SoftTypography>
@@ -383,7 +622,14 @@ const TacticsBoard = (): JSX.Element => {
       )}
     >
       {() => (
-        <Box ref={refFullScreenContainer}>
+        <Box
+          ref={refFullScreenContainer}
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            flexGrow: 1,
+          }}
+        >
           {isFullScreen && !isTacticBoardLoading && (
             <Card>
               <TacticBoardActions
@@ -408,19 +654,16 @@ const TacticsBoard = (): JSX.Element => {
             <Skeleton variant="rectangular" width={"100%"} height={100} />
           )}
           {!isTacticBoardError && !isTacticBoardLoading && (
-            <Box
-              ref={refContainer}
-              sx={{
-                width: "100%",
-                display: "flex",
-                justifyContent: "center",
-              }}
-            >
-              <FabricJsCanvas
-                initialHight={686}
-                initialWidth={1220}
-                containerRef={refContainer}
-              />
+            // <Box
+            //   ref={refContainer}
+            //   sx={{
+            //     width: "100%",
+            //     display: "flex",
+            //     justifyContent: "center",
+            //   }}
+            // >
+            <Box sx={{ flexGrow: 1, display: "flex" }}>
+              <FabricJsCanvas initialHight={686} initialWidth={1220} />
             </Box>
           )}
         </Box>
@@ -429,4 +672,12 @@ const TacticsBoard = (): JSX.Element => {
   );
 };
 
-export default TacticsBoard;
+const TacticsBoardWrapper = (): JSX.Element => {
+  return (
+    <TacticBoardFabricJsContextProvider heightFirstResizing={true}>
+      <TacticsBoard />
+    </TacticBoardFabricJsContextProvider>
+  );
+};
+
+export default TacticsBoardWrapper;

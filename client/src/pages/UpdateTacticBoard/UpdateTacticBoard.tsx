@@ -15,7 +15,7 @@ import { useTranslation } from "react-i18next";
 import {
   useUpdateTacticBoardMutation,
   useGetTacticBoardQuery,
-} from "../../pages/tacticboardApi";
+} from "../../api/quadcoachApi/tacticboardApi";
 import { TacticBoard, TacticPage } from "../../api/quadcoachApi/domain";
 import {
   SoftTypography,
@@ -26,12 +26,13 @@ import {
   TacticsBoardSpeedDialBalls,
   SoftButton,
 } from "../../components";
-import { useFabricJs } from "../../components/FabricJsContext/useFabricJs";
 import cloneDeep from "lodash/cloneDeep";
 import "../fullscreen.css";
 import FullscreenIcon from "@mui/icons-material/Fullscreen";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { DashboardLayout } from "../../components/LayoutContainers";
+import { useTacticBoardFabricJs } from "../../hooks";
+import { TacticBoardFabricJsContextProvider } from "../../contexts";
 import { useAuth } from "../../store/hooks";
 
 const UpdateTacticBoard = (): JSX.Element => {
@@ -40,11 +41,11 @@ const UpdateTacticBoard = (): JSX.Element => {
   const { id: tacticBoardId } = useParams();
   const {
     getAllObjectsJson,
-    loadFromJson,
+    loadFromTaticPage: loadFromJson,
     setControls,
     getActiveObjects,
     removeActiveObjects,
-  } = useFabricJs();
+  } = useTacticBoardFabricJs();
   const {
     data: tacticBoard,
     isError: isTacticBoardError,
@@ -144,14 +145,10 @@ const UpdateTacticBoard = (): JSX.Element => {
       // Save the last state of the old page
       updatedTacticBoard.pages[page - 2] = {
         ...getAllObjectsJson(),
-        playerANumbers: playerANumbers,
-        playerBNumbers: playerBNumbers,
       } as TacticPage;
       // Copy the state of the old page to the new page
       updatedTacticBoard.pages[page - 1] = {
         ...getAllObjectsJson(),
-        playerANumbers: playerANumbers,
-        playerBNumbers: playerBNumbers,
       } as TacticPage;
       updateTacticBoard(updatedTacticBoard);
     } else if (removePage) {
@@ -162,16 +159,12 @@ const UpdateTacticBoard = (): JSX.Element => {
       // Go to next page
       updatedTacticBoard.pages[page - 2] = {
         ...getAllObjectsJson(),
-        playerANumbers: playerANumbers,
-        playerBNumbers: playerBNumbers,
       } as TacticPage;
       updateTacticBoard(updatedTacticBoard);
     } else if (page < currentPage) {
       // go to previous page
       updatedTacticBoard.pages[page] = {
         ...getAllObjectsJson(),
-        playerANumbers: playerANumbers,
-        playerBNumbers: playerBNumbers,
       } as TacticPage;
       updateTacticBoard(updatedTacticBoard);
     }
@@ -246,8 +239,6 @@ const UpdateTacticBoard = (): JSX.Element => {
     const updatedTacticBoard: TacticBoard = cloneDeep(tacticBoard);
     updatedTacticBoard.pages[currentPage - 1] = {
       ...getAllObjectsJson(),
-      playerANumbers: playerANumbers,
-      playerBNumbers: playerBNumbers,
     } as TacticPage;
     updateTacticBoard(updatedTacticBoard);
   };
@@ -378,7 +369,7 @@ const UpdateTacticBoard = (): JSX.Element => {
                     <FabricJsCanvas
                       initialHight={686}
                       initialWidth={1220}
-                      containerRef={refContainer}
+                      // containerRef={refContainer}
                     />
                   </>
                   <TacticsBoardSpeedDial
@@ -476,7 +467,7 @@ const UpdateTacticBoard = (): JSX.Element => {
                       <FabricJsCanvas
                         initialHight={686}
                         initialWidth={1220}
-                        containerRef={refContainer}
+                        // containerRef={refContainer}
                       />
                     </>
                   )}
@@ -501,4 +492,12 @@ const UpdateTacticBoard = (): JSX.Element => {
   );
 };
 
-export default UpdateTacticBoard;
+const UpdateTacticBoardWrapper = (): JSX.Element => {
+  return (
+    <TacticBoardFabricJsContextProvider>
+      <UpdateTacticBoard />
+    </TacticBoardFabricJsContextProvider>
+  );
+};
+
+export default UpdateTacticBoardWrapper;

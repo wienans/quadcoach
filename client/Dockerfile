@@ -9,6 +9,6 @@ COPY ./tsconfig.json ./tsconfig.json
 COPY ./tsconfig.node.json ./tsconfig.node.json
 COPY ./public ./public
 COPY ./src ./src
-RUN npm install
+RUN npm install --loglevel verbose
 EXPOSE 5173
 CMD ["npm", "run", "dev"]

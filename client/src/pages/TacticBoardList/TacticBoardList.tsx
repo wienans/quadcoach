@@ -23,7 +23,7 @@ import {
 import {
   useLazyGetTacticBoardsQuery,
   useAddTacticBoardMutation,
-} from "../tacticboardApi";
+} from "../../api/quadcoachApi/tacticboardApi";
 import {
   TacticBoardWithOutId,
   TacticBoard,
@@ -121,13 +121,16 @@ const TacticBoardList = () => {
     navigate(`/tacticboards/${tacticBoardId}`);
   };
 
-  const handleAddTacticBoard = (name: string | undefined) => {
+  const handleAddTacticBoard = (
+    name: string | undefined,
+    backgroundImage: string | undefined,
+  ) => {
     if (name) {
       const emptyPage: TacticPage = {
         objects: undefined,
         backgroundImage: {
           type: "image",
-          src: "/full-court.svg",
+          src: backgroundImage ? backgroundImage : "/full-court.svg",
           width: 1220,
           height: 686,
         },
@@ -143,7 +146,7 @@ const TacticBoardList = () => {
       addTacticBoard(newTacticBoard).then(
         (result: { data: TacticBoard } | { error: unknown }) => {
           if (!result.data) return;
-          navigate(`/tacticboards/${result.data._id}/update`);
+          navigate(`/tacticboards/${result.data._id}`);
         },
       );
     }
@@ -274,7 +277,9 @@ const TacticBoardList = () => {
             )}
             <AddTacticBoardDialog
               isOpen={openAddTacticBoardDialog}
-              onConfirm={(name) => handleAddTacticBoard(name)}
+              onConfirm={(name, backgroundImage) =>
+                handleAddTacticBoard(name, backgroundImage)
+              }
             />
             <ToggleButtonGroup
               value={viewType}

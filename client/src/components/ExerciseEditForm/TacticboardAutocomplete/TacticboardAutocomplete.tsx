@@ -1,7 +1,7 @@
 import { Autocomplete, CircularProgress, TextField } from "@mui/material";
 import { FocusEvent, SyntheticEvent, useState } from "react";
 import { TacticBoard } from "../../../api/quadcoachApi/domain";
-import { useGetTacticBoardsQuery } from "../../../pages/tacticboardApi";
+import { useGetTacticBoardsQuery } from "../../../api/quadcoachApi/tacticboardApi";
 
 export type TacticboardAutocompleteProps = {
   value: string | undefined;

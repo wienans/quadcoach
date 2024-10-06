@@ -43,7 +43,7 @@ const initialState: LayoutState = {
 };
 
 export const layoutSlice = createSlice({
-  name: "counter",
+  name: "layout",
   // `createSlice` will infer the state type from the `initialState` argument
   initialState,
   reducers: {

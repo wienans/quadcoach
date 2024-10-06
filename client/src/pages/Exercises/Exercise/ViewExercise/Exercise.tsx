@@ -4,28 +4,15 @@ import { useEffect, useState } from "react";
 import {
   Alert,
   Card,
-  Grid,
   Skeleton,
   useTheme,
   useMediaQuery,
   IconButton,
   Tooltip,
   Theme,
-  CardHeader,
-  CardContent,
-  List,
-  ListItem,
-  ListItemText,
   BottomNavigationAction,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-  ListItemButton,
-  CardActions,
 } from "@mui/material";
 import { SoftBox, SoftButton } from "../../../../components";
-import ReactPlayer from "react-player";
-import { Exercise } from "../../../../api/quadcoachApi/domain";
 import {
   useDeleteExerciseMutation,
   useGetExerciseQuery,
@@ -40,11 +27,14 @@ import {
 } from "../../../../helpers/exerciseHelpers";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
+import ExerciseBlock from "./ExerciseBlock";
+import ExerciseInfo from "./ExerciseInfo";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ContentPasteIcon from "@mui/icons-material/ContentPaste";
 import { useAuth } from "../../../../store/hooks";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+
 type ExerciseValue = {
   labelResourceKey: string;
   getValue: (exercise: Exercise) => string;
@@ -146,7 +136,7 @@ const Exercise = () => {
     navigate("/exercises");
   }, [isDeleteExerciseSuccess, navigate]);
 
-  const handleChipClick = (id: string) => {
+  const handleOpenExerciseClick = (id: string) => {
     navigate(`/exercises/${id}`);
   };
 
@@ -253,205 +243,19 @@ const Exercise = () => {
               {t("Exercise:errorLoadingRelatedExercises")}
             </Alert>
           )}
-          <Card sx={{ height: "100%" }}>
-            <CardHeader title={t("Exercise:info.title")} />
-            <CardContent>
-              <List
-                sx={{
-                  width: "100%",
-                }}
-              >
-                <Grid container spacing={2}>
-                  {personValues.map(({ labelResourceKey, getValue }) => (
-                    <Grid item xs={6} md={3} key={labelResourceKey}>
-                      <ListItem>
-                        <ListItemText
-                          primary={getValue(exercise)}
-                          secondary={t(labelResourceKey)}
-                        />
-                      </ListItem>
-                    </Grid>
-                  ))}
-                  <Grid item xs={6} md={3}>
-                    <ListItem>
-                      <ListItemText
-                        primary={t("Exercise:info.minutesValue", {
-                          value: exercise.time_min,
-                        })}
-                        secondary={t("Exercise:info.time")}
-                      />
-                    </ListItem>
-                  </Grid>
-                </Grid>
-              </List>
-            </CardContent>
-          </Card>
-          <Grid container spacing={2} sx={{ my: 3 }}>
-            <Grid item xs={12} lg={4}>
-              <Accordion>
-                <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                  {t("Exercise:materials.title")}
-                </AccordionSummary>
-                <AccordionDetails>
-                  {exercise.materials?.some((el) => el !== "") ? (
-                    <List
-                      sx={{
-                        width: "100%",
-                      }}
-                    >
-                      {exercise.materials
-                        .filter((el) => el !== "")
-                        .map((el, index) => (
-                          <ListItem key={el + index}>
-                            <ListItemText primary={el} />
-                          </ListItem>
-                        ))}
-                    </List>
-                  ) : (
-                    t("Exercise:materials.none")
-                  )}
-                </AccordionDetails>
-              </Accordion>
-            </Grid>
-            <Grid item xs={12} lg={4}>
-              <Accordion>
-                <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                  {t("Exercise:tags.title")}
-                </AccordionSummary>
-                <AccordionDetails>
-                  {exercise.tags?.some((el) => el !== "") ? (
-                    <List
-                      sx={{
-                        width: "100%",
-                      }}
-                    >
-                      {exercise.tags
-                        .filter((el) => el !== "")
-                        .map((el, index) => (
-                          <ListItem key={el + index}>
-                            <ListItemText primary={el} />
-                          </ListItem>
-                        ))}
-                    </List>
-                  ) : (
-                    t("Exercise:tags.none")
-                  )}
-                </AccordionDetails>
-              </Accordion>
-            </Grid>
-            <Grid item xs={12} lg={4}>
-              <Accordion>
-                <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                  {t("Exercise:realtedToExercises.title")}
-                </AccordionSummary>
-                <AccordionDetails>
-                  {isRelatedExercisesLoading ? (
-                    <List
-                      sx={{
-                        width: "100%",
-                      }}
-                    >
-                      {Array.from(Array(5).keys()).map((k) => (
-                        <ListItem key={k}>
-                          <ListItemText
-                            primary={<Skeleton variant="text" width="100%" />}
-                          />
-                        </ListItem>
-                      ))}
-                    </List>
-                  ) : (relatedExercises?.length ?? 0) > 0 ? (
-                    <List
-                      sx={{
-                        width: "100%",
-                      }}
-                    >
-                      {relatedExercises?.map((relatedExercise) => (
-                        <ListItem key={relatedExercise._id}>
-                          <ListItemButton
-                            onClick={() => {
-                              handleChipClick(relatedExercise._id);
-                            }}
-                          >
-                            <ListItemText primary={relatedExercise.name} />
-                          </ListItemButton>
-                        </ListItem>
-                      ))}
-                    </List>
-                  ) : (
-                    t("Exercise:realtedToExercises.none")
-                  )}
-                </AccordionDetails>
-              </Accordion>
-            </Grid>
-          </Grid>
-          {exercise.description_blocks?.map((el, index) => {
-            return (
-              <Card sx={{ my: 3, display: "flex" }} key={el._id}>
-                <CardHeader
-                  title={t("Exercise:block.title", { blockNumber: index + 1 })}
-                  subheader={t("Exercise:block.minutes", {
-                    minutes: el.time_min,
-                  })}
-                  sx={{
-                    pb: 0,
-                  }}
-                />
-                {el.video_url != "" && (
-                  <Accordion defaultExpanded>
-                    <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                      Video
-                    </AccordionSummary>
-                    <AccordionDetails
-                      sx={{
-                        position: "relative",
-                        minHeight: "160px",
-                      }}
-                    >
-                      <ReactPlayer
-                        style={{ position: "absolute", left: 0, top: 0 }}
-                        url={el.video_url}
-                        width="100%"
-                        height="100%"
-                        controls
-                        light
-                      />
-                    </AccordionDetails>
-                  </Accordion>
-                )}
-                {el.description && el.description != "" && (
-                  <Accordion defaultExpanded>
-                    <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                      {t("Exercise:block.description")}
-                    </AccordionSummary>
-                    <AccordionDetails sx={{ ml: 2 }}>
-                      <Markdown remarkPlugins={[remarkGfm]}>
-                        {el.description}
-                      </Markdown>
-                    </AccordionDetails>
-                  </Accordion>
-                )}
-                {el.coaching_points && el.coaching_points != "" && (
-                  <Accordion defaultExpanded>
-                    <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                      {t("Exercise:block.coachingPoints")}
-                    </AccordionSummary>
-                    <AccordionDetails sx={{ ml: 2 }}>
-                      <Markdown remarkPlugins={[remarkGfm]}>
-                        {el.coaching_points}
-                      </Markdown>
-                    </AccordionDetails>
-                  </Accordion>
-                )}
-                {el.tactics_board && el.tactics_board != "" && (
-                  <CardActions disableSpacing>
-                    <IconButton href={`/tacticboards/${el.tactics_board}`}>
-                      <ContentPasteIcon />
-                    </IconButton>
-                  </CardActions>
-                )}
-              </Card>
-            );
-          })}
+          <ExerciseInfo
+            exercise={exercise}
+            handleOpenExerciseClick={handleOpenExerciseClick}
+            isRelatedExercisesLoading={isRelatedExercisesLoading}
+            relatedExercises={relatedExercises}
+          />
+          {exercise.description_blocks?.map((block, index) => (
+            <ExerciseBlock
+              block={block}
+              blockNumber={index + 1}
+              key={block._id}
+            />
+          ))}
         </>
       )}
     </ProfileLayout>

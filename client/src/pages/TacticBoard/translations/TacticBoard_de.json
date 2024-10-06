@@ -1,5 +1,51 @@
 {
-    "titel": "Taktik Tafel",
-    "editBtn": "Taktik Tafel bearbeiten"
+  "title": "Taktik Tafel",
+  "loadingTacticBoardError": "Es ist ein Fehler beim Laden der Taktik Tafel aufgetreten.",
+  "topMenu": {
+    "isEditModeButton": {
+      "tooltip": "Button um zwischen Ansicht und Editieren zu wechseln.",
+      "tooltip_editMode": "Änderungen speichern und in den Ansichtmodus wechseln.",
+      "tooltip_viewMode": "In den Editiermodus wechseln."
+    },
+    "itemsMenuButton": {
+      "tooltip": "Button um Elemente-Menü zu öffnen und zu schließen.",
+      "tooltip_open": "Elemente-Menü schließen.",
+      "tooltip_closed": "Elemente-Menü öffnen."
+    },
+    "deleteButton": {
+      "tooltip": "Löscht die Taktik Tfale"
+    },
+    "drawingButton": {
+      "tooltip_enable": "Aktiviert den Zeichenmodus",
+      "tooltip_disable": "Deaktiviert den Zeichenmodus"
+    },
+    "objectDeleteButton": {
+      "tooltip": "Löscht das aktuelle ausgewählte Objekt"
+    },
+    "isAnimatingButton": {
+      "tooltip": "Spielt die Taktik Tafel ab"
+    },
+    "isRecordingButton": {
+      "tooltip": "Erstellt ein Video der Taktik Tafel"
+    },
+    "renameTacticBoadButton": {
+      "tooltip": "Dialog öffnen, um die Taktik Tafel umzubenennen."
+    },
+    "pagination": {
+      "tooltip_removePage": "Löscht die aktuelle Taktik Tafel Seite",
+      "tooltip_addPage": "Fügt eine nächste Taktik Tafel Seite hinzu"
+    }
+  },
+  "itemsDrawer": {
+    "title": "Elemente-Menü",
+    "personItemsSection": {
+      "title": "Personen"
+    },
+    "ballItemsSection": {
+      "title": "Bälle"
+    },
+    "accessoryItemsSection": {
+      "title": "Zubehör"
+    }
+  }
 }
-  

@@ -1,5 +1,51 @@
 {
-    "titel": "Tacitc Board",
-    "editBtn": "Edit Tactic Board"
+  "title": "Tactic Board",
+  "loadingTacticBoardError": "An error occurred while loading tactic board.",
+  "topMenu": {
+    "isEditModeButton": {
+      "tooltip": "Button for switching between view and edit mode.",
+      "tooltip_editMode": "Save changes and switch to view mode.",
+      "tooltip_viewMode": "Open edit mode."
+    },
+    "itemsMenuButton": {
+      "tooltip": "Button to open and close items menu.",
+      "tooltip_open": "Close items menu.",
+      "tooltip_closed": "Open items menu."
+    },
+    "deleteButton": {
+      "tooltip": "Deletes the tactic board"
+    },
+    "drawingButton": {
+      "tooltip_enable": "Enables the drawing mode",
+      "tooltip_disable": "Disables the drawing mode"
+    },
+    "objectDeleteButton": {
+      "tooltip": "Deletes the current selected Object"
+    },
+    "isAnimatingButton": {
+      "tooltip": "Playbacks the tactic board"
+    },
+    "isRecordingButton": {
+      "tooltip": "Records a video of the Playback"
+    },
+    "renameTacticBoadButton": {
+      "tooltip": "Open dialog to rename tactic board."
+    },
+    "pagination": {
+      "tooltip_removePage": "Removes current tactic board page",
+      "tooltip_addPage": "Adds a new tactic board page"
+    }
+  },
+  "itemsDrawer": {
+    "title": "Items menu",
+    "PersonItemsSection": {
+      "title": "Persons"
+    },
+    "BallItemsSection": {
+      "title": "Balls"
+    },
+    "accessoryItemsSection": {
+      "title": "Accessories"
+    }
+  }
 }
-  

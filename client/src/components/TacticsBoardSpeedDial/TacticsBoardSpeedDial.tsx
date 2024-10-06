@@ -1,8 +1,8 @@
-import { useFabricJs } from "../FabricJsContext";
 import { SpeedDial, SpeedDialAction } from "@mui/material";
 import { fabric } from "fabric";
 import { v4 as uuidv4 } from "uuid";
 import { cloneDeep } from "lodash";
+import { useTacticBoardFabricJs } from "../../hooks";
 
 export type TacticsBoardSpeedDialProps = {
   teamB: boolean;
@@ -18,7 +18,7 @@ const TacticsBoardSpeedDial = ({
   playerNumbers,
   setPlayerNumbers,
 }: TacticsBoardSpeedDialProps): JSX.Element => {
-  const { addObject, getAllObjectsJson } = useFabricJs();
+  const { addObject, getAllObjectsJson } = useTacticBoardFabricJs();
   const findNumberInArray = (array: number[]) => {
     const clonedArray = cloneDeep(array);
     clonedArray.sort(function (a, b) {
