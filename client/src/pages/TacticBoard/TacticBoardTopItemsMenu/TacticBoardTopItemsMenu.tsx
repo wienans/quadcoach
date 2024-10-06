@@ -1,4 +1,11 @@
-import { IconButton, ToggleButton, Tooltip } from "@mui/material";
+import {
+  IconButton,
+  MenuItem,
+  Select,
+  SelectChangeEvent,
+  ToggleButton,
+  Tooltip,
+} from "@mui/material";
 import { SoftBox } from "../../../components";
 import DrawIcon from "@mui/icons-material/Draw";
 import LayersIcon from "@mui/icons-material/Layers";
@@ -6,7 +13,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { toggleTacticBoardItemsDrawerOpen } from "../tacticBoardSlice";
 import { useAppDispatch, useAppSelector } from "../../../store/hooks";
 import { useTranslation } from "react-i18next";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTacticBoardFabricJs } from "../../../hooks";
 
 type TacticBoardTopItemMenuProps = {
@@ -26,10 +33,16 @@ const TacticBoardTopItemsMenu = ({
     (state) => state.tacticBoard.tacticBoardItemsDrawerOpen,
   );
   const [drawingEnabled, enableDrawing] = useState<boolean>(false);
-  const { setDrawMode } = useTacticBoardFabricJs();
+  const [backgroundImageId, setBackgorundImageId] = useState<string>("");
+  const { setDrawMode, setBackgroundImage, getBackgroundImage } =
+    useTacticBoardFabricJs();
   const toggleItems = () => {
     dispatch(toggleTacticBoardItemsDrawerOpen());
   };
+
+  useEffect(() => {
+    setBackgorundImageId(getBackgroundImage());
+  }, [getBackgroundImage]);
 
   return (
     <SoftBox
@@ -95,6 +108,8 @@ const TacticBoardTopItemsMenu = ({
             </ToggleButton>
           </Tooltip>
         )}
+        {/* DRAW BUTTON END */}
+        {/* DELETE BUTTON START */}
         {isPrivileged && isEditMode && (
           <Tooltip title={t("TacticBoard:topMenu.objectDeleteButton.tooltip")}>
             <ToggleButton
@@ -111,7 +126,25 @@ const TacticBoardTopItemsMenu = ({
             </ToggleButton>
           </Tooltip>
         )}
-        {/* BRAW BUTTON END */}
+        {/* DELETE BUTTON END */}
+        <Select
+          labelId="court-select-label"
+          id="court-select"
+          sx={{
+            height: "30px",
+            ml: 2,
+          }}
+          value={backgroundImageId}
+          label={t("UpdateTacticBoardMeta:info.backgroundImage.label")}
+          onChange={(event: SelectChangeEvent) => {
+            setBackgorundImageId(event.target.value);
+            setBackgroundImage(event.target.value);
+          }}
+        >
+          <MenuItem value={"/full-court.svg"}>Full Court</MenuItem>
+          <MenuItem value={"/half-court.svg"}>Half Court</MenuItem>
+          <MenuItem value={"/empty-court.svg"}>Empty Court</MenuItem>
+        </Select>
       </SoftBox>
     </SoftBox>
   );

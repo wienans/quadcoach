@@ -4,6 +4,9 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  MenuItem,
+  Select,
+  SelectChangeEvent,
 } from "@mui/material";
 import { useState } from "react";
 import { SoftButton, SoftInput } from "..";
@@ -16,7 +19,7 @@ export type AddTacticBoardDialogProps = {
    * @param selectedMaterials if add was clicked, variable has selected exercises
    * @returns
    */
-  onConfirm: (name?: string) => void;
+  onConfirm: (name?: string, backgroundImage?: string) => void;
 };
 
 const AddTacticBoardDialog = ({
@@ -25,12 +28,14 @@ const AddTacticBoardDialog = ({
 }: AddTacticBoardDialogProps): JSX.Element => {
   const { t } = useTranslation("AddTacticBoardDialog");
   const [name, setName] = useState<string>("");
+  const [backgroundImageId, setBackgorundImageId] =
+    useState<string>("/full-court.svg");
 
-  const onClose = (name?: string) => {
-    onConfirm(name);
+  const onClose = (name?: string, backgroundImage?: string) => {
+    onConfirm(name, backgroundImage);
 
-    // reset
     setName("");
+    setBackgorundImageId("/full-court.svg");
   };
 
   return (
@@ -39,17 +44,35 @@ const AddTacticBoardDialog = ({
       <DialogContent>
         <SoftInput
           id="outlined-basic"
+          placeholder="Name"
           value={name}
           onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
             setName(event.target.value);
           }}
         />
+        <Select
+          labelId="court-select-label"
+          id="court-select"
+          sx={{ mt: 2 }}
+          value={backgroundImageId}
+          label={t("UpdateTacticBoardMeta:info.backgroundImage.label")}
+          onChange={(event: SelectChangeEvent) => {
+            setBackgorundImageId(event.target.value);
+          }}
+        >
+          <MenuItem value={"/full-court.svg"}>Full Court</MenuItem>
+          <MenuItem value={"/half-court.svg"}>Half Court</MenuItem>
+          <MenuItem value={"/empty-court.svg"}>Empty Court</MenuItem>
+        </Select>
       </DialogContent>
       <DialogActions>
         <SoftButton color="secondary" onClick={() => onClose()}>
           {t("AddTacticBoardDialog:cancel")}
         </SoftButton>
-        <SoftButton color="primary" onClick={() => onClose(name)}>
+        <SoftButton
+          color="primary"
+          onClick={() => onClose(name, backgroundImageId)}
+        >
           {t("AddTacticBoardDialog:add")}
         </SoftButton>
       </DialogActions>

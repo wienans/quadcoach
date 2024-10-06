@@ -41,6 +41,8 @@ export interface TacticBoardFabricJsContextProps {
   loadFromTacticPage: (page: TacticPage) => void;
   setDrawMode: (drawMode: boolean) => void;
   setControls: (controls: boolean) => void;
+  setBackgroundImage: (url: string) => void;
+  getBackgroundImage: () => string;
 }
 
 export const TacticBoardFabricJsContext = createContext<
@@ -119,6 +121,21 @@ const TacticBoardFabricJsContextProvider: FC<{
       json.backgroundImage.src = new URL(json.backgroundImage.src).pathname;
     }
     return json;
+  }, []);
+
+  const setBackgroundImage = useCallback((src: string) => {
+    const canvasFabric = canvasFabricRef.current;
+    if (!canvasFabric) return;
+    canvasFabric.setBackgroundImage(
+      src,
+      canvasFabric.renderAll.bind(canvasFabric),
+    );
+  }, []);
+
+  const getBackgroundImage = useCallback(() => {
+    const canvasFabric = canvasFabricRef.current;
+    if (!canvasFabric) return;
+    return new URL(canvasFabric.backgroundImage._element.src).pathname;
   }, []);
 
   const setControls = useCallback((controls: boolean) => {
@@ -205,6 +222,8 @@ const TacticBoardFabricJsContextProvider: FC<{
         loadFromTacticPage,
         setDrawMode,
         setControls,
+        setBackgroundImage,
+        getBackgroundImage,
       }}
     >
       {children}
