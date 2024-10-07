@@ -9,6 +9,8 @@ type TacticBoard = {
   creator?: string;
   user?: string;
   pages: TacticPage[];
+  description?: string;
+  coaching_points?: string;
 };
 
 export default TacticBoard;

@@ -1,0 +1,41 @@
+{
+  "errorLoadingTacticBoard": "Es ist ein Fehler beim Laden der Taktik Tafel aufgetreten.",
+  "errorDeletingTacticBoard": "Es ist ein Fehler beim Löschen der Taktik Tafel aufgetreten.",
+  "errorTacticBoardNotFound": "Taktik Tafel nicht gefunden",
+  "info": {
+    "title": "Info",
+    "name": {
+      "label": "Name",
+      "placeholder": "Name",
+      "missing": "Bitte gib einen Namen ein."
+    },
+    "isPrivate": {
+      "label": "Private Taktik Tafel"
+    },
+    "tags": {
+      "label": "Tags"
+    }
+  },
+  "topMenu": {
+    "isEditModeButton": {
+      "tooltip": "Bearbeite die Taktik Tafel"
+    },
+    "deleteButton": {
+      "tooltip": "Löscht die Taktik Tfale"
+    },
+    "isAnimatingButton": {
+      "tooltip": "Spielt die Taktik Tafel ab"
+    },
+    "isRecordingButton": {
+      "tooltip": "Erstellt ein Video der Taktik Tafel"
+    },
+    "isFullscreenButton": {
+      "tooltip": "Vollbildmodus"
+    }
+  },
+  "description": "Beschreibung",
+  "coaching_points": "Coaching Points",
+  "deleteTacticBoard": "Taktik Tafel löschen",
+  "editTacticBoardMeta": "Taktik Tafel Metadaten bearbeiten / speichern"
+
+}

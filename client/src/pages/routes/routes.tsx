@@ -96,6 +96,20 @@ const routes = [
           {
             path: ":id",
             handle: {
+              type: RouteHandleType.tacticBoardProfile,
+            },
+            async lazy() {
+              const TacticsBoardProfileRoot = (
+                await import("../TacticBoardProfile")
+              ).default;
+              return {
+                element: <TacticsBoardProfileRoot />,
+              };
+            },
+          },
+          {
+            path: ":id/update",
+            handle: {
               type: RouteHandleType.tacticBoard,
             },
             async lazy() {
@@ -103,34 +117,6 @@ const routes = [
                 .default;
               return {
                 element: <TacticsBoardWrapper />,
-              };
-            },
-          },
-          {
-            path: ":id/update",
-            handle: {
-              type: RouteHandleType.updateTacticBoard,
-            },
-            async lazy() {
-              const UpdateTacticBoardMeta = (
-                await import("../UpdateTacticBoardMeta")
-              ).default;
-              return {
-                element: <UpdateTacticBoardMeta />,
-              };
-            },
-          },
-          {
-            path: ":id/updateBoard",
-            handle: {
-              type: RouteHandleType.updateTacticBoard,
-            },
-            async lazy() {
-              const UpdateTacticBoardWrapper = (
-                await import("../UpdateTacticBoard")
-              ).default;
-              return {
-                element: <UpdateTacticBoardWrapper />,
               };
             },
           },
