@@ -1,0 +1,40 @@
+{
+  "errorLoadingTacticBoard": "An error occurred while loading the tactic board.",
+  "errorDeletingTacticBoard": "An error occurred while deleting the tactic board.",
+  "errorTacticBoardNotFound": "Tactic Board not found",
+  "info": {
+    "title": "Info",
+    "name": {
+      "label": "Name",
+      "placeholder": "Name",
+      "missing": "Please enter name."
+    },
+    "isPrivate": {
+      "label": "Private Tactic Board"
+    },
+    "tags": {
+      "label": "Tags"
+    }
+  },
+  "topMenu": {
+    "isEditModeButton": {
+      "tooltip": "Edit the tactic board"
+    },
+    "deleteButton": {
+      "tooltip": "Deletes the tactic board"
+    },
+    "isAnimatingButton": {
+      "tooltip": "Playbacks the tactic board"
+    },
+    "isRecordingButton": {
+      "tooltip": "Records a video of the Playback"
+    },
+    "isFullscreenButton": {
+      "tooltip": "Enables the fullscreen mode"
+    }
+  },
+  "description": "Description",
+  "coaching_points": "Coaching points",
+  "deleteTacticBoard": "Delete tacticboard",
+  "editTacticBoardMeta": "Edit / Save tacticboard metadata"
+}

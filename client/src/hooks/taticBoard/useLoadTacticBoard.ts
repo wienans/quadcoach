@@ -3,7 +3,8 @@ import { useTacticBoardFabricJs } from "..";
 import { useGetTacticBoardQuery } from "../../api/quadcoachApi/tacticboardApi";
 
 export const useLoadTacticBoard = (tacticBoardId?: string) => {
-  const { loadFromTaticPage: loadFromJson, setSelection } = useTacticBoardFabricJs();
+  const { loadFromTaticPage: loadFromJson, setSelection } =
+    useTacticBoardFabricJs();
 
   const {
     data: tacticBoard,
@@ -20,9 +21,6 @@ export const useLoadTacticBoard = (tacticBoardId?: string) => {
       !tacticBoard?.pages?.length
     )
       return;
-
-    // loadFromJson(tacticBoard.pages[0]);
-    // setSelection(false);
   }, [
     isTacticBoardError,
     isTacticBoardLoading,

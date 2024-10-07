@@ -7,6 +7,7 @@ export enum RouteHandleType {
   updateExercise = "updateExercise",
   tacticBoards = "tacticBoards",
   tacticBoard = "tacticBoard",
+  tacticBoardProfile = "tacitcBoardProfile",
   addTacticBoard = "addTacticBoard",
   updateTacticBoard = "updateTacticBoard",
   componentsTest = "componentsTest",

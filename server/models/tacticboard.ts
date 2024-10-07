@@ -53,6 +53,8 @@ interface ITacticBoard {
   creator?: string;
   user?: Types.ObjectId;
   pages?: Types.Array<ITacticPage>;
+  description?: string;
+  coaching_points?: string;
 }
 
 const objectSchema = new Schema<IObject>({
@@ -207,6 +209,12 @@ const tacticBoardSchema = new Schema<ITacticBoard>(
     user: {
       type: Types.ObjectId,
       ref: "users",
+    },
+    description: {
+      type: String,
+    },
+    coaching_points: {
+      type: String,
     },
   },
   { timestamps: true }

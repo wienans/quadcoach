@@ -34,6 +34,9 @@
     "pagination": {
       "tooltip_removePage": "Löscht die aktuelle Taktik Tafel Seite",
       "tooltip_addPage": "Fügt eine nächste Taktik Tafel Seite hinzu"
+    },
+    "backButton": {
+      "tooltip": "Zurück zur Taktik Tafel Profile"
     }
   },
   "itemsDrawer": {

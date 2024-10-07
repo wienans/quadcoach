@@ -34,6 +34,9 @@
     "pagination": {
       "tooltip_removePage": "Removes current tactic board page",
       "tooltip_addPage": "Adds a new tactic board page"
+    },
+    "backButton": {
+      "tooltip": "Go back to tactic board profile"
     }
   },
   "itemsDrawer": {

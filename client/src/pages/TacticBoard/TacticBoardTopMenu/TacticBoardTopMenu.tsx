@@ -18,6 +18,7 @@ import PauseCircleIcon from "@mui/icons-material/PauseCircle";
 import MovieIcon from "@mui/icons-material/Movie";
 import FullscreenIcon from "@mui/icons-material/Fullscreen";
 import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { TacticBoard } from "../../../api/quadcoachApi/domain";
 import CategoryIcon from "@mui/icons-material/Category";
 import { useAppDispatch, useAppSelector, useAuth } from "../../../store/hooks";
@@ -30,6 +31,7 @@ import { SoftBox, SoftButton, SoftTypography } from "../../../components";
 import { useEffect, useState } from "react";
 import { useTacticBoardFabricJs } from "../../../hooks";
 import { FullscreenExit } from "mdi-material-ui";
+import { useNavigate } from "react-router-dom";
 
 type TacticBoardTopMenuProps = {
   saveTacticBoard: () => void;
@@ -71,7 +73,7 @@ const TacticBoardTopMenu = ({
   const dispatch = useAppDispatch();
   const { t } = useTranslation("TacticBoard");
   const { setSelection } = useTacticBoardFabricJs();
-
+  const navigate = useNavigate();
   const isEditMode = useAppSelector((state) => state.tacticBoard.isEditMode);
 
   const onToggleEditMode = () => {
@@ -104,25 +106,25 @@ const TacticBoardTopMenu = ({
           alignContent: "center",
         }}
       >
-        {/* NAME START */}
-        {isPrivileged && isEditMode ? (
-          <Tooltip
-            title={t("TacticBoard:topMenu.renameTacticBoadButton.tooltip")}
+        <Tooltip title={t("TacticBoard:topMenu.backButton.tooltip")}>
+          <ToggleButton
+            disabled={isTacticBoardLoading}
+            value={false}
+            size="small"
+            selected={false}
+            onChange={() => {
+              navigate(`/tacticboards/${tacticBoard._id}`);
+            }}
+            sx={{
+              mr: 1,
+            }}
           >
-            <Button
-              endIcon={<EditIcon color="black" />}
-              sx={{ textTransform: "none", p: 0 }}
-            >
-              {isTacticBoardLoading ? (
-                <Skeleton variant="rectangular" />
-              ) : (
-                <SoftTypography color="black">
-                  {tacticBoard.name}
-                </SoftTypography>
-              )}
-            </Button>
-          </Tooltip>
-        ) : isTacticBoardLoading ? (
+            <ArrowBackIcon color="black" />
+          </ToggleButton>
+        </Tooltip>
+
+        {/* NAME START */}
+        {isTacticBoardLoading ? (
           <Skeleton variant="rectangular" />
         ) : (
           <SoftTypography color="black">{tacticBoard.name}</SoftTypography>

@@ -187,7 +187,6 @@ const TacticBoardInBlockWrapper = ({
 }: TacticBoardInBlockWrapperProps): JSX.Element => {
   return (
     <div>
-      {/* PAGINATION END */}
       <TacticBoardFabricJsContextProvider heightFirstResizing={false}>
         <TacticBoardInBlock block={block} />
       </TacticBoardFabricJsContextProvider>
