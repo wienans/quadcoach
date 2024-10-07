@@ -19,7 +19,10 @@ import {
   useGetRelatedExercisesQuery,
 } from "../../../exerciseApi";
 import { useTranslation } from "react-i18next";
-import { ProfileLayout } from "../../../../components/LayoutContainers";
+import {
+  DashboardLayout,
+  ProfileLayout,
+} from "../../../../components/LayoutContainers";
 import { getExerciseTypeHeaderBackgroundImage } from "../../../../components/LayoutContainers/ProfileLayout";
 import {
   ExerciseType,
@@ -142,25 +145,37 @@ const Exercise = () => {
 
   if (isExerciseLoading) {
     return (
-      <>
-        <Card>
-          <Skeleton variant="rectangular" width={"100%"} height={120} />
-        </Card>
-        <SoftBox mt={5} mb={3}>
-          <Skeleton variant="rectangular" width={"100%"} height={120} />
-        </SoftBox>
-        <SoftBox mt={5} mb={3}>
-          <Skeleton variant="rectangular" width={"100%"} height={120} />
-        </SoftBox>
-        <SoftBox mt={5} mb={3}>
-          <Skeleton variant="rectangular" width={"100%"} height={120} />
-        </SoftBox>
-      </>
+      <DashboardLayout>
+        {() => (
+          <>
+            <Card>
+              <Skeleton variant="rectangular" width={"100%"} height={120} />
+            </Card>
+            <SoftBox mt={5} mb={3}>
+              <Skeleton variant="rectangular" width={"100%"} height={120} />
+            </SoftBox>
+            <SoftBox mt={5} mb={3}>
+              <Skeleton variant="rectangular" width={"100%"} height={120} />
+            </SoftBox>
+            <SoftBox mt={5} mb={3}>
+              <Skeleton variant="rectangular" width={"100%"} height={120} />
+            </SoftBox>
+          </>
+        )}
+      </DashboardLayout>
     );
   }
 
   if (!exercise || isExerciseError) {
-    return <Alert color="error">{t("Exercise:errorLoadingExercise")}</Alert>;
+    return (
+      <DashboardLayout>
+        {() => (
+          <>
+            <Alert color="error">{t("Exercise:errorLoadingExercise")}</Alert>;
+          </>
+        )}
+      </DashboardLayout>
+    );
   }
 
   return (
