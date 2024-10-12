@@ -14,5 +14,5 @@
   },
   "loginBtn": "Einloggen",
   "registerBtn": "Registrieren",
-  "loginErr": "E-Mail oder Passwort falsch. Bitte versuche es erneut."
+  "loginErr": "E-Mail oder Passwort falsch. Oder der Account ist noch nicht aktiviert. Bitte versuche es erneut."
 }

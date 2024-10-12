@@ -6,7 +6,10 @@ import User from "../models/user";
 import { logEvents } from "../middleware/logger";
 import validator from "validator";
 import crypto from "crypto";
-
+import nodemailer from "nodemailer";
+import handlebars from "handlebars";
+import fs from "fs";
+import path from "path";
 // @desc Login
 // @route POST /auth
 // @access Public
@@ -20,7 +23,7 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
 
   const foundUser = await User.findOne({ email }).exec();
 
-  if (!foundUser || !foundUser.active) {
+  if (!foundUser || !foundUser.active || !foundUser.isVerified) {
     res.status(401).json({ message: "Unauthorized" });
     return;
   }
@@ -99,6 +102,40 @@ export const register = asyncHandler(async (req: Request, res: Response) => {
     password: hashedPwd,
     emailToken: crypto.randomBytes(64).toString("hex"),
   };
+  console.log("EMAIL TO BE SEND");
+  const transporter = nodemailer.createTransport({
+    host: "smtp.gmail.com",
+    port: 465,
+    secure: true,
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
+    },
+  });
+
+  const source = fs.readFileSync(
+    path.join(__dirname, "../templates/verifyEmail.html"),
+    "utf8"
+  );
+  const template = handlebars.compile(source);
+  const replacements = {
+    name: userObject.name,
+    emailToken: userObject.emailToken,
+  };
+  const htmlToSend = template(replacements);
+  transporter
+    .sendMail({
+      to: "sven.wienand@outlook.com", //userObject.email,
+      from: process.env.EMAIL_USER,
+      subject: "Verify Email",
+      html: htmlToSend,
+    })
+    .then(() => {
+      console.log("Email sent");
+    })
+    .catch((error) => {
+      console.log(error);
+    });
   const user = await User.create(userObject);
   if (user) {
     res.status(201).json({ message: `New user ${email} created` });

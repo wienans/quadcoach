@@ -14,5 +14,5 @@
   },
   "loginBtn": "Login",
   "registerBtn": "Register",
-  "loginErr": "Wrong E-Mail or Password. Please try again."
+  "loginErr": "Wrong E-Mail or Password or Accoung is not activated/verified. Please try again."
 }
