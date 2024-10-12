@@ -46,12 +46,12 @@ const Home = () => {
                     fontWeight="bold"
                     textTransform="uppercase"
                   >
-                    05.Feb.2024
+                    12.Oct.2024
                   </SoftTypography>
                 </SoftBox>
                 <SoftTypography>
-                  As Login is implemented we can do the fist Beta Testing of the
-                  App Quadcoach
+                  Tactic Board V2.0 which can be visualized in a Exercise and
+                  Login / Registration implemented for Beta Testing
                 </SoftTypography>
               </SoftBox>
             </Card>

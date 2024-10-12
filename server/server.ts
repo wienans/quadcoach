@@ -1,4 +1,5 @@
 import express from "express";
+import bodyParser from "body-parser";
 import mongoose from "mongoose";
 
 import cors from "cors";
@@ -33,6 +34,7 @@ const MONGO_DB = process.env.MONGO_DB;
 const dbURI = `mongodb://${MONGO_USER}:${MONGO_PASSWORD}@quadcoach-mongodb:27017/${MONGO_DB}?retryWrites=true&w=majority`;
 
 // Middleware
+app.use(bodyParser.json({ limit: "1mb" }));
 app.use(logger);
 app.use(express.json());
 app.use(cookieParser());
