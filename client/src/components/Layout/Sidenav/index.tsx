@@ -39,7 +39,7 @@ import { RootState } from "../../../store/store";
 import { DrawerProps, Palette, PaletteColor } from "@mui/material";
 import { PickByType } from "../../../helpers/typeHelpers";
 import { useTranslation } from "react-i18next";
-import Logo from "../../../assets/images/logo.svg";
+import Logo from "../../../assets/images/logo.png";
 
 // Soft UI Dashboard React context
 // import { useSoftUIController, setMiniSidenav } from "context";
@@ -233,7 +233,7 @@ const Sidenav = ({ color, routes, ...rest }: SidenavProps) => {
             component="img"
             src={Logo}
             alt="QuadCoach Logo"
-            height="100%"
+            style={{ width: "50px" }}
           />
         </SoftBox>
       </SoftBox>
