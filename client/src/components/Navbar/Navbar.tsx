@@ -21,7 +21,7 @@ import Toolbar from "@mui/material/Toolbar";
 import { SoftBox, Breadcrumbs } from "..";
 
 // Custom styles for DashboardNavbar
-import Logo from "../../assets/images/logo.svg";
+import Logo from "../../assets/images/logo.png";
 import NavbarMainControls from "../NavbarMainControls";
 import BackButton from "./BackButton";
 
@@ -62,7 +62,8 @@ const Navbar = ({ light }: NavbarProps) => (
           style={{
             filter: light
               ? "invert(100%) sepia(0%) saturate(7481%) hue-rotate(347deg) brightness(102%) contrast(100%)"
-              : "invert(0%) sepia(90%) saturate(7500%) hue-rotate(347deg) brightness(105%) contrast(111%)",
+              : "invert(0%) sepia(0%) saturate(7500%) hue-rotate(347deg) brightness(105%) contrast(111%)",
+            width: "50px",
           }}
         />
       </SoftBox>
