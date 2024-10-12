@@ -8,6 +8,12 @@ router.route("/").post(rateLimiter, authController.login);
 
 router.route("/register").post(rateLimiter, authController.register);
 
+router.route("/resetPassword").post(rateLimiter, authController.resetPassword);
+
+router
+  .route("/updatePassword")
+  .post(rateLimiter, authController.updatePassword);
+
 router.route("/refresh").get(authController.refresh);
 
 router.route("/logout").post(authController.logout);

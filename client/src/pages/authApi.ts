@@ -54,6 +54,20 @@ export const authApiSlice = quadcoachApi.injectEndpoints({
         data,
       }),
     }),
+    resetPassword: builder.mutation({
+      query: (data) => ({
+        url: "/api/auth/resetPassword",
+        method: "post",
+        data,
+      }),
+    }),
+    updatePassword: builder.mutation({
+      query: (data) => ({
+        url: "/api/auth/updatePassword",
+        method: "post",
+        data,
+      }),
+    }),
   }),
 });
 
@@ -63,4 +77,6 @@ export const {
   useSendLogoutMutation,
   useRefreshMutation,
   useVerifyEmailMutation,
+  useResetPasswordMutation,
+  useUpdatePasswordMutation,
 } = authApiSlice;

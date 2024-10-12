@@ -9,6 +9,7 @@ interface IUser {
   active: boolean;
   isVerified: boolean;
   emailToken: string;
+  passwordResetToken: string;
 }
 
 const userSchema = new Schema<IUser>({
@@ -37,6 +38,9 @@ const userSchema = new Schema<IUser>({
     default: false,
   },
   emailToken: {
+    type: String,
+  },
+  passwordResetToken: {
     type: String,
   },
 });

@@ -12,6 +12,7 @@
       "missing": "Please enter a password."
     }
   },
+  "forgotPassword": "Forgot Password?",
   "loginBtn": "Login",
   "registerBtn": "Register",
   "loginErr": "Wrong E-Mail or Password or Accoung is not activated/verified. Please try again."

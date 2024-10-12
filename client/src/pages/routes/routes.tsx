@@ -171,6 +171,30 @@ const routes = [
           };
         },
       },
+      {
+        path: "/resetPassword",
+        handle: {
+          type: RouteHandleType.dashboard,
+        },
+        async lazy() {
+          const ResetPassword = (await import("../ResetPassword")).default;
+          return {
+            element: <ResetPassword />,
+          };
+        },
+      },
+      {
+        path: "/updatePassword",
+        handle: {
+          type: RouteHandleType.dashboard,
+        },
+        async lazy() {
+          const UpdatePassword = (await import("../UpdatePassword")).default;
+          return {
+            element: <UpdatePassword />,
+          };
+        },
+      },
     ],
   },
 ];
