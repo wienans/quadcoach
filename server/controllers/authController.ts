@@ -5,7 +5,11 @@ import asyncHandler from "express-async-handler";
 import User from "../models/user";
 import { logEvents } from "../middleware/logger";
 import validator from "validator";
-
+import crypto from "crypto";
+import nodemailer from "nodemailer";
+import handlebars from "handlebars";
+import fs from "fs";
+import path from "path";
 // @desc Login
 // @route POST /auth
 // @access Public
@@ -19,7 +23,7 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
 
   const foundUser = await User.findOne({ email }).exec();
 
-  if (!foundUser || !foundUser.active) {
+  if (!foundUser || !foundUser.active || !foundUser.isVerified) {
     res.status(401).json({ message: "Unauthorized" });
     return;
   }
@@ -69,6 +73,115 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
   res.json({ accessToken });
 });
 
+// @desc request of Reseting Password
+// @route POST /auth/resetPassword
+// @access Public
+export const resetPassword = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { email } = req.body;
+
+    if (
+      process.env.ACCESS_TOKEN_SECRET === undefined ||
+      process.env.REFRESH_TOKEN_SECRET === undefined
+    ) {
+      logEvents(`JWT SECRETS NOT DEFINED`, "errLog.log");
+      res.status(401).json({ message: "Unauthorized" });
+      return;
+    }
+
+    if (!email) {
+      res.status(400).json({ message: "All fields are required" });
+      return;
+    }
+    const foundUser = await User.findOne({ email }).exec();
+    if (!foundUser) {
+      res.status(401).json({ message: "Unauthorized" });
+      return;
+    }
+    const token = jwt.sign(
+      { email: foundUser.email, id: foundUser._id },
+      process.env.ACCESS_TOKEN_SECRET,
+      { expiresIn: "1h" }
+    );
+
+    foundUser.passwordResetToken = token;
+    await foundUser.save();
+    const source = fs.readFileSync(
+      path.join(__dirname, "../templates/resetPassword.html"),
+      "utf-8"
+    );
+    const template = handlebars.compile(source);
+    const replacements = {
+      name: foundUser.name,
+      passwordToken: token,
+    };
+    const htmlToSend = template(replacements);
+    const transporter = nodemailer.createTransport({
+      host: "smtp.gmail.com",
+      port: 465,
+      secure: true,
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
+    transporter
+      .sendMail({
+        to: foundUser.email,
+        from: process.env.EMAIL_USER,
+        subject: "Reset Password",
+        html: htmlToSend,
+      })
+      .then(() => {})
+      .catch((error) => {
+        logEvents(
+          `Sending Reset Password E-Mail failed:` + error,
+          "errLog.log"
+        );
+      });
+    res.status(200).json({ message: "Password reset link sent" });
+  }
+);
+
+export const updatePassword = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { password, passwordResetToken } = req.body;
+    if (
+      process.env.ACCESS_TOKEN_SECRET === undefined ||
+      process.env.REFRESH_TOKEN_SECRET === undefined
+    ) {
+      logEvents(`JWT SECRETS NOT DEFINED`, "errLog.log");
+      res.status(401).json({ message: "Unauthorized" });
+      return;
+    }
+
+    try {
+      const decode = jwt.verify(
+        passwordResetToken,
+        process.env.ACCESS_TOKEN_SECRET
+      );
+      const foundUser = await User.findOne({
+        // @ts-ignore
+        email: decode?.email,
+      }).exec();
+      if (!foundUser) {
+        res.status(401).json({ message: "Unauthorized" });
+        return;
+      }
+      const hashedPwd = await bcrypt.hash(password, 10);
+      foundUser.password = hashedPwd;
+      foundUser.passwordResetToken = "";
+      await foundUser.save();
+      res.status(200).json({ message: "Password updated" });
+    } catch (e) {
+      if (e) {
+        res.status(403).json({ message: "Forbidden" });
+        return;
+      }
+    }
+  }
+);
+
 // @desc Register
 // @route POST /auth/register
 // @access Public
@@ -92,7 +205,44 @@ export const register = asyncHandler(async (req: Request, res: Response) => {
 
   // Hash password, with 10 salt rounds
   const hashedPwd = await bcrypt.hash(password, 10);
-  const userObject = { name, email, password: hashedPwd };
+  const userObject = {
+    name,
+    email,
+    password: hashedPwd,
+    emailToken: crypto.randomBytes(64).toString("hex"),
+  };
+
+  const transporter = nodemailer.createTransport({
+    host: "smtp.gmail.com",
+    port: 465,
+    secure: true,
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
+    },
+  });
+
+  const source = fs.readFileSync(
+    path.join(__dirname, "../templates/verifyEmail.html"),
+    "utf8"
+  );
+  const template = handlebars.compile(source);
+  const replacements = {
+    name: userObject.name,
+    emailToken: userObject.emailToken,
+  };
+  const htmlToSend = template(replacements);
+  transporter
+    .sendMail({
+      to: userObject.email,
+      from: process.env.EMAIL_USER,
+      subject: "Verify Email",
+      html: htmlToSend,
+    })
+    .then(() => {})
+    .catch((error) => {
+      logEvents(`Sending Register E-Mail failed:` + error, "errLog.log");
+    });
   const user = await User.create(userObject);
   if (user) {
     res.status(201).json({ message: `New user ${email} created` });
@@ -173,3 +323,26 @@ export const logout = (req: Request, res: Response) => {
   });
   res.json({ message: "Cookie cleared" });
 };
+
+// @desc Verify Email
+// @route POST /auth/verifyEmail
+// @access Public
+export const verifyEmail = asyncHandler(async (req: Request, res: Response) => {
+  const emailToken = req.body.emailToken;
+
+  if (!emailToken) {
+    res.status(400).json({ message: "Email Token Required" });
+    return;
+  }
+  const user = await User.findOne({ emailToken, isVerified: false });
+  if (!user) {
+    res
+      .status(404)
+      .json({ message: "Invalid Email Token, or already verified" });
+    return;
+  }
+  user.isVerified = true;
+  user.emailToken = "";
+  await user.save();
+  res.status(200).json({ message: "Email Verified" });
+});

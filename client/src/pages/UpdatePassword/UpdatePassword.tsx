@@ -1,12 +1,5 @@
 import "./translations";
-import {
-  Card,
-  FormGroup,
-  Grid,
-  FormHelperText,
-  Alert,
-  Link,
-} from "@mui/material";
+import { Card, FormGroup, Grid, FormHelperText, Alert } from "@mui/material";
 import {
   SoftBox,
   SoftButton,
@@ -15,55 +8,58 @@ import {
 } from "../../components";
 import { useTranslation } from "react-i18next";
 
-import { useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
-import { setCredentials } from "../../api/auth/authSlice";
-import { useLoginMutation } from "../authApi";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { useUpdatePasswordMutation } from "../authApi";
 
 import { FormikProvider, useFormik } from "formik";
 import * as Yup from "yup";
 
 import { DashboardLayout } from "../../components/LayoutContainers";
 
-type LoginFields = {
-  email: string;
+type UpdatePasswordFields = {
   password: string;
+  confirmpassword: string;
 };
 
-const Login = (): JSX.Element => {
-  const { t } = useTranslation("Login");
+const UpdatePassword = (): JSX.Element => {
+  const { t } = useTranslation("UpdatePassword");
   const navigate = useNavigate();
-  const dispatch = useDispatch();
+  const [searchParams] = useSearchParams();
+  const passwordToken = searchParams.get("passwordToken");
+  const [updatePassword, { isLoading, isError }] = useUpdatePasswordMutation();
 
-  const [login, { isLoading: isLoginLoading, isError: isLoginError }] =
-    useLoginMutation();
-
-  const formik = useFormik<LoginFields>({
+  const formik = useFormik<UpdatePasswordFields>({
     // enableReinitialize : use this flag when initial values needs to be changed
     enableReinitialize: true,
 
     initialValues: {
-      email: "",
       password: "",
+      confirmpassword: "",
     },
 
     validationSchema: Yup.object({
-      email: Yup.string().required("Login:info.email.missing"),
-      password: Yup.string().required("Login:info.password.missing"),
+      password: Yup.string()
+        .matches(
+          /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])(?=.{8,})/,
+          "UpdatePassword:info.password.valid",
+        )
+        .required("UpdatePassword:info.password.missing"),
+      confirmpassword: Yup.string().oneOf(
+        [Yup.ref("password")],
+        "UpdatePassword:info.confirmpassword.missing",
+      ),
     }),
 
     onSubmit: async (values) => {
-      const { email, password } = values;
+      const { password } = values;
 
-      const result = await login({
-        email: email,
+      const result = await updatePassword({
         password: password,
+        passwordResetToken: passwordToken,
       });
       // @ts-ignore
       if (result.data) {
-        // @ts-ignore
-        dispatch(setCredentials({ accessToken: result.data.accessToken }));
-        navigate("/");
+        navigate("/login");
       }
     },
   });
@@ -92,48 +88,28 @@ const Login = (): JSX.Element => {
               }}
             >
               <SoftBox sx={{ m: 2, p: 2 }}>
-                <SoftTypography variant="h3">{t("Login:title")}</SoftTypography>
+                <SoftTypography variant="h3">
+                  {t("UpdatePassword:title")}
+                </SoftTypography>
               </SoftBox>
               <Grid item xs={12}>
                 <Grid item xs={12} p={1}>
                   <FormGroup>
                     <SoftTypography variant="body2">
-                      {t("Login:info.email.label")}
+                      {t("UpdatePassword:info.password.label")}
                     </SoftTypography>
                     <SoftInput
                       error={
-                        formik.touched.email && Boolean(formik.errors.email)
-                      }
-                      name="email"
-                      required
-                      id="outlined-basic"
-                      placeholder={t("Login:info.email.placeholder")}
-                      value={formik.values.email}
-                      onChange={formik.handleChange}
-                      fullWidth
-                      onBlur={formik.handleBlur}
-                    />
-                    {formik.touched.email && Boolean(formik.errors.email) && (
-                      <FormHelperText error>
-                        {translateError(formik.errors.email)}
-                      </FormHelperText>
-                    )}
-                  </FormGroup>
-                </Grid>
-                <Grid item xs={12} p={1}>
-                  <FormGroup>
-                    <SoftTypography variant="body2">
-                      {t("Login:info.password.label")}
-                    </SoftTypography>
-                    <SoftInput
-                      error={
-                        formik.touched.email && Boolean(formik.errors.email)
+                        formik.touched.password &&
+                        Boolean(formik.errors.password)
                       }
                       name="password"
                       required
                       id="outlined-basic"
                       type="password"
-                      placeholder={t("Login:info.password.placeholder")}
+                      placeholder={t(
+                        "UpdatePassword:info.password.placeholder",
+                      )}
                       value={formik.values.password}
                       onChange={formik.handleChange}
                       fullWidth
@@ -146,17 +122,42 @@ const Login = (): JSX.Element => {
                         </FormHelperText>
                       )}
                   </FormGroup>
-                  <Link href="/resetPassword">
-                    <SoftTypography variant="body2">
-                      {t("Login:forgotPassword")}
-                    </SoftTypography>
-                  </Link>
                 </Grid>
-                {isLoginError && (
+                <Grid item xs={12} p={1}>
+                  <FormGroup>
+                    <SoftTypography variant="body2">
+                      {t("UpdatePassword:info.confirmpassword.label")}
+                    </SoftTypography>
+                    <SoftInput
+                      error={
+                        formik.touched.confirmpassword &&
+                        Boolean(formik.errors.confirmpassword)
+                      }
+                      name="confirmpassword"
+                      required
+                      id="outlined-basic"
+                      type="password"
+                      placeholder={t(
+                        "UpdatePassword:info.confirmpassword.placeholder",
+                      )}
+                      value={formik.values.confirmpassword}
+                      onChange={formik.handleChange}
+                      fullWidth
+                      onBlur={formik.handleBlur}
+                    />
+                    {formik.touched.confirmpassword &&
+                      Boolean(formik.errors.confirmpassword) && (
+                        <FormHelperText error>
+                          {translateError(formik.errors.confirmpassword)}
+                        </FormHelperText>
+                      )}
+                  </FormGroup>
+                </Grid>
+                {isError && (
                   <Grid item xs={12} justifyContent="center" display="flex">
                     <Alert color="error" sx={{ mt: 2 }}>
                       {" "}
-                      {t("Login:loginErr")}
+                      {t("UpdatePassword:registerErr")}
                     </Alert>
                   </Grid>
                 )}
@@ -165,18 +166,9 @@ const Login = (): JSX.Element => {
                     sx={{ marginRight: 1 }}
                     type="submit"
                     color="primary"
-                    disabled={isLoginLoading}
+                    disabled={isLoading}
                   >
-                    {t("Login:loginBtn")}
-                  </SoftButton>
-                  <SoftButton
-                    sx={{ marginRight: 1 }}
-                    type="button"
-                    color="secondary"
-                    disabled={isLoginLoading}
-                    onClick={() => navigate("/register")}
-                  >
-                    {t("Login:registerBtn")}
+                    {t("UpdatePassword:registerBtn")}
                   </SoftButton>
                 </Grid>
               </Grid>
@@ -188,4 +180,4 @@ const Login = (): JSX.Element => {
   );
 };
 
-export default Login;
+export default UpdatePassword;
