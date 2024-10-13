@@ -13,12 +13,7 @@ import { useAuth } from "../../../store/hooks";
 const AddExercise = () => {
   const { t } = useTranslation("AddExercise");
   const [isPrivileged, setIsPrivileged] = useState(false);
-  const {
-    name: userName,
-    id: userId,
-    status: userStatus,
-    roles: userRoles,
-  } = useAuth();
+  const { status: userStatus, roles: userRoles } = useAuth();
 
   const navigate = useNavigate();
   const [

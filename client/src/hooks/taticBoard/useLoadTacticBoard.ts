@@ -3,7 +3,7 @@ import { useTacticBoardFabricJs } from "..";
 import { useGetTacticBoardQuery } from "../../api/quadcoachApi/tacticboardApi";
 
 export const useLoadTacticBoard = (tacticBoardId?: string) => {
-  const { loadFromTaticPage: loadFromJson, setSelection } =
+  const { loadFromTacticPage: loadFromJson, setSelection } =
     useTacticBoardFabricJs();
 
   const {

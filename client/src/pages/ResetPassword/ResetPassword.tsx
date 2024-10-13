@@ -8,7 +8,6 @@ import {
 } from "../../components";
 import { useTranslation } from "react-i18next";
 
-import { useNavigate } from "react-router-dom";
 import { useResetPasswordMutation } from "../authApi";
 
 import { FormikProvider, useFormik } from "formik";
@@ -47,7 +46,10 @@ const ResetPassword = (): JSX.Element => {
       const result = await resetPassword({
         email: email,
       });
-      if (result.data) {
+      if ("error" in result) {
+        setIsSuccess(false);
+      }
+      if ("data" in result && result.data) {
         setIsSuccess(true);
       }
     },

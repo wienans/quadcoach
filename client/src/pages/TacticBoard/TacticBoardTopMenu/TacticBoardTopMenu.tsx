@@ -1,7 +1,4 @@
 import {
-  AppBar,
-  Button,
-  ButtonGroup,
   Pagination,
   Skeleton,
   ToggleButton,
@@ -20,17 +17,11 @@ import FullscreenIcon from "@mui/icons-material/Fullscreen";
 import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { TacticBoard } from "../../../api/quadcoachApi/domain";
-import CategoryIcon from "@mui/icons-material/Category";
-import { useAppDispatch, useAppSelector, useAuth } from "../../../store/hooks";
-import {
-  setIsEditMode,
-  toggleTacticBoardItemsDrawerOpen,
-} from "../tacticBoardSlice";
+import { useAppDispatch, useAppSelector } from "../../../store/hooks";
+import { setIsEditMode } from "../tacticBoardSlice";
 import { useTranslation } from "react-i18next";
-import { SoftBox, SoftButton, SoftTypography } from "../../../components";
-import { useEffect, useState } from "react";
+import { SoftBox, SoftTypography } from "../../../components";
 import { useTacticBoardFabricJs } from "../../../hooks";
-import { FullscreenExit } from "mdi-material-ui";
 import { useNavigate } from "react-router-dom";
 
 type TacticBoardTopMenuProps = {
@@ -119,7 +110,7 @@ const TacticBoardTopMenu = ({
               mr: 1,
             }}
           >
-            <ArrowBackIcon color="black" />
+            <ArrowBackIcon sx={{ color: "#000000" }} />
           </ToggleButton>
         </Tooltip>
 
@@ -155,9 +146,9 @@ const TacticBoardTopMenu = ({
                 }}
               >
                 {isAnimating ? (
-                  <PauseCircleIcon color="black" />
+                  <PauseCircleIcon sx={{ color: "#000000" }} />
                 ) : (
-                  <PlayCircleIcon color="black" />
+                  <PlayCircleIcon sx={{ color: "#000000" }} />
                 )}
               </ToggleButton>
             </Tooltip>
@@ -235,7 +226,7 @@ const TacticBoardTopMenu = ({
                   mr: 1,
                 }}
               >
-                <MovieIcon color="black" />
+                <MovieIcon sx={{ color: "#000000" }} />
               </ToggleButton>
             </Tooltip>
           )}

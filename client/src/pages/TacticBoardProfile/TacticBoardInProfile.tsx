@@ -1,6 +1,5 @@
 import {
   Alert,
-  IconButton,
   Pagination,
   Skeleton,
   ToggleButton,
@@ -45,15 +44,9 @@ const TacticBoardInProfile = ({
     setSelection,
     setControls,
     getAllObjects,
-    getAllObjectsJson,
   } = useTacticBoardFabricJs();
 
-  const {
-    name: userName,
-    id: userId,
-    status: userStatus,
-    roles: userRoles,
-  } = useAuth();
+  const { id: userId, roles: userRoles } = useAuth();
 
   useEffect(() => {
     if (
@@ -93,6 +86,7 @@ const TacticBoardInProfile = ({
   }, [isAnimating]);
 
   const onRecordClick = () => {
+    // @ts-ignore
     const canvasStream = canvasRef.current?.lowerCanvasEl.captureStream(60);
     mediaRecorder = new MediaRecorder(canvasStream, {
       mimeType: "video/webm",
@@ -117,21 +111,39 @@ const TacticBoardInProfile = ({
     if (isFullscreen) {
       if (document.exitFullscreen) {
         document.exitFullscreen();
-      } else if (document.mozCancelFullScreen) {
+      }
+      // @ts-ignore
+      else if (document.mozCancelFullScreen) {
+        // @ts-ignore
         document.mozCancelFullScreen();
-      } else if (document.webkitExitFullscreen) {
+      }
+      // @ts-ignore
+      else if (document.webkitExitFullscreen) {
+        // @ts-ignore
         document.webkitExitFullscreen();
-      } else if (document.msExitFullscreen) {
+      }
+      // @ts-ignore
+      else if (document.msExitFullscreen) {
+        // @ts-ignore
         document.msExitFullscreen();
       }
     } else {
       if (container && container.requestFullscreen) {
         container.requestFullscreen();
-      } else if (container && container.mozRequestFullScreen) {
+      }
+      // @ts-ignore
+      else if (container && container.mozRequestFullScreen) {
+        // @ts-ignore
         container.mozRequestFullScreen();
-      } else if (container && container.webkitRequestFullscreen) {
+      }
+      // @ts-ignore
+      else if (container && container.webkitRequestFullscreen) {
+        // @ts-ignore
         container.webkitRequestFullscreen();
-      } else if (container && container.msRequestFullscreen) {
+      }
+      // @ts-ignore
+      else if (container && container.msRequestFullscreen) {
+        // @ts-ignore
         container.msRequestFullscreen();
       }
     }
@@ -161,7 +173,7 @@ const TacticBoardInProfile = ({
   };
 
   useEffect(() => {
-    let interval: number;
+    let interval: NodeJS.Timeout;
     if (isAnimating && tacticBoard) {
       // Start the animation only if isAnimating is true
       interval = setInterval(() => {
@@ -169,6 +181,7 @@ const TacticBoardInProfile = ({
           const newPage = (prevPage % tacticBoard.pages.length) + 1;
           getAllObjects().forEach((obj) => {
             const targetObject = tacticBoard.pages[newPage - 1].objects?.find(
+              // @ts-ignore
               (nextObject) => nextObject.uuid == obj.uuid,
             );
             if (targetObject && canvasRef.current) {
@@ -198,7 +211,7 @@ const TacticBoardInProfile = ({
   }, [isAnimating, onLoadPage, tacticBoard, getAllObjects, canvasRef]);
 
   useEffect(() => {
-    let interval: number;
+    let interval: NodeJS.Timeout;
     if (isRecording && tacticBoard) {
       // Start the animation only if isAnimating is true
       interval = setInterval(() => {
@@ -212,6 +225,7 @@ const TacticBoardInProfile = ({
           }
           getAllObjects().forEach((obj) => {
             const targetObject = tacticBoard.pages[newPage - 1].objects?.find(
+              // @ts-ignore
               (nextObject) => nextObject.uuid == obj.uuid,
             );
             if (targetObject && canvasRef.current) {
@@ -295,9 +309,9 @@ const TacticBoardInProfile = ({
               }}
             >
               {isAnimating ? (
-                <PauseCircleIcon color="black" />
+                <PauseCircleIcon sx={{ color: "#000000" }} />
               ) : (
-                <PlayCircleIcon color="black" />
+                <PlayCircleIcon sx={{ color: "#000000" }} />
               )}
             </ToggleButton>
           </Tooltip>
@@ -326,7 +340,7 @@ const TacticBoardInProfile = ({
                 mr: 1,
               }}
             >
-              <MovieIcon color="black" />
+              <MovieIcon sx={{ color: "#000000" }} />
             </ToggleButton>
           </Tooltip>
         </SoftBox>
@@ -372,7 +386,7 @@ const TacticBoardInProfile = ({
           </ToggleButton>
         </Tooltip>
       </Toolbar>
-      <FabricJsCanvas initialHight={686} initialWidth={1220} />
+      <FabricJsCanvas />
     </div>
   );
 };

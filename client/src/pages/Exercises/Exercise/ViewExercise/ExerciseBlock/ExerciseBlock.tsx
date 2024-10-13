@@ -5,13 +5,10 @@ import {
   AccordionDetails,
   AccordionSummary,
   Card,
-  CardActions,
   CardHeader,
-  IconButton,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ReactPlayer from "react-player";
-import ContentPasteIcon from "@mui/icons-material/ContentPaste";
 import TacticBoardInBlockWrapper from "./TacticBoardInBlock";
 import remarkGfm from "remark-gfm";
 import Markdown from "react-markdown";

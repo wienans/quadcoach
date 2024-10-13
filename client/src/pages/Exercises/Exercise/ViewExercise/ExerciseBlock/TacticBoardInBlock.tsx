@@ -1,13 +1,12 @@
 import {
   Alert,
-  Box,
   IconButton,
   Pagination,
   Skeleton,
   ToggleButton,
   Tooltip,
 } from "@mui/material";
-import { Block, TacticBoard } from "../../../../../api/quadcoachApi/domain";
+import { Block } from "../../../../../api/quadcoachApi/domain";
 import { useTranslation } from "react-i18next";
 import {
   useLoadTacticBoard,
@@ -15,7 +14,7 @@ import {
 } from "../../../../../hooks";
 import { TacticBoardFabricJsContextProvider } from "../../../../../contexts";
 import { FabricJsCanvas, SoftBox } from "../../../../../components";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import PlayCircleIcon from "@mui/icons-material/PlayCircle";
 import PauseCircleIcon from "@mui/icons-material/PauseCircle";
 import ContentPasteIcon from "@mui/icons-material/ContentPaste";
@@ -40,7 +39,6 @@ const TacticBoardInBlock = ({
     setSelection,
     setControls,
     getAllObjects,
-    getAllObjectsJson,
   } = useTacticBoardFabricJs();
 
   useEffect(() => {
@@ -71,7 +69,7 @@ const TacticBoardInBlock = ({
   }, [isAnimating]);
 
   useEffect(() => {
-    let interval: number;
+    let interval: NodeJS.Timeout;
     if (isAnimating && tacticBoard) {
       // Start the animation only if isAnimating is true
       interval = setInterval(() => {
@@ -79,6 +77,7 @@ const TacticBoardInBlock = ({
           const newPage = (prevPage % tacticBoard.pages.length) + 1;
           getAllObjects().forEach((obj) => {
             const targetObject = tacticBoard.pages[newPage - 1].objects?.find(
+              // @ts-ignore
               (nextObject) => nextObject.uuid == obj.uuid,
             );
             if (targetObject && canvasRef.current) {
@@ -152,9 +151,9 @@ const TacticBoardInBlock = ({
             }}
           >
             {isAnimating ? (
-              <PauseCircleIcon color="black" />
+              <PauseCircleIcon sx={{ color: "#000000" }} />
             ) : (
-              <PlayCircleIcon color="black" />
+              <PlayCircleIcon sx={{ color: "#000000" }} />
             )}
           </ToggleButton>
         </Tooltip>
@@ -173,7 +172,7 @@ const TacticBoardInBlock = ({
           <ContentPasteIcon />
         </IconButton>
       </SoftBox>
-      <FabricJsCanvas initialHight={686} initialWidth={1220} />
+      <FabricJsCanvas />
     </div>
   );
 };

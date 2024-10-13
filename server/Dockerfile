@@ -2,7 +2,12 @@ FROM node:20
 VOLUME [ "/server" ]
 WORKDIR /server
 COPY ./package.json ./package.json
+COPY ./config ./config
+COPY ./controllers ./controllers
+COPY ./middleware ./middleware
 COPY ./models ./models
+COPY ./routes ./routes
+COPY ./templates ./templates
 COPY ./server.ts ./server.ts
 COPY ./tsconfig.json ./tsconfig.json
 RUN npm install --loglevel verbose

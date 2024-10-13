@@ -3,11 +3,8 @@ import {
   createContext,
   ReactNode,
   FC,
-  useState,
   useCallback,
-  useEffect,
   useRef,
-  RefObject,
   MutableRefObject,
 } from "react";
 import { fabric } from "fabric";
@@ -42,7 +39,7 @@ export interface TacticBoardFabricJsContextProps {
   setDrawMode: (drawMode: boolean) => void;
   setControls: (controls: boolean) => void;
   setBackgroundImage: (url: string) => void;
-  getBackgroundImage: () => string;
+  getBackgroundImage: () => string | undefined;
 }
 
 export const TacticBoardFabricJsContext = createContext<
@@ -135,7 +132,8 @@ const TacticBoardFabricJsContextProvider: FC<{
   const getBackgroundImage = useCallback(() => {
     const canvasFabric = canvasFabricRef.current;
     if (!canvasFabric) return;
-    return new URL(canvasFabric.backgroundImage._element.src).pathname;
+    //@ts-ignore
+    return new URL(canvasFabric.backgroundImage?._element.src).pathname;
   }, []);
 
   const setControls = useCallback((controls: boolean) => {
@@ -161,10 +159,10 @@ const TacticBoardFabricJsContextProvider: FC<{
     page.objects?.forEach((obj) => {
       console.log(obj);
       if (obj.type == "circle") {
-        const addObj = new fabric.Circle(obj);
+        const addObj = new fabric.Circle(obj as object);
         canvasFabric.add(addObj);
       } else if (obj.type == "rect") {
-        const addObj = new fabric.Rect(obj);
+        const addObj = new fabric.Rect(obj as object);
         canvasFabric.add(addObj);
       } else if (obj.type == "path") {
         const addObj = new fabric.Path(obj.path?.toString(), obj as object);
@@ -173,11 +171,11 @@ const TacticBoardFabricJsContextProvider: FC<{
         const objects: fabric.Object[] = [];
         obj.objects?.forEach((obj) => {
           if (obj.type == "circle") {
-            const addObj = new fabric.Circle(obj);
+            const addObj = new fabric.Circle(obj as object);
             objects.push(addObj);
           } else if (obj.type == "text") {
             if (obj.text) {
-              const addObj = new fabric.Text(obj.text, obj);
+              const addObj = new fabric.Text(obj.text, obj as object);
               objects.push(addObj);
             }
           } else if (obj.type == "path") {
@@ -185,7 +183,7 @@ const TacticBoardFabricJsContextProvider: FC<{
             objects.push(addObj);
           }
         });
-        const addObj = new fabric.Group(objects, obj);
+        const addObj = new fabric.Group(objects, obj as object);
         canvasFabric.add(addObj);
       }
     });

@@ -27,9 +27,7 @@ const VerifyEmail = (): JSX.Element => {
     console.log(emailToken);
     if (emailToken) {
       verifyEmail({ emailToken }).then((result) => {
-        console.log(result);
-        if (result.data) {
-          console.log(result.data);
+        if ("data" in result && result.data) {
           navigate("/login");
         }
       });
@@ -45,6 +43,7 @@ const VerifyEmail = (): JSX.Element => {
               {t("VerifyEmail:NoTokenFound")}
             </Alert>
           )}
+          {/* @ts-ignore */}
           {isVerifyError && error?.status === 404 && (
             <Alert color="error" sx={{ mt: 2 }}>
               {t("VerifyEmail:errorVerifyingEmail")}

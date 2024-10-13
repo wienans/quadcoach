@@ -22,12 +22,7 @@ const UpdateExercise = () => {
   const navigate = useNavigate();
   const [isPrivileged, setIsPrivileged] = useState<boolean | null>(null);
 
-  const {
-    name: userName,
-    id: userId,
-    status: userStatus,
-    roles: userRoles,
-  } = useAuth();
+  const { id: userId, status: userStatus, roles: userRoles } = useAuth();
   const {
     data: exercise,
     isError: isExerciseError,

@@ -33,6 +33,8 @@ const MONGO_DB = process.env.MONGO_DB;
 
 const dbURI = `mongodb://${MONGO_USER}:${MONGO_PASSWORD}@quadcoach-mongodb:27017/${MONGO_DB}?retryWrites=true&w=majority`;
 
+app.use(express.static("dist"));
+
 // Middleware
 app.use(bodyParser.json({ limit: "1mb" }));
 app.use(logger);

@@ -1,5 +1,4 @@
 import { configureStore } from "@reduxjs/toolkit";
-import logger from "redux-logger";
 import { LayoutReducer } from "../components/Layout";
 import { quadcoachApi } from "../api";
 import { TacticBoardReducer } from "../pages/TacticBoard";

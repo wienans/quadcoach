@@ -1,5 +1,4 @@
 import {
-  IconButton,
   MenuItem,
   Select,
   SelectChangeEvent,
@@ -41,7 +40,10 @@ const TacticBoardTopItemsMenu = ({
   };
 
   useEffect(() => {
-    setBackgorundImageId(getBackgroundImage());
+    const image = getBackgroundImage();
+    if (image) {
+      setBackgorundImageId(image);
+    }
   }, [getBackgroundImage]);
 
   return (
@@ -135,7 +137,7 @@ const TacticBoardTopItemsMenu = ({
             ml: 2,
           }}
           value={backgroundImageId}
-          label={t("UpdateTacticBoardMeta:info.backgroundImage.label")}
+          label={t("TacticBoard:info.backgroundImage.label")}
           onChange={(event: SelectChangeEvent) => {
             setBackgorundImageId(event.target.value);
             setBackgroundImage(event.target.value);

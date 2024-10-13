@@ -6,10 +6,8 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
-  SxProps,
-  Theme,
 } from "@mui/material";
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
 import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
 import PersonAddAlt1Icon from "@mui/icons-material/PersonAddAlt1";
@@ -75,6 +73,7 @@ const PersonItemsSection = ({
   const getNextNumber = () => {
     console.log("Start");
     let numbers: number[] = [0];
+    // @ts-ignore
     getAllObjectsJson().objects.forEach((obj) => {
       console.log("obj");
       if (obj.objectType == (teamA ? "playerA" : "playerB")) {
@@ -97,6 +96,7 @@ const PersonItemsSection = ({
       stroke: getFabricPersonColor(personType), // Set the color of the stroke
       strokeWidth: 3, // Set the width of the stroke
       fill: teamA ? teamAInfo.color : teamBInfo.color,
+      // @ts-ignore
       uuid: uuidv4(),
     });
     const newNumber = getNextNumber();
@@ -108,10 +108,12 @@ const PersonItemsSection = ({
       textAlign: "center",
       originX: "center",
       originY: "center",
+      // @ts-ignore
       uuid: uuidv4(),
     });
     const group = new fabric.Group([circle, text], {
       uuid: uuidv4(),
+      // @ts-ignore
       objectType: teamA ? "playerA" : "playerB",
       hasControls: false, // Disable resizing handles
     });

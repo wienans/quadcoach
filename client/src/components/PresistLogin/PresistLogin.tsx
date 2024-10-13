@@ -1,4 +1,4 @@
-import { Outlet, Link } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import { useRefreshMutation } from "../../pages/authApi";
 import { useSelector } from "react-redux";
@@ -10,7 +10,7 @@ const PresistLogin = (): JSX.Element => {
 
   const [trueSuccess, setTrueSuccess] = useState(false);
 
-  const [refresh, { isUninitialized, isLoading, isSuccess, isError, error }] =
+  const [refresh, { isUninitialized, isSuccess, isError }] =
     useRefreshMutation();
 
   useEffect(() => {
@@ -19,9 +19,7 @@ const PresistLogin = (): JSX.Element => {
 
       const verifyRefreshToken = async () => {
         try {
-          //const response =
-          await refresh();
-          //const { accessToken } = response.data
+          await refresh({});
           setTrueSuccess(true);
         } catch (err) {
           console.error(err);
@@ -51,14 +49,6 @@ const PresistLogin = (): JSX.Element => {
     console.log("Login after Logout Successfull");
     return <Outlet />;
   } else {
-    // console.log(
-    //   trueSuccess,
-    //   isUninitialized,
-    //   isLoading,
-    //   isSuccess,
-    //   isError,
-    //   token,
-    // );
     return <></>;
   }
 };

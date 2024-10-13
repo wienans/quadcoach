@@ -84,7 +84,7 @@ const NavbarMainControls = ({
             size="small"
             color="inherit"
             onClick={() => {
-              sendLogout();
+              sendLogout({});
               navigate("/");
             }}
             sx={(theme) => ({

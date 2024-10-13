@@ -1,7 +1,6 @@
 import {
   Avatar,
   Collapse,
-  createSvgIcon,
   Icon,
   List,
   ListItemAvatar,
@@ -13,7 +12,6 @@ import { useState } from "react";
 import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
 import SportsVolleyballIcon from "@mui/icons-material/SportsVolleyball";
-import CircleIcon from "@mui/icons-material/Circle";
 import { AccessoryType } from "../../../contexts/tacticBoard/TacticBoardFabricJsContext/types";
 import { useTranslation } from "react-i18next";
 import { fabric } from "fabric";
@@ -42,7 +40,7 @@ const AccessoryItemSection = (): JSX.Element => {
     fabric.loadSVGFromURL(
       getAccesTypeSvg(accessType),
       function (objects, options) {
-        let obj = fabric.util.groupSVGElements(objects, {
+        const obj = fabric.util.groupSVGElements(objects, {
           ...options,
           uuid: uuidv4(),
         });
