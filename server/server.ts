@@ -16,6 +16,7 @@ import userRoutes from "./routes/userRoutes";
 import tacticboardRoutes from "./routes/tacticboardRoutes";
 import exerciseRoutes from "./routes/exerciseRoutes";
 import authRoutes from "./routes/authRoutes";
+import path from "path";
 
 // Read out Port or use Default
 const PORT = process.env.PORT || 3001;
@@ -159,4 +160,8 @@ app.get("/api/tags/tacticboards", async (req, res) => {
   } else {
     res.send(result);
   }
+});
+
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "dist", "index.html"));
 });
