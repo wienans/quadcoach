@@ -143,8 +143,6 @@ const TacticBoardFabricJsContextProvider: FC<{
   }, []);
 
   const loadFromTacticPage = useCallback((page: TacticPage) => {
-    console.log("Load From Tactic Page", page);
-    console.log();
     const canvasFabric = canvasFabricRef.current;
     if (!canvasFabric) return;
     canvasFabric.remove(...canvasFabric.getObjects());
@@ -155,9 +153,7 @@ const TacticBoardFabricJsContextProvider: FC<{
       page.backgroundImage.src,
       canvasFabric.renderAll.bind(canvasFabric),
     );
-    console.log(page);
     page.objects?.forEach((obj) => {
-      console.log(obj);
       if (obj.type == "circle") {
         const addObj = new fabric.Circle(obj as object);
         canvasFabric.add(addObj);

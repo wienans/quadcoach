@@ -39,14 +39,12 @@ const PresistLogin = (): JSX.Element => {
     return <Outlet />;
   } else if (isSuccess && trueSuccess) {
     // Successfull login verification
-    console.log("Login Successfull");
     return <Outlet />;
   } else if (!token && isUninitialized && trueSuccess) {
     // Fix after Logout
     return <Outlet />;
   } else if (token && isUninitialized && trueSuccess) {
     // Login after Logout
-    console.log("Login after Logout Successfull");
     return <Outlet />;
   } else {
     return <></>;

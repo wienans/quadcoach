@@ -71,15 +71,10 @@ const PersonItemsSection = ({
 
   const handleToggleOpen = () => setOpen(!open);
   const getNextNumber = () => {
-    console.log("Start");
     let numbers: number[] = [0];
     // @ts-ignore
     getAllObjectsJson().objects.forEach((obj) => {
-      console.log("obj");
       if (obj.objectType == (teamA ? "playerA" : "playerB")) {
-        console.log(obj.objectType);
-        console.log(obj.objects[1].text);
-        console.log([...numbers, parseInt(obj.objects[1].text)]);
         numbers = [...numbers, parseInt(obj.objects[1].text)];
       }
     });
@@ -87,8 +82,6 @@ const PersonItemsSection = ({
   };
 
   const onPersonAddClick = (personType: PersonType) => () => {
-    console.log(personType);
-
     const circle = new fabric.Circle({
       radius: 15,
       left: teamA ? 250 : 1220 - 250 - 30,

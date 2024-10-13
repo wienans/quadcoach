@@ -81,26 +81,22 @@ const TacticsBoard = (): JSX.Element => {
           updatedTacticBoard.pages[page - 1] = {
             ...getAllObjectsJson(),
           } as TacticPage;
-          console.log(updatedTacticBoard);
           updateTacticBoard(updatedTacticBoard);
         } else if (removePage) {
           // Remove Last Page
           updatedTacticBoard.pages.pop();
-          console.log(updatedTacticBoard);
           updateTacticBoard(updatedTacticBoard);
         } else if (page > currentPage) {
           // Go to next page
           updatedTacticBoard.pages[page - 2] = {
             ...getAllObjectsJson(),
           } as TacticPage;
-          console.log(updatedTacticBoard);
           updateTacticBoard(updatedTacticBoard);
         } else if (page < currentPage) {
           // go to previous page
           updatedTacticBoard.pages[page] = {
             ...getAllObjectsJson(),
           } as TacticPage;
-          console.log(updatedTacticBoard);
           updateTacticBoard(updatedTacticBoard);
         }
       }
@@ -132,7 +128,6 @@ const TacticsBoard = (): JSX.Element => {
     updatedTacticBoard.pages[currentPage - 1] = {
       ...getAllObjectsJson(),
     } as TacticPage;
-    console.log(updatedTacticBoard);
     updateTacticBoard(updatedTacticBoard);
   }, [tacticBoard, currentPage, getAllObjectsJson, updateTacticBoard]);
 

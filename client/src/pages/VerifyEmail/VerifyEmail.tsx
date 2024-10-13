@@ -24,7 +24,6 @@ const VerifyEmail = (): JSX.Element => {
   ] = useVerifyEmailMutation();
 
   useEffect(() => {
-    console.log(emailToken);
     if (emailToken) {
       verifyEmail({ emailToken }).then((result) => {
         if ("data" in result && result.data) {

@@ -219,9 +219,7 @@ const TacticBoardProfile = () => {
                       setIsEditMode(!isEditMode);
 
                       if (isEditMode && formik.isValid) {
-                        formik.submitForm().then(() => {
-                          console.log("Form submitted");
-                        });
+                        formik.submitForm().then(() => {});
                       }
                     }}
                     color="primary"
