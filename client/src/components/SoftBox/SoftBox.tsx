@@ -47,6 +47,7 @@ const SoftBox = <C extends React.ElementType>(
   }: SoftBoxProps<C>,
   ref?: Ref<C>,
 ) => (
+  //@ts-ignore
   <SoftBoxRoot
     {...rest}
     ref={ref}
