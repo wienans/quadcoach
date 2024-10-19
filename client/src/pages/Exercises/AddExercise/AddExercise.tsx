@@ -9,16 +9,12 @@ import { useTranslation } from "react-i18next";
 import "./translations";
 import { DashboardLayout } from "../../../components/LayoutContainers";
 import { useAuth } from "../../../store/hooks";
+import Footer from "../../../components/Footer";
 
 const AddExercise = () => {
   const { t } = useTranslation("AddExercise");
   const [isPrivileged, setIsPrivileged] = useState(false);
-  const {
-    name: userName,
-    id: userId,
-    status: userStatus,
-    roles: userRoles,
-  } = useAuth();
+  const { status: userStatus, roles: userRoles } = useAuth();
 
   const navigate = useNavigate();
   const [
@@ -122,6 +118,7 @@ const AddExercise = () => {
               {t("AddExercise:unauthorized")}
             </Alert>
           )}
+          <Footer />
         </>
       )}
     </DashboardLayout>

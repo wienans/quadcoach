@@ -16,6 +16,7 @@ import userRoutes from "./routes/userRoutes";
 import tacticboardRoutes from "./routes/tacticboardRoutes";
 import exerciseRoutes from "./routes/exerciseRoutes";
 import authRoutes from "./routes/authRoutes";
+import path from "path";
 
 // Read out Port or use Default
 const PORT = process.env.PORT || 3001;
@@ -32,6 +33,8 @@ const MONGO_PASSWORD = process.env.MONGO_PASSWORD;
 const MONGO_DB = process.env.MONGO_DB;
 
 const dbURI = `mongodb://${MONGO_USER}:${MONGO_PASSWORD}@quadcoach-mongodb:27017/${MONGO_DB}?retryWrites=true&w=majority`;
+
+app.use(express.static("dist"));
 
 // Middleware
 app.use(bodyParser.json({ limit: "1mb" }));
@@ -157,4 +160,8 @@ app.get("/api/tags/tacticboards", async (req, res) => {
   } else {
     res.send(result);
   }
+});
+
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "dist", "index.html"));
 });

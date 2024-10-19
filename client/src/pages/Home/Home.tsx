@@ -1,13 +1,14 @@
 import "./translations";
 import { Card } from "@mui/material";
 import { SoftBox, SoftTypography } from "../../components";
-import { useTranslation } from "react-i18next";
+// import { useTranslation } from "react-i18next";
 
 import Logo from "../../assets/images/logo.png";
 import { DashboardLayout } from "../../components/LayoutContainers";
+import Footer from "../../components/Footer";
 
 const Home = () => {
-  const { t } = useTranslation("Home");
+  // const { t } = useTranslation("Home");
 
   return (
     <DashboardLayout>
@@ -86,6 +87,7 @@ const Home = () => {
               </SoftBox>
             </Card>
           </SoftBox>
+          <Footer />
         </>
       )}
     </DashboardLayout>

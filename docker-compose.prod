@@ -6,6 +6,7 @@ services:
     container_name: quadcoach-backend
     env_file:
       - env.env
+      - secret.env
     build:
       context: ./
       dockerfile: Dockerfile.prod

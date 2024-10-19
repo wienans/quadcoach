@@ -6,7 +6,6 @@ import {
   Alert,
   BottomNavigationAction,
   Card,
-  CardHeader,
   Checkbox,
   Chip,
   FormControlLabel,
@@ -20,12 +19,7 @@ import {
   useMediaQuery,
 } from "@mui/material";
 import * as Yup from "yup";
-import {
-  SoftBox,
-  SoftButton,
-  SoftInput,
-  SoftTypography,
-} from "../../components";
+import { SoftBox, SoftInput, SoftTypography } from "../../components";
 import {
   useDeleteTacticBoardMutation,
   useGetTacticBoardQuery,
@@ -46,7 +40,7 @@ import { useAuth } from "../../store/hooks";
 import TacticBoardInProfileWrapper from "./TacticBoardInProfile";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import MDEditor, { selectWord } from "@uiw/react-md-editor";
+import MDEditor from "@uiw/react-md-editor";
 // No import is required in the WebPack.
 import "@uiw/react-md-editor/markdown-editor.css";
 // No import is required in the WebPack.
@@ -59,6 +53,7 @@ import {
 } from "formik";
 import { TacticBoardPartialId } from "../../api/quadcoachApi/domain";
 import AddTagDialog from "./AddTagDialog";
+import Footer from "../../components/Footer";
 
 const TacticBoardProfile = () => {
   const { t } = useTranslation("TacticBoardProfile");
@@ -66,16 +61,10 @@ const TacticBoardProfile = () => {
 
   const navigate = useNavigate();
   const [isPrivileged, setIsPrivileged] = useState<boolean>(false);
-  const isUpXl = useMediaQuery((theme: Theme) => theme.breakpoints.up("xl"));
   const isUpMd = useMediaQuery((theme: Theme) => theme.breakpoints.up("md"));
   const [isEditMode, setIsEditMode] = useState<boolean>(false);
   const [openTagDialog, setOpenTagDialog] = useState<boolean>(false);
-  const {
-    name: userName,
-    id: userId,
-    status: userStatus,
-    roles: userRoles,
-  } = useAuth();
+  const { id: userId, roles: userRoles } = useAuth();
 
   const {
     data: tacticBoard,
@@ -85,14 +74,7 @@ const TacticBoardProfile = () => {
     skip: tacticBoardId == null,
   });
 
-  const [
-    updateTacticBoard,
-    {
-      isError: isUpdateTacticBoardError,
-      isLoading: isUpdateTacticBoardLoading,
-      isSuccess: isUpdateTacticBoardSuccess,
-    },
-  ] = useUpdateTacticBoardMutation();
+  const [updateTacticBoard] = useUpdateTacticBoardMutation();
 
   const [
     deleteTacticBoard,
@@ -238,9 +220,7 @@ const TacticBoardProfile = () => {
                       setIsEditMode(!isEditMode);
 
                       if (isEditMode && formik.isValid) {
-                        formik.submitForm().then(() => {
-                          console.log("Form submitted");
-                        });
+                        formik.submitForm().then(() => {});
                       }
                     }}
                     color="primary"
@@ -500,6 +480,7 @@ const TacticBoardProfile = () => {
                 </Accordion>
               )}
             </Card>
+            <Footer />
           </>
         )}
       </ProfileLayout>

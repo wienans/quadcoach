@@ -50,11 +50,13 @@ const ExercisesCardView = ({
       <Grid container spacing={1} sx={{ mb: { sm: 2, md: undefined } }}>
         {isExercisesLoading
           ? Array.from(Array(10).keys()).map((loadingNumber) => (
+              // @ts-ignore
               <Grid item xs={12} md={6} xl={4} xxl={3} key={loadingNumber}>
                 <ExerciseLoadingCard />
               </Grid>
             ))
           : exercises?.map((exercise) => (
+              // @ts-ignore
               <Grid item xs={12} md={6} xl={4} xxl={3} key={exercise._id}>
                 <ExerciseCard
                   exercise={exercise}

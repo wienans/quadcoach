@@ -38,6 +38,7 @@ import TacticBoardCardView from "./cardView/TacticBoardCardView";
 import AddIcon from "@mui/icons-material/Add";
 import { DashboardLayout } from "../../components/LayoutContainers";
 import { useAuth } from "../../store/hooks";
+import Footer from "../../components/Footer";
 
 enum ViewType {
   List = "List",
@@ -90,18 +91,10 @@ const TacticBoardList = () => {
       data: tacticBoards,
       isError: isTacticBoardsError,
       isLoading: isTacticBoardsLoading,
-      error,
     },
   ] = useLazyGetTacticBoardsQuery();
 
-  const [
-    addTacticBoard,
-    {
-      isLoading: isAddTacticBoardLoading,
-      isError: isAddTacticBoardError,
-      isSuccess: isAddTacticBoardSuccess,
-    },
-  ] = useAddTacticBoardMutation();
+  const [addTacticBoard] = useAddTacticBoardMutation();
 
   useEffect(() => {
     getTacticBoards({
@@ -145,6 +138,7 @@ const TacticBoardList = () => {
 
       addTacticBoard(newTacticBoard).then(
         (result: { data: TacticBoard } | { error: unknown }) => {
+          if ("error" in result) return;
           if (!result.data) return;
           navigate(`/tacticboards/${result.data._id}`);
         },
@@ -321,6 +315,7 @@ const TacticBoardList = () => {
               />
             </SoftBox>
           )}
+          <Footer />
         </>
       )}
     </DashboardLayout>

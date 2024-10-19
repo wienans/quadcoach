@@ -1,6 +1,5 @@
 import { Collapse, Drawer, Theme, useMediaQuery } from "@mui/material";
 import { SoftBox } from "../../../components";
-import { useTacticBoardFabricJs } from "../../../hooks";
 import TacticBoardItemsDrawer from "./TacticBoardItemsDrawer";
 import { useAppDispatch, useAppSelector } from "../../../store/hooks";
 import {
@@ -12,6 +11,7 @@ export const tacticBoardItemsDrawerWidth = 240;
 
 const TacticBoardItemsDrawerNav = (): JSX.Element | null => {
   const dispatch = useAppDispatch();
+  //@ts-ignore
   const isUpSm = useMediaQuery((theme: Theme) => theme.breakpoints.up("xxxl"));
 
   const tacticBoardItemsDrawerOpen = useAppSelector(

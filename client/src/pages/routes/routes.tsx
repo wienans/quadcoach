@@ -122,19 +122,6 @@ const routes = [
           },
         ],
       },
-
-      {
-        path: "/componentsTest",
-        handle: {
-          type: RouteHandleType.componentsTest,
-        },
-        async lazy() {
-          const ComponentsTest = (await import("../ComponentsTest")).default;
-          return {
-            element: <ComponentsTest />,
-          };
-        },
-      },
       {
         path: "/login",
         handle: {

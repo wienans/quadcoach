@@ -9,7 +9,5 @@ export { default as SettingsMenu } from "./SettingsMenu";
 export { default as Collapsible } from "./Collapsible";
 export { default as FabricJsCanvas } from "./FabricJsCanvas";
 export { default as TacticsBoardToolBar } from "./TacticsBoardToolBar";
-export { default as TacticsBoardSpeedDial } from "./TacticsBoardSpeedDial";
-export { default as TacticsBoardSpeedDialBalls } from "./TacticsBoardSpeedDialBalls";
 export { default as AddTacticBoardDialog } from "./AddTacticBoardDialog";
 export { default as PresistLogin } from "./PresistLogin";

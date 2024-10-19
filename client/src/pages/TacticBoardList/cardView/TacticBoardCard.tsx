@@ -22,7 +22,6 @@ import OpenInBrowserIcon from "@mui/icons-material/OpenInBrowser";
 import { SoftButton, SoftTypography } from "../../../components";
 import TagIcon from "@mui/icons-material/Tag";
 import DeveloperBoardIcon from "@mui/icons-material/DeveloperBoard";
-import { RelationOneToMany } from "mdi-material-ui";
 
 interface ExpandMoreProps extends IconButtonProps {
   expand: boolean;

@@ -47,7 +47,7 @@ const breakpoints: Breakpoints = {
 
 declare module "@mui/material/styles" {
   interface BreakpointOverrides {
-    xxl: true;
+    xxl: number;
   }
 }
 

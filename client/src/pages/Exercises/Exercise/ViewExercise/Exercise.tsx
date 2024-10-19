@@ -32,43 +32,15 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ExerciseBlock from "./ExerciseBlock";
 import ExerciseInfo from "./ExerciseInfo";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import ContentPasteIcon from "@mui/icons-material/ContentPaste";
 import { useAuth } from "../../../../store/hooks";
-import Markdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-
-type ExerciseValue = {
-  labelResourceKey: string;
-  getValue: (exercise: Exercise) => string;
-};
-
-const personValues: ExerciseValue[] = [
-  {
-    labelResourceKey: "Exercise:info.personNumber",
-    getValue: (exercise) => exercise.persons.toString(),
-  },
-  {
-    labelResourceKey: "Exercise:info.beaterNumber",
-    getValue: (exercise) => exercise.beaters.toString(),
-  },
-  {
-    labelResourceKey: "Exercise:info.chaserNumber",
-    getValue: (exercise) => exercise.chasers.toString(),
-  },
-];
+import Footer from "../../../../components/Footer";
 
 const Exercise = () => {
   const { t } = useTranslation("Exercise");
   const { id: exerciseId } = useParams();
   const navigate = useNavigate();
   const [isPrivileged, setIsPrivileged] = useState<boolean>(false);
-  const {
-    name: userName,
-    id: userId,
-    status: userStatus,
-    roles: userRoles,
-  } = useAuth();
+  const { id: userId, roles: userRoles } = useAuth();
 
   const theme = useTheme();
 
@@ -271,6 +243,7 @@ const Exercise = () => {
               key={block._id}
             />
           ))}
+          <Footer />
         </>
       )}
     </ProfileLayout>

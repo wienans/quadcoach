@@ -55,7 +55,7 @@ const AddTacticBoardDialog = ({
           id="court-select"
           sx={{ mt: 2 }}
           value={backgroundImageId}
-          label={t("UpdateTacticBoardMeta:info.backgroundImage.label")}
+          label={t("AddTacticBoardDialog:info.backgroundImage.label")}
           onChange={(event: SelectChangeEvent) => {
             setBackgorundImageId(event.target.value);
           }}
