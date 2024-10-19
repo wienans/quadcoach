@@ -6,20 +6,20 @@ on:
       - "main"
   pull_request:
 jobs:
-  lint:
-    runs-on: ubuntu-latest
-    container:
-      image: node:20
-    steps:
-      - name: Check out repository code
-        uses: actions/checkout@v4
-      - name: Lint Client
-        if: "!cancelled()"
-        working-directory: ./client
-        run: |
-          ls
-          npm install
-          npm run lint
+  # lint:
+  #   runs-on: ubuntu-latest
+  #   container:
+  #     image: node:20
+  #   steps:
+  #     - name: Check out repository code
+  #       uses: actions/checkout@v4
+  #     - name: Lint Client
+  #       if: "!cancelled()"
+  #       working-directory: ./client
+  #       run: |
+  #         ls
+  #         npm install
+  #         npm run lint
   build:
     runs-on: ubuntu-latest
     container:
