@@ -14,11 +14,12 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v4
       - name: Lint Client
+        if: "!cancelled()"
         working-directory: ./client
         run: |
           ls
           npm install
-          npm run build
+          npm run lint
   build:
     runs-on: ubuntu-latest
     container:
@@ -27,12 +28,14 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v4
       - name: Build Server
+        if: "!cancelled()"
         working-directory: ./server
         run: |
           ls
           npm install
           npm run build
       - name: Build Client
+        if: "!cancelled()"
         working-directory: ./client
         run: |
           ls
