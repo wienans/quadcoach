@@ -36,14 +36,13 @@ jobs:
         working-directory: ./server
         run: |
           ls
-          npm install --loglevel verbose
-          npm run lint
+          npm install
           npm run build
       - name: List files in the repository
         working-directory: ./client
         run: |
           ls
-          npm install --loglevel verbose
+          npm install
           npm run lint
           npm run build
       - run: echo "🍏 This job's status is ${{ job.status }}."
