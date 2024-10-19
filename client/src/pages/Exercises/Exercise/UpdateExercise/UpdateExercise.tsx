@@ -15,6 +15,7 @@ import { ExerciseExtendWithRelatedExercises } from "../../../../components/Exerc
 import { useTranslation } from "react-i18next";
 import { DashboardLayout } from "../../../../components/LayoutContainers";
 import { useAuth } from "../../../../store/hooks";
+import Footer from "../../../../components/Footer";
 
 const UpdateExercise = () => {
   const { t } = useTranslation("UpdateExercise");
@@ -207,6 +208,7 @@ const UpdateExercise = () => {
               {t("UpdateExercise:unauthorized")}
             </Alert>
           )}
+          <Footer />
         </>
       )}
     </DashboardLayout>

@@ -6,6 +6,7 @@ import { useSearchParams, useNavigate } from "react-router-dom";
 import { useVerifyEmailMutation } from "../authApi";
 
 import { DashboardLayout } from "../../components/LayoutContainers";
+import Footer from "../../components/Footer";
 
 const VerifyEmail = (): JSX.Element => {
   const { t } = useTranslation("VerifyEmail");
@@ -58,6 +59,7 @@ const VerifyEmail = (): JSX.Element => {
               {t("VerifyEmail:redirectingToLogin")}
             </Alert>
           )}
+          <Footer />
         </>
       )}
     </DashboardLayout>

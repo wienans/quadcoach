@@ -53,6 +53,7 @@ import {
 } from "formik";
 import { TacticBoardPartialId } from "../../api/quadcoachApi/domain";
 import AddTagDialog from "./AddTagDialog";
+import Footer from "../../components/Footer";
 
 const TacticBoardProfile = () => {
   const { t } = useTranslation("TacticBoardProfile");
@@ -479,6 +480,7 @@ const TacticBoardProfile = () => {
                 </Accordion>
               )}
             </Card>
+            <Footer />
           </>
         )}
       </ProfileLayout>

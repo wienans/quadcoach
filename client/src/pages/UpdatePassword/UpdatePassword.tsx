@@ -15,6 +15,7 @@ import { FormikProvider, useFormik } from "formik";
 import * as Yup from "yup";
 
 import { DashboardLayout } from "../../components/LayoutContainers";
+import Footer from "../../components/Footer";
 
 type UpdatePasswordFields = {
   password: string;
@@ -173,6 +174,7 @@ const UpdatePassword = (): JSX.Element => {
                 </Grid>
               </Grid>
             </Card>
+            <Footer />
           </form>
         )}
       </DashboardLayout>

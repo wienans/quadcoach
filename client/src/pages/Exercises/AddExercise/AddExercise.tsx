@@ -9,6 +9,7 @@ import { useTranslation } from "react-i18next";
 import "./translations";
 import { DashboardLayout } from "../../../components/LayoutContainers";
 import { useAuth } from "../../../store/hooks";
+import Footer from "../../../components/Footer";
 
 const AddExercise = () => {
   const { t } = useTranslation("AddExercise");
@@ -117,6 +118,7 @@ const AddExercise = () => {
               {t("AddExercise:unauthorized")}
             </Alert>
           )}
+          <Footer />
         </>
       )}
     </DashboardLayout>

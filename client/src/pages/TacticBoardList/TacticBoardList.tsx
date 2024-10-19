@@ -38,6 +38,7 @@ import TacticBoardCardView from "./cardView/TacticBoardCardView";
 import AddIcon from "@mui/icons-material/Add";
 import { DashboardLayout } from "../../components/LayoutContainers";
 import { useAuth } from "../../store/hooks";
+import Footer from "../../components/Footer";
 
 enum ViewType {
   List = "List",
@@ -314,6 +315,7 @@ const TacticBoardList = () => {
               />
             </SoftBox>
           )}
+          <Footer />
         </>
       )}
     </DashboardLayout>

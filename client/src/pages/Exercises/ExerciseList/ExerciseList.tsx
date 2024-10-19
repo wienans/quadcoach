@@ -30,6 +30,7 @@ import AddIcon from "@mui/icons-material/Add";
 import { useLazyGetExercisesQuery } from "../../exerciseApi";
 import { DashboardLayout } from "../../../components/LayoutContainers";
 import { useAuth } from "../../../store/hooks";
+import Footer from "../../../components/Footer";
 const maxPersons = 100;
 
 enum ViewType {
@@ -301,6 +302,7 @@ const ExerciseList = () => {
               </SoftBox>
             </>
           )}
+          <Footer />
         </>
       )}
     </DashboardLayout>

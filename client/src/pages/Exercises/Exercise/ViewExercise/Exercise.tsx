@@ -33,6 +33,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import ExerciseBlock from "./ExerciseBlock";
 import ExerciseInfo from "./ExerciseInfo";
 import { useAuth } from "../../../../store/hooks";
+import Footer from "../../../../components/Footer";
 
 const Exercise = () => {
   const { t } = useTranslation("Exercise");
@@ -242,6 +243,7 @@ const Exercise = () => {
               key={block._id}
             />
           ))}
+          <Footer />
         </>
       )}
     </ProfileLayout>

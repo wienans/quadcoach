@@ -15,6 +15,7 @@ import { FormikProvider, useFormik } from "formik";
 import * as Yup from "yup";
 
 import { DashboardLayout } from "../../components/LayoutContainers";
+import Footer from "../../components/Footer";
 
 type RegisterFields = {
   name: string;
@@ -228,6 +229,7 @@ const Register = (): JSX.Element => {
                 </Grid>
               </Grid>
             </Card>
+            <Footer />
           </form>
         )}
       </DashboardLayout>

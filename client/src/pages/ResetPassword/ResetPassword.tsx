@@ -15,6 +15,7 @@ import * as Yup from "yup";
 
 import { DashboardLayout } from "../../components/LayoutContainers";
 import { useState } from "react";
+import Footer from "../../components/Footer";
 
 type ResetPasswordFields = {
   email: string;
@@ -136,6 +137,7 @@ const ResetPassword = (): JSX.Element => {
                 </Grid>
               </Grid>
             </Card>
+            <Footer />
           </form>
         )}
       </DashboardLayout>
