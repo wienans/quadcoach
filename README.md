@@ -81,6 +81,14 @@ into the container and
 npm run build
 ```
 
+```bash
+docker exec -it quadcoach-backend /bin/bash
+```
+
+```bash
+npm run build
+```
+
 to build the App. Due to Volume mounting we now have the build App also in the host machine and can use
 
 ```bash
