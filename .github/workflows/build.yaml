@@ -1,0 +1,24 @@
+name: Build
+run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
+on: [push]
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    container:
+      image: node:20
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      - run: cd client
+      - run: npm install --loglevel verbose
+      - run: npm run lint
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: node:20
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      - run: cd client
+      - run: npm install --loglevel verbose
+      - run: npm run build
