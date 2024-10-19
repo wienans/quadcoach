@@ -81,9 +81,13 @@ into the container and
 npm run build
 ```
 
+then again
+
 ```bash
 docker exec -it quadcoach-backend /bin/bash
 ```
+
+and
 
 ```bash
 npm run build
