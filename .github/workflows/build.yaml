@@ -32,9 +32,18 @@ jobs:
       - name: List files in the repository
         run: |
           ls
-      - run: cd client
-      - run: ls
-      - run: cd ../server
-      - run: ls
-      - run: cd ../quadoach
+      - name: List files in the repository
+        working-directory: ./server
+        run: |
+          ls
+          npm install --loglevel verbose
+          npm run lint
+          npm run build
+      - name: List files in the repository
+        working-directory: ./client
+        run: |
+          ls
+          npm install --loglevel verbose
+          npm run lint
+          npm run build
       - run: echo "🍏 This job's status is ${{ job.status }}."
