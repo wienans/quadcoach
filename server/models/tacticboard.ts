@@ -51,7 +51,7 @@ interface ITacticBoard {
   isPrivate?: boolean;
   tags?: Types.Array<string>;
   creator?: string;
-  users?: Types.ObjectId[];
+  user?: Types.ObjectId;
   pages?: Types.Array<ITacticPage>;
   description?: string;
   coaching_points?: string;
@@ -206,8 +206,8 @@ const tacticBoardSchema = new Schema<ITacticBoard>(
     creator: {
       type: String,
     },
-    users: {
-      type: [Types.ObjectId],
+    user: {
+      type: Types.ObjectId,
       ref: "users",
     },
     description: {

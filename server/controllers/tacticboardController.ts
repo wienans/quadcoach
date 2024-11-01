@@ -20,7 +20,7 @@ export const getAllTacticboards = asyncHandler(
     //@ts-ignore
     if (req.UserInfo.id) {
       //@ts-ignore
-      parseObject.$or.push({ isPrivate: true, users: req.UserInfo.id });
+      parseObject.$or.push({ isPrivate: true, user: req.UserInfo.id });
     }
     //@ts-ignore
     if (
@@ -49,9 +49,9 @@ export const getById = asyncHandler(async (req: Request, res: Response) => {
     if (result) {
       if (
         result.isPrivate &&
-        result.users &&
+        result.user &&
         // @ts-ignore
-        (!req.UserInfo.id || !result.users.includes(req.UserInfo.id)) &&
+        (!req.UserInfo.id || req.UserInfo.id != result.user?.toString()) &&
         // @ts-ignore
         !req.UserInfo.roles.includes("Admin") &&
         // @ts-ignore
@@ -97,9 +97,9 @@ export const updateById = asyncHandler(async (req: Request, res: Response) => {
     const findResult = await TacticBoard.findOne({ _id: req.params.id });
     if (findResult) {
       if (
-        findResult.users &&
+        findResult.user &&
         // @ts-ignore
-        (!req.UserInfo.id || !findResult.users.includes(req.UserInfo.id)) &&
+        (!req.UserInfo.id || req.UserInfo.id != findResult.user?.toString()) &&
         // @ts-ignore
         !req.UserInfo.roles.includes("Admin") &&
         // @ts-ignore
@@ -134,9 +134,11 @@ export const updatePageById = asyncHandler(
       const findResult = await TacticBoard.findOne({ _id: req.params.id });
       if (findResult) {
         if (
-          findResult.users &&
+          findResult.user &&
           // @ts-ignore
-          (!req.UserInfo.id || !findResult.users.includes(req.UserInfo.id)) &&
+          (!req.UserInfo.id ||
+            // @ts-ignore
+            req.UserInfo.id != findResult.user?.toString()) &&
           // @ts-ignore
           !req.UserInfo.roles.includes("Admin") &&
           // @ts-ignore
@@ -177,14 +179,15 @@ export const updatePageById = asyncHandler(
 export const updateMetaById = asyncHandler(
   async (req: Request, res: Response) => {
     const { id: tacticBoardId } = req.params;
+
     if (mongoose.isValidObjectId(tacticBoardId)) {
       const findResult = await TacticBoard.findOne({ _id: tacticBoardId });
       if (findResult) {
         // Authorization check
         if (
-          findResult.users &&
+          findResult.user &&
           // @ts-ignore
-          (!req.UserInfo.id || !findResult.users.includes(req.UserInfo.id)) &&
+          (!req.UserInfo.id || req.UserInfo.id != findResult.user.toString()) &&
           // @ts-ignore
           !req.UserInfo.roles.includes("Admin") &&
           // @ts-ignore
@@ -213,7 +216,6 @@ export const updateMetaById = asyncHandler(
               isPrivate,
               tags,
               creator,
-              users,
               description,
               coaching_points,
             },
@@ -242,9 +244,9 @@ export const deleteById = asyncHandler(async (req: Request, res: Response) => {
     const findResult = await TacticBoard.findOne({ _id: req.params.id });
     if (findResult) {
       if (
-        findResult.users &&
+        findResult.user &&
         // @ts-ignore
-        (!req.UserInfo.id || !findResult.users.includes(req.UserInfo.id)) &&
+        (!req.UserInfo.id || req.UserInfo.id != findResult.user?.toString()) &&
         // @ts-ignore
         !req.UserInfo.roles.includes("Admin") &&
         // @ts-ignore
@@ -275,9 +277,9 @@ export const createNewPage = asyncHandler(
       if (findResult) {
         // Authorization check
         if (
-          findResult.users &&
+          findResult.user &&
           // @ts-ignore
-          (!req.UserInfo.id || !findResult.users.includes(req.UserInfo.id)) &&
+          (!req.UserInfo.id || req.UserInfo.id != findResult.user.toString()) &&
           // @ts-ignore
           !req.UserInfo.roles.includes("Admin") &&
           // @ts-ignore
@@ -322,9 +324,9 @@ export const deletePageById = asyncHandler(
       if (findResult) {
         // Authorization check
         if (
-          findResult.users &&
+          findResult.user &&
           // @ts-ignore
-          (!req.UserInfo.id || !findResult.users.includes(req.UserInfo.id)) &&
+          (!req.UserInfo.id || req.UserInfo.id != findResult.user.toString()) &&
           // @ts-ignore
           !req.UserInfo.roles.includes("Admin") &&
           // @ts-ignore

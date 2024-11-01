@@ -132,7 +132,7 @@ const TacticBoardList = () => {
         name: name,
         isPrivate: false,
         creator: userName,
-        users: [userId],
+        user: userId,
         pages: [emptyPage],
       };
 
