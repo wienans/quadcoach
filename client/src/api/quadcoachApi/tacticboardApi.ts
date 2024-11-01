@@ -13,7 +13,11 @@ export const tacticBoardApiSlice = quadcoachApi.injectEndpoints({
         url: `/api/tacticboards/${tacticboardId}`,
         method: "get",
       }),
-      providesTags: () => [TagType.tacticboard],
+      // Tag both the list and the individual item
+      providesTags: (result) =>
+        result
+          ? [{ type: TagType.tacticboard, id: result._id }, TagType.tacticboard]
+          : [TagType.tacticboard],
     }),
     updateTacticBoard: builder.mutation<{ message: string }, TacticBoard>({
       query(data) {
@@ -23,7 +27,10 @@ export const tacticBoardApiSlice = quadcoachApi.injectEndpoints({
           data,
         };
       },
-      invalidatesTags: () => [TagType.tacticboard, TagType.tacticboardTag],
+      invalidatesTags: (_result, _error, data) => [
+        { type: TagType.tacticboard, id: data._id },
+        TagType.tacticboardTag,
+      ],
     }),
     updateTacticBoardPage: builder.mutation<
       { message: string },
@@ -36,7 +43,9 @@ export const tacticBoardApiSlice = quadcoachApi.injectEndpoints({
           data: pageData,
         };
       },
-      invalidatesTags: () => [TagType.tacticboard, TagType.tacticboardTag],
+      invalidatesTags: (_result, _error, { tacticboardId }) => [
+        { type: TagType.tacticboard, id: tacticboardId },
+      ],
     }),
     deleteTacticBoard: builder.mutation<{ message: string }, string>({
       query(tacticboardId) {
@@ -47,6 +56,7 @@ export const tacticBoardApiSlice = quadcoachApi.injectEndpoints({
       },
       invalidatesTags: (_result, _error, tacticboardId) => [
         { type: TagType.tacticboard, id: tacticboardId },
+        TagType.tacticboard,
         TagType.tacticboardTag,
       ],
     }),
@@ -88,7 +98,17 @@ export const tacticBoardApiSlice = quadcoachApi.injectEndpoints({
           method: "get",
         };
       },
-      providesTags: () => [TagType.tacticboard],
+      // Tag the list and each individual tacticboard
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.map(({ _id }) => ({
+                type: TagType.tacticboard as const,
+                id: _id,
+              })),
+              TagType.tacticboard,
+            ]
+          : [TagType.tacticboard],
     }),
     getAllTacticBoardTags: builder.query<string[], string | undefined>({
       query: (tagRegex) => {
@@ -121,7 +141,9 @@ export const tacticBoardApiSlice = quadcoachApi.injectEndpoints({
           data: pageData,
         };
       },
-      invalidatesTags: () => [TagType.tacticboard, TagType.tacticboardTag],
+      invalidatesTags: (_result, _error, { tacticboardId }) => [
+        { type: TagType.tacticboard, id: tacticboardId },
+      ],
     }),
     deleteTacticBoardPage: builder.mutation<
       { message: string },
@@ -131,7 +153,9 @@ export const tacticBoardApiSlice = quadcoachApi.injectEndpoints({
         url: `/api/tacticboards/${tacticboardId}/pages/${pageId}`,
         method: "delete",
       }),
-      invalidatesTags: () => [TagType.tacticboard, TagType.tacticboardTag],
+      invalidatesTags: (_result, _error, { tacticboardId }) => [
+        { type: TagType.tacticboard, id: tacticboardId },
+      ],
     }),
     updateTacticBoardMeta: builder.mutation<
       { message: string },
@@ -155,7 +179,11 @@ export const tacticBoardApiSlice = quadcoachApi.injectEndpoints({
           data: metaData,
         };
       },
-      invalidatesTags: () => [TagType.tacticboard, TagType.tacticboardTag],
+      // Only invalidate the specific tacticboard and tags
+      invalidatesTags: (_result, _error, { tacticboardId }) => [
+        { type: TagType.tacticboard, id: tacticboardId },
+        TagType.tacticboardTag,
+      ],
     }),
   }),
 });
