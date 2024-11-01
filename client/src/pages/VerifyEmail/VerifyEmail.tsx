@@ -43,8 +43,7 @@ const VerifyEmail = (): JSX.Element => {
               {t("VerifyEmail:NoTokenFound")}
             </Alert>
           )}
-          {/* @ts-ignore */}
-          {isVerifyError && error?.status === 404 && (
+          {isVerifyError && (error as { status?: number })?.status === 404 && (
             <Alert color="error" sx={{ mt: 2 }}>
               {t("VerifyEmail:errorVerifyingEmail")}
             </Alert>

@@ -3,6 +3,13 @@ import { Request, Response } from "express";
 import Exercise from "../models/exercise";
 import mongoose from "mongoose";
 
+interface RequestWithUser extends Request {
+  UserInfo?: {
+    id: string;
+    roles: string[];
+  };
+}
+
 // @desc    Get all exercises
 // @route   GET /api/exercises
 // @access  Public
@@ -41,9 +48,8 @@ export const getById = asyncHandler(async (req: Request, res: Response) => {
 // @route   POST /api/exercises
 // @access  Private - Authenticated users only
 export const createNewExercise = asyncHandler(
-  async (req: Request, res: Response) => {
-    // @ts-ignore
-    if (req.UserInfo.id != "") {
+  async (req: RequestWithUser, res: Response) => {
+    if (req.UserInfo?.id) {
       let exercise = new Exercise(req.body);
       const result = await exercise.save();
       if (!result) {
@@ -59,63 +65,63 @@ export const createNewExercise = asyncHandler(
 // @desc    Update exercise by ID
 // @route   PATCH /api/exercises/:id
 // @access  Private - Owner or Admin only
-export const updateById = asyncHandler(async (req: Request, res: Response) => {
-  if (mongoose.isValidObjectId(req.params.id)) {
-    const findResult = await Exercise.findOne({ _id: req.params.id });
-    if (findResult) {
-      if (
-        findResult.user &&
-        // @ts-ignore
-        (!req.UserInfo.id || req.UserInfo.id != findResult.user?.toString()) &&
-        // @ts-ignore
-        !req.UserInfo.roles.includes("Admin") &&
-        // @ts-ignore
-        !req.UserInfo.roles.includes("admin")
-      ) {
-        res.status(403).json({ message: "Forbidden" });
-        return;
+export const updateById = asyncHandler(
+  async (req: RequestWithUser, res: Response) => {
+    if (mongoose.isValidObjectId(req.params.id)) {
+      const findResult = await Exercise.findOne({ _id: req.params.id });
+      if (findResult) {
+        if (
+          findResult.user &&
+          (!req.UserInfo?.id ||
+            req.UserInfo.id != findResult.user?.toString()) &&
+          !req.UserInfo?.roles?.includes("Admin") &&
+          !req.UserInfo?.roles?.includes("admin")
+        ) {
+          res.status(403).json({ message: "Forbidden" });
+          return;
+        }
+        const result = await Exercise.updateOne(
+          { _id: req.params.id },
+          { $set: req.body }
+        );
+        res.send(result);
+      } else {
+        res.send({ result: "No Record Found" });
       }
-      const result = await Exercise.updateOne(
-        { _id: req.params.id },
-        { $set: req.body }
-      );
-      res.send(result);
     } else {
       res.send({ result: "No Record Found" });
     }
-  } else {
-    res.send({ result: "No Record Found" });
   }
-});
+);
 
 // @desc    Delete exercise by ID
 // @route   DELETE /api/exercises/:id
 // @access  Private - Owner or Admin only
-export const deleteById = asyncHandler(async (req: Request, res: Response) => {
-  if (mongoose.isValidObjectId(req.params.id)) {
-    const findResult = await Exercise.findOne({ _id: req.params.id });
-    if (findResult) {
-      if (
-        findResult.user &&
-        // @ts-ignore
-        (!req.UserInfo.id || req.UserInfo.id != findResult.user?.toString()) &&
-        // @ts-ignore
-        !req.UserInfo.roles.includes("Admin") &&
-        // @ts-ignore
-        !req.UserInfo.roles.includes("admin")
-      ) {
-        res.status(403).json({ message: "Forbidden" });
-        return;
+export const deleteById = asyncHandler(
+  async (req: RequestWithUser, res: Response) => {
+    if (mongoose.isValidObjectId(req.params.id)) {
+      const findResult = await Exercise.findOne({ _id: req.params.id });
+      if (findResult) {
+        if (
+          findResult.user &&
+          (!req.UserInfo?.id ||
+            req.UserInfo.id != findResult.user?.toString()) &&
+          !req.UserInfo?.roles?.includes("Admin") &&
+          !req.UserInfo?.roles?.includes("admin")
+        ) {
+          res.status(403).json({ message: "Forbidden" });
+          return;
+        }
+        const result = await Exercise.deleteOne({ _id: req.params.id });
+        res.send(result);
+      } else {
+        res.send({ result: "No Record Found" });
       }
-      const result = await Exercise.deleteOne({ _id: req.params.id });
-      res.send(result);
     } else {
       res.send({ result: "No Record Found" });
     }
-  } else {
-    res.send({ result: "No Record Found" });
   }
-});
+);
 
 // @desc    Get related exercises by ID
 // @route   GET /api/exercises/:id/related

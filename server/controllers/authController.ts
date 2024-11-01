@@ -1,5 +1,5 @@
 import bcrypt from "bcrypt";
-import jwt, { JwtPayload, VerifyCallback } from "jsonwebtoken";
+import jwt, { JwtPayload } from "jsonwebtoken";
 import { Request, Response, NextFunction } from "express";
 import asyncHandler from "express-async-handler";
 import User from "../models/user";
@@ -163,10 +163,9 @@ export const updatePassword = asyncHandler(
       const decode = jwt.verify(
         passwordResetToken,
         process.env.ACCESS_TOKEN_SECRET
-      );
+      ) as JwtPayload;
       const foundUser = await User.findOne({
-        // @ts-ignore
-        email: decode?.email,
+        email: decode.email,
       }).exec();
       if (!foundUser) {
         res.status(401).json({ message: "Unauthorized" });
@@ -278,10 +277,12 @@ export const refresh = asyncHandler(
     }
 
     try {
-      const decode = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
+      const decode = jwt.verify(
+        refreshToken,
+        process.env.REFRESH_TOKEN_SECRET
+      ) as JwtPayload;
       const foundUser = await User.findOne({
-        // @ts-ignore
-        email: decode?.email,
+        email: decode.email,
       }).exec();
 
       if (!foundUser) {

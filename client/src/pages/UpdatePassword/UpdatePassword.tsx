@@ -58,8 +58,7 @@ const UpdatePassword = (): JSX.Element => {
         password: password,
         passwordResetToken: passwordToken,
       });
-      // @ts-ignore
-      if (result.data) {
+      if ("data" in result) {
         navigate("/login");
       }
     },

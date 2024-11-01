@@ -3,11 +3,20 @@ import { Request, Response } from "express";
 import TacticBoard from "../models/tacticboard";
 import mongoose from "mongoose";
 
+interface UserInfo {
+  id?: string;
+  roles?: string[];
+}
+
+interface RequestWithUser extends Request {
+  UserInfo?: UserInfo;
+}
+
 // @desc    Get all tacticboards
 // @route   GET /api/tacticboards
 // @access  Public - Returns only public boards and user's private boards
 export const getAllTacticboards = asyncHandler(
-  async (req: Request, res: Response) => {
+  async (req: RequestWithUser, res: Response) => {
     let queryString: string = JSON.stringify(req.query);
 
     queryString = queryString.replace(
@@ -17,19 +26,15 @@ export const getAllTacticboards = asyncHandler(
     let parseObject = JSON.parse(queryString);
 
     parseObject.$or = [{ isPrivate: false }];
-    //@ts-ignore
-    if (req.UserInfo.id) {
-      //@ts-ignore
+
+    if (req.UserInfo?.id) {
       parseObject.$or.push({ isPrivate: true, user: req.UserInfo.id });
     }
-    //@ts-ignore
+
     if (
-      //@ts-ignore
-      req.UserInfo.roles.includes("Admin") ||
-      //@ts-ignore
-      req.UserInfo.roles.includes("admin")
+      req.UserInfo?.roles?.includes("Admin") ||
+      req.UserInfo?.roles?.includes("admin")
     ) {
-      //@ts-ignore
       parseObject.$or.push({ isPrivate: true });
     }
 
@@ -42,41 +47,39 @@ export const getAllTacticboards = asyncHandler(
 // @desc    Get tacticboard by ID
 // @route   GET /api/tacticboards/:id
 // @access  Public - Returns public board or user's private board
-export const getById = asyncHandler(async (req: Request, res: Response) => {
-  if (mongoose.isValidObjectId(req.params.id)) {
-    const result = await TacticBoard.findOne({ _id: req.params.id });
+export const getById = asyncHandler(
+  async (req: RequestWithUser, res: Response) => {
+    if (mongoose.isValidObjectId(req.params.id)) {
+      const result = await TacticBoard.findOne({ _id: req.params.id });
 
-    if (result) {
-      if (
-        result.isPrivate &&
-        result.user &&
-        // @ts-ignore
-        (!req.UserInfo.id || req.UserInfo.id != result.user?.toString()) &&
-        // @ts-ignore
-        !req.UserInfo.roles.includes("Admin") &&
-        // @ts-ignore
-        !req.UserInfo.roles.includes("admin")
-      ) {
-        res.status(403).json({ message: "Forbidden" });
-        return;
+      if (result) {
+        if (
+          result.isPrivate &&
+          result.user &&
+          (!req.UserInfo?.id || req.UserInfo.id != result.user?.toString()) &&
+          !req.UserInfo?.roles?.includes("Admin") &&
+          !req.UserInfo?.roles?.includes("admin")
+        ) {
+          res.status(403).json({ message: "Forbidden" });
+          return;
+        }
+
+        res.send(result);
+      } else {
+        res.status(404).json({ result: "No Record Found" });
       }
-
-      res.send(result);
     } else {
-      res.status(404).json({ result: "No Record Found" });
+      res.status(400).json({ message: "Invalid ID format" });
     }
-  } else {
-    res.status(400).json({ message: "Invalid ID format" });
   }
-});
+);
 
 // @desc    Create new tacticboard
 // @route   POST /api/tacticboards
 // @access  Private - Authenticated users only
 export const createNewTacticboard = asyncHandler(
-  async (req: Request, res: Response) => {
-    // @ts-ignore
-    if (req.UserInfo.id != "") {
+  async (req: RequestWithUser, res: Response) => {
+    if (req.UserInfo?.id) {
       let tacticboard = new TacticBoard(req.body);
       const result = await tacticboard.save();
       if (!result) {
@@ -97,44 +100,44 @@ export const createNewTacticboard = asyncHandler(
 // @desc    Update entire tacticboard by ID
 // @route   PATCH /api/tacticboards/:id
 // @access  Private - Owner or Admin only
-export const updateById = asyncHandler(async (req: Request, res: Response) => {
-  if (mongoose.isValidObjectId(req.params.id)) {
-    const findResult = await TacticBoard.findOne({ _id: req.params.id });
-    if (findResult) {
-      if (
-        findResult.user &&
-        // @ts-ignore
-        (!req.UserInfo.id || req.UserInfo.id != findResult.user?.toString()) &&
-        // @ts-ignore
-        !req.UserInfo.roles.includes("Admin") &&
-        // @ts-ignore
-        !req.UserInfo.roles.includes("admin")
-      ) {
-        res.status(403).json({ message: "Forbidden" });
-        return;
-      }
-      const result = await TacticBoard.updateOne(
-        { _id: req.params.id },
-        { $set: req.body }
-      );
-      if (result.modifiedCount > 0) {
-        res.json({ message: "Tacticboard updated successfully" });
+export const updateById = asyncHandler(
+  async (req: RequestWithUser, res: Response) => {
+    if (mongoose.isValidObjectId(req.params.id)) {
+      const findResult = await TacticBoard.findOne({ _id: req.params.id });
+      if (findResult) {
+        if (
+          findResult.user &&
+          (!req.UserInfo?.id ||
+            req.UserInfo.id != findResult.user?.toString()) &&
+          !req.UserInfo?.roles?.includes("Admin") &&
+          !req.UserInfo?.roles?.includes("admin")
+        ) {
+          res.status(403).json({ message: "Forbidden" });
+          return;
+        }
+        const result = await TacticBoard.updateOne(
+          { _id: req.params.id },
+          { $set: req.body }
+        );
+        if (result.modifiedCount > 0) {
+          res.json({ message: "Tacticboard updated successfully" });
+        } else {
+          res.json({ message: "No changes made" });
+        }
       } else {
-        res.json({ message: "No changes made" });
+        res.status(404).json({ message: "TacticBoard not found" });
       }
     } else {
-      res.status(404).json({ message: "TacticBoard not found" });
+      res.status(400).json({ message: "Invalid ID format" });
     }
-  } else {
-    res.status(400).json({ message: "Invalid ID format" });
   }
-});
+);
 
 // @desc    Update specific page in tacticboard
 // @route   PATCH /api/tacticboards/:id/:pageId
 // @access  Private - Owner or Admin only
 export const updatePageById = asyncHandler(
-  async (req: Request, res: Response) => {
+  async (req: RequestWithUser, res: Response) => {
     const { id: tacticBoardId, pageId } = req.params;
     if (
       mongoose.isValidObjectId(tacticBoardId) &&
@@ -144,14 +147,10 @@ export const updatePageById = asyncHandler(
       if (findResult) {
         if (
           findResult.user &&
-          // @ts-ignore
-          (!req.UserInfo.id ||
-            // @ts-ignore
+          (!req.UserInfo?.id ||
             req.UserInfo.id != findResult.user?.toString()) &&
-          // @ts-ignore
-          !req.UserInfo.roles.includes("Admin") &&
-          // @ts-ignore
-          !req.UserInfo.roles.includes("admin")
+          !req.UserInfo?.roles?.includes("Admin") &&
+          !req.UserInfo?.roles?.includes("admin")
         ) {
           res.status(403).json({ message: "Forbidden" });
           return;
@@ -186,7 +185,7 @@ export const updatePageById = asyncHandler(
 // @route   PATCH /api/tacticboards/:id/meta
 // @access  Private - Owner or Admin only
 export const updateMetaById = asyncHandler(
-  async (req: Request, res: Response) => {
+  async (req: RequestWithUser, res: Response) => {
     const { id: tacticBoardId } = req.params;
 
     if (mongoose.isValidObjectId(tacticBoardId)) {
@@ -195,12 +194,10 @@ export const updateMetaById = asyncHandler(
         // Authorization check
         if (
           findResult.user &&
-          // @ts-ignore
-          (!req.UserInfo.id || req.UserInfo.id != findResult.user.toString()) &&
-          // @ts-ignore
-          !req.UserInfo.roles.includes("Admin") &&
-          // @ts-ignore
-          !req.UserInfo.roles.includes("admin")
+          (!req.UserInfo?.id ||
+            req.UserInfo.id != findResult.user.toString()) &&
+          !req.UserInfo?.roles?.includes("Admin") &&
+          !req.UserInfo?.roles?.includes("admin")
         ) {
           res.status(403).json({ message: "Forbidden" });
           return;
@@ -240,41 +237,41 @@ export const updateMetaById = asyncHandler(
 // @desc    Delete tacticboard by ID
 // @route   DELETE /api/tacticboards/:id
 // @access  Private - Owner or Admin only
-export const deleteById = asyncHandler(async (req: Request, res: Response) => {
-  if (mongoose.isValidObjectId(req.params.id)) {
-    const findResult = await TacticBoard.findOne({ _id: req.params.id });
-    if (findResult) {
-      if (
-        findResult.user &&
-        // @ts-ignore
-        (!req.UserInfo.id || req.UserInfo.id != findResult.user?.toString()) &&
-        // @ts-ignore
-        !req.UserInfo.roles.includes("Admin") &&
-        // @ts-ignore
-        !req.UserInfo.roles.includes("admin")
-      ) {
-        res.status(403).json({ message: "Forbidden" });
-        return;
-      }
-      const result = await TacticBoard.deleteOne({ _id: req.params.id });
-      if (result.deletedCount > 0) {
-        res.json({ message: "Tacticboard deleted successfully" });
+export const deleteById = asyncHandler(
+  async (req: RequestWithUser, res: Response) => {
+    if (mongoose.isValidObjectId(req.params.id)) {
+      const findResult = await TacticBoard.findOne({ _id: req.params.id });
+      if (findResult) {
+        if (
+          findResult.user &&
+          (!req.UserInfo?.id ||
+            req.UserInfo.id != findResult.user?.toString()) &&
+          !req.UserInfo?.roles?.includes("Admin") &&
+          !req.UserInfo?.roles?.includes("admin")
+        ) {
+          res.status(403).json({ message: "Forbidden" });
+          return;
+        }
+        const result = await TacticBoard.deleteOne({ _id: req.params.id });
+        if (result.deletedCount > 0) {
+          res.json({ message: "Tacticboard deleted successfully" });
+        } else {
+          res.status(404).json({ result: "No Record Found" });
+        }
       } else {
         res.status(404).json({ result: "No Record Found" });
       }
     } else {
-      res.status(404).json({ result: "No Record Found" });
+      res.status(400).json({ message: "Invalid ID format" });
     }
-  } else {
-    res.status(400).json({ message: "Invalid ID format" });
   }
-});
+);
 
 // @desc    Create new page in tacticboard
 // @route   POST /api/tacticboards/:id/newPage
 // @access  Private - Owner or Admin only
 export const createNewPage = asyncHandler(
-  async (req: Request, res: Response) => {
+  async (req: RequestWithUser, res: Response) => {
     const { id: tacticBoardId } = req.params;
 
     if (mongoose.isValidObjectId(tacticBoardId)) {
@@ -283,12 +280,10 @@ export const createNewPage = asyncHandler(
         // Authorization check
         if (
           findResult.user &&
-          // @ts-ignore
-          (!req.UserInfo.id || req.UserInfo.id != findResult.user.toString()) &&
-          // @ts-ignore
-          !req.UserInfo.roles.includes("Admin") &&
-          // @ts-ignore
-          !req.UserInfo.roles.includes("admin")
+          (!req.UserInfo?.id ||
+            req.UserInfo.id != findResult.user.toString()) &&
+          !req.UserInfo?.roles?.includes("Admin") &&
+          !req.UserInfo?.roles?.includes("admin")
         ) {
           res.status(403).json({ message: "Forbidden" });
           return;
@@ -318,7 +313,7 @@ export const createNewPage = asyncHandler(
 // @route   DELETE /api/tacticboards/:id/:pageId
 // @access  Private - Owner or Admin only
 export const deletePageById = asyncHandler(
-  async (req: Request, res: Response) => {
+  async (req: RequestWithUser, res: Response) => {
     const { id: tacticBoardId, pageId } = req.params;
 
     if (
@@ -330,12 +325,10 @@ export const deletePageById = asyncHandler(
         // Authorization check
         if (
           findResult.user &&
-          // @ts-ignore
-          (!req.UserInfo.id || req.UserInfo.id != findResult.user.toString()) &&
-          // @ts-ignore
-          !req.UserInfo.roles.includes("Admin") &&
-          // @ts-ignore
-          !req.UserInfo.roles.includes("admin")
+          (!req.UserInfo?.id ||
+            req.UserInfo.id != findResult.user.toString()) &&
+          !req.UserInfo?.roles?.includes("Admin") &&
+          !req.UserInfo?.roles?.includes("admin")
         ) {
           res.status(403).json({ message: "Forbidden" });
           return;
