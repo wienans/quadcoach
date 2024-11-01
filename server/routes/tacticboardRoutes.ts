@@ -16,7 +16,7 @@ router
   .put(tacticboardController.updateById)
   .delete(tacticboardController.deleteById);
 router
-  .route("/:id/:pageId")
+  .route("/:id/pages/:pageId")
   .patch(tacticboardController.updatePageById)
   .delete(tacticboardController.deletePageById);
 router.route("/:id/meta").patch(tacticboardController.updateMetaById);

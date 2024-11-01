@@ -31,7 +31,7 @@ export const tacticBoardApiSlice = quadcoachApi.injectEndpoints({
     >({
       query({ tacticboardId, pageId, pageData }) {
         return {
-          url: `/api/tacticboards/${tacticboardId}/${pageId}`,
+          url: `/api/tacticboards/${tacticboardId}/pages/${pageId}`,
           method: "patch",
           data: pageData,
         };
@@ -125,7 +125,7 @@ export const tacticBoardApiSlice = quadcoachApi.injectEndpoints({
       { tacticboardId: string; pageId: string }
     >({
       query: ({ tacticboardId, pageId }) => ({
-        url: `/api/tacticboards/${tacticboardId}/${pageId}`,
+        url: `/api/tacticboards/${tacticboardId}/pages/${pageId}`,
         method: "delete",
       }),
       invalidatesTags: () => [TagType.tacticboard, TagType.tacticboardTag],

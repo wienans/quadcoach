@@ -176,8 +176,6 @@ export const updatePageById = asyncHandler(
 // @access  Private - Owner or Admin only
 export const updateMetaById = asyncHandler(
   async (req: Request, res: Response) => {
-    console.log(JSON.stringify(res));
-    console.log(JSON.stringify(req));
     const { id: tacticBoardId } = req.params;
     if (mongoose.isValidObjectId(tacticBoardId)) {
       const findResult = await TacticBoard.findOne({ _id: tacticBoardId });

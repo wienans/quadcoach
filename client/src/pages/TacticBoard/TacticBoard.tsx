@@ -156,6 +156,7 @@ const TacticsBoard = (): JSX.Element => {
     if (!tacticBoard) return;
     const updatedTacticBoard: TacticBoard = cloneDeep(tacticBoard);
     updatedTacticBoard.pages[currentPage - 1] = {
+      ...updatedTacticBoard.pages[currentPage - 1],
       ...getAllObjectsJson(),
     } as TacticPage;
     updateTacticBoardPage({
