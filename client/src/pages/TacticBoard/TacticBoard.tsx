@@ -49,11 +49,12 @@ const TacticsBoard = (): JSX.Element => {
     skip: tacticBoardId == null,
   });
 
-  const [updateTacticBoard, { isLoading: isUpdateLoading }] =
-    useUpdateTacticBoardMutation();
-  const [updateTacticBoardPage] = useUpdateTacticBoardPageMutation();
-  const [createTacticBoardPage] = useCreateTacticBoardPageMutation();
-  const [deleteTacticBoardPage] = useDeleteTacticBoardPageMutation();
+  const [updateTacticBoardPage, { isLoading: isUpdatePageLoading }] =
+    useUpdateTacticBoardPageMutation();
+  const [createTacticBoardPage, { isLoading: isCreatePageLoading }] =
+    useCreateTacticBoardPageMutation();
+  const [deleteTacticBoardPage, { isLoading: isDeletePageLoading }] =
+    useDeleteTacticBoardPageMutation();
   const [deleteTacticBoard] = useDeleteTacticBoardMutation();
 
   const [currentPage, setPage] = useState<number>(1);
@@ -427,7 +428,12 @@ const TacticsBoard = (): JSX.Element => {
         >
           <TacticBoardTopMenu
             saveTacticBoard={saveTacticBoard}
-            isTacticBoardLoading={isTacticBoardLoading || isUpdateLoading}
+            isTacticBoardLoading={
+              isTacticBoardLoading ||
+              isUpdatePageLoading ||
+              isCreatePageLoading ||
+              isDeletePageLoading
+            }
             tacticBoard={tacticBoard}
             isPrivileged={isPrivileged}
             currentPage={currentPage}

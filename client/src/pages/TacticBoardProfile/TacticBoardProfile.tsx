@@ -75,8 +75,8 @@ const TacticBoardProfile = () => {
     skip: tacticBoardId == null,
   });
 
-  const [updateTacticBoard] = useUpdateTacticBoardMutation();
-  const [updateTacticBoardMeta] = useUpdateTacticBoardMetaMutation();
+  const [updateTacticBoardMeta, { isLoading: isUpdateTacticBoardMetaLoading }] =
+    useUpdateTacticBoardMetaMutation();
   const [
     deleteTacticBoard,
     {
@@ -96,7 +96,6 @@ const TacticBoardProfile = () => {
       isPrivate: tacticBoard?.isPrivate ?? false,
       tags: tacticBoard?.tags ?? [],
       creator: tacticBoard?.creator ?? "",
-      users: tacticBoard?.users ?? [userId],
       description: tacticBoard?.description ?? "",
       coaching_points: tacticBoard?.coaching_points ?? "",
     },
@@ -115,21 +114,17 @@ const TacticBoardProfile = () => {
           isPrivate,
           tags,
           description,
-          users,
+          user,
           creator,
           coaching_points,
         } = values;
-        // updateTacticBoard({
-        //   _id: tacticBoardId,
-        //   ...updatedTacticBoard,
-        // });
         updateTacticBoardMeta({
           tacticboardId: tacticBoardId,
           metaData: {
             name,
             isPrivate,
             creator,
-            users,
+            user,
             tags,
             description,
             coaching_points,
@@ -246,7 +241,11 @@ const TacticBoardProfile = () => {
                   <IconButton
                     onClick={onDeleteTacticBoardClick}
                     color="error"
-                    disabled={!tacticBoard || isDeleteTacticBoardLoading}
+                    disabled={
+                      !tacticBoard ||
+                      isDeleteTacticBoardLoading ||
+                      isUpdateTacticBoardMetaLoading
+                    }
                   >
                     <DeleteIcon />
                   </IconButton>
@@ -270,7 +269,11 @@ const TacticBoardProfile = () => {
                 <BottomNavigationAction
                   icon={<DeleteIcon />}
                   onClick={onDeleteTacticBoardClick}
-                  disabled={!tacticBoard || isDeleteTacticBoardLoading}
+                  disabled={
+                    !tacticBoard ||
+                    isDeleteTacticBoardLoading ||
+                    isUpdateTacticBoardMetaLoading
+                  }
                 />
               </Tooltip>
             </>
@@ -303,7 +306,8 @@ const TacticBoardProfile = () => {
                           render={() => {
                             return (
                               <div>
-                                {formik.values.tags?.length > 0 &&
+                                {formik.values.tags &&
+                                  formik.values.tags?.length > 0 &&
                                   formik.values.tags?.map((el, index) => {
                                     if (el != "") {
                                       return (
