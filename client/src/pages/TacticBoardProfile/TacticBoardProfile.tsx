@@ -24,7 +24,6 @@ import {
   useDeleteTacticBoardMutation,
   useGetTacticBoardQuery,
   useUpdateTacticBoardMetaMutation,
-  useUpdateTacticBoardMutation,
 } from "../../api/quadcoachApi/tacticboardApi";
 import { useParams, useNavigate } from "react-router-dom";
 import {
@@ -136,7 +135,7 @@ const TacticBoardProfile = () => {
 
   useEffect(() => {
     if (
-      tacticBoard?.users?.includes(userId) ||
+      tacticBoard?.user?.toString() === userId ||
       userRoles.includes("Admin") ||
       userRoles.includes("admin")
     ) {

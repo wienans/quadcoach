@@ -46,5 +46,5 @@ type TacticPage = {
   objects?: TacticsObject[];
   backgroundImage: TacticsBackImg;
 };
-
+export type TacticPageWithOutId = Omit<TacticPage, "_id">;
 export default TacticPage;

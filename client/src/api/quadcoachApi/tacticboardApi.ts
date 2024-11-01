@@ -1,6 +1,7 @@
 import { quadcoachApi } from "..";
 import { TagType } from "../enum";
 import { TacticBoard, TacticPage } from "./domain";
+import { TacticBoardWithOutIds } from "./domain/TacticBoard";
 export type GetTacticBoardRequest = {
   nameRegex?: string;
   tagString?: string;
@@ -61,8 +62,8 @@ export const tacticBoardApiSlice = quadcoachApi.injectEndpoints({
       ],
     }),
     addTacticBoard: builder.mutation<
-      { message: string },
-      Omit<TacticBoard, "_id">
+      { message: string; _id: string },
+      TacticBoardWithOutIds
     >({
       query(data) {
         return {

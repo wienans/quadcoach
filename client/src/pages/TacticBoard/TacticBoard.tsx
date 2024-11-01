@@ -11,7 +11,6 @@ import {
   useDeleteTacticBoardMutation,
   useDeleteTacticBoardPageMutation,
   useGetTacticBoardQuery,
-  useUpdateTacticBoardMutation,
   useUpdateTacticBoardPageMutation,
 } from "../../api/quadcoachApi/tacticboardApi";
 import "../fullscreen.css";

@@ -24,11 +24,7 @@ import {
   useLazyGetTacticBoardsQuery,
   useAddTacticBoardMutation,
 } from "../../api/quadcoachApi/tacticboardApi";
-import {
-  TacticBoardWithOutId,
-  TacticBoard,
-} from "../../api/quadcoachApi/domain";
-import TacticPage from "../../api/quadcoachApi/domain/TacticPage";
+import { TacticPageWithOutId } from "../../api/quadcoachApi/domain/TacticPage";
 import { useTranslation } from "react-i18next";
 import FilterAltIcon from "@mui/icons-material/FilterAlt";
 import GridViewIcon from "@mui/icons-material/GridView";
@@ -39,6 +35,7 @@ import AddIcon from "@mui/icons-material/Add";
 import { DashboardLayout } from "../../components/LayoutContainers";
 import { useAuth } from "../../store/hooks";
 import Footer from "../../components/Footer";
+import { TacticBoardWithOutIds } from "../../api/quadcoachApi/domain/TacticBoard";
 
 enum ViewType {
   List = "List",
@@ -119,7 +116,7 @@ const TacticBoardList = () => {
     backgroundImage: string | undefined,
   ) => {
     if (name) {
-      const emptyPage: TacticPage = {
+      const emptyPage: TacticPageWithOutId = {
         objects: undefined,
         backgroundImage: {
           type: "image",
@@ -128,7 +125,7 @@ const TacticBoardList = () => {
           height: 686,
         },
       };
-      const newTacticBoard: TacticBoardWithOutId = {
+      const newTacticBoard: TacticBoardWithOutIds = {
         name: name,
         isPrivate: false,
         creator: userName,
@@ -137,7 +134,11 @@ const TacticBoardList = () => {
       };
 
       addTacticBoard(newTacticBoard).then(
-        (result: { data: TacticBoard } | { error: unknown }) => {
+        (
+          result:
+            | { data: { message: string; _id: string } }
+            | { error: unknown },
+        ) => {
           if ("error" in result) return;
           if (!result.data) return;
           navigate(`/tacticboards/${result.data._id}`);
