@@ -15,7 +15,7 @@ export const tacticBoardApiSlice = quadcoachApi.injectEndpoints({
       }),
       providesTags: () => [TagType.tacticboard],
     }),
-    updateTacticBoard: builder.mutation<TacticBoard, TacticBoard>({
+    updateTacticBoard: builder.mutation<{ message: string }, TacticBoard>({
       query(data) {
         return {
           url: `/api/tacticboards/${data._id}`,
@@ -26,7 +26,7 @@ export const tacticBoardApiSlice = quadcoachApi.injectEndpoints({
       invalidatesTags: () => [TagType.tacticboard, TagType.tacticboardTag],
     }),
     updateTacticBoardPage: builder.mutation<
-      TacticBoard,
+      { message: string },
       { tacticboardId: string; pageId: string; pageData: Partial<TacticPage> }
     >({
       query({ tacticboardId, pageId, pageData }) {
@@ -38,7 +38,7 @@ export const tacticBoardApiSlice = quadcoachApi.injectEndpoints({
       },
       invalidatesTags: () => [TagType.tacticboard, TagType.tacticboardTag],
     }),
-    deleteTacticBoard: builder.mutation<void, string>({
+    deleteTacticBoard: builder.mutation<{ message: string }, string>({
       query(tacticboardId) {
         return {
           url: `/api/tacticboards/${tacticboardId}`,
@@ -50,7 +50,10 @@ export const tacticBoardApiSlice = quadcoachApi.injectEndpoints({
         TagType.tacticboardTag,
       ],
     }),
-    addTacticBoard: builder.mutation<TacticBoard, Omit<TacticBoard, "_id">>({
+    addTacticBoard: builder.mutation<
+      { message: string },
+      Omit<TacticBoard, "_id">
+    >({
       query(data) {
         return {
           url: "/api/tacticboards",
@@ -108,7 +111,7 @@ export const tacticBoardApiSlice = quadcoachApi.injectEndpoints({
       providesTags: () => [TagType.tacticboardTag],
     }),
     createTacticBoardPage: builder.mutation<
-      TacticBoard,
+      { message: string },
       { tacticboardId: string; pageData: Partial<TacticPage> }
     >({
       query({ tacticboardId, pageData }) {
@@ -121,7 +124,7 @@ export const tacticBoardApiSlice = quadcoachApi.injectEndpoints({
       invalidatesTags: () => [TagType.tacticboard, TagType.tacticboardTag],
     }),
     deleteTacticBoardPage: builder.mutation<
-      void,
+      { message: string },
       { tacticboardId: string; pageId: string }
     >({
       query: ({ tacticboardId, pageId }) => ({
@@ -139,7 +142,7 @@ export const tacticBoardApiSlice = quadcoachApi.injectEndpoints({
           isPrivate?: boolean;
           tags?: string[];
           creator?: string;
-          users?: string[];
+          user?: string;
           description?: string;
           coaching_points?: string;
         };

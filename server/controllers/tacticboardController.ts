@@ -66,7 +66,7 @@ export const getById = asyncHandler(async (req: Request, res: Response) => {
       res.status(404).json({ result: "No Record Found" });
     }
   } else {
-    res.status(404).json({ result: "No Record Found" });
+    res.status(400).json({ message: "Invalid ID format" });
   }
 });
 
@@ -81,8 +81,10 @@ export const createNewTacticboard = asyncHandler(
       const result = await tacticboard.save();
       if (!result) {
         console.error("Couldn't create Tacticboard");
+        res.send({ message: "Couldn't create Tacticboard" });
+      } else {
+        res.send({ message: "Tacticboard created successfully" });
       }
-      res.send(result);
     } else {
       res.status(403).json({ message: "Forbidden" });
     }
@@ -112,12 +114,16 @@ export const updateById = asyncHandler(async (req: Request, res: Response) => {
         { _id: req.params.id },
         { $set: req.body }
       );
-      res.send(result);
+      if (result.modifiedCount > 0) {
+        res.json({ message: "Tacticboard updated successfully" });
+      } else {
+        res.json({ message: "No changes made" });
+      }
     } else {
-      res.send({ result: "No Record Found" });
+      res.status(404).json({ message: "TacticBoard not found" });
     }
   } else {
-    res.send({ result: "No Record Found" });
+    res.status(400).json({ message: "Invalid ID format" });
   }
 });
 
@@ -198,15 +204,8 @@ export const updateMetaById = asyncHandler(
         }
 
         // Destructure the fields to be updated from req.body, excluding `pages`
-        const {
-          name,
-          isPrivate,
-          tags,
-          creator,
-          users,
-          description,
-          coaching_points,
-        } = req.body;
+        const { name, isPrivate, tags, description, coaching_points } =
+          req.body;
 
         const result = await TacticBoard.updateOne(
           { _id: tacticBoardId },
@@ -215,7 +214,6 @@ export const updateMetaById = asyncHandler(
               name,
               isPrivate,
               tags,
-              creator,
               description,
               coaching_points,
             },
@@ -256,12 +254,16 @@ export const deleteById = asyncHandler(async (req: Request, res: Response) => {
         return;
       }
       const result = await TacticBoard.deleteOne({ _id: req.params.id });
-      res.send(result);
+      if (result.deletedCount > 0) {
+        res.json({ message: "Tacticboard deleted successfully" });
+      } else {
+        res.status(404).json({ result: "No Record Found" });
+      }
     } else {
-      res.send({ result: "No Record Found" });
+      res.status(404).json({ result: "No Record Found" });
     }
   } else {
-    res.send({ result: "No Record Found" });
+    res.status(400).json({ message: "Invalid ID format" });
   }
 });
 
@@ -296,7 +298,7 @@ export const createNewPage = asyncHandler(
         );
 
         if (result) {
-          res.json(result);
+          res.json({ message: "New page added successfully" });
         } else {
           res.status(404).json({ message: "Failed to add new page" });
         }
