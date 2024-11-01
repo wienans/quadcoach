@@ -50,7 +50,7 @@ const TacticBoardInProfile = ({
 
   useEffect(() => {
     if (
-      userId == tacticBoard?.user ||
+      tacticBoard?.users?.includes(userId) ||
       userRoles.includes("Admin") ||
       userRoles.includes("admin")
     ) {

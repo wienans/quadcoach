@@ -130,6 +130,30 @@ export const tacticBoardApiSlice = quadcoachApi.injectEndpoints({
       }),
       invalidatesTags: () => [TagType.tacticboard, TagType.tacticboardTag],
     }),
+    updateTacticBoardMeta: builder.mutation<
+      { message: string },
+      {
+        tacticboardId: string;
+        metaData: {
+          name?: string;
+          isPrivate?: boolean;
+          tags?: string[];
+          creator?: string;
+          users?: string[];
+          description?: string;
+          coaching_points?: string;
+        };
+      }
+    >({
+      query({ tacticboardId, metaData }) {
+        return {
+          url: `/api/tacticboards/${tacticboardId}/meta`,
+          method: "patch",
+          data: metaData,
+        };
+      },
+      invalidatesTags: () => [TagType.tacticboard, TagType.tacticboardTag],
+    }),
   }),
 });
 

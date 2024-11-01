@@ -20,7 +20,7 @@ export const getAllTacticboards = asyncHandler(
     //@ts-ignore
     if (req.UserInfo.id) {
       //@ts-ignore
-      parseObject.$or.push({ isPrivate: true, user: req.UserInfo.id });
+      parseObject.$or.push({ isPrivate: true, users: req.UserInfo.id });
     }
     //@ts-ignore
     if (
@@ -49,9 +49,9 @@ export const getById = asyncHandler(async (req: Request, res: Response) => {
     if (result) {
       if (
         result.isPrivate &&
-        result.user &&
+        result.users &&
         // @ts-ignore
-        (!req.UserInfo.id || req.UserInfo.id != result.user?.toString()) &&
+        (!req.UserInfo.id || !result.users.includes(req.UserInfo.id)) &&
         // @ts-ignore
         !req.UserInfo.roles.includes("Admin") &&
         // @ts-ignore
@@ -97,9 +97,9 @@ export const updateById = asyncHandler(async (req: Request, res: Response) => {
     const findResult = await TacticBoard.findOne({ _id: req.params.id });
     if (findResult) {
       if (
-        findResult.user &&
+        findResult.users &&
         // @ts-ignore
-        (!req.UserInfo.id || req.UserInfo.id != findResult.user?.toString()) &&
+        (!req.UserInfo.id || !findResult.users.includes(req.UserInfo.id)) &&
         // @ts-ignore
         !req.UserInfo.roles.includes("Admin") &&
         // @ts-ignore
@@ -134,11 +134,9 @@ export const updatePageById = asyncHandler(
       const findResult = await TacticBoard.findOne({ _id: req.params.id });
       if (findResult) {
         if (
-          findResult.user &&
+          findResult.users &&
           // @ts-ignore
-          (!req.UserInfo.id ||
-            // @ts-ignore
-            req.UserInfo.id != findResult.user?.toString()) &&
+          (!req.UserInfo.id || !findResult.users.includes(req.UserInfo.id)) &&
           // @ts-ignore
           !req.UserInfo.roles.includes("Admin") &&
           // @ts-ignore
@@ -178,16 +176,17 @@ export const updatePageById = asyncHandler(
 // @access  Private - Owner or Admin only
 export const updateMetaById = asyncHandler(
   async (req: Request, res: Response) => {
+    console.log(JSON.stringify(res));
+    console.log(JSON.stringify(req));
     const { id: tacticBoardId } = req.params;
-
     if (mongoose.isValidObjectId(tacticBoardId)) {
       const findResult = await TacticBoard.findOne({ _id: tacticBoardId });
       if (findResult) {
         // Authorization check
         if (
-          findResult.user &&
+          findResult.users &&
           // @ts-ignore
-          (!req.UserInfo.id || req.UserInfo.id != findResult.user.toString()) &&
+          (!req.UserInfo.id || !findResult.users.includes(req.UserInfo.id)) &&
           // @ts-ignore
           !req.UserInfo.roles.includes("Admin") &&
           // @ts-ignore
@@ -198,8 +197,15 @@ export const updateMetaById = asyncHandler(
         }
 
         // Destructure the fields to be updated from req.body, excluding `pages`
-        const { name, isPrivate, tags, creator, description, coaching_points } =
-          req.body;
+        const {
+          name,
+          isPrivate,
+          tags,
+          creator,
+          users,
+          description,
+          coaching_points,
+        } = req.body;
 
         const result = await TacticBoard.updateOne(
           { _id: tacticBoardId },
@@ -209,6 +215,7 @@ export const updateMetaById = asyncHandler(
               isPrivate,
               tags,
               creator,
+              users,
               description,
               coaching_points,
             },
@@ -237,9 +244,9 @@ export const deleteById = asyncHandler(async (req: Request, res: Response) => {
     const findResult = await TacticBoard.findOne({ _id: req.params.id });
     if (findResult) {
       if (
-        findResult.user &&
+        findResult.users &&
         // @ts-ignore
-        (!req.UserInfo.id || req.UserInfo.id != findResult.user?.toString()) &&
+        (!req.UserInfo.id || !findResult.users.includes(req.UserInfo.id)) &&
         // @ts-ignore
         !req.UserInfo.roles.includes("Admin") &&
         // @ts-ignore
@@ -270,9 +277,9 @@ export const createNewPage = asyncHandler(
       if (findResult) {
         // Authorization check
         if (
-          findResult.user &&
+          findResult.users &&
           // @ts-ignore
-          (!req.UserInfo.id || req.UserInfo.id != findResult.user.toString()) &&
+          (!req.UserInfo.id || !findResult.users.includes(req.UserInfo.id)) &&
           // @ts-ignore
           !req.UserInfo.roles.includes("Admin") &&
           // @ts-ignore
@@ -317,9 +324,9 @@ export const deletePageById = asyncHandler(
       if (findResult) {
         // Authorization check
         if (
-          findResult.user &&
+          findResult.users &&
           // @ts-ignore
-          (!req.UserInfo.id || req.UserInfo.id != findResult.user.toString()) &&
+          (!req.UserInfo.id || !findResult.users.includes(req.UserInfo.id)) &&
           // @ts-ignore
           !req.UserInfo.roles.includes("Admin") &&
           // @ts-ignore

@@ -7,7 +7,7 @@ type TacticBoard = {
   isPrivate?: boolean;
   tags?: string[];
   creator?: string;
-  user?: string;
+  users?: string[];
   pages: TacticPage[];
   description?: string;
   coaching_points?: string;

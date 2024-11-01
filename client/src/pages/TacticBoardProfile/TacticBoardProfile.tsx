@@ -23,6 +23,7 @@ import { SoftBox, SoftInput, SoftTypography } from "../../components";
 import {
   useDeleteTacticBoardMutation,
   useGetTacticBoardQuery,
+  useUpdateTacticBoardMetaMutation,
   useUpdateTacticBoardMutation,
 } from "../../api/quadcoachApi/tacticboardApi";
 import { useParams, useNavigate } from "react-router-dom";
@@ -75,7 +76,7 @@ const TacticBoardProfile = () => {
   });
 
   const [updateTacticBoard] = useUpdateTacticBoardMutation();
-
+  const [updateTacticBoardMeta] = useUpdateTacticBoardMetaMutation();
   const [
     deleteTacticBoard,
     {
@@ -95,6 +96,7 @@ const TacticBoardProfile = () => {
       isPrivate: tacticBoard?.isPrivate ?? false,
       tags: tacticBoard?.tags ?? [],
       creator: tacticBoard?.creator ?? "",
+      users: tacticBoard?.users ?? [userId],
       description: tacticBoard?.description ?? "",
       coaching_points: tacticBoard?.coaching_points ?? "",
     },
@@ -108,19 +110,30 @@ const TacticBoardProfile = () => {
 
     onSubmit: (values) => {
       if (tacticBoardId) {
-        const { name, isPrivate, tags, pages, description, coaching_points } =
-          values;
-        const updatedTacticBoard: TacticBoardPartialId = {
+        const {
           name,
           isPrivate,
-          pages,
           tags,
           description,
+          users,
+          creator,
           coaching_points,
-        };
-        updateTacticBoard({
-          _id: tacticBoardId,
-          ...updatedTacticBoard,
+        } = values;
+        // updateTacticBoard({
+        //   _id: tacticBoardId,
+        //   ...updatedTacticBoard,
+        // });
+        updateTacticBoardMeta({
+          tacticboardId: tacticBoardId,
+          metaData: {
+            name,
+            isPrivate,
+            creator,
+            users,
+            tags,
+            description,
+            coaching_points,
+          },
         });
       }
     },
@@ -128,7 +141,7 @@ const TacticBoardProfile = () => {
 
   useEffect(() => {
     if (
-      userId == tacticBoard?.user ||
+      tacticBoard?.users?.includes(userId) ||
       userRoles.includes("Admin") ||
       userRoles.includes("admin")
     ) {
