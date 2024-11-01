@@ -1,6 +1,6 @@
 import { quadcoachApi } from "..";
 import { TagType } from "../enum";
-import { TacticBoard } from "./domain";
+import { TacticBoard, TacticPage } from "./domain";
 export type GetTacticBoardRequest = {
   nameRegex?: string;
   tagString?: string;
@@ -25,15 +25,28 @@ export const tacticBoardApiSlice = quadcoachApi.injectEndpoints({
       },
       invalidatesTags: () => [TagType.tacticboard, TagType.tacticboardTag],
     }),
-    deleteTacticBoard: builder.mutation<void, string>({
-      query(exerciseId) {
+    updateTacticBoardPage: builder.mutation<
+      TacticBoard,
+      { tacticboardId: string; pageId: string; pageData: Partial<TacticPage> }
+    >({
+      query({ tacticboardId, pageId, pageData }) {
         return {
-          url: `/api/tacticboards/${exerciseId}`,
+          url: `/api/tacticboards/${tacticboardId}/${pageId}`,
+          method: "patch",
+          data: pageData,
+        };
+      },
+      invalidatesTags: () => [TagType.tacticboard, TagType.tacticboardTag],
+    }),
+    deleteTacticBoard: builder.mutation<void, string>({
+      query(tacticboardId) {
+        return {
+          url: `/api/tacticboards/${tacticboardId}`,
           method: "delete",
         };
       },
-      invalidatesTags: (_result, _error, exerciseId) => [
-        { type: TagType.tacticboard, id: exerciseId },
+      invalidatesTags: (_result, _error, tacticboardId) => [
+        { type: TagType.tacticboard, id: tacticboardId },
         TagType.tacticboardTag,
       ],
     }),
@@ -94,6 +107,29 @@ export const tacticBoardApiSlice = quadcoachApi.injectEndpoints({
       },
       providesTags: () => [TagType.tacticboardTag],
     }),
+    createTacticBoardPage: builder.mutation<
+      TacticBoard,
+      { tacticboardId: string; pageData: Partial<TacticPage> }
+    >({
+      query({ tacticboardId, pageData }) {
+        return {
+          url: `/api/tacticboards/${tacticboardId}/newPage`,
+          method: "post",
+          data: pageData,
+        };
+      },
+      invalidatesTags: () => [TagType.tacticboard, TagType.tacticboardTag],
+    }),
+    deleteTacticBoardPage: builder.mutation<
+      void,
+      { tacticboardId: string; pageId: string }
+    >({
+      query: ({ tacticboardId, pageId }) => ({
+        url: `/api/tacticboards/${tacticboardId}/${pageId}`,
+        method: "delete",
+      }),
+      invalidatesTags: () => [TagType.tacticboard, TagType.tacticboardTag],
+    }),
   }),
 });
 
@@ -102,7 +138,11 @@ export const {
   useLazyGetTacticBoardsQuery,
   useDeleteTacticBoardMutation,
   useUpdateTacticBoardMutation,
+  useUpdateTacticBoardMetaMutation,
+  useUpdateTacticBoardPageMutation,
   useAddTacticBoardMutation,
   useGetTacticBoardsQuery,
   useGetAllTacticBoardTagsQuery,
+  useCreateTacticBoardPageMutation,
+  useDeleteTacticBoardPageMutation,
 } = tacticBoardApiSlice;

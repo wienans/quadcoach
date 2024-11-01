@@ -7,9 +7,12 @@ import { useTranslation } from "react-i18next";
 import { FabricJsCanvas, SoftBox } from "../../components";
 import cloneDeep from "lodash/cloneDeep";
 import {
+  useCreateTacticBoardPageMutation,
   useDeleteTacticBoardMutation,
+  useDeleteTacticBoardPageMutation,
   useGetTacticBoardQuery,
   useUpdateTacticBoardMutation,
+  useUpdateTacticBoardPageMutation,
 } from "../../api/quadcoachApi/tacticboardApi";
 import "../fullscreen.css";
 import { TacticBoard, TacticPage } from "../../api/quadcoachApi/domain";
@@ -46,8 +49,11 @@ const TacticsBoard = (): JSX.Element => {
     skip: tacticBoardId == null,
   });
 
-  const [updateTacticBoard] = useUpdateTacticBoardMutation();
-
+  const [updateTacticBoard, { isLoading: isUpdateLoading }] =
+    useUpdateTacticBoardMutation();
+  const [updateTacticBoardPage] = useUpdateTacticBoardPageMutation();
+  const [createTacticBoardPage] = useCreateTacticBoardPageMutation();
+  const [deleteTacticBoardPage] = useDeleteTacticBoardPageMutation();
   const [deleteTacticBoard] = useDeleteTacticBoardMutation();
 
   const [currentPage, setPage] = useState<number>(1);
@@ -70,34 +76,56 @@ const TacticsBoard = (): JSX.Element => {
     (page: number, newPage?: boolean, removePage?: boolean) => {
       if (newPage && removePage) return;
       if (!tacticBoard) return;
+      console.log(tacticBoard);
       const updatedTacticBoard: TacticBoard = cloneDeep(tacticBoard);
       if (isPrivileged && isEditMode) {
         if (newPage) {
-          // Save the last state of the old page
-          updatedTacticBoard.pages[page - 2] = {
-            ...getAllObjectsJson(),
-          } as TacticPage;
-          // Copy the state of the old page to the new page
           updatedTacticBoard.pages[page - 1] = {
+            ...updatedTacticBoard.pages[page - 1],
             ...getAllObjectsJson(),
           } as TacticPage;
-          updateTacticBoard(updatedTacticBoard);
+          updateTacticBoardPage({
+            tacticboardId: tacticBoard._id,
+            pageId: updatedTacticBoard.pages[page - 2]._id,
+            pageData: getAllObjectsJson(),
+          });
+          createTacticBoardPage({
+            tacticboardId: tacticBoard._id,
+            pageData: getAllObjectsJson(),
+          });
         } else if (removePage) {
           // Remove Last Page
+          deleteTacticBoardPage({
+            tacticboardId: tacticBoard._id,
+            pageId:
+              updatedTacticBoard.pages[updatedTacticBoard.pages.length - 1]._id,
+          });
           updatedTacticBoard.pages.pop();
-          updateTacticBoard(updatedTacticBoard);
+          // updateTacticBoard(updatedTacticBoard);
         } else if (page > currentPage) {
           // Go to next page
           updatedTacticBoard.pages[page - 2] = {
+            ...updatedTacticBoard.pages[page - 2],
             ...getAllObjectsJson(),
           } as TacticPage;
-          updateTacticBoard(updatedTacticBoard);
+          updateTacticBoardPage({
+            tacticboardId: tacticBoard._id,
+            pageId: updatedTacticBoard.pages[page - 2]._id,
+            pageData: updatedTacticBoard.pages[page - 2],
+          });
+          //updateTacticBoard(updatedTacticBoard);
         } else if (page < currentPage) {
           // go to previous page
           updatedTacticBoard.pages[page] = {
+            ...updatedTacticBoard.pages[page],
             ...getAllObjectsJson(),
           } as TacticPage;
-          updateTacticBoard(updatedTacticBoard);
+          updateTacticBoardPage({
+            tacticboardId: tacticBoard._id,
+            pageId: updatedTacticBoard.pages[page]._id,
+            pageData: updatedTacticBoard.pages[page],
+          });
+          //updateTacticBoard(updatedTacticBoard);
         }
       }
       loadFromJson(updatedTacticBoard.pages[page - 1]);
@@ -111,13 +139,15 @@ const TacticsBoard = (): JSX.Element => {
     },
     [
       tacticBoard,
-      currentPage,
-      loadFromJson,
       isPrivileged,
       isEditMode,
+      loadFromJson,
       setControls,
+      currentPage,
       getAllObjectsJson,
-      updateTacticBoard,
+      updateTacticBoardPage,
+      createTacticBoardPage,
+      deleteTacticBoardPage,
       setSelection,
     ],
   );
@@ -128,8 +158,13 @@ const TacticsBoard = (): JSX.Element => {
     updatedTacticBoard.pages[currentPage - 1] = {
       ...getAllObjectsJson(),
     } as TacticPage;
-    updateTacticBoard(updatedTacticBoard);
-  }, [tacticBoard, currentPage, getAllObjectsJson, updateTacticBoard]);
+    updateTacticBoardPage({
+      tacticboardId: tacticBoard._id,
+      pageId: updatedTacticBoard.pages[currentPage - 1]._id,
+      pageData: getAllObjectsJson(),
+    });
+    //updateTacticBoard(updatedTacticBoard);
+  }, [tacticBoard, currentPage, getAllObjectsJson, updateTacticBoardPage]);
 
   const onDeleteTacticBoardClick = () => {
     if (!tacticBoard) return;
@@ -391,7 +426,7 @@ const TacticsBoard = (): JSX.Element => {
         >
           <TacticBoardTopMenu
             saveTacticBoard={saveTacticBoard}
-            isTacticBoardLoading={isTacticBoardLoading}
+            isTacticBoardLoading={isTacticBoardLoading || isUpdateLoading}
             tacticBoard={tacticBoard}
             isPrivileged={isPrivileged}
             currentPage={currentPage}

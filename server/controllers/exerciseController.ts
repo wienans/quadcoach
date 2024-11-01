@@ -3,8 +3,9 @@ import { Request, Response } from "express";
 import Exercise from "../models/exercise";
 import mongoose from "mongoose";
 
-// @route GET
-// @access public
+// @desc    Get all exercises
+// @route   GET /api/exercises
+// @access  Public
 export const getAllExercises = asyncHandler(
   async (req: Request, res: Response) => {
     let queryString: string = JSON.stringify(req.query);
@@ -20,8 +21,9 @@ export const getAllExercises = asyncHandler(
   }
 );
 
-// @route GET
-// @access Public
+// @desc    Get exercise by ID
+// @route   GET /api/exercises/:id
+// @access  Public
 export const getById = asyncHandler(async (req: Request, res: Response) => {
   if (mongoose.isValidObjectId(req.params.id)) {
     const result = await Exercise.findOne({ _id: req.params.id });
@@ -35,8 +37,9 @@ export const getById = asyncHandler(async (req: Request, res: Response) => {
   }
 });
 
-// @route POST
-// @access Public
+// @desc    Create new exercise
+// @route   POST /api/exercises
+// @access  Private - Authenticated users only
 export const createNewExercise = asyncHandler(
   async (req: Request, res: Response) => {
     // @ts-ignore
@@ -53,8 +56,9 @@ export const createNewExercise = asyncHandler(
   }
 );
 
-// @route PATCH
-// @access Private
+// @desc    Update exercise by ID
+// @route   PATCH /api/exercises/:id
+// @access  Private - Owner or Admin only
 export const updateById = asyncHandler(async (req: Request, res: Response) => {
   if (mongoose.isValidObjectId(req.params.id)) {
     const findResult = await Exercise.findOne({ _id: req.params.id });
@@ -84,8 +88,9 @@ export const updateById = asyncHandler(async (req: Request, res: Response) => {
   }
 });
 
-// @route DELETE
-// @access Private
+// @desc    Delete exercise by ID
+// @route   DELETE /api/exercises/:id
+// @access  Private - Owner or Admin only
 export const deleteById = asyncHandler(async (req: Request, res: Response) => {
   if (mongoose.isValidObjectId(req.params.id)) {
     const findResult = await Exercise.findOne({ _id: req.params.id });
@@ -112,8 +117,9 @@ export const deleteById = asyncHandler(async (req: Request, res: Response) => {
   }
 });
 
-// @route GET
-// @access Public
+// @desc    Get related exercises by ID
+// @route   GET /api/exercises/:id/related
+// @access  Public
 export const getRelatedById = asyncHandler(
   async (req: Request, res: Response) => {
     if (mongoose.isValidObjectId(req.params.id)) {

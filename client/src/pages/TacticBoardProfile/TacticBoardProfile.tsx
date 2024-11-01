@@ -290,19 +290,21 @@ const TacticBoardProfile = () => {
                           render={() => {
                             return (
                               <div>
-                                {formik.values.tags?.map((el, index) => {
-                                  if (el != "") {
-                                    return (
-                                      <Chip
-                                        size="small"
-                                        key={el + index}
-                                        label={el}
-                                        sx={{ margin: "2px" }}
-                                        variant={"outlined"}
-                                      />
-                                    );
-                                  }
-                                })}
+                                {formik.values.tags?.length > 0 &&
+                                  formik.values.tags?.map((el, index) => {
+                                    if (el != "") {
+                                      return (
+                                        <Chip
+                                          size="small"
+                                          key={el + index}
+                                          label={el}
+                                          sx={{ margin: "2px" }}
+                                          variant={"outlined"}
+                                        />
+                                      );
+                                    }
+                                  })}
+                                {formik.values.tags?.length == 0 && "No Tags"}
                               </div>
                             );
                           }}

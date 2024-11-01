@@ -41,6 +41,7 @@ type TacticsObject = {
 };
 
 type TacticPage = {
+  _id: string;
   version?: string;
   objects?: TacticsObject[];
   backgroundImage: TacticsBackImg;

@@ -3,8 +3,9 @@ import { Request, Response } from "express";
 import TacticBoard from "../models/tacticboard";
 import mongoose from "mongoose";
 
-// @route GET
-// @access public
+// @desc    Get all tacticboards
+// @route   GET /api/tacticboards
+// @access  Public - Returns only public boards and user's private boards
 export const getAllTacticboards = asyncHandler(
   async (req: Request, res: Response) => {
     let queryString: string = JSON.stringify(req.query);
@@ -38,8 +39,9 @@ export const getAllTacticboards = asyncHandler(
   }
 );
 
-// @route GET
-// @access public
+// @desc    Get tacticboard by ID
+// @route   GET /api/tacticboards/:id
+// @access  Public - Returns public board or user's private board
 export const getById = asyncHandler(async (req: Request, res: Response) => {
   if (mongoose.isValidObjectId(req.params.id)) {
     const result = await TacticBoard.findOne({ _id: req.params.id });
@@ -68,8 +70,9 @@ export const getById = asyncHandler(async (req: Request, res: Response) => {
   }
 });
 
-// @route POST
-// @access public
+// @desc    Create new tacticboard
+// @route   POST /api/tacticboards
+// @access  Private - Authenticated users only
 export const createNewTacticboard = asyncHandler(
   async (req: Request, res: Response) => {
     // @ts-ignore
@@ -86,13 +89,13 @@ export const createNewTacticboard = asyncHandler(
   }
 );
 
-// @route PATCH
-// @access Private
+// @desc    Update entire tacticboard by ID
+// @route   PATCH /api/tacticboards/:id
+// @access  Private - Owner or Admin only
 export const updateById = asyncHandler(async (req: Request, res: Response) => {
   if (mongoose.isValidObjectId(req.params.id)) {
     const findResult = await TacticBoard.findOne({ _id: req.params.id });
     if (findResult) {
-      console.log(findResult.user);
       if (
         findResult.user &&
         // @ts-ignore
@@ -118,8 +121,117 @@ export const updateById = asyncHandler(async (req: Request, res: Response) => {
   }
 });
 
-// @route DELETE
-// @access Private
+// @desc    Update specific page in tacticboard
+// @route   PATCH /api/tacticboards/:id/:pageId
+// @access  Private - Owner or Admin only
+export const updatePageById = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { id: tacticBoardId, pageId } = req.params;
+    if (
+      mongoose.isValidObjectId(tacticBoardId) &&
+      mongoose.isValidObjectId(pageId)
+    ) {
+      const findResult = await TacticBoard.findOne({ _id: req.params.id });
+      if (findResult) {
+        if (
+          findResult.user &&
+          // @ts-ignore
+          (!req.UserInfo.id ||
+            // @ts-ignore
+            req.UserInfo.id != findResult.user?.toString()) &&
+          // @ts-ignore
+          !req.UserInfo.roles.includes("Admin") &&
+          // @ts-ignore
+          !req.UserInfo.roles.includes("admin")
+        ) {
+          res.status(403).json({ message: "Forbidden" });
+          return;
+        }
+        // Update specific page within the pages array
+        const result = await TacticBoard.updateOne(
+          { _id: tacticBoardId, "pages._id": pageId }, // Match TacticBoard and specific page
+          {
+            $set: {
+              "pages.$[page]": req.body,
+            },
+          },
+          {
+            arrayFilters: [{ "page._id": pageId }], // Apply update to the matching page only
+          }
+        );
+        if (result.modifiedCount > 0) {
+          res.json({ message: "Page updated successfully" });
+        } else {
+          res.status(404).json({ message: "Page not found" });
+        }
+      } else {
+        res.status(404).json({ message: "TacticBoard not found" });
+      }
+    } else {
+      res.status(400).json({ message: "Invalid ID format" });
+    }
+  }
+);
+
+// @desc    Update tacticboard metadata only
+// @route   PATCH /api/tacticboards/:id/meta
+// @access  Private - Owner or Admin only
+export const updateMetaById = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { id: tacticBoardId } = req.params;
+
+    if (mongoose.isValidObjectId(tacticBoardId)) {
+      const findResult = await TacticBoard.findOne({ _id: tacticBoardId });
+      if (findResult) {
+        // Authorization check
+        if (
+          findResult.user &&
+          // @ts-ignore
+          (!req.UserInfo.id || req.UserInfo.id != findResult.user.toString()) &&
+          // @ts-ignore
+          !req.UserInfo.roles.includes("Admin") &&
+          // @ts-ignore
+          !req.UserInfo.roles.includes("admin")
+        ) {
+          res.status(403).json({ message: "Forbidden" });
+          return;
+        }
+
+        // Destructure the fields to be updated from req.body, excluding `pages`
+        const { name, isPrivate, tags, creator, description, coaching_points } =
+          req.body;
+
+        const result = await TacticBoard.updateOne(
+          { _id: tacticBoardId },
+          {
+            $set: {
+              name,
+              isPrivate,
+              tags,
+              creator,
+              description,
+              coaching_points,
+            },
+          }
+        );
+
+        if (result.modifiedCount > 0) {
+          res.json({ message: "TacticBoard updated successfully" });
+        } else {
+          res.status(404).json({ message: "No changes made" });
+        }
+      } else {
+        res.status(404).json({ message: "TacticBoard not found" });
+      }
+    } else {
+      res.status(400).json({ message: "Invalid ID format" });
+    }
+  }
+);
+
+// @desc    Delete tacticboard by ID
+// @route   DELETE /api/tacticboards/:id
+// @access  Private - Owner or Admin only
 export const deleteById = asyncHandler(async (req: Request, res: Response) => {
   if (mongoose.isValidObjectId(req.params.id)) {
     const findResult = await TacticBoard.findOne({ _id: req.params.id });
@@ -145,3 +257,93 @@ export const deleteById = asyncHandler(async (req: Request, res: Response) => {
     res.send({ result: "No Record Found" });
   }
 });
+
+// @desc    Create new page in tacticboard
+// @route   POST /api/tacticboards/:id/newPage
+// @access  Private - Owner or Admin only
+export const createNewPage = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { id: tacticBoardId } = req.params;
+
+    if (mongoose.isValidObjectId(tacticBoardId)) {
+      const findResult = await TacticBoard.findOne({ _id: tacticBoardId });
+      if (findResult) {
+        // Authorization check
+        if (
+          findResult.user &&
+          // @ts-ignore
+          (!req.UserInfo.id || req.UserInfo.id != findResult.user.toString()) &&
+          // @ts-ignore
+          !req.UserInfo.roles.includes("Admin") &&
+          // @ts-ignore
+          !req.UserInfo.roles.includes("admin")
+        ) {
+          res.status(403).json({ message: "Forbidden" });
+          return;
+        }
+
+        // Add new page to the pages array
+        const result = await TacticBoard.findOneAndUpdate(
+          { _id: tacticBoardId },
+          { $push: { pages: req.body } }
+        );
+
+        if (result) {
+          res.json(result);
+        } else {
+          res.status(404).json({ message: "Failed to add new page" });
+        }
+      } else {
+        res.status(404).json({ message: "TacticBoard not found" });
+      }
+    } else {
+      res.status(400).json({ message: "Invalid ID format" });
+    }
+  }
+);
+
+// @desc    Delete page from tacticboard
+// @route   DELETE /api/tacticboards/:id/:pageId
+// @access  Private - Owner or Admin only
+export const deletePageById = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { id: tacticBoardId, pageId } = req.params;
+
+    if (
+      mongoose.isValidObjectId(tacticBoardId) &&
+      mongoose.isValidObjectId(pageId)
+    ) {
+      const findResult = await TacticBoard.findOne({ _id: tacticBoardId });
+      if (findResult) {
+        // Authorization check
+        if (
+          findResult.user &&
+          // @ts-ignore
+          (!req.UserInfo.id || req.UserInfo.id != findResult.user.toString()) &&
+          // @ts-ignore
+          !req.UserInfo.roles.includes("Admin") &&
+          // @ts-ignore
+          !req.UserInfo.roles.includes("admin")
+        ) {
+          res.status(403).json({ message: "Forbidden" });
+          return;
+        }
+
+        const result = await TacticBoard.updateOne(
+          { _id: tacticBoardId },
+          { $pull: { pages: { _id: pageId } } }
+        );
+
+        if (result.modifiedCount > 0) {
+          res.json({ message: "Page deleted successfully" });
+        } else {
+          res.status(404).json({ message: "Page not found" });
+        }
+      } else {
+        res.status(404).json({ message: "TacticBoard not found" });
+      }
+    } else {
+      res.status(400).json({ message: "Invalid ID format" });
+    }
+  }
+);
