@@ -1,7 +1,6 @@
 import { Autocomplete, CircularProgress, TextField } from "@mui/material";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useLazyGetAllMaterialsQuery } from "../../../pages/exerciseApi";
-import debounce from "lodash/debounce";
 
 export type MaterialAutocompleteProps = {
   selectedMaterials: string[];
@@ -18,21 +17,10 @@ const MaterialAutocomplete = ({
   const [getMaterials, { data: materials, isLoading: isMaterialsLoading }] =
     useLazyGetAllMaterialsQuery();
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const debouncedGetMaterials = useCallback(
-    debounce((search: string) => {
-      getMaterials(search || undefined);
-    }, 300),
-    [getMaterials],
-  );
-
   useEffect(() => {
-    debouncedGetMaterials(searchValue);
-    // Cleanup
-    return () => {
-      debouncedGetMaterials.cancel();
-    };
-  }, [searchValue, debouncedGetMaterials]);
+    // Load initial data
+    getMaterials(undefined);
+  }, [getMaterials]);
 
   const filteredOptions = [
     ...(materials?.filter(

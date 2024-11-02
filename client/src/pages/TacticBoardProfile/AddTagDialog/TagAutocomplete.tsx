@@ -1,7 +1,6 @@
 import { Autocomplete, CircularProgress, TextField } from "@mui/material";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useLazyGetAllTacticBoardTagsQuery } from "../../../api/quadcoachApi/tacticboardApi";
-import debounce from "lodash/debounce";
 
 export type TagAutocompleteProps = {
   selectedTags: string[];
@@ -18,21 +17,10 @@ const TagAutocomplete = ({
   const [getTags, { data: tags, isLoading: isTagsLoading }] =
     useLazyGetAllTacticBoardTagsQuery();
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const debouncedGetTags = useCallback(
-    debounce((search: string) => {
-      getTags(search || undefined);
-    }, 300),
-    [getTags],
-  );
-
   useEffect(() => {
-    debouncedGetTags(searchValue);
-    // Cleanup
-    return () => {
-      debouncedGetTags.cancel();
-    };
-  }, [searchValue, debouncedGetTags]);
+    // Load initial data
+    getTags(undefined);
+  }, [getTags]);
 
   const filteredOptions = [
     ...(tags?.filter((tag) => !alreadyAddedTags.some((rel) => rel === tag)) ??
