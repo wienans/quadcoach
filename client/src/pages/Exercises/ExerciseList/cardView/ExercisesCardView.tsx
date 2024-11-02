@@ -70,7 +70,7 @@ const ExercisesCardView = ({
           sx={{ position: "fixed", bottom: 0, left: 0, right: 0 }}
           elevation={3}
         >
-          <BottomNavigation showLabels={false}>
+          <BottomNavigation>
             <BottomNavigationAction
               icon={<Icon>{miniSidenav ? "menu_open" : "menu"}</Icon>}
               onClick={handleMiniSidenav}

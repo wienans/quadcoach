@@ -98,20 +98,22 @@ const TacticBoardTopMenu = ({
         }}
       >
         <Tooltip title={t("TacticBoard:topMenu.backButton.tooltip")}>
-          <ToggleButton
-            disabled={isTacticBoardLoading}
-            value={false}
-            size="small"
-            selected={false}
-            onChange={() => {
-              navigate(`/tacticboards/${tacticBoard._id}`);
-            }}
-            sx={{
-              mr: 1,
-            }}
-          >
-            <ArrowBackIcon sx={{ color: "#000000" }} />
-          </ToggleButton>
+          <span>
+            <ToggleButton
+              disabled={isTacticBoardLoading}
+              value={false}
+              size="small"
+              selected={false}
+              onChange={() => {
+                navigate(`/tacticboards/${tacticBoard._id}`);
+              }}
+              sx={{
+                mr: 1,
+              }}
+            >
+              <ArrowBackIcon sx={{ color: "#000000" }} />
+            </ToggleButton>
+          </span>
         </Tooltip>
 
         {/* NAME START */}
@@ -135,22 +137,24 @@ const TacticBoardTopMenu = ({
                 context: isAnimating ? "animationMode" : "pauseMode",
               })}
             >
-              <ToggleButton
-                disabled={isRecording}
-                value={isAnimating}
-                size="small"
-                selected={isAnimating}
-                onChange={onAnimateClick}
-                sx={{
-                  mr: 1,
-                }}
-              >
-                {isAnimating ? (
-                  <PauseCircleIcon sx={{ color: "#000000" }} />
-                ) : (
-                  <PlayCircleIcon sx={{ color: "#000000" }} />
-                )}
-              </ToggleButton>
+              <span>
+                <ToggleButton
+                  disabled={isRecording}
+                  value={isAnimating}
+                  size="small"
+                  selected={isAnimating}
+                  onChange={onAnimateClick}
+                  sx={{
+                    mr: 1,
+                  }}
+                >
+                  {isAnimating ? (
+                    <PauseCircleIcon sx={{ color: "#000000" }} />
+                  ) : (
+                    <PlayCircleIcon sx={{ color: "#000000" }} />
+                  )}
+                </ToggleButton>
+              </span>
             </Tooltip>
           )}
 
@@ -159,28 +163,30 @@ const TacticBoardTopMenu = ({
             <Tooltip
               title={t("TacticBoard:topMenu.pagination.tooltip_removePage")}
             >
-              <ToggleButton
-                disabled={
-                  isTacticBoardLoading ||
-                  maxPages == 1 ||
-                  currentPage != maxPages
-                }
-                value={false}
-                selected={false}
-                onChange={() => {
-                  if (maxPages > 1) {
-                    setMaxPages(maxPages - 1);
-                    setPage(currentPage - 1);
-                    onLoadPage(currentPage - 1, false, true);
+              <span>
+                <ToggleButton
+                  disabled={
+                    isTacticBoardLoading ||
+                    maxPages == 1 ||
+                    currentPage != maxPages
                   }
-                }}
-                size="small"
-                sx={{
-                  mr: 1,
-                }}
-              >
-                <RemoveIcon />
-              </ToggleButton>
+                  value={false}
+                  selected={false}
+                  onChange={() => {
+                    if (maxPages > 1) {
+                      setMaxPages(maxPages - 1);
+                      setPage(currentPage - 1);
+                      onLoadPage(currentPage - 1, false, true);
+                    }
+                  }}
+                  size="small"
+                  sx={{
+                    mr: 1,
+                  }}
+                >
+                  <RemoveIcon />
+                </ToggleButton>
+              </span>
             </Tooltip>
           )}
 
@@ -196,59 +202,65 @@ const TacticBoardTopMenu = ({
             <Tooltip
               title={t("TacticBoard:topMenu.pagination.tooltip_addPage")}
             >
-              <ToggleButton
-                disabled={isTacticBoardLoading || currentPage != maxPages}
-                value={false}
-                selected={false}
-                onChange={() => {
-                  setMaxPages(maxPages + 1);
-                  setPage(currentPage + 1);
-                  onLoadPage(currentPage + 1, true, false);
-                }}
-                size="small"
-                sx={{
-                  mr: 1,
-                }}
-              >
-                <AddIcon />
-              </ToggleButton>
+              <span>
+                <ToggleButton
+                  disabled={isTacticBoardLoading || currentPage != maxPages}
+                  value={false}
+                  selected={false}
+                  onChange={() => {
+                    setMaxPages(maxPages + 1);
+                    setPage(currentPage + 1);
+                    onLoadPage(currentPage + 1, true, false);
+                  }}
+                  size="small"
+                  sx={{
+                    mr: 1,
+                  }}
+                >
+                  <AddIcon />
+                </ToggleButton>
+              </span>
             </Tooltip>
           )}
           {!isEditMode && (
             <Tooltip title={t("TacticBoard:topMenu.isRecordingButton.tooltip")}>
-              <ToggleButton
-                disabled={isAnimating}
-                value={false}
-                size="small"
-                selected={false}
-                onChange={onRecordClick}
-                sx={{
-                  mr: 1,
-                }}
-              >
-                <MovieIcon sx={{ color: "#000000" }} />
-              </ToggleButton>
+              <span>
+                <ToggleButton
+                  disabled={isAnimating}
+                  value={false}
+                  size="small"
+                  selected={false}
+                  onChange={onRecordClick}
+                  sx={{
+                    mr: 1,
+                  }}
+                >
+                  <MovieIcon sx={{ color: "#000000" }} />
+                </ToggleButton>
+              </span>
             </Tooltip>
           )}
         </SoftBox>
         {/* PAGINATION END */}
         <Tooltip title={t("TacticBoard:topMenu.isFullscreenButton.tooltip")}>
-          <ToggleButton
-            disabled={isTacticBoardLoading || isRecording || isAnimating}
-            value={isFullScreen}
-            size="small"
-            selected={isFullScreen}
-            onChange={onFullScreenClick}
-            sx={{
-              mr: 1,
-            }}
-          >
-            {isFullScreen ? (
-              <FullscreenExitIcon color="primary" />
-            ) : (
-              <FullscreenIcon color="primary" />
-            )}
-          </ToggleButton>
+          <span>
+            <ToggleButton
+              disabled={isTacticBoardLoading || isRecording || isAnimating}
+              value={isFullScreen}
+              size="small"
+              selected={isFullScreen}
+              onChange={onFullScreenClick}
+              sx={{
+                mr: 1,
+              }}
+            >
+              {isFullScreen ? (
+                <FullscreenExitIcon color="primary" />
+              ) : (
+                <FullscreenIcon color="primary" />
+              )}
+            </ToggleButton>
+          </span>
         </Tooltip>
         {/* EDIT/SAVE BUTTON START */}
         {isPrivileged && (
@@ -257,35 +269,39 @@ const TacticBoardTopMenu = ({
               context: isEditMode ? "editMode" : "viewMode",
             })}
           >
-            <ToggleButton
-              disabled={isTacticBoardLoading || isRecording || isAnimating}
-              value={isEditMode}
-              size="small"
-              selected={isEditMode}
-              onChange={onToggleEditMode}
-              sx={{
-                mr: 1,
-              }}
-            >
-              {isEditMode ? (
-                <SaveIcon color="primary" />
-              ) : (
-                <EditIcon color="primary" />
-              )}
-            </ToggleButton>
+            <span>
+              <ToggleButton
+                disabled={isTacticBoardLoading || isRecording || isAnimating}
+                value={isEditMode}
+                size="small"
+                selected={isEditMode}
+                onChange={onToggleEditMode}
+                sx={{
+                  mr: 1,
+                }}
+              >
+                {isEditMode ? (
+                  <SaveIcon color="primary" />
+                ) : (
+                  <EditIcon color="primary" />
+                )}
+              </ToggleButton>
+            </span>
           </Tooltip>
         )}
         {isPrivileged && (
           <Tooltip title={t("TacticBoard:topMenu.deleteButton.tooltip")}>
-            <ToggleButton
-              disabled={isTacticBoardLoading || isRecording || isAnimating}
-              value={false}
-              size="small"
-              selected={false}
-              onChange={onDeleteTacticBoard}
-            >
-              <DeleteIcon color="error" />
-            </ToggleButton>
+            <span>
+              <ToggleButton
+                disabled={isTacticBoardLoading || isRecording || isAnimating}
+                value={false}
+                size="small"
+                selected={false}
+                onChange={onDeleteTacticBoard}
+              >
+                <DeleteIcon color="error" />
+              </ToggleButton>
+            </span>
           </Tooltip>
         )}
         {/* EDIT/SAVE BUTTON END */}

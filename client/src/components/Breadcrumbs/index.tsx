@@ -31,7 +31,7 @@ export type BreadcrumbsProps = {
   light: boolean;
 };
 
-const Breadcrumbs = ({ light }: BreadcrumbsProps) => {
+const Breadcrumbs = ({ light = false }: BreadcrumbsProps) => {
   const breadcrumbsToRender = useBreadcrumbsToRender();
   const breadcrumbsToRenderLength = breadcrumbsToRender.length;
 
@@ -65,11 +65,6 @@ const Breadcrumbs = ({ light }: BreadcrumbsProps) => {
       </MuiBreadcrumbs>
     </SoftBox>
   );
-};
-
-// Setting default values for the props of Breadcrumbs
-Breadcrumbs.defaultProps = {
-  light: false,
 };
 
 export default Breadcrumbs;
