@@ -9,4 +9,15 @@ export default defineConfig({
     },
   },
   plugins: [react()],
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          markdown: ["react-markdown", "remark-gfm"],
+          react: ["react", "react-dom"],
+          mui: ["@mui/material", "@mui/icons-material"],
+        },
+      },
+    },
+  },
 });

@@ -10,8 +10,11 @@ import {
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ReactPlayer from "react-player";
 import TacticBoardInBlockWrapper from "./TacticBoardInBlock";
-import remarkGfm from "remark-gfm";
-import Markdown from "react-markdown";
+import { lazy, Suspense } from "react";
+
+const MarkdownRenderer = lazy(
+  () => import("../../../../../components/MarkdownRenderer"),
+);
 
 export type ExerciseBlockProps = {
   block: Block;
@@ -78,7 +81,9 @@ const ExerciseBlock = ({
             {t("Exercise:block.description")}
           </AccordionSummary>
           <AccordionDetails sx={{ ml: 2 }}>
-            <Markdown remarkPlugins={[remarkGfm]}>{block.description}</Markdown>
+            <Suspense fallback={<div>Loading...</div>}>
+              <MarkdownRenderer>{block.description}</MarkdownRenderer>
+            </Suspense>
           </AccordionDetails>
         </Accordion>
       )}
@@ -88,9 +93,9 @@ const ExerciseBlock = ({
             {t("Exercise:block.coachingPoints")}
           </AccordionSummary>
           <AccordionDetails sx={{ ml: 2 }}>
-            <Markdown remarkPlugins={[remarkGfm]}>
-              {block.coaching_points}
-            </Markdown>
+            <Suspense fallback={<div>Loading...</div>}>
+              <MarkdownRenderer>{block.coaching_points}</MarkdownRenderer>
+            </Suspense>
           </AccordionDetails>
         </Accordion>
       )}

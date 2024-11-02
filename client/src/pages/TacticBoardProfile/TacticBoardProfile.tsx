@@ -35,11 +35,9 @@ import SaveIcon from "@mui/icons-material/Save";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { useTranslation } from "react-i18next";
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { useAuth } from "../../store/hooks";
 import TacticBoardInProfileWrapper from "./TacticBoardInProfile";
-import Markdown from "react-markdown";
-import remarkGfm from "remark-gfm";
 import MDEditor from "@uiw/react-md-editor";
 // No import is required in the WebPack.
 import "@uiw/react-md-editor/markdown-editor.css";
@@ -54,6 +52,10 @@ import {
 import { TacticBoardPartialId } from "../../api/quadcoachApi/domain";
 import AddTagDialog from "./AddTagDialog";
 import Footer from "../../components/Footer";
+
+const MarkdownRenderer = lazy(
+  () => import("../../components/MarkdownRenderer"),
+);
 
 const TacticBoardProfile = () => {
   const { t } = useTranslation("TacticBoardProfile");
@@ -468,9 +470,11 @@ const TacticBoardProfile = () => {
                     {t("TacticBoardProfile:description")}
                   </AccordionSummary>
                   <AccordionDetails sx={{ ml: 1 }}>
-                    <Markdown remarkPlugins={[remarkGfm]}>
-                      {tacticBoard?.description}
-                    </Markdown>
+                    <Suspense fallback={<div>Loading...</div>}>
+                      <MarkdownRenderer>
+                        {tacticBoard?.description ?? ""}
+                      </MarkdownRenderer>
+                    </Suspense>
                   </AccordionDetails>
                 </Accordion>
               )}
@@ -497,9 +501,11 @@ const TacticBoardProfile = () => {
                     {t("TacticBoardProfile:coaching_points")}
                   </AccordionSummary>
                   <AccordionDetails sx={{ ml: 1 }}>
-                    <Markdown remarkPlugins={[remarkGfm]}>
-                      {tacticBoard?.coaching_points}
-                    </Markdown>
+                    <Suspense fallback={<div>Loading...</div>}>
+                      <MarkdownRenderer>
+                        {tacticBoard?.coaching_points ?? ""}
+                      </MarkdownRenderer>
+                    </Suspense>
                   </AccordionDetails>
                 </Accordion>
               )}
