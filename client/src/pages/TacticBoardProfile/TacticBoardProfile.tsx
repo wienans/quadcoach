@@ -82,6 +82,7 @@ const TacticBoardProfile = () => {
       isError: isDeleteTacticBoardError,
       isLoading: isDeleteTacticBoardLoading,
       isSuccess: isDeleteTacticBoardSuccess,
+      error: deleteError,
     },
   ] = useDeleteTacticBoardMutation();
 
@@ -284,6 +285,24 @@ const TacticBoardProfile = () => {
             {isDeleteTacticBoardError && (
               <Alert color="error" sx={{ mt: 5, mb: 3 }}>
                 {t("TacticBoardProfile:errorDeletingTacticBoard")}
+                {(
+                  deleteError as {
+                    data?: { exercises?: Array<{ id: string; name: string }> };
+                  }
+                )?.data?.exercises && (
+                  <div>
+                    {t("TacticBoardProfile:usedInExercises")}
+                    {(
+                      deleteError as {
+                        data?: {
+                          exercises?: Array<{ id: string; name: string }>;
+                        };
+                      }
+                    )?.data?.exercises?.map((exercise) => (
+                      <div key={exercise.id}>{exercise.name}</div>
+                    ))}
+                  </div>
+                )}
               </Alert>
             )}
             <Card sx={{ height: "100%" }}>

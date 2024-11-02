@@ -149,7 +149,7 @@ export const tacticBoardApiSlice = quadcoachApi.injectEndpoints({
       ],
     }),
     deleteTacticBoardPage: builder.mutation<
-      { message: string },
+      { message: string; exercises?: { id: string; name: string }[] },
       { tacticboardId: string; pageId: string }
     >({
       query: ({ tacticboardId, pageId }) => ({

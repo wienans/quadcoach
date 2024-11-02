@@ -2,6 +2,7 @@ import asyncHandler from "express-async-handler";
 import { Request, Response } from "express";
 import TacticBoard from "../models/tacticboard";
 import mongoose from "mongoose";
+import Exercise from "../models/exercise";
 
 interface UserInfo {
   id?: string;
@@ -273,7 +274,9 @@ export const deleteById = asyncHandler(
   async (req: RequestWithUser, res: Response) => {
     if (mongoose.isValidObjectId(req.params.id)) {
       const findResult = await TacticBoard.findOne({ _id: req.params.id });
+
       if (findResult) {
+        // Check permissions
         if (
           findResult.user &&
           (!req.UserInfo?.id ||
@@ -284,14 +287,36 @@ export const deleteById = asyncHandler(
           res.status(403).json({ message: "Forbidden" });
           return;
         }
+
+        // Check if tacticboard is used in any exercises
+        const exercisesUsingTacticboard = await Exercise.find({
+          description_blocks: {
+            $elemMatch: {
+              tactics_board: req.params.id,
+            },
+          },
+        });
+        if (exercisesUsingTacticboard.length > 0) {
+          res.status(400).json({
+            message:
+              "Cannot delete tacticboard - it is being used in exercises",
+            exercises: exercisesUsingTacticboard.map((ex) => ({
+              id: ex._id,
+              name: ex.name,
+            })),
+          });
+          return;
+        }
+
+        // If not used in exercises, proceed with deletion
         const result = await TacticBoard.deleteOne({ _id: req.params.id });
         if (result.deletedCount > 0) {
           res.json({ message: "Tacticboard deleted successfully" });
         } else {
-          res.status(404).json({ result: "No Record Found" });
+          res.status(404).json({ message: "TacticBoard not found" });
         }
       } else {
-        res.status(404).json({ result: "No Record Found" });
+        res.status(404).json({ message: "No Record Found" });
       }
     } else {
       res.status(400).json({ message: "Invalid ID format" });
