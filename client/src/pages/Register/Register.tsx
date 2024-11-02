@@ -67,8 +67,8 @@ const Register = (): JSX.Element => {
         email: email,
         password: password,
       });
-      // @ts-ignore
-      if (result.data) {
+
+      if ("data" in result) {
         navigate("/");
       }
     },

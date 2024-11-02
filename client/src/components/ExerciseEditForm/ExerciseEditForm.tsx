@@ -15,7 +15,6 @@ import {
   Block,
   Exercise,
   ExercisePartialId,
-  TacticBoard,
 } from "../../api/quadcoachApi/domain";
 import AddRelatedExercisesDialog from "./AddRelatedExercisesDialog";
 import AddTagDialog from "./AddTagDialog";
@@ -31,6 +30,7 @@ import MDEditor from "@uiw/react-md-editor";
 import "@uiw/react-md-editor/markdown-editor.css";
 // No import is required in the WebPack.
 import "@uiw/react-markdown-preview/markdown.css";
+import { TacticBoardHeader } from "../../api/quadcoachApi/domain/TacticBoard";
 
 const exerciseShape = shape({
   name: string,
@@ -670,7 +670,7 @@ const ExerciseEditForm = ({
                                     }
                                     onChange={(
                                       _,
-                                      value: TacticBoard | null,
+                                      value: TacticBoardHeader | null,
                                     ) => {
                                       if (value != null) {
                                         formik.setFieldValue(

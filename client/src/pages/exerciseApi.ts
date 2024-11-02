@@ -203,7 +203,9 @@ export const {
   useAddExerciseMutation,
   useGetRelatedExercisesQuery,
   useGetAllTagsQuery,
+  useLazyGetAllTagsQuery,
   useGetAllMaterialsQuery,
+  useLazyGetAllMaterialsQuery,
   useGetExercisesQuery,
   useLazyGetExercisesQuery,
 } = exerciseApiSlice;

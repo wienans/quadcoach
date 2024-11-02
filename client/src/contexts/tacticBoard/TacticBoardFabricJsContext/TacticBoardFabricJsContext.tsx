@@ -132,8 +132,9 @@ const TacticBoardFabricJsContextProvider: FC<{
   const getBackgroundImage = useCallback(() => {
     const canvasFabric = canvasFabricRef.current;
     if (!canvasFabric) return;
-    //@ts-ignore
-    return new URL(canvasFabric.backgroundImage?._element.src).pathname;
+    const bgImage = canvasFabric.backgroundImage as fabric.Image;
+    if (!bgImage?.getSrc()) return;
+    return new URL(bgImage.getSrc()).pathname;
   }, []);
 
   const setControls = useCallback((controls: boolean) => {

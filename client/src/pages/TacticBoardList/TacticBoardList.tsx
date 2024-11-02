@@ -1,5 +1,11 @@
 import "./translations";
-import { ChangeEvent, MouseEvent, useEffect, useState } from "react";
+import {
+  ChangeEvent,
+  MouseEvent,
+  useEffect,
+  useState,
+  useCallback,
+} from "react";
 import {
   Alert,
   Card,
@@ -21,14 +27,10 @@ import {
   AddTacticBoardDialog,
 } from "../../components";
 import {
-  useLazyGetTacticBoardsQuery,
   useAddTacticBoardMutation,
+  useLazyGetTacticBoardHeadersQuery,
 } from "../../api/quadcoachApi/tacticboardApi";
-import {
-  TacticBoardWithOutId,
-  TacticBoard,
-} from "../../api/quadcoachApi/domain";
-import TacticPage from "../../api/quadcoachApi/domain/TacticPage";
+import { TacticPageWithOutId } from "../../api/quadcoachApi/domain/TacticPage";
 import { useTranslation } from "react-i18next";
 import FilterAltIcon from "@mui/icons-material/FilterAlt";
 import GridViewIcon from "@mui/icons-material/GridView";
@@ -39,6 +41,8 @@ import AddIcon from "@mui/icons-material/Add";
 import { DashboardLayout } from "../../components/LayoutContainers";
 import { useAuth } from "../../store/hooks";
 import Footer from "../../components/Footer";
+import { TacticBoardWithOutIds } from "../../api/quadcoachApi/domain/TacticBoard";
+import debounce from "lodash/debounce";
 
 enum ViewType {
   List = "List",
@@ -76,15 +80,6 @@ const TacticBoardList = () => {
     defaultTacticBoardFilter,
   );
 
-  const onTacticBoardFilterValueChange =
-    (tacticBoardFilterProperty: keyof TacticBoardFilter) =>
-    (event: ChangeEvent<HTMLInputElement>) => {
-      setTacticBoardFilter({
-        ...tacticBoardFilter,
-        [tacticBoardFilterProperty]: event.target.value,
-      });
-    };
-
   const [
     getTacticBoards,
     {
@@ -92,10 +87,32 @@ const TacticBoardList = () => {
       isError: isTacticBoardsError,
       isLoading: isTacticBoardsLoading,
     },
-  ] = useLazyGetTacticBoardsQuery();
+  ] = useLazyGetTacticBoardHeadersQuery();
 
-  const [addTacticBoard] = useAddTacticBoardMutation();
+  // Create debounced search function
+  const debouncedSearch = useCallback(
+    debounce((filter: TacticBoardFilter) => {
+      getTacticBoards({
+        nameRegex: filter.searchValue,
+        tagString: filter.tagString,
+      });
+    }, 300),
+    [getTacticBoards],
+  );
 
+  // Update the filter change handler
+  const onTacticBoardFilterValueChange =
+    (tacticBoardFilterProperty: keyof TacticBoardFilter) =>
+    (event: ChangeEvent<HTMLInputElement>) => {
+      const newFilter = {
+        ...tacticBoardFilter,
+        [tacticBoardFilterProperty]: event.target.value,
+      };
+      setTacticBoardFilter(newFilter);
+      debouncedSearch(newFilter);
+    };
+
+  // Initial load
   useEffect(() => {
     getTacticBoards({
       nameRegex: defaultTacticBoardFilter.searchValue,
@@ -103,12 +120,14 @@ const TacticBoardList = () => {
     });
   }, [getTacticBoards]);
 
+  // Cleanup
   useEffect(() => {
-    getTacticBoards({
-      nameRegex: tacticBoardFilter.searchValue,
-      tagString: tacticBoardFilter.tagString,
-    });
-  }, [tacticBoardFilter.searchValue, getTacticBoards, tacticBoardFilter]);
+    return () => {
+      debouncedSearch.cancel();
+    };
+  }, [debouncedSearch]);
+
+  const [addTacticBoard] = useAddTacticBoardMutation();
 
   const onOpenTacticBoardClick = (tacticBoardId: string) => {
     navigate(`/tacticboards/${tacticBoardId}`);
@@ -119,7 +138,7 @@ const TacticBoardList = () => {
     backgroundImage: string | undefined,
   ) => {
     if (name) {
-      const emptyPage: TacticPage = {
+      const emptyPage: TacticPageWithOutId = {
         objects: undefined,
         backgroundImage: {
           type: "image",
@@ -128,7 +147,7 @@ const TacticBoardList = () => {
           height: 686,
         },
       };
-      const newTacticBoard: TacticBoardWithOutId = {
+      const newTacticBoard: TacticBoardWithOutIds = {
         name: name,
         isPrivate: false,
         creator: userName,
@@ -137,7 +156,11 @@ const TacticBoardList = () => {
       };
 
       addTacticBoard(newTacticBoard).then(
-        (result: { data: TacticBoard } | { error: unknown }) => {
+        (
+          result:
+            | { data: { message: string; _id: string } }
+            | { error: unknown },
+        ) => {
           if ("error" in result) return;
           if (!result.data) return;
           navigate(`/tacticboards/${result.data._id}`);

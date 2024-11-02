@@ -5,9 +5,10 @@ import { Request, Response } from "express";
 import TacticBoard from "../models/tacticboard";
 import Exercise from "../models/exercise";
 import mongoose from "mongoose";
-// @desc Get all users
-// @route GET /users
-// @access Private
+
+// @desc    Get all users
+// @route   GET /api/users
+// @access  Private - Admin only
 export const getAllUsers = asyncHandler(async (req: Request, res: Response) => {
   let queryString: string = JSON.stringify(req.query);
 
@@ -24,9 +25,9 @@ export const getAllUsers = asyncHandler(async (req: Request, res: Response) => {
   }
 });
 
-// @desc Get users by ID
-// @route GET /users
-// @access Private
+// @desc    Get user by ID
+// @route   GET /api/users/:id
+// @access  Private - Admin or User themselves
 export const getUserById = asyncHandler(async (req: Request, res: Response) => {
   if (mongoose.isValidObjectId(req.params.id)) {
     const users = await User.findOne({
@@ -42,9 +43,9 @@ export const getUserById = asyncHandler(async (req: Request, res: Response) => {
   }
 });
 
-// @desc Create new user
-// @route POST /users
-// @access Private
+// @desc    Create new user
+// @route   POST /api/users
+// @access  Private - Admin only
 export const createNewUser = asyncHandler(
   async (req: Request, res: Response) => {
     const { name, email, password, roles } = req.body;
@@ -85,9 +86,9 @@ export const createNewUser = asyncHandler(
   }
 );
 
-// @desc Update a user
-// @route PATCH /users
-// @access Private
+// @desc    Update user details
+// @route   PATCH /api/users
+// @access  Private - Admin only
 export const updateUser = asyncHandler(async (req: Request, res: Response) => {
   const { id, name, email, roles, active, password } = req.body;
   // Confirm data
@@ -128,9 +129,9 @@ export const updateUser = asyncHandler(async (req: Request, res: Response) => {
   res.json({ message: `${updatedUser.email} updated` });
 });
 
-// @desc Delete a user
-// @route DELETE /users
-// @access Private
+// @desc    Delete user account
+// @route   DELETE /api/users
+// @access  Private - Admin only
 export const deleteUser = asyncHandler(async (req: Request, res: Response) => {
   const { id } = req.body;
   if (!id) {

@@ -72,17 +72,19 @@ const TacticBoardTopItemsMenu = ({
               context: tacticBoardItemsDrawerOpen ? "open" : "closed",
             })}
           >
-            <ToggleButton
-              value={tacticBoardItemsDrawerOpen}
-              selected={tacticBoardItemsDrawerOpen}
-              onChange={toggleItems}
-              size="small"
-              sx={{
-                mr: 1,
-              }}
-            >
-              <LayersIcon />
-            </ToggleButton>
+            <span>
+              <ToggleButton
+                value={tacticBoardItemsDrawerOpen}
+                selected={tacticBoardItemsDrawerOpen}
+                onChange={toggleItems}
+                size="small"
+                sx={{
+                  mr: 1,
+                }}
+              >
+                <LayersIcon />
+              </ToggleButton>
+            </span>
           </Tooltip>
         )}
         {/* MENU BUTTON END */}
@@ -93,39 +95,43 @@ const TacticBoardTopItemsMenu = ({
               context: drawingEnabled ? "disable" : "enable",
             })}
           >
-            <ToggleButton
-              value={drawingEnabled}
-              selected={drawingEnabled}
-              disabled={!isEditMode}
-              onChange={() => {
-                setDrawMode(!drawingEnabled);
-                enableDrawing(!drawingEnabled);
-              }}
-              size="small"
-              sx={{
-                mr: 1,
-              }}
-            >
-              <DrawIcon />
-            </ToggleButton>
+            <span>
+              <ToggleButton
+                value={drawingEnabled}
+                selected={drawingEnabled}
+                disabled={!isEditMode}
+                onChange={() => {
+                  setDrawMode(!drawingEnabled);
+                  enableDrawing(!drawingEnabled);
+                }}
+                size="small"
+                sx={{
+                  mr: 1,
+                }}
+              >
+                <DrawIcon />
+              </ToggleButton>
+            </span>
           </Tooltip>
         )}
         {/* DRAW BUTTON END */}
         {/* DELETE BUTTON START */}
         {isPrivileged && isEditMode && (
           <Tooltip title={t("TacticBoard:topMenu.objectDeleteButton.tooltip")}>
-            <ToggleButton
-              value={false}
-              selected={false}
-              disabled={!isEditMode}
-              onChange={onDelete}
-              size="small"
-              sx={{
-                mr: 1,
-              }}
-            >
-              <DeleteIcon />
-            </ToggleButton>
+            <span>
+              <ToggleButton
+                value={false}
+                selected={false}
+                disabled={!isEditMode}
+                onChange={onDelete}
+                size="small"
+                sx={{
+                  mr: 1,
+                }}
+              >
+                <DeleteIcon />
+              </ToggleButton>
+            </span>
           </Tooltip>
         )}
         {/* DELETE BUTTON END */}

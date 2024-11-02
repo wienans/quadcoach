@@ -1,6 +1,6 @@
 import { Autocomplete, CircularProgress, TextField } from "@mui/material";
-import { useState } from "react";
-import { useGetAllMaterialsQuery } from "../../../pages/exerciseApi";
+import { useState, useEffect } from "react";
+import { useLazyGetAllMaterialsQuery } from "../../../pages/exerciseApi";
 
 export type MaterialAutocompleteProps = {
   selectedMaterials: string[];
@@ -14,19 +14,27 @@ const MaterialAutocomplete = ({
   alreadyAddedMaterials,
 }: MaterialAutocompleteProps): JSX.Element => {
   const [searchValue, setSearchValue] = useState<string>("");
-  const { data: materials, isLoading: isMaterialsLoading } =
-    useGetAllMaterialsQuery(searchValue !== "" ? searchValue : undefined);
+  const [getMaterials, { data: materials, isLoading: isMaterialsLoading }] =
+    useLazyGetAllMaterialsQuery();
+
+  useEffect(() => {
+    // Load initial data
+    getMaterials(undefined);
+  }, [getMaterials]);
+
+  const filteredOptions = [
+    ...(materials?.filter(
+      (material) => !alreadyAddedMaterials.some((rel) => rel === material),
+    ) ?? []),
+    ...(searchValue && !materials?.includes(searchValue) ? [searchValue] : []),
+  ];
 
   return (
     <Autocomplete
       id="related-text"
       freeSolo
       multiple
-      options={
-        materials?.filter(
-          (material) => !alreadyAddedMaterials.some((rel) => rel === material),
-        ) ?? []
-      }
+      options={filteredOptions}
       getOptionLabel={(material) => material}
       isOptionEqualToValue={(option, value) => option === value}
       inputValue={searchValue}

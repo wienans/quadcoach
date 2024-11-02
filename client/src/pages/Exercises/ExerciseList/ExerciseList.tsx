@@ -1,5 +1,11 @@
 import "./translations";
-import { ChangeEvent, MouseEvent, useEffect, useState } from "react";
+import {
+  ChangeEvent,
+  MouseEvent,
+  useEffect,
+  useState,
+  useCallback,
+} from "react";
 import {
   Alert,
   Card,
@@ -31,6 +37,7 @@ import { useLazyGetExercisesQuery } from "../../exerciseApi";
 import { DashboardLayout } from "../../../components/LayoutContainers";
 import { useAuth } from "../../../store/hooks";
 import Footer from "../../../components/Footer";
+import debounce from "lodash/debounce";
 const maxPersons = 100;
 
 enum ViewType {
@@ -89,23 +96,25 @@ const ExerciseList = () => {
     },
   ] = useLazyGetExercisesQuery();
 
-  useEffect(() => {
-    getExercises({
-      maxPersons: defaultExerciseFilter.maxPersons,
-      minPersons: defaultExerciseFilter.minPersons,
-      nameRegex: defaultExerciseFilter.searchValue,
-      tagString: defaultExerciseFilter.tagString,
-    });
-  }, [getExercises]);
+  const debouncedGetExercises = useCallback(
+    debounce((filter: ExerciseFilter) => {
+      getExercises({
+        maxPersons: filter.maxPersons,
+        minPersons: filter.minPersons,
+        nameRegex: filter.searchValue,
+        tagString: filter.tagString,
+      });
+    }, 500),
+    [getExercises],
+  );
 
   useEffect(() => {
-    getExercises({
-      maxPersons: exerciseFilter.maxPersons,
-      minPersons: exerciseFilter.minPersons,
-      nameRegex: exerciseFilter.searchValue,
-      tagString: exerciseFilter.tagString,
-    });
-  }, [exerciseFilter.searchValue, getExercises, exerciseFilter]);
+    debouncedGetExercises(exerciseFilter);
+
+    return () => {
+      debouncedGetExercises.cancel();
+    };
+  }, [exerciseFilter, debouncedGetExercises]);
 
   const onOpenExerciseClick = (exerciseId: string) => {
     navigate(`/exercises/${exerciseId}`);

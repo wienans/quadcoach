@@ -12,7 +12,7 @@ export const useContainerResizeEvent = (
 
   const resize = useCallback(
     (nextWidth: number, nextHeight: number): void => {
-      if (!canvas.current) return;
+      if (!canvas.current?.getElement()) return;
       const adjustedWidth = nextWidth - 20;
       const adjustedHeight = nextHeight - 10 < 240 ? 160 : nextHeight - 10;
       if (hightFirstResizeing) {

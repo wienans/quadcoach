@@ -36,5 +36,6 @@
   "description": "Description",
   "coaching_points": "Coaching points",
   "deleteTacticBoard": "Delete tacticboard",
+  "usedInExercises": "Used in exercises:",
   "editTacticBoardMeta": "Edit / Save tacticboard metadata"
 }

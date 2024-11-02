@@ -1,13 +1,13 @@
 import { Autocomplete, CircularProgress, TextField } from "@mui/material";
-import { FocusEvent, SyntheticEvent, useState } from "react";
-import { TacticBoard } from "../../../api/quadcoachApi/domain";
-import { useGetTacticBoardsQuery } from "../../../api/quadcoachApi/tacticboardApi";
+import { FocusEvent, SyntheticEvent, useEffect, useState } from "react";
+import { useLazyGetTacticBoardHeadersQuery } from "../../../api/quadcoachApi/tacticboardApi";
+import { TacticBoardHeader } from "../../../api/quadcoachApi/domain/TacticBoard";
 
 export type TacticboardAutocompleteProps = {
   value: string | undefined;
   onChange: (
     event: SyntheticEvent<Element, Event>,
-    value: TacticBoard | null,
+    value: TacticBoardHeader | null,
   ) => void;
   onBlur: (event: FocusEvent<HTMLDivElement> | undefined) => void;
   autoFocus?: boolean;
@@ -20,10 +20,15 @@ const TacticboardAutocomplete = ({
   autoFocus,
 }: TacticboardAutocompleteProps): JSX.Element => {
   const [searchValue, setSearchValue] = useState<string>("");
-  const { data: tacticboards, isLoading: isTacticboardsLoading } =
-    useGetTacticBoardsQuery({
-      nameRegex: searchValue !== "" ? searchValue : undefined,
-    });
+  const [
+    getTacticboards,
+    { data: tacticboards, isLoading: isTacticboardsLoading },
+  ] = useLazyGetTacticBoardHeadersQuery();
+
+  useEffect(() => {
+    // Load initial data
+    getTacticboards({});
+  }, [getTacticboards]);
 
   return (
     <Autocomplete
@@ -38,9 +43,12 @@ const TacticboardAutocomplete = ({
         }
       }}
       inputValue={searchValue}
-      onInputChange={(_event, newValue) => setSearchValue(newValue)}
+      onInputChange={(_event, newValue) => {
+        setSearchValue(newValue);
+      }}
       value={
-        tacticboards?.find((obj: TacticBoard) => obj["_id"] === value) ?? null
+        tacticboards?.find((obj: TacticBoardHeader) => obj["_id"] === value) ??
+        null
       }
       onChange={onChange}
       onBlur={onBlur}

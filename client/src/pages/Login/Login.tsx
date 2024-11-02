@@ -60,9 +60,7 @@ const Login = (): JSX.Element => {
         email: email,
         password: password,
       });
-      // @ts-ignore
-      if (result.data) {
-        // @ts-ignore
+      if ("data" in result && result.data) {
         dispatch(setCredentials({ accessToken: result.data.accessToken }));
         navigate("/");
       }

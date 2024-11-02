@@ -86,8 +86,10 @@ const TacticBoardInProfile = ({
   }, [isAnimating]);
 
   const onRecordClick = () => {
-    // @ts-ignore
-    const canvasStream = canvasRef.current?.lowerCanvasEl.captureStream(60);
+    const canvas = canvasRef.current?.getElement() as HTMLCanvasElement;
+    if (!canvas) return;
+
+    const canvasStream = canvas.captureStream(60);
     mediaRecorder = new MediaRecorder(canvasStream, {
       mimeType: "video/webm",
     });
@@ -108,43 +110,37 @@ const TacticBoardInProfile = ({
   const onFullScreenClick = () => {
     const container = refFullScreenContainer.current;
     const isFullscreen = document.fullscreenElement;
+    const doc = document as Document & {
+      mozCancelFullScreen?: () => Promise<void>;
+      webkitExitFullscreen?: () => Promise<void>;
+      msExitFullscreen?: () => Promise<void>;
+    };
+
     if (isFullscreen) {
-      if (document.exitFullscreen) {
-        document.exitFullscreen();
+      if (doc.exitFullscreen) {
+        doc.exitFullscreen();
+      } else if (doc.mozCancelFullScreen) {
+        doc.mozCancelFullScreen();
+      } else if (doc.webkitExitFullscreen) {
+        doc.webkitExitFullscreen();
+      } else if (doc.msExitFullscreen) {
+        doc.msExitFullscreen();
       }
-      // @ts-ignore
-      else if (document.mozCancelFullScreen) {
-        // @ts-ignore
-        document.mozCancelFullScreen();
-      }
-      // @ts-ignore
-      else if (document.webkitExitFullscreen) {
-        // @ts-ignore
-        document.webkitExitFullscreen();
-      }
-      // @ts-ignore
-      else if (document.msExitFullscreen) {
-        // @ts-ignore
-        document.msExitFullscreen();
-      }
-    } else {
-      if (container && container.requestFullscreen) {
-        container.requestFullscreen();
-      }
-      // @ts-ignore
-      else if (container && container.mozRequestFullScreen) {
-        // @ts-ignore
-        container.mozRequestFullScreen();
-      }
-      // @ts-ignore
-      else if (container && container.webkitRequestFullscreen) {
-        // @ts-ignore
-        container.webkitRequestFullscreen();
-      }
-      // @ts-ignore
-      else if (container && container.msRequestFullscreen) {
-        // @ts-ignore
-        container.msRequestFullscreen();
+    } else if (container) {
+      const element = container as HTMLElement & {
+        mozRequestFullScreen?: () => Promise<void>;
+        webkitRequestFullscreen?: () => Promise<void>;
+        msRequestFullscreen?: () => Promise<void>;
+      };
+
+      if (element.requestFullscreen) {
+        element.requestFullscreen();
+      } else if (element.mozRequestFullScreen) {
+        element.mozRequestFullScreen();
+      } else if (element.webkitRequestFullscreen) {
+        element.webkitRequestFullscreen();
+      } else if (element.msRequestFullscreen) {
+        element.msRequestFullscreen();
       }
     }
   };

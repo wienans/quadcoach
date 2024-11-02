@@ -54,12 +54,13 @@ export type SidenavCollapseProps<C extends React.ElementType> =
   };
 
 const SidenavCollapse = <C extends React.ElementType>({
-  color,
+  color = "info",
   icon,
   name,
-  children,
-  active,
-  open,
+  children = false,
+  active = false,
+  noCollapse = false,
+  open = false,
   ...rest
 }: SidenavCollapseProps<C>) => {
   const miniSidenav = useAppSelector((state) => state.layout.miniSidenav);
@@ -101,15 +102,6 @@ const SidenavCollapse = <C extends React.ElementType>({
       )}
     </>
   );
-};
-
-// Setting default values for the props of SidenavCollapse
-SidenavCollapse.defaultProps = {
-  color: "info",
-  active: false,
-  noCollapse: false,
-  children: false,
-  open: false,
 };
 
 export default SidenavCollapse;

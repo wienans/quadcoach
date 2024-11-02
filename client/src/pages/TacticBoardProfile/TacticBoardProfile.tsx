@@ -23,7 +23,7 @@ import { SoftBox, SoftInput, SoftTypography } from "../../components";
 import {
   useDeleteTacticBoardMutation,
   useGetTacticBoardQuery,
-  useUpdateTacticBoardMutation,
+  useUpdateTacticBoardMetaMutation,
 } from "../../api/quadcoachApi/tacticboardApi";
 import { useParams, useNavigate } from "react-router-dom";
 import {
@@ -35,11 +35,9 @@ import SaveIcon from "@mui/icons-material/Save";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { useTranslation } from "react-i18next";
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { useAuth } from "../../store/hooks";
 import TacticBoardInProfileWrapper from "./TacticBoardInProfile";
-import Markdown from "react-markdown";
-import remarkGfm from "remark-gfm";
 import MDEditor from "@uiw/react-md-editor";
 // No import is required in the WebPack.
 import "@uiw/react-md-editor/markdown-editor.css";
@@ -54,6 +52,10 @@ import {
 import { TacticBoardPartialId } from "../../api/quadcoachApi/domain";
 import AddTagDialog from "./AddTagDialog";
 import Footer from "../../components/Footer";
+
+const MarkdownRenderer = lazy(
+  () => import("../../components/MarkdownRenderer"),
+);
 
 const TacticBoardProfile = () => {
   const { t } = useTranslation("TacticBoardProfile");
@@ -74,14 +76,15 @@ const TacticBoardProfile = () => {
     skip: tacticBoardId == null,
   });
 
-  const [updateTacticBoard] = useUpdateTacticBoardMutation();
-
+  const [updateTacticBoardMeta, { isLoading: isUpdateTacticBoardMetaLoading }] =
+    useUpdateTacticBoardMetaMutation();
   const [
     deleteTacticBoard,
     {
       isError: isDeleteTacticBoardError,
       isLoading: isDeleteTacticBoardLoading,
       isSuccess: isDeleteTacticBoardSuccess,
+      error: deleteError,
     },
   ] = useDeleteTacticBoardMutation();
 
@@ -108,19 +111,26 @@ const TacticBoardProfile = () => {
 
     onSubmit: (values) => {
       if (tacticBoardId) {
-        const { name, isPrivate, tags, pages, description, coaching_points } =
-          values;
-        const updatedTacticBoard: TacticBoardPartialId = {
+        const {
           name,
           isPrivate,
-          pages,
           tags,
           description,
+          user,
+          creator,
           coaching_points,
-        };
-        updateTacticBoard({
-          _id: tacticBoardId,
-          ...updatedTacticBoard,
+        } = values;
+        updateTacticBoardMeta({
+          tacticboardId: tacticBoardId,
+          metaData: {
+            name,
+            isPrivate,
+            creator,
+            user,
+            tags,
+            description,
+            coaching_points,
+          },
         });
       }
     },
@@ -128,7 +138,7 @@ const TacticBoardProfile = () => {
 
   useEffect(() => {
     if (
-      userId == tacticBoard?.user ||
+      tacticBoard?.user?.toString() === userId ||
       userRoles.includes("Admin") ||
       userRoles.includes("admin")
     ) {
@@ -233,7 +243,11 @@ const TacticBoardProfile = () => {
                   <IconButton
                     onClick={onDeleteTacticBoardClick}
                     color="error"
-                    disabled={!tacticBoard || isDeleteTacticBoardLoading}
+                    disabled={
+                      !tacticBoard ||
+                      isDeleteTacticBoardLoading ||
+                      isUpdateTacticBoardMetaLoading
+                    }
                   >
                     <DeleteIcon />
                   </IconButton>
@@ -243,25 +257,33 @@ const TacticBoardProfile = () => {
           </>
         }
         bottomNavigation={
-          !isUpMd && (
-            <>
-              <Tooltip title={t("TacticBoardProfile:TacticBoardProfile")}>
-                <BottomNavigationAction
-                  icon={<EditIcon />}
-                  onClick={() => {
-                    setIsEditMode(!isEditMode);
-                  }}
-                />
-              </Tooltip>
-              <Tooltip title={t("TacticBoardProfile:deleteTacticBoard")}>
-                <BottomNavigationAction
-                  icon={<DeleteIcon />}
-                  onClick={onDeleteTacticBoardClick}
-                  disabled={!tacticBoard || isDeleteTacticBoardLoading}
-                />
-              </Tooltip>
-            </>
-          )
+          !isUpMd && [
+            <Tooltip
+              key="edit"
+              title={t("TacticBoardProfile:editTacticBoardMeta")}
+            >
+              <BottomNavigationAction
+                icon={<EditIcon />}
+                onClick={() => {
+                  setIsEditMode(!isEditMode);
+                }}
+              />
+            </Tooltip>,
+            <Tooltip
+              key="delete"
+              title={t("TacticBoardProfile:deleteTacticBoard")}
+            >
+              <BottomNavigationAction
+                icon={<DeleteIcon />}
+                onClick={onDeleteTacticBoardClick}
+                disabled={
+                  !tacticBoard ||
+                  isDeleteTacticBoardLoading ||
+                  isUpdateTacticBoardMetaLoading
+                }
+              />
+            </Tooltip>,
+          ]
         }
       >
         {() => (
@@ -269,6 +291,24 @@ const TacticBoardProfile = () => {
             {isDeleteTacticBoardError && (
               <Alert color="error" sx={{ mt: 5, mb: 3 }}>
                 {t("TacticBoardProfile:errorDeletingTacticBoard")}
+                {(
+                  deleteError as {
+                    data?: { exercises?: Array<{ id: string; name: string }> };
+                  }
+                )?.data?.exercises && (
+                  <div>
+                    {t("TacticBoardProfile:usedInExercises")}
+                    {(
+                      deleteError as {
+                        data?: {
+                          exercises?: Array<{ id: string; name: string }>;
+                        };
+                      }
+                    )?.data?.exercises?.map((exercise) => (
+                      <div key={exercise.id}>{exercise.name}</div>
+                    ))}
+                  </div>
+                )}
               </Alert>
             )}
             <Card sx={{ height: "100%" }}>
@@ -290,19 +330,22 @@ const TacticBoardProfile = () => {
                           render={() => {
                             return (
                               <div>
-                                {formik.values.tags?.map((el, index) => {
-                                  if (el != "") {
-                                    return (
-                                      <Chip
-                                        size="small"
-                                        key={el + index}
-                                        label={el}
-                                        sx={{ margin: "2px" }}
-                                        variant={"outlined"}
-                                      />
-                                    );
-                                  }
-                                })}
+                                {formik.values.tags &&
+                                  formik.values.tags?.length > 0 &&
+                                  formik.values.tags?.map((el, index) => {
+                                    if (el != "") {
+                                      return (
+                                        <Chip
+                                          size="small"
+                                          key={el + index}
+                                          label={el}
+                                          sx={{ margin: "2px" }}
+                                          variant={"outlined"}
+                                        />
+                                      );
+                                    }
+                                  })}
+                                {formik.values.tags?.length == 0 && "No Tags"}
                               </div>
                             );
                           }}
@@ -427,9 +470,11 @@ const TacticBoardProfile = () => {
                     {t("TacticBoardProfile:description")}
                   </AccordionSummary>
                   <AccordionDetails sx={{ ml: 1 }}>
-                    <Markdown remarkPlugins={[remarkGfm]}>
-                      {tacticBoard?.description}
-                    </Markdown>
+                    <Suspense fallback={<div>Loading...</div>}>
+                      <MarkdownRenderer>
+                        {tacticBoard?.description ?? ""}
+                      </MarkdownRenderer>
+                    </Suspense>
                   </AccordionDetails>
                 </Accordion>
               )}
@@ -456,9 +501,11 @@ const TacticBoardProfile = () => {
                     {t("TacticBoardProfile:coaching_points")}
                   </AccordionSummary>
                   <AccordionDetails sx={{ ml: 1 }}>
-                    <Markdown remarkPlugins={[remarkGfm]}>
-                      {tacticBoard?.coaching_points}
-                    </Markdown>
+                    <Suspense fallback={<div>Loading...</div>}>
+                      <MarkdownRenderer>
+                        {tacticBoard?.coaching_points ?? ""}
+                      </MarkdownRenderer>
+                    </Suspense>
                   </AccordionDetails>
                 </Accordion>
               )}

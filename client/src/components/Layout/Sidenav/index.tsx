@@ -111,7 +111,7 @@ export interface SidenavProps extends Omit<DrawerProps, "color"> {
   routes: SidebarNavRoute[];
 }
 
-const Sidenav = ({ color, routes, ...rest }: SidenavProps) => {
+const Sidenav = ({ color = "info", routes, ...rest }: SidenavProps) => {
   const { t } = useTranslation();
   const dispatch = useAppDispatch();
   const { miniSidenav } = useAppSelector(sidenavSelector);
@@ -241,12 +241,6 @@ const Sidenav = ({ color, routes, ...rest }: SidenavProps) => {
       <List>{routes.map((route) => renderRoute(route))}</List>
     </SidenavRoot>
   );
-};
-
-// Setting default values for the props of Sidenav
-Sidenav.defaultProps = {
-  color: "info",
-  brand: "",
 };
 
 export default Sidenav;

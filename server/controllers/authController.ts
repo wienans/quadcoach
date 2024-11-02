@@ -1,5 +1,5 @@
 import bcrypt from "bcrypt";
-import jwt, { JwtPayload, VerifyCallback } from "jsonwebtoken";
+import jwt, { JwtPayload } from "jsonwebtoken";
 import { Request, Response, NextFunction } from "express";
 import asyncHandler from "express-async-handler";
 import User from "../models/user";
@@ -10,9 +10,10 @@ import nodemailer from "nodemailer";
 import handlebars from "handlebars";
 import fs from "fs";
 import path from "path";
-// @desc Login
-// @route POST /auth
-// @access Public
+
+// @desc    Authenticate user and get tokens
+// @route   POST /auth/login
+// @access  Public
 export const login = asyncHandler(async (req: Request, res: Response) => {
   const { email, password } = req.body;
 
@@ -73,9 +74,9 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
   res.json({ accessToken });
 });
 
-// @desc request of Reseting Password
-// @route POST /auth/resetPassword
-// @access Public
+// @desc    Request password reset email
+// @route   POST /auth/resetPassword
+// @access  Public - Anyone can request password reset
 export const resetPassword = asyncHandler(
   async (req: Request, res: Response) => {
     const { email } = req.body;
@@ -143,6 +144,9 @@ export const resetPassword = asyncHandler(
   }
 );
 
+// @desc    Update password using reset token
+// @route   POST /auth/updatePassword
+// @access  Public - Must have valid reset token
 export const updatePassword = asyncHandler(
   async (req: Request, res: Response) => {
     const { password, passwordResetToken } = req.body;
@@ -159,10 +163,9 @@ export const updatePassword = asyncHandler(
       const decode = jwt.verify(
         passwordResetToken,
         process.env.ACCESS_TOKEN_SECRET
-      );
+      ) as JwtPayload;
       const foundUser = await User.findOne({
-        // @ts-ignore
-        email: decode?.email,
+        email: decode.email,
       }).exec();
       if (!foundUser) {
         res.status(401).json({ message: "Unauthorized" });
@@ -182,9 +185,9 @@ export const updatePassword = asyncHandler(
   }
 );
 
-// @desc Register
-// @route POST /auth/register
-// @access Public
+// @desc    Register new user account
+// @route   POST /auth/register
+// @access  Public - Anyone can register
 export const register = asyncHandler(async (req: Request, res: Response) => {
   const { name, email, password } = req.body;
 
@@ -251,9 +254,9 @@ export const register = asyncHandler(async (req: Request, res: Response) => {
   }
 });
 
-// @desc Refresh
-// @route GET /auth/refresh
-// @access Public - because access token has expired
+// @desc    Get new access token using refresh token
+// @route   GET /auth/refresh
+// @access  Public - Uses httpOnly refresh token cookie
 export const refresh = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     const cookies = req.cookies;
@@ -274,10 +277,12 @@ export const refresh = asyncHandler(
     }
 
     try {
-      const decode = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
+      const decode = jwt.verify(
+        refreshToken,
+        process.env.REFRESH_TOKEN_SECRET
+      ) as JwtPayload;
       const foundUser = await User.findOne({
-        // @ts-ignore
-        email: decode?.email,
+        email: decode.email,
       }).exec();
 
       if (!foundUser) {
@@ -307,9 +312,9 @@ export const refresh = asyncHandler(
   }
 );
 
-// @desc Logout
-// @route POST /auth/logout
-// @access Public - just to clear cookie if exists
+// @desc    Clear refresh token cookie
+// @route   POST /auth/logout
+// @access  Public - No auth needed to logout
 export const logout = (req: Request, res: Response) => {
   const cookies = req.cookies;
   if (!cookies?.jwt) {
@@ -324,9 +329,9 @@ export const logout = (req: Request, res: Response) => {
   res.json({ message: "Cookie cleared" });
 };
 
-// @desc Verify Email
-// @route POST /auth/verifyEmail
-// @access Public
+// @desc    Verify user's email address
+// @route   POST /auth/verifyEmail
+// @access  Public - Uses email verification token
 export const verifyEmail = asyncHandler(async (req: Request, res: Response) => {
   const emailToken = req.body.emailToken;
 

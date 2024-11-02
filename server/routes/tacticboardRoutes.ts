@@ -5,6 +5,8 @@ const router = express.Router();
 
 router.use(verifyJWT);
 
+router.route("/header").get(tacticboardController.getAllTacticboardHeaders);
+
 router
   .route("/")
   .get(tacticboardController.getAllTacticboards)
@@ -15,5 +17,11 @@ router
   .get(tacticboardController.getById)
   .put(tacticboardController.updateById)
   .delete(tacticboardController.deleteById);
+router
+  .route("/:id/pages/:pageId")
+  .patch(tacticboardController.updatePageById)
+  .delete(tacticboardController.deletePageById);
+router.route("/:id/meta").patch(tacticboardController.updateMetaById);
+router.route("/:id/newPage").post(tacticboardController.createNewPage);
 
 export default router;
