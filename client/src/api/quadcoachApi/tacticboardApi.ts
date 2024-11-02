@@ -240,4 +240,5 @@ export const {
   useCreateTacticBoardPageMutation,
   useDeleteTacticBoardPageMutation,
   useGetTacticBoardHeadersQuery,
+  useLazyGetTacticBoardHeadersQuery,
 } = tacticBoardApiSlice;

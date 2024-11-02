@@ -1,5 +1,11 @@
 import "./translations";
-import { ChangeEvent, MouseEvent, useEffect, useState } from "react";
+import {
+  ChangeEvent,
+  MouseEvent,
+  useEffect,
+  useState,
+  useCallback,
+} from "react";
 import {
   Alert,
   Card,
@@ -23,6 +29,7 @@ import {
 import {
   useAddTacticBoardMutation,
   useGetTacticBoardHeadersQuery,
+  useLazyGetTacticBoardHeadersQuery,
 } from "../../api/quadcoachApi/tacticboardApi";
 import { TacticPageWithOutId } from "../../api/quadcoachApi/domain/TacticPage";
 import { useTranslation } from "react-i18next";
@@ -36,6 +43,7 @@ import { DashboardLayout } from "../../components/LayoutContainers";
 import { useAuth } from "../../store/hooks";
 import Footer from "../../components/Footer";
 import { TacticBoardWithOutIds } from "../../api/quadcoachApi/domain/TacticBoard";
+import debounce from "lodash/debounce";
 
 enum ViewType {
   List = "List",
@@ -73,23 +81,52 @@ const TacticBoardList = () => {
     defaultTacticBoardFilter,
   );
 
+  const [
+    getTacticBoards,
+    {
+      data: tacticBoards,
+      isError: isTacticBoardsError,
+      isLoading: isTacticBoardsLoading,
+    },
+  ] = useLazyGetTacticBoardHeadersQuery();
+
+  // Create debounced search function
+  const debouncedSearch = useCallback(
+    debounce((filter: TacticBoardFilter) => {
+      getTacticBoards({
+        nameRegex: filter.searchValue,
+        tagString: filter.tagString,
+      });
+    }, 300),
+    [getTacticBoards],
+  );
+
+  // Update the filter change handler
   const onTacticBoardFilterValueChange =
     (tacticBoardFilterProperty: keyof TacticBoardFilter) =>
     (event: ChangeEvent<HTMLInputElement>) => {
-      setTacticBoardFilter({
+      const newFilter = {
         ...tacticBoardFilter,
         [tacticBoardFilterProperty]: event.target.value,
-      });
+      };
+      setTacticBoardFilter(newFilter);
+      debouncedSearch(newFilter);
     };
 
-  const {
-    data: tacticBoards,
-    isError: isTacticBoardsError,
-    isLoading: isTacticBoardsLoading,
-  } = useGetTacticBoardHeadersQuery({
-    nameRegex: tacticBoardFilter.searchValue,
-    tagString: tacticBoardFilter.tagString,
-  });
+  // Initial load
+  useEffect(() => {
+    getTacticBoards({
+      nameRegex: defaultTacticBoardFilter.searchValue,
+      tagString: defaultTacticBoardFilter.tagString,
+    });
+  }, [getTacticBoards]);
+
+  // Cleanup
+  useEffect(() => {
+    return () => {
+      debouncedSearch.cancel();
+    };
+  }, [debouncedSearch]);
 
   const [addTacticBoard] = useAddTacticBoardMutation();
 
