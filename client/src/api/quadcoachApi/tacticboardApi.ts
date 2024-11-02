@@ -237,6 +237,7 @@ export const {
   useAddTacticBoardMutation,
   useGetTacticBoardsQuery,
   useGetAllTacticBoardTagsQuery,
+  useLazyGetAllTacticBoardTagsQuery,
   useCreateTacticBoardPageMutation,
   useDeleteTacticBoardPageMutation,
   useGetTacticBoardHeadersQuery,

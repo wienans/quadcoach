@@ -1,6 +1,7 @@
 import { Autocomplete, CircularProgress, TextField } from "@mui/material";
-import { useState } from "react";
-import { useGetAllTagsQuery } from "../../../pages/exerciseApi";
+import { useState, useEffect, useCallback } from "react";
+import { useLazyGetAllTagsQuery } from "../../../pages/exerciseApi";
+import debounce from "lodash/debounce";
 
 export type TagAutocompleteProps = {
   selectedTags: string[];
@@ -14,19 +15,37 @@ const TagAutocomplete = ({
   alreadyAddedTags,
 }: TagAutocompleteProps): JSX.Element => {
   const [searchValue, setSearchValue] = useState<string>("");
-  const { data: tags, isLoading: isTagsLoading } = useGetAllTagsQuery(
-    searchValue !== "" ? searchValue : undefined,
+  const [getTags, { data: tags, isLoading: isTagsLoading }] =
+    useLazyGetAllTagsQuery();
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const debouncedGetTags = useCallback(
+    debounce((search: string) => {
+      getTags(search || undefined);
+    }, 300),
+    [getTags],
   );
+
+  useEffect(() => {
+    debouncedGetTags(searchValue);
+    // Cleanup
+    return () => {
+      debouncedGetTags.cancel();
+    };
+  }, [searchValue, debouncedGetTags]);
+
+  const filteredOptions = [
+    ...(tags?.filter((tag) => !alreadyAddedTags.some((rel) => rel === tag)) ??
+      []),
+    ...(searchValue && !tags?.includes(searchValue) ? [searchValue] : []),
+  ];
 
   return (
     <Autocomplete
       id="related-text"
       freeSolo
       multiple
-      options={
-        tags?.filter((tag) => !alreadyAddedTags.some((rel) => rel === tag)) ??
-        []
-      }
+      options={filteredOptions}
       getOptionLabel={(tag) => tag}
       isOptionEqualToValue={(option, value) => option === value}
       inputValue={searchValue}

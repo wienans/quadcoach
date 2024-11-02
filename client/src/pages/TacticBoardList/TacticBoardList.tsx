@@ -28,7 +28,6 @@ import {
 } from "../../components";
 import {
   useAddTacticBoardMutation,
-  useGetTacticBoardHeadersQuery,
   useLazyGetTacticBoardHeadersQuery,
 } from "../../api/quadcoachApi/tacticboardApi";
 import { TacticPageWithOutId } from "../../api/quadcoachApi/domain/TacticPage";
