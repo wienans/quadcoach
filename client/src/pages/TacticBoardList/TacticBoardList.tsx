@@ -21,8 +21,8 @@ import {
   AddTacticBoardDialog,
 } from "../../components";
 import {
-  useLazyGetTacticBoardsQuery,
   useAddTacticBoardMutation,
+  useGetTacticBoardHeadersQuery,
 } from "../../api/quadcoachApi/tacticboardApi";
 import { TacticPageWithOutId } from "../../api/quadcoachApi/domain/TacticPage";
 import { useTranslation } from "react-i18next";
@@ -82,30 +82,16 @@ const TacticBoardList = () => {
       });
     };
 
-  const [
-    getTacticBoards,
-    {
-      data: tacticBoards,
-      isError: isTacticBoardsError,
-      isLoading: isTacticBoardsLoading,
-    },
-  ] = useLazyGetTacticBoardsQuery();
+  const {
+    data: tacticBoards,
+    isError: isTacticBoardsError,
+    isLoading: isTacticBoardsLoading,
+  } = useGetTacticBoardHeadersQuery({
+    nameRegex: tacticBoardFilter.searchValue,
+    tagString: tacticBoardFilter.tagString,
+  });
 
   const [addTacticBoard] = useAddTacticBoardMutation();
-
-  useEffect(() => {
-    getTacticBoards({
-      nameRegex: defaultTacticBoardFilter.searchValue,
-      tagString: defaultTacticBoardFilter.tagString,
-    });
-  }, [getTacticBoards]);
-
-  useEffect(() => {
-    getTacticBoards({
-      nameRegex: tacticBoardFilter.searchValue,
-      tagString: tacticBoardFilter.tagString,
-    });
-  }, [tacticBoardFilter.searchValue, getTacticBoards, tacticBoardFilter]);
 
   const onOpenTacticBoardClick = (tacticBoardId: string) => {
     navigate(`/tacticboards/${tacticBoardId}`);

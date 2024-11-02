@@ -39,7 +39,39 @@ export const getAllTacticboards = asyncHandler(
     }
 
     const boards = await TacticBoard.find(parseObject);
+    res.send(boards);
+  }
+);
 
+// @desc    Get all tacticboard headers (minimal data)
+// @route   GET /api/tacticboards/header
+// @access  Public - Returns only public boards and user's private boards
+export const getAllTacticboardHeaders = asyncHandler(
+  async (req: RequestWithUser, res: Response) => {
+    let queryString: string = JSON.stringify(req.query);
+
+    queryString = queryString.replace(
+      /\b(gte|gt|lte|lt|eq|ne|regex|options|in|nin)\b/g,
+      (match) => `$${match}`
+    );
+    let parseObject = JSON.parse(queryString);
+
+    parseObject.$or = [{ isPrivate: false }];
+
+    if (req.UserInfo?.id) {
+      parseObject.$or.push({ isPrivate: true, user: req.UserInfo.id });
+    }
+
+    if (
+      req.UserInfo?.roles?.includes("Admin") ||
+      req.UserInfo?.roles?.includes("admin")
+    ) {
+      parseObject.$or.push({ isPrivate: true });
+    }
+
+    const boards = await TacticBoard.find(parseObject).select(
+      "_id name tags isPrivate creator user"
+    );
     res.send(boards);
   }
 );

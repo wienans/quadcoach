@@ -2,6 +2,8 @@ import { quadcoachApi } from "..";
 import { TagType } from "../enum";
 import { TacticBoard, TacticPage } from "./domain";
 import { TacticBoardWithOutIds } from "./domain/TacticBoard";
+import { TacticBoardHeader } from "./domain/TacticBoard";
+
 export type GetTacticBoardRequest = {
   nameRegex?: string;
   tagString?: string;
@@ -186,6 +188,42 @@ export const tacticBoardApiSlice = quadcoachApi.injectEndpoints({
         TagType.tacticboardTag,
       ],
     }),
+    getTacticBoardHeaders: builder.query<
+      TacticBoardHeader[],
+      GetTacticBoardRequest | undefined
+    >({
+      query: (request) => {
+        const { nameRegex, tagString } = request || {};
+        const urlParams = new URLSearchParams();
+
+        if (nameRegex != null && nameRegex !== "") {
+          urlParams.append("name[regex]", nameRegex);
+          urlParams.append("name[options]", "i");
+        }
+        if (tagString != null && tagString !== "") {
+          urlParams.append("tags[regex]", tagString);
+          urlParams.append("tags[options]", "i");
+        }
+
+        const urlParamsString = urlParams.toString();
+        return {
+          url: `/api/tacticboards/header${
+            urlParamsString === "" ? "" : `?${urlParamsString}`
+          }`,
+          method: "get",
+        };
+      },
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.map(({ _id }) => ({
+                type: TagType.tacticboard as const,
+                id: _id,
+              })),
+              TagType.tacticboard,
+            ]
+          : [TagType.tacticboard],
+    }),
   }),
 });
 
@@ -201,4 +239,5 @@ export const {
   useGetAllTacticBoardTagsQuery,
   useCreateTacticBoardPageMutation,
   useDeleteTacticBoardPageMutation,
+  useGetTacticBoardHeadersQuery,
 } = tacticBoardApiSlice;

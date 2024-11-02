@@ -5,6 +5,8 @@ const router = express.Router();
 
 router.use(verifyJWT);
 
+router.route("/header").get(tacticboardController.getAllTacticboardHeaders);
+
 router
   .route("/")
   .get(tacticboardController.getAllTacticboards)
