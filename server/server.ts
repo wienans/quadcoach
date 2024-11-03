@@ -24,6 +24,9 @@ const PORT = process.env.PORT || 3001;
 // Start Express
 const app = express();
 
+// Add this line before other middleware
+app.set("trust proxy", 1);
+
 // Connect to Mongo DB
 console.warn(process.env.MONGO_USER);
 console.warn(process.env.MONGO_PASSWORD);
@@ -59,6 +62,12 @@ mongoose
       "mongoErrLog.log"
     );
   });
+
+// Add timeout to server creation
+const server = app.listen(PORT, () => {
+  console.log(`Server listening on ${PORT}`);
+});
+server.timeout = 60000; // 1 minute timeout
 
 // API's
 app.use("/api/user", userRoutes);
