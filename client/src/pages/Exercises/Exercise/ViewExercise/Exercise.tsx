@@ -203,16 +203,20 @@ const Exercise = () => {
       showScrollToTopButton={(scrollTrigger) => scrollTrigger && isUpMd}
       bottomNavigation={
         !isUpMd && [
-          <Tooltip key="edit" title={t("Exercise:updateExercise")}>
-            <BottomNavigationAction icon={<EditIcon />} onClick={update} />
-          </Tooltip>,
-          <Tooltip key="delete" title={t("Exercise:deleteExercise")}>
-            <BottomNavigationAction
-              icon={<DeleteIcon />}
-              onClick={onDeleteExerciseClick}
-              disabled={!exercise || isDeleteExerciseLoading}
-            />
-          </Tooltip>,
+          isPrivileged && (
+            <Tooltip key="edit" title={t("Exercise:updateExercise")}>
+              <BottomNavigationAction icon={<EditIcon />} onClick={update} />
+            </Tooltip>
+          ),
+          isPrivileged && (
+            <Tooltip key="delete" title={t("Exercise:deleteExercise")}>
+              <BottomNavigationAction
+                icon={<DeleteIcon />}
+                onClick={onDeleteExerciseClick}
+                disabled={!exercise || isDeleteExerciseLoading}
+              />
+            </Tooltip>
+          ),
         ]
       }
     >

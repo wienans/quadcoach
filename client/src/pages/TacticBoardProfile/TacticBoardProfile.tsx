@@ -258,31 +258,35 @@ const TacticBoardProfile = () => {
         }
         bottomNavigation={
           !isUpMd && [
-            <Tooltip
-              key="edit"
-              title={t("TacticBoardProfile:editTacticBoardMeta")}
-            >
-              <BottomNavigationAction
-                icon={<EditIcon />}
-                onClick={() => {
-                  setIsEditMode(!isEditMode);
-                }}
-              />
-            </Tooltip>,
-            <Tooltip
-              key="delete"
-              title={t("TacticBoardProfile:deleteTacticBoard")}
-            >
-              <BottomNavigationAction
-                icon={<DeleteIcon />}
-                onClick={onDeleteTacticBoardClick}
-                disabled={
-                  !tacticBoard ||
-                  isDeleteTacticBoardLoading ||
-                  isUpdateTacticBoardMetaLoading
-                }
-              />
-            </Tooltip>,
+            isPrivileged && (
+              <Tooltip
+                key="edit"
+                title={t("TacticBoardProfile:editTacticBoardMeta")}
+              >
+                <BottomNavigationAction
+                  icon={<EditIcon />}
+                  onClick={() => {
+                    setIsEditMode(!isEditMode);
+                  }}
+                />
+              </Tooltip>
+            ),
+            isPrivileged && (
+              <Tooltip
+                key="delete"
+                title={t("TacticBoardProfile:deleteTacticBoard")}
+              >
+                <BottomNavigationAction
+                  icon={<DeleteIcon />}
+                  onClick={onDeleteTacticBoardClick}
+                  disabled={
+                    !tacticBoard ||
+                    isDeleteTacticBoardLoading ||
+                    isUpdateTacticBoardMetaLoading
+                  }
+                />
+              </Tooltip>
+            ),
           ]
         }
       >
