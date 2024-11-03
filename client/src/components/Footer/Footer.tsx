@@ -76,11 +76,18 @@ const Footer = (): JSX.Element => {
         <SoftBox width="100%" px={3.0}>
           <SoftTypography fontSize="small">
             <br />
-            {import.meta.env.VITE_NAME} <br />
-            {import.meta.env.VITE_ADDRESS_L1} <br />
-            {import.meta.env.VITE_ADDRESS_L2} <br />
-            E-Mail: {import.meta.env.VITE_EMAIL} <br />
-            Telefon: {import.meta.env.VITE_TELEFON} <br /> <br />
+            {import.meta.env.VITE_NAME || process.env.VITE_NAME} <br />
+            {import.meta.env.VITE_ADDRESS_L1 ||
+              process.env.VITE_ADDRESS_L1}{" "}
+            <br />
+            {import.meta.env.VITE_ADDRESS_L2 ||
+              process.env.VITE_ADDRESS_L2}{" "}
+            <br />
+            E-Mail: {import.meta.env.VITE_EMAIL || process.env.VITE_EMAIL}{" "}
+            <br />
+            Telefon: {import.meta.env.VITE_TELEFON ||
+              process.env.VITE_TELEFON}{" "}
+            <br /> <br />
           </SoftTypography>
           <SoftTypography fontSize="small" fontWeight="medium">
             Disclaimer – rechtliche Hinweise
