@@ -63,12 +63,6 @@ mongoose
     );
   });
 
-// Add timeout to server creation
-const server = app.listen(PORT, () => {
-  console.log(`Server listening on ${PORT}`);
-});
-server.timeout = 60000; // 1 minute timeout
-
 // API's
 app.use("/api/user", userRoutes);
 app.use("/api/auth", authRoutes);
