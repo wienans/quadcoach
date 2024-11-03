@@ -17,6 +17,8 @@ import * as Yup from "yup";
 import { DashboardLayout } from "../../components/LayoutContainers";
 import Footer from "../../components/Footer";
 
+import { useState } from "react";
+
 type RegisterFields = {
   name: string;
   email: string;
@@ -27,6 +29,7 @@ type RegisterFields = {
 const Register = (): JSX.Element => {
   const { t } = useTranslation("Register");
   const navigate = useNavigate();
+  const [showSuccess, setShowSuccess] = useState(false);
 
   const [register, { isLoading: isRegisterLoading, isError: isRegisterError }] =
     useRegisterMutation();
@@ -69,7 +72,7 @@ const Register = (): JSX.Element => {
       });
 
       if ("data" in result) {
-        navigate("/");
+        setShowSuccess(true);
       }
     },
   });
@@ -212,8 +215,14 @@ const Register = (): JSX.Element => {
                 {isRegisterError && (
                   <Grid item xs={12} justifyContent="center" display="flex">
                     <Alert color="error" sx={{ mt: 2 }}>
-                      {" "}
                       {t("Register:registerErr")}
+                    </Alert>
+                  </Grid>
+                )}
+                {showSuccess && (
+                  <Grid item xs={12} justifyContent="center" display="flex">
+                    <Alert color="success" sx={{ mt: 2 }}>
+                      {t("Register:registerSuccess")}
                     </Alert>
                   </Grid>
                 )}
@@ -222,10 +231,15 @@ const Register = (): JSX.Element => {
                     sx={{ marginRight: 1 }}
                     type="submit"
                     color="primary"
-                    disabled={isRegisterLoading}
+                    disabled={isRegisterLoading || showSuccess}
                   >
                     {t("Register:registerBtn")}
                   </SoftButton>
+                  {showSuccess && (
+                    <SoftButton color="info" onClick={() => navigate("/login")}>
+                      {t("Register:goToLogin")}
+                    </SoftButton>
+                  )}
                 </Grid>
               </Grid>
             </Card>

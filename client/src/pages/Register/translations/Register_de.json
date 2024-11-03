@@ -25,5 +25,7 @@
     }
   },
   "registerBtn": "Registerieren",
-  "registerErr": "E-Mail bereits registriert. Bitte versuche es erneut."
+  "registerErr": "E-Mail bereits registriert. Bitte versuche es erneut.",
+  "registerSuccess": "Registrierung erfolgreich! Bitte überprüfen Sie Ihre E-Mail (auch den Spam-Ordner), um Ihr Konto zu verifizieren, bevor Sie sich anmelden.",
+  "goToLogin": "Zum Login"
 }
