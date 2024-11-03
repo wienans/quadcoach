@@ -40,7 +40,37 @@ const Home = () => {
                     fontWeight="bold"
                     textTransform="uppercase"
                   >
-                    Beta Tesing
+                    Open Beta Testing
+                  </SoftTypography>
+                  <SoftTypography
+                    variant="h3"
+                    fontWeight="bold"
+                    textTransform="uppercase"
+                  >
+                    03.Nov.2024
+                  </SoftTypography>
+                </SoftBox>
+                <SoftTypography>
+                  Performance improvements for saving and loading tacticboards,
+                  and overall backend improvements.
+                </SoftTypography>
+              </SoftBox>
+            </Card>
+          </SoftBox>
+          <SoftBox>
+            <Card sx={{ height: "100%" }}>
+              <SoftBox p={2}>
+                <SoftBox
+                  display="flex"
+                  justifyContent="space-between"
+                  width="100%"
+                >
+                  <SoftTypography
+                    variant="h3"
+                    fontWeight="bold"
+                    textTransform="uppercase"
+                  >
+                    Beta Testing
                   </SoftTypography>
                   <SoftTypography
                     variant="h3"
