@@ -30,10 +30,9 @@ app.set("trust proxy", 1);
 // Connect to Mongo DB
 console.warn(process.env.MONGO_USER);
 console.warn(process.env.MONGO_DB);
-const MONGO_USER = process.env.MONGO_USER;
-const MONGO_PASSWORD = process.env.MONGO_PASSWORD;
+const MONGO_USER = encodeURIComponent(process.env.MONGO_USER || "");
+const MONGO_PASSWORD = encodeURIComponent(process.env.MONGO_PASSWORD || "");
 const MONGO_DB = process.env.MONGO_DB;
-
 const dbURI = `mongodb://${MONGO_USER}:${MONGO_PASSWORD}@quadcoach-mongodb:27017/${MONGO_DB}?retryWrites=true&w=majority`;
 
 app.use(express.static("dist"));
