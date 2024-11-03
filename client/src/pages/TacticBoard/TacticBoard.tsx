@@ -76,7 +76,6 @@ const TacticsBoard = (): JSX.Element => {
     (page: number, newPage?: boolean, removePage?: boolean) => {
       if (newPage && removePage) return;
       if (!tacticBoard) return;
-      console.log(tacticBoard);
       const updatedTacticBoard: TacticBoard = cloneDeep(tacticBoard);
       if (isPrivileged && isEditMode) {
         if (newPage) {
