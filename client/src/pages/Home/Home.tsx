@@ -57,7 +57,7 @@ const Home = () => {
               </SoftBox>
             </Card>
           </SoftBox>
-          <SoftBox>
+          <SoftBox mt={5}>
             <Card sx={{ height: "100%" }}>
               <SoftBox p={2}>
                 <SoftBox
