@@ -5,6 +5,7 @@
     "addExercise": "Übung hinzufügen",
     "tacticBoards": "Taktik Tafeln",
     "gitHubRepository": "GitHub Repository",
-    "deleteAccount": "Konto löschen"
+    "deleteAccount": "Konto löschen",
+    "login": "Login"
   }
 }

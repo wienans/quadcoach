@@ -5,14 +5,17 @@ import DeveloperBoardIcon from "@mui/icons-material/DeveloperBoard";
 import ListIcon from "@mui/icons-material/List";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import DeleteIcon from "@mui/icons-material/Delete";
+import LoginIcon from "@mui/icons-material/Login";
 import { PresistLogin } from "..";
 import { useAuth } from "../../store/hooks";
 import { useDeleteUserMutation } from "../../pages/userApi";
 import { useNavigate } from "react-router-dom";
+import { useSendLogoutMutation } from "../../pages/authApi";
 
 const Layout = () => {
   const { id: userId } = useAuth();
   const [deleteUser] = useDeleteUserMutation();
+  const [sendLogout] = useSendLogoutMutation();
   const navigate = useNavigate();
 
   const handleDeleteAccount = async () => {
@@ -24,6 +27,7 @@ const Layout = () => {
         )
       ) {
         await deleteUser(userId).unwrap();
+        await sendLogout({}).unwrap();
         navigate("/");
       }
     } catch (err) {
@@ -89,7 +93,17 @@ const Layout = () => {
             onClick: handleDeleteAccount,
           },
         ]
-      : []),
+      : [
+          {
+            type: "collapse" as const,
+            nameResourceKey: "Layout:routes.login",
+            key: "login",
+            noCollapse: true,
+            route: "/login",
+            icon: <LoginIcon />,
+            protected: true,
+          },
+        ]),
   ];
   return (
     <>
