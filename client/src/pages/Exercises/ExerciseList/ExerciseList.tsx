@@ -49,14 +49,16 @@ type ExerciseFilter = {
   searchValue: string;
   minPersons: number;
   maxPersons: number;
-  tagString: string;
+  tagRegex: string;
+  tagList: string[];
 };
 
 const defaultExerciseFilter: ExerciseFilter = {
   maxPersons: maxPersons,
   minPersons: 0,
   searchValue: "",
-  tagString: "",
+  tagRegex: "",
+  tagList: [],
 };
 
 const ExerciseList = () => {
@@ -102,7 +104,8 @@ const ExerciseList = () => {
         maxPersons: filter.maxPersons,
         minPersons: filter.minPersons,
         nameRegex: filter.searchValue,
-        tagString: filter.tagString,
+        tagRegex: filter.tagRegex,
+        tagList: filter.tagList,
       });
     }, 500),
     [getExercises],
@@ -244,8 +247,8 @@ const ExerciseList = () => {
                   <SoftInput
                     id="outlined-basic"
                     placeholder={t("ExerciseList:filter.tags.placeholder")}
-                    value={exerciseFilter.tagString}
-                    onChange={onExerciseFilterValueChange("tagString")}
+                    value={exerciseFilter.tagRegex}
+                    onChange={onExerciseFilterValueChange("tagRegex")}
                     sx={{ width: "100%" }}
                   />
                 </Grid>

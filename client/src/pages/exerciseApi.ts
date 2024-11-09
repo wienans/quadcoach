@@ -7,7 +7,8 @@ export type GetExercisesRequest = {
   nameRegex?: string;
   minPersons?: number;
   maxPersons?: number;
-  tagString?: string;
+  tagRegex?: string;
+  tagList?: string[];
 };
 
 export const exerciseApiSlice = quadcoachApi.injectEndpoints({
@@ -152,7 +153,8 @@ export const exerciseApiSlice = quadcoachApi.injectEndpoints({
     }),
     getExercises: builder.query<Exercise[], GetExercisesRequest | undefined>({
       query: (request) => {
-        const { maxPersons, minPersons, nameRegex, tagString } = request || {};
+        const { maxPersons, minPersons, nameRegex, tagRegex, tagList } =
+          request || {};
         const urlParams = new URLSearchParams();
 
         if (nameRegex != null && nameRegex !== "") {
@@ -165,8 +167,11 @@ export const exerciseApiSlice = quadcoachApi.injectEndpoints({
         if (maxPersons != null) {
           urlParams.append("persons[lte]", maxPersons.toString());
         }
-        if (tagString != null && tagString !== "") {
-          urlParams.append("tags[regex]", tagString);
+        if (tagList != null && tagList.length > 0) {
+          urlParams.append("tags[all]", tagList.join(","));
+        }
+        if (tagRegex != null && tagRegex !== "") {
+          urlParams.append("tags[regex]", tagRegex);
           urlParams.append("tags[options]", "i");
         }
 

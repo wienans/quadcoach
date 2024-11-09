@@ -16,12 +16,21 @@ interface RequestWithUser extends Request {
 export const getAllExercises = asyncHandler(
   async (req: Request, res: Response) => {
     let queryString: string = JSON.stringify(req.query);
+    console.log(queryString);
 
     queryString = queryString.replace(
-      /\b(gte|gt|lte|lt|eq|ne|regex|options|in|nin)\b/g,
+      /\b(gte|gt|lte|lt|eq|ne|regex|options|in|nin|all)\b/g,
       (match) => `$${match}`
     );
 
+    // Convert comma-separated strings in $all operators to arrays
+    queryString = queryString.replace(
+      /"?\$all"?\s*:\s*"([^"]+)"/g,
+      (_, match) =>
+        `"$all": [${match.split(",").map((item: string) => `"${item}"`)}]`
+    );
+
+    console.log(queryString);
     const exercises = await Exercise.find(JSON.parse(queryString));
 
     res.send(exercises);
