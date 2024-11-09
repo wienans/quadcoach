@@ -42,6 +42,7 @@ import { DashboardLayout } from "../../../components/LayoutContainers";
 import { useAuth } from "../../../store/hooks";
 import Footer from "../../../components/Footer";
 import debounce from "lodash/debounce";
+import { Exercise } from "../../../api/quadcoachApi/domain";
 const maxPersons = 100;
 
 enum ViewType {
@@ -55,6 +56,8 @@ type ExerciseFilter = {
   maxPersons: number;
   tagRegex: string;
   tagList: string[];
+  page: number;
+  limit: number;
 };
 
 const defaultExerciseFilter: ExerciseFilter = {
@@ -63,6 +66,8 @@ const defaultExerciseFilter: ExerciseFilter = {
   searchValue: "",
   tagRegex: "",
   tagList: [],
+  page: 1,
+  limit: 50,
 };
 
 const ExerciseList = () => {
@@ -74,47 +79,56 @@ const ExerciseList = () => {
   const [showFilters, setShowFilters] = useState<boolean>(false);
   const [viewType, setViewType] = useState<ViewType>(ViewType.Cards);
   const { status: userStatus } = useAuth();
+  const [loadedExercises, setLoadedExercises] = useState<Exercise[]>([]);
 
   useEffect(() => {
     if (isUpMd) return;
     setViewType(ViewType.Cards);
   }, [isUpMd]);
 
-  const [exerciseFilter, setExerciseFilter] = useState<ExerciseFilter>(
-    defaultExerciseFilter,
-  );
+  const [exerciseFilter, setExerciseFilter] = useState<ExerciseFilter>({
+    ...defaultExerciseFilter,
+    page: 1,
+    limit: 50,
+  });
 
   const onExerciseFilterValueChange =
     (exerciseFilterProperty: keyof ExerciseFilter) =>
     (event: ChangeEvent<HTMLInputElement>) => {
+      setLoadedExercises([]);
       setExerciseFilter({
         ...exerciseFilter,
         [exerciseFilterProperty]: event.target.value,
+        page: 1,
       });
     };
 
   const handleTagKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Enter" && exerciseFilter.tagRegex.trim() !== "") {
       event.preventDefault();
+      setLoadedExercises([]);
       setExerciseFilter({
         ...exerciseFilter,
         tagList: [...exerciseFilter.tagList, exerciseFilter.tagRegex.trim()],
         tagRegex: "",
+        page: 1,
       });
     }
   };
 
   const handleDeleteTag = (tagToDelete: string) => {
+    setLoadedExercises([]);
     setExerciseFilter({
       ...exerciseFilter,
       tagList: exerciseFilter.tagList.filter((tag) => tag !== tagToDelete),
+      page: 1,
     });
   };
 
   const [
     getExercises,
     {
-      data: exercises,
+      data: exercisesData,
       isError: isExercisesError,
       isLoading: isExercisesLoading,
     },
@@ -128,6 +142,8 @@ const ExerciseList = () => {
         nameRegex: filter.searchValue,
         tagRegex: filter.tagRegex,
         tagList: filter.tagList,
+        page: filter.page,
+        limit: filter.limit,
       });
     }, 500),
     [getExercises],
@@ -141,6 +157,12 @@ const ExerciseList = () => {
     };
   }, [exerciseFilter, debouncedGetExercises]);
 
+  useEffect(() => {
+    if (exercisesData?.exercises) {
+      setLoadedExercises((prev) => [...prev, ...exercisesData.exercises]);
+    }
+  }, [exercisesData]);
+
   const onOpenExerciseClick = (exerciseId: string) => {
     navigate(`/exercises/${exerciseId}`);
   };
@@ -151,6 +173,16 @@ const ExerciseList = () => {
   ) => {
     setViewType(newViewType);
   };
+
+  // Load more function
+  const loadMore = useCallback(() => {
+    if (exercisesData && exerciseFilter.page < exercisesData.pagination.pages) {
+      setExerciseFilter((prev) => ({
+        ...prev,
+        page: prev.page + 1,
+      }));
+    }
+  }, [exercisesData, exerciseFilter.page]);
 
   return (
     <DashboardLayout
@@ -344,7 +376,7 @@ const ExerciseList = () => {
               <ExercisesListView
                 isExercisesLoading={isExercisesLoading}
                 onOpenExerciseClick={onOpenExerciseClick}
-                exercises={exercises}
+                exercises={loadedExercises}
               />
             </SoftBox>
           )}
@@ -354,10 +386,25 @@ const ExerciseList = () => {
                 <ExercisesCardView
                   isExercisesLoading={isExercisesLoading}
                   onOpenExerciseClick={onOpenExerciseClick}
-                  exercises={exercises}
+                  exercises={loadedExercises}
                   scrollTrigger={scrollTrigger}
                 />
               </SoftBox>
+              {exercisesData &&
+                exerciseFilter.page < exercisesData.pagination.pages && (
+                  <SoftBox
+                    display="flex"
+                    justifyContent="center"
+                    sx={{ mt: 2, mb: 2 }}
+                  >
+                    <SoftButton
+                      onClick={loadMore}
+                      disabled={isExercisesLoading}
+                    >
+                      {t("ExerciseList:loadMore")}
+                    </SoftButton>
+                  </SoftBox>
+                )}
             </>
           )}
           <Footer />

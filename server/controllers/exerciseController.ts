@@ -16,22 +16,44 @@ interface RequestWithUser extends Request {
 export const getAllExercises = asyncHandler(
   async (req: Request, res: Response) => {
     let queryString: string = JSON.stringify(req.query);
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 50;
+    const skip = (page - 1) * limit;
+
+    // Remove pagination params from the query string
+    const queryObj = JSON.parse(queryString);
+    delete queryObj.page;
+    delete queryObj.limit;
+    queryString = JSON.stringify(queryObj);
 
     queryString = queryString.replace(
       /\b(gte|gt|lte|lt|eq|ne|regex|options|in|nin|all)\b/g,
       (match) => `$${match}`
     );
 
-    // Convert comma-separated strings in $all operators to arrays
     queryString = queryString.replace(
       /"?\$all"?\s*:\s*"([^"]+)"/g,
       (_, match) =>
         `"$all": [${match.split(",").map((item: string) => `"${item}"`)}]`
     );
 
-    const exercises = await Exercise.find(JSON.parse(queryString));
+    const query = JSON.parse(queryString);
 
-    res.send(exercises);
+    // Get total count for pagination
+    const total = await Exercise.countDocuments(query);
+
+    // Execute query with pagination
+    const exercises = await Exercise.find(query).skip(skip).limit(limit);
+
+    res.send({
+      exercises,
+      pagination: {
+        page,
+        limit,
+        total,
+        pages: Math.ceil(total / limit),
+      },
+    });
   }
 );
 
