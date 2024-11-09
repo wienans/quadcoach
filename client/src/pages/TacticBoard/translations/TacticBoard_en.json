@@ -12,6 +12,9 @@
       "tooltip_open": "Close items menu.",
       "tooltip_closed": "Open items menu."
     },
+    "isFullscreenButton": {
+      "tooltip": "Switch tactic board to fullscreen mode."
+    },
     "deleteButton": {
       "tooltip": "Deletes the tactic board"
     },

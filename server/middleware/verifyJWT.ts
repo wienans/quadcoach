@@ -20,7 +20,17 @@ const verifyJWT = (req: Request, res: Response, next: NextFunction) => {
     return;
   }
   try {
-    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+    const decoded = jwt.verify(
+      token,
+      process.env.ACCESS_TOKEN_SECRET
+    ) as JwtPayload;
+
+    // Check if token is expired
+    const currentTimestamp = Math.floor(Date.now() / 1000);
+    if (decoded.exp && decoded.exp < currentTimestamp) {
+      return res.status(401).json({ message: "Token expired" });
+    }
+
     // @ts-ignore
     req.UserInfo = {};
     // @ts-ignore
@@ -34,6 +44,9 @@ const verifyJWT = (req: Request, res: Response, next: NextFunction) => {
 
     next();
   } catch (e) {
+    if (e instanceof jwt.TokenExpiredError) {
+      return res.status(401).json({ message: "Token expired" });
+    }
     // @ts-ignore
     req.UserInfo = {};
     // @ts-ignore

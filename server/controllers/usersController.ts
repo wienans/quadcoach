@@ -6,6 +6,15 @@ import TacticBoard from "../models/tacticboard";
 import Exercise from "../models/exercise";
 import mongoose from "mongoose";
 
+interface UserInfo {
+  id?: string;
+  roles?: string[];
+}
+
+interface RequestWithUser extends Request {
+  UserInfo?: UserInfo;
+}
+
 // @desc    Get all users
 // @route   GET /api/users
 // @access  Private - Admin only
@@ -132,26 +141,35 @@ export const updateUser = asyncHandler(async (req: Request, res: Response) => {
 // @desc    Delete user account
 // @route   DELETE /api/users
 // @access  Private - Admin only
-export const deleteUser = asyncHandler(async (req: Request, res: Response) => {
-  const { id } = req.body;
-  if (!id) {
-    res.status(400).json({ message: "User ID Required" });
-    return;
+export const deleteUser = asyncHandler(
+  async (req: RequestWithUser, res: Response) => {
+    const { id } = req.body;
+    if (
+      (!req.UserInfo?.id || req.UserInfo.id !== id) &&
+      !req.UserInfo?.roles?.some((role) => role.toLowerCase() === "admin")
+    ) {
+      res.status(403).json({ message: "Forbidden" });
+      return;
+    }
+    if (!id) {
+      res.status(400).json({ message: "User ID Required" });
+      return;
+    }
+    const boards = await TacticBoard.findOne({ user: id }).lean().exec();
+    const exercises = await Exercise.findOne({ user: id }).lean().exec();
+    if (boards || exercises) {
+      res
+        .status(400)
+        .json({ message: "User has assigned Exercises or Tacticboards" });
+      return;
+    }
+    const user = await User.findById(id).exec();
+    if (!user) {
+      res.status(400).json({ message: "User not found" });
+      return;
+    }
+    const result = await user.deleteOne();
+    const reply = `Username ${result.email} with ID ${result._id} deleted`;
+    res.json({ message: reply });
   }
-  const boards = await TacticBoard.findOne({ user: id }).lean().exec();
-  const exercises = await Exercise.findOne({ user: id }).lean().exec();
-  if (boards || exercises) {
-    res
-      .status(400)
-      .json({ message: "User has assigned Exercises or Tacticboards" });
-    return;
-  }
-  const user = await User.findById(id).exec();
-  if (!user) {
-    res.status(400).json({ message: "User not found" });
-    return;
-  }
-  const result = await user.deleteOne();
-  const reply = `Username ${result.email} with ID ${result._id} deleted`;
-  res.json({ message: reply });
-});
+);
