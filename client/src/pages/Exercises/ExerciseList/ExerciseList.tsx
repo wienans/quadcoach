@@ -5,6 +5,7 @@ import {
   useEffect,
   useState,
   useCallback,
+  KeyboardEvent,
 } from "react";
 import {
   Alert,
@@ -18,6 +19,7 @@ import {
   ToggleButton,
   ToggleButtonGroup,
   useMediaQuery,
+  Chip,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import {
@@ -88,6 +90,24 @@ const ExerciseList = () => {
         [exerciseFilterProperty]: event.target.value,
       });
     };
+
+  const handleTagKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Enter" && exerciseFilter.tagRegex.trim() !== "") {
+      event.preventDefault();
+      setExerciseFilter({
+        ...exerciseFilter,
+        tagList: [...exerciseFilter.tagList, exerciseFilter.tagRegex.trim()],
+        tagRegex: "",
+      });
+    }
+  };
+
+  const handleDeleteTag = (tagToDelete: string) => {
+    setExerciseFilter({
+      ...exerciseFilter,
+      tagList: exerciseFilter.tagList.filter((tag) => tag !== tagToDelete),
+    });
+  };
 
   const [
     getExercises,
@@ -249,8 +269,22 @@ const ExerciseList = () => {
                     placeholder={t("ExerciseList:filter.tags.placeholder")}
                     value={exerciseFilter.tagRegex}
                     onChange={onExerciseFilterValueChange("tagRegex")}
+                    onKeyDown={handleTagKeyDown}
                     sx={{ width: "100%" }}
                   />
+                  <SoftBox
+                    sx={{ display: "flex", flexWrap: "wrap", gap: 1, mt: 1 }}
+                  >
+                    {exerciseFilter.tagList.map((tag) => (
+                      <Chip
+                        key={tag}
+                        label={tag}
+                        onDelete={() => handleDeleteTag(tag)}
+                        color="primary"
+                        variant="outlined"
+                      />
+                    ))}
+                  </SoftBox>
                 </Grid>
               </Grid>
             </CardContent>
