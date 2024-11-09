@@ -6,7 +6,8 @@ import { TacticBoardHeader } from "./domain/TacticBoard";
 
 export type GetTacticBoardRequest = {
   nameRegex?: string;
-  tagString?: string;
+  tagRegex?: string;
+  tagList?: string[];
 };
 
 export const tacticBoardApiSlice = quadcoachApi.injectEndpoints({
@@ -81,15 +82,18 @@ export const tacticBoardApiSlice = quadcoachApi.injectEndpoints({
       GetTacticBoardRequest | undefined
     >({
       query: (request) => {
-        const { nameRegex, tagString } = request || {};
+        const { nameRegex, tagRegex, tagList } = request || {};
         const urlParams = new URLSearchParams();
 
         if (nameRegex != null && nameRegex !== "") {
           urlParams.append("name[regex]", nameRegex);
           urlParams.append("name[options]", "i");
         }
-        if (tagString != null && tagString !== "") {
-          urlParams.append("tags[regex]", tagString);
+        if (tagList != null && tagList.length > 0) {
+          urlParams.append("tags[in]", tagList.join(","));
+        }
+        if (tagRegex != null && tagRegex !== "") {
+          urlParams.append("tags[regex]", tagRegex);
           urlParams.append("tags[options]", "i");
         }
 
@@ -193,15 +197,18 @@ export const tacticBoardApiSlice = quadcoachApi.injectEndpoints({
       GetTacticBoardRequest | undefined
     >({
       query: (request) => {
-        const { nameRegex, tagString } = request || {};
+        const { nameRegex, tagRegex, tagList } = request || {};
         const urlParams = new URLSearchParams();
 
         if (nameRegex != null && nameRegex !== "") {
           urlParams.append("name[regex]", nameRegex);
           urlParams.append("name[options]", "i");
         }
-        if (tagString != null && tagString !== "") {
-          urlParams.append("tags[regex]", tagString);
+        if (tagList != null && tagList.length > 0) {
+          urlParams.append("tags[in]", tagList.join(","));
+        }
+        if (tagRegex != null && tagRegex !== "") {
+          urlParams.append("tags[regex]", tagRegex);
           urlParams.append("tags[options]", "i");
         }
 

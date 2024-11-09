@@ -5,6 +5,7 @@ import {
   useEffect,
   useState,
   useCallback,
+  KeyboardEvent,
 } from "react";
 import {
   Alert,
@@ -18,6 +19,8 @@ import {
   ToggleButton,
   ToggleButtonGroup,
   useMediaQuery,
+  Chip,
+  InputAdornment,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import {
@@ -30,6 +33,7 @@ import { useTranslation } from "react-i18next";
 import FilterAltIcon from "@mui/icons-material/FilterAlt";
 import GridViewIcon from "@mui/icons-material/GridView";
 import ListIcon from "@mui/icons-material/List";
+import KeyboardReturnIcon from "@mui/icons-material/KeyboardReturn";
 import ExercisesListView from "./listView/ExercisesListView";
 import ExercisesCardView from "./cardView/ExercisesCardView";
 import AddIcon from "@mui/icons-material/Add";
@@ -49,14 +53,16 @@ type ExerciseFilter = {
   searchValue: string;
   minPersons: number;
   maxPersons: number;
-  tagString: string;
+  tagRegex: string;
+  tagList: string[];
 };
 
 const defaultExerciseFilter: ExerciseFilter = {
   maxPersons: maxPersons,
   minPersons: 0,
   searchValue: "",
-  tagString: "",
+  tagRegex: "",
+  tagList: [],
 };
 
 const ExerciseList = () => {
@@ -87,6 +93,24 @@ const ExerciseList = () => {
       });
     };
 
+  const handleTagKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Enter" && exerciseFilter.tagRegex.trim() !== "") {
+      event.preventDefault();
+      setExerciseFilter({
+        ...exerciseFilter,
+        tagList: [...exerciseFilter.tagList, exerciseFilter.tagRegex.trim()],
+        tagRegex: "",
+      });
+    }
+  };
+
+  const handleDeleteTag = (tagToDelete: string) => {
+    setExerciseFilter({
+      ...exerciseFilter,
+      tagList: exerciseFilter.tagList.filter((tag) => tag !== tagToDelete),
+    });
+  };
+
   const [
     getExercises,
     {
@@ -102,7 +126,8 @@ const ExerciseList = () => {
         maxPersons: filter.maxPersons,
         minPersons: filter.minPersons,
         nameRegex: filter.searchValue,
-        tagString: filter.tagString,
+        tagRegex: filter.tagRegex,
+        tagList: filter.tagList,
       });
     }, 500),
     [getExercises],
@@ -244,10 +269,34 @@ const ExerciseList = () => {
                   <SoftInput
                     id="outlined-basic"
                     placeholder={t("ExerciseList:filter.tags.placeholder")}
-                    value={exerciseFilter.tagString}
-                    onChange={onExerciseFilterValueChange("tagString")}
+                    value={exerciseFilter.tagRegex}
+                    onChange={onExerciseFilterValueChange("tagRegex")}
+                    onKeyDown={handleTagKeyDown}
                     sx={{ width: "100%" }}
+                    endAdornment={
+                      <InputAdornment position="end">
+                        <KeyboardReturnIcon
+                          sx={{
+                            fontSize: 20,
+                            opacity: exerciseFilter.tagRegex != "" ? 1 : 0.4,
+                          }}
+                        />
+                      </InputAdornment>
+                    }
                   />
+                  <SoftBox
+                    sx={{ display: "flex", flexWrap: "wrap", gap: 1, mt: 1 }}
+                  >
+                    {exerciseFilter.tagList.map((tag) => (
+                      <Chip
+                        key={tag}
+                        label={tag}
+                        onDelete={() => handleDeleteTag(tag)}
+                        color="primary"
+                        variant="outlined"
+                      />
+                    ))}
+                  </SoftBox>
                 </Grid>
               </Grid>
             </CardContent>

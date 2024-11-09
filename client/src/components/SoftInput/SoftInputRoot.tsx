@@ -186,6 +186,35 @@ const SoftInputRoot = styled(InputBase)<SoftInputRootProps>(({
     "&.MuiInputBase-multiline": {
       padding: `${pxToRem(10)} ${pxToRem(12)}`,
     },
+
+    "& .MuiInputBase-input": {
+      // ... existing input styles ...
+    },
+
+    // Add these styles to fix endAdornment positioning
+    "& .MuiInputAdornment-root": {
+      height: "100%",
+      maxHeight: "100%",
+      paddingRight: theme.spacing(1),
+      color: theme.palette.text.secondary,
+      "& .MuiSvgIcon-root": {
+        marginTop: 0,
+      },
+    },
+
+    "& .MuiInputAdornment-positionEnd": {
+      position: "absolute",
+      right: 0,
+      height: "100%",
+      display: "flex",
+      alignItems: "center",
+      maxHeight: "none",
+    },
+
+    // Add position relative to the root to help with absolute positioning
+    position: "relative",
+    display: "flex",
+    alignItems: "center",
   };
 });
 

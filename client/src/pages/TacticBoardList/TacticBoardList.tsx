@@ -5,6 +5,7 @@ import {
   useEffect,
   useState,
   useCallback,
+  KeyboardEvent,
 } from "react";
 import {
   Alert,
@@ -17,6 +18,7 @@ import {
   ToggleButton,
   ToggleButtonGroup,
   useMediaQuery,
+  InputAdornment,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import {
@@ -43,6 +45,8 @@ import { useAuth } from "../../store/hooks";
 import Footer from "../../components/Footer";
 import { TacticBoardWithOutIds } from "../../api/quadcoachApi/domain/TacticBoard";
 import debounce from "lodash/debounce";
+import KeyboardReturnIcon from "@mui/icons-material/KeyboardReturn";
+import { Chip } from "@mui/material";
 
 enum ViewType {
   List = "List",
@@ -51,12 +55,14 @@ enum ViewType {
 
 type TacticBoardFilter = {
   searchValue: string;
-  tagString: string;
+  tagRegex: string;
+  tagList: string[];
 };
 
 const defaultTacticBoardFilter: TacticBoardFilter = {
   searchValue: "",
-  tagString: "",
+  tagRegex: "",
+  tagList: [],
 };
 
 const TacticBoardList = () => {
@@ -94,7 +100,8 @@ const TacticBoardList = () => {
     debounce((filter: TacticBoardFilter) => {
       getTacticBoards({
         nameRegex: filter.searchValue,
-        tagString: filter.tagString,
+        tagRegex: filter.tagRegex,
+        tagList: filter.tagList,
       });
     }, 300),
     [getTacticBoards],
@@ -116,7 +123,8 @@ const TacticBoardList = () => {
   useEffect(() => {
     getTacticBoards({
       nameRegex: defaultTacticBoardFilter.searchValue,
-      tagString: defaultTacticBoardFilter.tagString,
+      tagRegex: defaultTacticBoardFilter.tagRegex,
+      tagList: defaultTacticBoardFilter.tagList,
     });
   }, [getTacticBoards]);
 
@@ -175,6 +183,27 @@ const TacticBoardList = () => {
     newViewType: ViewType,
   ) => {
     setViewType(newViewType);
+  };
+
+  const handleTagKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Enter" && tacticBoardFilter.tagRegex.trim() !== "") {
+      event.preventDefault();
+      setTacticBoardFilter({
+        ...tacticBoardFilter,
+        tagList: [
+          ...tacticBoardFilter.tagList,
+          tacticBoardFilter.tagRegex.trim(),
+        ],
+        tagRegex: "",
+      });
+    }
+  };
+
+  const handleDeleteTag = (tagToDelete: string) => {
+    setTacticBoardFilter({
+      ...tacticBoardFilter,
+      tagList: tacticBoardFilter.tagList.filter((tag) => tag !== tagToDelete),
+    });
   };
 
   return (
@@ -267,10 +296,34 @@ const TacticBoardList = () => {
                   <SoftInput
                     id="outlined-basic"
                     placeholder={t("TacticBoardList:filter.tags.placeholder")}
-                    value={tacticBoardFilter.tagString}
-                    onChange={onTacticBoardFilterValueChange("tagString")}
+                    value={tacticBoardFilter.tagRegex}
+                    onChange={onTacticBoardFilterValueChange("tagRegex")}
+                    onKeyDown={handleTagKeyDown}
                     sx={{ width: "100%" }}
+                    endAdornment={
+                      <InputAdornment position="end">
+                        <KeyboardReturnIcon
+                          sx={{
+                            fontSize: 20,
+                            opacity: tacticBoardFilter.tagRegex != "" ? 1 : 0.4,
+                          }}
+                        />
+                      </InputAdornment>
+                    }
                   />
+                  <SoftBox
+                    sx={{ display: "flex", flexWrap: "wrap", gap: 1, mt: 1 }}
+                  >
+                    {tacticBoardFilter.tagList.map((tag) => (
+                      <Chip
+                        key={tag}
+                        label={tag}
+                        onDelete={() => handleDeleteTag(tag)}
+                        color="primary"
+                        variant="outlined"
+                      />
+                    ))}
+                  </SoftBox>
                 </Grid>
               </Grid>
             </CardContent>

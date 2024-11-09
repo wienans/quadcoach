@@ -21,9 +21,16 @@ export const getAllTacticboards = asyncHandler(
     let queryString: string = JSON.stringify(req.query);
 
     queryString = queryString.replace(
-      /\b(gte|gt|lte|lt|eq|ne|regex|options|in|nin)\b/g,
+      /\b(gte|gt|lte|lt|eq|ne|regex|options|in|nin|all)\b/g,
       (match) => `$${match}`
     );
+    // Convert comma-separated strings in $all operators to arrays
+    queryString = queryString.replace(
+      /"?\$all"?\s*:\s*"([^"]+)"/g,
+      (_, match) =>
+        `"$all": [${match.split(",").map((item: string) => `"${item}"`)}]`
+    );
+
     let parseObject = JSON.parse(queryString);
 
     parseObject.$or = [{ isPrivate: false }];

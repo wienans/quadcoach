@@ -9,7 +9,7 @@
     "name": "Search Tactic Board",
     "tags": {
       "title": "Tags",
-      "placeholder": "Search tag"
+      "placeholder": "Enter tag and press Enter..."
     },
     "apply": "Apply filter"
   },
