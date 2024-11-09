@@ -20,6 +20,7 @@ import {
   ToggleButtonGroup,
   useMediaQuery,
   Chip,
+  InputAdornment,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import {
@@ -32,6 +33,7 @@ import { useTranslation } from "react-i18next";
 import FilterAltIcon from "@mui/icons-material/FilterAlt";
 import GridViewIcon from "@mui/icons-material/GridView";
 import ListIcon from "@mui/icons-material/List";
+import KeyboardReturnIcon from "@mui/icons-material/KeyboardReturn";
 import ExercisesListView from "./listView/ExercisesListView";
 import ExercisesCardView from "./cardView/ExercisesCardView";
 import AddIcon from "@mui/icons-material/Add";
@@ -271,6 +273,16 @@ const ExerciseList = () => {
                     onChange={onExerciseFilterValueChange("tagRegex")}
                     onKeyDown={handleTagKeyDown}
                     sx={{ width: "100%" }}
+                    endAdornment={
+                      <InputAdornment position="end">
+                        <KeyboardReturnIcon
+                          sx={{
+                            fontSize: 20,
+                            opacity: exerciseFilter.tagRegex != "" ? 1 : 0.4,
+                          }}
+                        />
+                      </InputAdornment>
+                    }
                   />
                   <SoftBox
                     sx={{ display: "flex", flexWrap: "wrap", gap: 1, mt: 1 }}
