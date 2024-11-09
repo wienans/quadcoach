@@ -9,7 +9,7 @@
     "name": "Suche Taktik Tafel",
     "tags": {
       "title": "Stichwörter",
-      "placeholder": "Suche Stichwort"
+      "placeholder": "Stichwort eingeben und Enter drücken..."
     },
     "apply": "Filter anwenden"
   },
