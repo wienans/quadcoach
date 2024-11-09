@@ -46,6 +46,19 @@ const TacticBoardTopItemsMenu = ({
     }
   }, [getBackgroundImage]);
 
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Delete" && isPrivileged && isEditMode) {
+        onDelete();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isPrivileged, isEditMode, onDelete]);
+
   return (
     <SoftBox
       sx={{

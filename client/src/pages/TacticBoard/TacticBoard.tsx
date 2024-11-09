@@ -260,6 +260,7 @@ const TacticsBoard = (): JSX.Element => {
       loadFromJson(tacticBoard.pages[0]);
       setMaxPages(tacticBoard.pages.length);
       setSelection(false);
+      setControls(false);
     }
   }, [
     loadFromJson,
@@ -268,6 +269,7 @@ const TacticsBoard = (): JSX.Element => {
     isTacticBoardLoading,
     firstAPICall,
     setSelection,
+    setControls,
   ]);
   useEffect(() => {
     let interval: NodeJS.Timeout;

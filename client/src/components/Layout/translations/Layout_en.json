@@ -4,6 +4,8 @@
     "exercises": "Exercises",
     "addExercise": "Add Exercise",
     "tacticBoards": "Tactic Boards",
-    "gitHubRepository": "GitHub Repository"
+    "gitHubRepository": "GitHub Repository",
+    "deleteAccount": "Delete Account",
+    "login": "Login"
   }
 }

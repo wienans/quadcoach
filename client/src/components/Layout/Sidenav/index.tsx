@@ -66,9 +66,7 @@ type SidebarNavRouteCollapse = {
   icon: ReactNode;
   noCollapse?: boolean;
   regExp?: RegExp;
-  /**
-   * Currently not used, later for routes, which can only be called by authenticated user.
-   */
+  onClick?: () => void | Promise<void>;
   protected?: boolean;
 };
 
@@ -132,8 +130,23 @@ const Sidenav = ({ color = "info", routes, ...rest }: SidenavProps) => {
     icon,
     noCollapse,
     regExp,
+    onClick,
   }: SidebarNavRouteCollapse): JSX.Element | undefined => {
     const isActive = isRoutePropsActive(key, regExp);
+
+    if (onClick) {
+      return (
+        <div key={key} onClick={onClick} style={{ cursor: "pointer" }}>
+          <SidenavCollapse
+            color={color}
+            name={t(nameResourceKey)}
+            icon={icon}
+            active={isActive}
+            noCollapse={noCollapse}
+          />
+        </div>
+      );
+    }
 
     if (href) {
       return (

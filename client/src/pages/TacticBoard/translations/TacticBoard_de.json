@@ -12,6 +12,9 @@
       "tooltip_open": "Elemente-Menü schließen.",
       "tooltip_closed": "Elemente-Menü öffnen."
     },
+    "isFullscreenButton": {
+      "tooltip": "Taktik Tafel in den Vollbildmodus schalten."
+    },
     "deleteButton": {
       "tooltip": "Löscht die Taktik Tfale"
     },
