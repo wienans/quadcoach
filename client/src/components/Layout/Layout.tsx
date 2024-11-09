@@ -7,9 +7,29 @@ import GitHubIcon from "@mui/icons-material/GitHub";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { PresistLogin } from "..";
 import { useAuth } from "../../store/hooks";
+import { useDeleteUserMutation } from "../../pages/userApi";
+import { useNavigate } from "react-router-dom";
 
 const Layout = () => {
   const { id: userId } = useAuth();
+  const [deleteUser] = useDeleteUserMutation();
+  const navigate = useNavigate();
+
+  const handleDeleteAccount = async () => {
+    try {
+      if (
+        userId &&
+        window.confirm(
+          "Are you sure you want to delete your account? This action cannot be undone.",
+        )
+      ) {
+        await deleteUser(userId).unwrap();
+        navigate("/");
+      }
+    } catch (err) {
+      console.error("Failed to delete account:", err);
+    }
+  };
 
   const sidebarNavRoutes: SidebarNavRoute[] = [
     {
@@ -63,11 +83,10 @@ const Layout = () => {
             type: "collapse" as const,
             nameResourceKey: "Layout:routes.deleteAccount",
             key: "deleteAccount",
-            route: "/deleteAccount",
             noCollapse: true,
             icon: <DeleteIcon />,
             protected: true,
-            regExp: new RegExp("\\/deleteAccount$"),
+            onClick: handleDeleteAccount,
           },
         ]
       : []),
