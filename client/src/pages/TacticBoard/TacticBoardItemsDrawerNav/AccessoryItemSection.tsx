@@ -26,6 +26,27 @@ const getAccesTypeSvg = (accessType: AccessoryType) => {
       return "/cone-blue.svg";
     case AccessoryType.YellowCone:
       return "/cone-yellow.svg";
+    case AccessoryType.Hoop:
+      return "/hoop.svg";
+    case AccessoryType.Ladder:
+      return "/ladder.svg";
+    case AccessoryType.Hurdle:
+      return "/hurdle.svg";
+  }
+};
+
+const getAccesTypeScale = (accessType: AccessoryType) => {
+  switch (accessType) {
+    case AccessoryType.RedCone:
+    case AccessoryType.BlueCone:
+    case AccessoryType.YellowCone:
+      return 0.04;
+    case AccessoryType.Hoop:
+      return 0.45;
+    case AccessoryType.Ladder:
+      return 0.1;
+    case AccessoryType.Hurdle:
+      return 0.06;
   }
 };
 
@@ -44,12 +65,24 @@ const AccessoryItemSection = (): JSX.Element => {
           ...options,
           uuid: uuidv4(),
         });
-        obj.scaleX = 0.04;
-        obj.scaleY = 0.04;
+        obj.scaleX = getAccesTypeScale(accessType);
+        obj.scaleY = getAccesTypeScale(accessType);
         obj.left = 600;
         obj.top = 333;
         obj.hasControls = false;
-        addObject(obj);
+        // @ts-ignore
+        obj.uuid = uuidv4();
+        if (accessType === AccessoryType.Hoop) {
+          // Need to group the hoop as it has some weird behavior when saving to DB
+          const group = new fabric.Group([obj], {
+            // @ts-ignore
+            uuid: uuidv4(),
+            hasControls: false, // Disable resizing handles
+          });
+          addObject(group);
+        } else {
+          addObject(obj);
+        }
       },
     );
   };
@@ -75,14 +108,32 @@ const AccessoryItemSection = (): JSX.Element => {
             >
               <ListItemAvatar>
                 <Avatar>
-                  <Icon>
+                  <Icon
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
                     <img
                       src={getAccesTypeSvg(value)}
-                      style={{
-                        width: "28px",
-                        marginTop: "-4px",
-                        marginLeft: "-4px",
-                      }}
+                      style={
+                        value === AccessoryType.Hoop
+                          ? {
+                              width: "20px",
+                            }
+                          : value === AccessoryType.Hurdle
+                          ? {
+                              width: "22px",
+                            }
+                          : value === AccessoryType.Ladder
+                          ? {
+                              width: "13px",
+                            }
+                          : {
+                              width: "28px",
+                            }
+                      }
                     />
                   </Icon>
                 </Avatar>
