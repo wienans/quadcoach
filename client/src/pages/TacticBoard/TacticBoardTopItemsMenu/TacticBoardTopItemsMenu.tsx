@@ -6,6 +6,7 @@ import {
   Tooltip,
   IconButton,
   Slider,
+  ToggleButtonGroup,
 } from "@mui/material";
 import { SoftBox } from "../../../components";
 import DrawIcon from "@mui/icons-material/Draw";
@@ -19,6 +20,7 @@ import { useTacticBoardFabricJs } from "../../../hooks";
 import { ChromePicker, ColorResult } from "react-color";
 import Popover from "@mui/material/Popover";
 import ColorLensIcon from "@mui/icons-material/ColorLens";
+import { LineStyle } from "../../../contexts/tacticBoard/TacticBoardFabricJsContext/TacticBoardFabricJsContext";
 
 type TacticBoardTopItemMenuProps = {
   isPrivileged: boolean;
@@ -33,6 +35,17 @@ const TacticBoardTopItemsMenu = ({
 }: TacticBoardTopItemMenuProps): JSX.Element => {
   const { t } = useTranslation("TacticBoard");
   const dispatch = useAppDispatch();
+  const {
+    setDrawMode,
+    setBackgroundImage,
+    getBackgroundImage,
+    setDrawColor,
+    setDrawThickness,
+    getDrawColor,
+    getDrawThickness,
+    setLineStyle,
+    getLineStyle,
+  } = useTacticBoardFabricJs();
   const tacticBoardItemsDrawerOpen = useAppSelector(
     (state) => state.tacticBoard.tacticBoardItemsDrawerOpen,
   );
@@ -42,16 +55,10 @@ const TacticBoardTopItemsMenu = ({
     useState<HTMLElement | null>(null);
   const [currentColor, setCurrentColor] = useState("#000000");
   const [currentThickness, setCurrentThickness] = useState(1);
+  const [currentLineStyle, setCurrentLineStyle] = useState<LineStyle>(
+    getLineStyle(),
+  );
 
-  const {
-    setDrawMode,
-    setBackgroundImage,
-    getBackgroundImage,
-    setDrawColor,
-    setDrawThickness,
-    getDrawColor,
-    getDrawThickness,
-  } = useTacticBoardFabricJs();
   const toggleItems = () => {
     dispatch(toggleTacticBoardItemsDrawerOpen());
   };
@@ -100,6 +107,16 @@ const TacticBoardTopItemsMenu = ({
     const thickness = value as number;
     setCurrentThickness(thickness);
     setDrawThickness(thickness);
+  };
+
+  const handleLineStyleChange = (
+    _event: React.MouseEvent<HTMLElement>,
+    newStyle: LineStyle,
+  ) => {
+    if (newStyle !== null) {
+      setCurrentLineStyle(newStyle);
+      setLineStyle(newStyle);
+    }
   };
 
   return (
@@ -172,6 +189,17 @@ const TacticBoardTopItemsMenu = ({
             </Tooltip>
             {drawingEnabled && (
               <>
+                <ToggleButtonGroup
+                  value={currentLineStyle}
+                  exclusive
+                  onChange={handleLineStyleChange}
+                  size="small"
+                  sx={{ mr: 1 }}
+                >
+                  <ToggleButton value="solid">―</ToggleButton>
+                  <ToggleButton value="dashed">- -</ToggleButton>
+                  <ToggleButton value="dotted">...</ToggleButton>
+                </ToggleButtonGroup>
                 <IconButton
                   size="small"
                   onClick={handleColorPickerOpen}

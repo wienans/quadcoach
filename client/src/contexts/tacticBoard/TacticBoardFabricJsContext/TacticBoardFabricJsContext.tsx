@@ -19,6 +19,8 @@ const canvasDefaultOptions: fabric.ICanvasOptions = {
   allowTouchScrolling: true,
 };
 
+export type LineStyle = "solid" | "dashed" | "dotted";
+
 export interface TacticBoardFabricJsContextProps {
   containerRef: MutableRefObject<HTMLDivElement | null>;
   // setBoxRef: (boxRef: HTMLDivElement | null) => void;
@@ -36,7 +38,7 @@ export interface TacticBoardFabricJsContextProps {
   getActiveObjects: () => fabric.Object[];
   setSelection: (selection: boolean) => void;
   loadFromTacticPage: (page: TacticPage) => void;
-  setDrawMode: (drawMode: boolean) => void;
+  setDrawMode: (drawMode: boolean, dashArray?: number[]) => void;
   setControls: (controls: boolean) => void;
   setBackgroundImage: (url: string) => void;
   getBackgroundImage: () => string | undefined;
@@ -44,6 +46,8 @@ export interface TacticBoardFabricJsContextProps {
   setDrawThickness: (thickness: number) => void;
   getDrawColor: () => string;
   getDrawThickness: () => number;
+  setLineStyle: (style: LineStyle) => void;
+  getLineStyle: () => LineStyle;
 }
 
 export const TacticBoardFabricJsContext = createContext<
@@ -59,6 +63,7 @@ const TacticBoardFabricJsContextProvider: FC<{
   const canvasFabricRef = useRef<fabric.Canvas | null>(null);
   const drawColorRef = useRef<string>("#000000");
   const drawThicknessRef = useRef<number>(2);
+  const lineStyleRef = useRef<LineStyle>("solid");
 
   const { initializeContainerResizeObserver } = useContainerResizeEvent(
     containerRef,
@@ -201,15 +206,50 @@ const TacticBoardFabricJsContextProvider: FC<{
     });
   }, []);
 
-  const setDrawMode = useCallback((drawMode: boolean) => {
-    const canvasFabric = canvasFabricRef.current;
-    if (!canvasFabric) return;
+  const setDrawMode = useCallback(
+    (drawMode: boolean, dashArray?: number[]) => {
+      const canvasFabric = canvasFabricRef.current;
+      if (!canvasFabric) return;
 
-    canvasFabric.isDrawingMode = drawMode;
-    if (drawMode) {
-      canvasFabric.freeDrawingBrush.color = drawColorRef.current;
-      canvasFabric.freeDrawingBrush.width = drawThicknessRef.current;
-    }
+      canvasFabric.isDrawingMode = drawMode;
+      if (drawMode) {
+        canvasFabric.freeDrawingBrush.color = drawColorRef.current;
+        canvasFabric.freeDrawingBrush.width = drawThicknessRef.current;
+        if (dashArray) {
+          (canvasFabric.freeDrawingBrush as any).strokeDashArray = dashArray;
+        } else {
+          (canvasFabric.freeDrawingBrush as any).strokeDashArray = null;
+        }
+      }
+      setControls(false);
+    },
+    [setControls],
+  );
+
+  const setLineStyle = useCallback(
+    (style: LineStyle) => {
+      const canvasFabric = canvasFabricRef.current;
+      if (!canvasFabric) return;
+
+      lineStyleRef.current = style;
+
+      switch (style) {
+        case "solid":
+          setDrawMode(true);
+          break;
+        case "dashed":
+          setDrawMode(true, [20, 10]);
+          break;
+        case "dotted":
+          setDrawMode(true, [3, 10]);
+          break;
+      }
+    },
+    [setDrawMode],
+  );
+
+  const getLineStyle = useCallback(() => {
+    return lineStyleRef.current;
   }, []);
 
   const setDrawColor = useCallback((color: string) => {
@@ -264,6 +304,8 @@ const TacticBoardFabricJsContextProvider: FC<{
         setDrawThickness,
         getDrawColor,
         getDrawThickness,
+        setLineStyle,
+        getLineStyle,
       }}
     >
       {children}
