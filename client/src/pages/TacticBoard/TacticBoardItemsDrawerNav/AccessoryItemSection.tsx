@@ -70,7 +70,19 @@ const AccessoryItemSection = (): JSX.Element => {
         obj.left = 600;
         obj.top = 333;
         obj.hasControls = false;
-        addObject(obj);
+        // @ts-ignore
+        obj.uuid = uuidv4();
+        if (accessType === AccessoryType.Hoop) {
+          // Need to group the hoop as it has some weird behavior when saving to DB
+          const group = new fabric.Group([obj], {
+            // @ts-ignore
+            uuid: uuidv4(),
+            hasControls: false, // Disable resizing handles
+          });
+          addObject(group);
+        } else {
+          addObject(obj);
+        }
       },
     );
   };
@@ -113,6 +125,10 @@ const AccessoryItemSection = (): JSX.Element => {
                           : value === AccessoryType.Hurdle
                           ? {
                               width: "22px",
+                            }
+                          : value === AccessoryType.Ladder
+                          ? {
+                              width: "13px",
                             }
                           : {
                               width: "28px",

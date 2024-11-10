@@ -178,6 +178,9 @@ const TacticBoardFabricJsContextProvider: FC<{
           } else if (obj.type == "path") {
             const addObj = new fabric.Path(obj.path?.toString(), obj as object);
             objects.push(addObj);
+          } else if (obj.type == "rect") {
+            const addObj = new fabric.Rect(obj as object);
+            objects.push(addObj);
           }
         });
         const addObj = new fabric.Group(objects, obj as object);
