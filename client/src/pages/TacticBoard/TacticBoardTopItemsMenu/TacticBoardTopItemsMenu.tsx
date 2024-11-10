@@ -4,6 +4,8 @@ import {
   SelectChangeEvent,
   ToggleButton,
   Tooltip,
+  IconButton,
+  Slider,
 } from "@mui/material";
 import { SoftBox } from "../../../components";
 import DrawIcon from "@mui/icons-material/Draw";
@@ -14,6 +16,9 @@ import { useAppDispatch, useAppSelector } from "../../../store/hooks";
 import { useTranslation } from "react-i18next";
 import { useEffect, useState } from "react";
 import { useTacticBoardFabricJs } from "../../../hooks";
+import { ChromePicker, ColorResult } from "react-color";
+import Popover from "@mui/material/Popover";
+import ColorLensIcon from "@mui/icons-material/ColorLens";
 
 type TacticBoardTopItemMenuProps = {
   isPrivileged: boolean;
@@ -33,8 +38,20 @@ const TacticBoardTopItemsMenu = ({
   );
   const [drawingEnabled, enableDrawing] = useState<boolean>(false);
   const [backgroundImageId, setBackgorundImageId] = useState<string>("");
-  const { setDrawMode, setBackgroundImage, getBackgroundImage } =
-    useTacticBoardFabricJs();
+  const [colorPickerAnchor, setColorPickerAnchor] =
+    useState<HTMLElement | null>(null);
+  const [currentColor, setCurrentColor] = useState("#000000");
+  const [currentThickness, setCurrentThickness] = useState(1);
+
+  const {
+    setDrawMode,
+    setBackgroundImage,
+    getBackgroundImage,
+    setDrawColor,
+    setDrawThickness,
+    getDrawColor,
+    getDrawThickness,
+  } = useTacticBoardFabricJs();
   const toggleItems = () => {
     dispatch(toggleTacticBoardItemsDrawerOpen());
   };
@@ -58,6 +75,32 @@ const TacticBoardTopItemsMenu = ({
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [isPrivileged, isEditMode, onDelete]);
+
+  useEffect(() => {
+    setCurrentColor(getDrawColor());
+    setCurrentThickness(getDrawThickness());
+  }, [getDrawColor, getDrawThickness]);
+
+  const handleColorPickerOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setColorPickerAnchor(event.currentTarget);
+  };
+
+  const handleColorPickerClose = () => {
+    setColorPickerAnchor(null);
+  };
+
+  const colorPickerOpen = Boolean(colorPickerAnchor);
+
+  const handleColorChange = (color: ColorResult) => {
+    setCurrentColor(color.hex);
+    setDrawColor(color.hex);
+  };
+
+  const handleThicknessChange = (_event: Event, value: number | number[]) => {
+    const thickness = value as number;
+    setCurrentThickness(thickness);
+    setDrawThickness(thickness);
+  };
 
   return (
     <SoftBox
@@ -103,29 +146,73 @@ const TacticBoardTopItemsMenu = ({
         {/* MENU BUTTON END */}
         {/* DRAW BUTTON START */}
         {isPrivileged && isEditMode && (
-          <Tooltip
-            title={t("TacticBoard:topMenu.drawingButton.tooltip", {
-              context: drawingEnabled ? "disable" : "enable",
-            })}
-          >
-            <span>
-              <ToggleButton
-                value={drawingEnabled}
-                selected={drawingEnabled}
-                disabled={!isEditMode}
-                onChange={() => {
-                  setDrawMode(!drawingEnabled);
-                  enableDrawing(!drawingEnabled);
-                }}
-                size="small"
-                sx={{
-                  mr: 1,
-                }}
-              >
-                <DrawIcon />
-              </ToggleButton>
-            </span>
-          </Tooltip>
+          <>
+            <Tooltip
+              title={t("TacticBoard:topMenu.drawingButton.tooltip", {
+                context: drawingEnabled ? "disable" : "enable",
+              })}
+            >
+              <span>
+                <ToggleButton
+                  value={drawingEnabled}
+                  selected={drawingEnabled}
+                  disabled={!isEditMode}
+                  onChange={() => {
+                    setDrawMode(!drawingEnabled);
+                    enableDrawing(!drawingEnabled);
+                  }}
+                  size="small"
+                  sx={{
+                    mr: 1,
+                  }}
+                >
+                  <DrawIcon />
+                </ToggleButton>
+              </span>
+            </Tooltip>
+            {drawingEnabled && (
+              <>
+                <IconButton
+                  size="small"
+                  onClick={handleColorPickerOpen}
+                  sx={{
+                    mr: 1,
+                    backgroundColor: currentColor,
+                    width: 30,
+                    height: 30,
+                    "&:hover": {
+                      backgroundColor: currentColor,
+                    },
+                  }}
+                >
+                  <ColorLensIcon sx={{ color: "#ffffff" }} />
+                </IconButton>
+                <Popover
+                  open={colorPickerOpen}
+                  anchorEl={colorPickerAnchor}
+                  onClose={handleColorPickerClose}
+                  anchorOrigin={{
+                    vertical: "bottom",
+                    horizontal: "left",
+                  }}
+                >
+                  <ChromePicker
+                    color={currentColor}
+                    onChange={handleColorChange}
+                    onChangeComplete={handleColorChange}
+                  />
+                </Popover>
+                <Slider
+                  value={currentThickness}
+                  onChange={handleThicknessChange}
+                  min={1}
+                  max={20}
+                  valueLabelDisplay="auto"
+                  sx={{ width: 100, ml: 1, mr: 2 }}
+                />
+              </>
+            )}
+          </>
         )}
         {/* DRAW BUTTON END */}
         {/* DELETE BUTTON START */}

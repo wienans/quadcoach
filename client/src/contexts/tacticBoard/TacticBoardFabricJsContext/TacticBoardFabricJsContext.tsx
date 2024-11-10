@@ -40,6 +40,10 @@ export interface TacticBoardFabricJsContextProps {
   setControls: (controls: boolean) => void;
   setBackgroundImage: (url: string) => void;
   getBackgroundImage: () => string | undefined;
+  setDrawColor: (color: string) => void;
+  setDrawThickness: (thickness: number) => void;
+  getDrawColor: () => string;
+  getDrawThickness: () => number;
 }
 
 export const TacticBoardFabricJsContext = createContext<
@@ -53,6 +57,8 @@ const TacticBoardFabricJsContextProvider: FC<{
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const canvasFabricRef = useRef<fabric.Canvas | null>(null);
+  const drawColorRef = useRef<string>("#000000");
+  const drawThicknessRef = useRef<number>(2);
 
   const { initializeContainerResizeObserver } = useContainerResizeEvent(
     containerRef,
@@ -200,6 +206,38 @@ const TacticBoardFabricJsContextProvider: FC<{
     if (!canvasFabric) return;
 
     canvasFabric.isDrawingMode = drawMode;
+    if (drawMode) {
+      canvasFabric.freeDrawingBrush.color = drawColorRef.current;
+      canvasFabric.freeDrawingBrush.width = drawThicknessRef.current;
+    }
+  }, []);
+
+  const setDrawColor = useCallback((color: string) => {
+    const canvasFabric = canvasFabricRef.current;
+    if (!canvasFabric) return;
+
+    drawColorRef.current = color;
+    if (canvasFabric.isDrawingMode) {
+      canvasFabric.freeDrawingBrush.color = color;
+    }
+  }, []);
+
+  const setDrawThickness = useCallback((thickness: number) => {
+    const canvasFabric = canvasFabricRef.current;
+    if (!canvasFabric) return;
+
+    drawThicknessRef.current = thickness;
+    if (canvasFabric.isDrawingMode) {
+      canvasFabric.freeDrawingBrush.width = thickness;
+    }
+  }, []);
+
+  const getDrawColor = useCallback(() => {
+    return drawColorRef.current;
+  }, []);
+
+  const getDrawThickness = useCallback(() => {
+    return drawThicknessRef.current;
   }, []);
 
   return (
@@ -222,6 +260,10 @@ const TacticBoardFabricJsContextProvider: FC<{
         setControls,
         setBackgroundImage,
         getBackgroundImage,
+        setDrawColor,
+        setDrawThickness,
+        getDrawColor,
+        getDrawThickness,
       }}
     >
       {children}
