@@ -22,6 +22,7 @@ import { useAuth } from "../../../../store/hooks";
 export type ExercisesCardViewProps = {
   exercises?: Exercise[];
   isExercisesLoading: boolean;
+  isExercisesFetching: boolean;
   onOpenExerciseClick: (exerciseId: string) => void;
   scrollTrigger: boolean;
 };
@@ -29,6 +30,7 @@ export type ExercisesCardViewProps = {
 const ExercisesCardView = ({
   exercises,
   isExercisesLoading,
+  isExercisesFetching,
   onOpenExerciseClick,
   scrollTrigger,
 }: ExercisesCardViewProps): JSX.Element => {
@@ -48,7 +50,7 @@ const ExercisesCardView = ({
   return (
     <>
       <Grid container spacing={1} sx={{ mb: { sm: 2, md: undefined } }}>
-        {isExercisesLoading
+        {isExercisesLoading || isExercisesFetching
           ? Array.from(Array(10).keys()).map((loadingNumber) => (
               // @ts-ignore
               <Grid item xs={12} md={6} xl={4} xxl={3} key={loadingNumber}>
