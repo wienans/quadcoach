@@ -25,7 +25,7 @@ const ExerciseAutocomplete = ({
       id="related-text"
       multiple
       options={
-        exercises?.filter(
+        exercises?.exercises.filter(
           (ex) => !alreadyAddedExercises.some((al) => al._id === ex._id),
         ) ?? []
       }

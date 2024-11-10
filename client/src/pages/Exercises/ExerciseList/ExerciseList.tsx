@@ -83,8 +83,6 @@ const ExerciseList = () => {
 
   const [exerciseFilter, setExerciseFilter] = useState<ExerciseFilter>({
     ...defaultExerciseFilter,
-    page: 1,
-    limit: 50,
   });
 
   const onExerciseFilterValueChange =
@@ -126,7 +124,6 @@ const ExerciseList = () => {
       data: exercisesData,
       isError: isExercisesError,
       isLoading: isExercisesLoading,
-      isFetching: isExercisesFetching,
     },
   ] = useLazyGetExercisesQuery();
 
@@ -156,7 +153,13 @@ const ExerciseList = () => {
 
   useEffect(() => {
     if (exercisesData?.exercises) {
-      setLoadedExercises((prev) => [...prev, ...exercisesData.exercises]);
+      setLoadedExercises((prev) => {
+        const newExerciseIds = new Set(
+          exercisesData.exercises.map((e) => e._id),
+        );
+        const filteredPrev = prev.filter((e) => !newExerciseIds.has(e._id));
+        return [...filteredPrev, ...exercisesData.exercises];
+      });
     }
   }, [exercisesData]);
 
@@ -173,6 +176,13 @@ const ExerciseList = () => {
       }));
     }
   }, [exercisesData, exerciseFilter.page]);
+
+  // Add cleanup effect
+  useEffect(() => {
+    return () => {
+      setLoadedExercises([]); // Clear exercises when component unmounts
+    };
+  }, []);
 
   return (
     <DashboardLayout
@@ -352,7 +362,6 @@ const ExerciseList = () => {
               <SoftBox sx={{ mt: 2, flexGrow: 1, overflowY: "auto", p: 2 }}>
                 <ExercisesCardView
                   isExercisesLoading={isExercisesLoading}
-                  isExercisesFetching={isExercisesFetching}
                   onOpenExerciseClick={onOpenExerciseClick}
                   exercises={loadedExercises}
                   scrollTrigger={scrollTrigger}

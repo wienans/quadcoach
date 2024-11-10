@@ -33,7 +33,7 @@ const TacticboardAutocomplete = ({
   return (
     <Autocomplete
       id="related-text"
-      options={tacticboards ?? []}
+      options={tacticboards?.tacticboards ?? []}
       getOptionLabel={(option) => option.name ?? ""}
       isOptionEqualToValue={(option, value) => {
         if (value != null && value != undefined) {
@@ -47,8 +47,9 @@ const TacticboardAutocomplete = ({
         setSearchValue(newValue);
       }}
       value={
-        tacticboards?.find((obj: TacticBoardHeader) => obj["_id"] === value) ??
-        null
+        tacticboards?.tacticboards.find(
+          (obj: TacticBoardHeader) => obj["_id"] === value,
+        ) ?? null
       }
       onChange={onChange}
       onBlur={onBlur}
