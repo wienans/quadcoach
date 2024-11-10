@@ -39,5 +39,6 @@
     "tags": "Tags",
     "relatedExercises": "Related exercises"
   },
-  "addExercise": "Add exercise"
+  "addExercise": "Add exercise",
+  "loadMore": "Load more"
 }

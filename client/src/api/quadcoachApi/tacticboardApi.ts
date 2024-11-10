@@ -8,6 +8,28 @@ export type GetTacticBoardRequest = {
   nameRegex?: string;
   tagRegex?: string;
   tagList?: string[];
+  page?: number;
+  limit?: number;
+};
+
+export type GetTacticBoardHeadersResponse = {
+  tacticboards: TacticBoardHeader[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    pages: number;
+  };
+};
+
+export type GetTacticBoardResponse = {
+  tacticboards: TacticBoard[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    pages: number;
+  };
 };
 
 export const tacticBoardApiSlice = quadcoachApi.injectEndpoints({
@@ -78,12 +100,21 @@ export const tacticBoardApiSlice = quadcoachApi.injectEndpoints({
       invalidatesTags: () => [TagType.tacticboard, TagType.tacticboardTag],
     }),
     getTacticBoards: builder.query<
-      TacticBoard[],
+      GetTacticBoardResponse,
       GetTacticBoardRequest | undefined
     >({
       query: (request) => {
-        const { nameRegex, tagRegex, tagList } = request || {};
+        const {
+          nameRegex,
+          tagRegex,
+          tagList,
+          page = 1,
+          limit = 50,
+        } = request || {};
         const urlParams = new URLSearchParams();
+
+        urlParams.append("page", page.toString());
+        urlParams.append("limit", limit.toString());
 
         if (nameRegex != null && nameRegex !== "") {
           urlParams.append("name[regex]", nameRegex);
@@ -109,7 +140,7 @@ export const tacticBoardApiSlice = quadcoachApi.injectEndpoints({
       providesTags: (result) =>
         result
           ? [
-              ...result.map(({ _id }) => ({
+              ...result.tacticboards.map(({ _id }) => ({
                 type: TagType.tacticboard as const,
                 id: _id,
               })),
@@ -193,12 +224,21 @@ export const tacticBoardApiSlice = quadcoachApi.injectEndpoints({
       ],
     }),
     getTacticBoardHeaders: builder.query<
-      TacticBoardHeader[],
+      GetTacticBoardHeadersResponse,
       GetTacticBoardRequest | undefined
     >({
       query: (request) => {
-        const { nameRegex, tagRegex, tagList } = request || {};
+        const {
+          nameRegex,
+          tagRegex,
+          tagList,
+          page = 1,
+          limit = 50,
+        } = request || {};
         const urlParams = new URLSearchParams();
+
+        urlParams.append("page", page.toString());
+        urlParams.append("limit", limit.toString());
 
         if (nameRegex != null && nameRegex !== "") {
           urlParams.append("name[regex]", nameRegex);
@@ -223,7 +263,7 @@ export const tacticBoardApiSlice = quadcoachApi.injectEndpoints({
       providesTags: (result) =>
         result
           ? [
-              ...result.map(({ _id }) => ({
+              ...result.tacticboards.map(({ _id }) => ({
                 type: TagType.tacticboard as const,
                 id: _id,
               })),

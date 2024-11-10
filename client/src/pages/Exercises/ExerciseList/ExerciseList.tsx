@@ -1,7 +1,6 @@
 import "./translations";
 import {
   ChangeEvent,
-  MouseEvent,
   useEffect,
   useState,
   useCallback,
@@ -17,7 +16,6 @@ import {
   Slider,
   Theme,
   ToggleButton,
-  ToggleButtonGroup,
   useMediaQuery,
   Chip,
   InputAdornment,
@@ -31,10 +29,7 @@ import {
 } from "../../../components";
 import { useTranslation } from "react-i18next";
 import FilterAltIcon from "@mui/icons-material/FilterAlt";
-import GridViewIcon from "@mui/icons-material/GridView";
-import ListIcon from "@mui/icons-material/List";
 import KeyboardReturnIcon from "@mui/icons-material/KeyboardReturn";
-import ExercisesListView from "./listView/ExercisesListView";
 import ExercisesCardView from "./cardView/ExercisesCardView";
 import AddIcon from "@mui/icons-material/Add";
 import { useLazyGetExercisesQuery } from "../../exerciseApi";
@@ -42,6 +37,7 @@ import { DashboardLayout } from "../../../components/LayoutContainers";
 import { useAuth } from "../../../store/hooks";
 import Footer from "../../../components/Footer";
 import debounce from "lodash/debounce";
+import { Exercise } from "../../../api/quadcoachApi/domain";
 const maxPersons = 100;
 
 enum ViewType {
@@ -55,6 +51,8 @@ type ExerciseFilter = {
   maxPersons: number;
   tagRegex: string;
   tagList: string[];
+  page: number;
+  limit: number;
 };
 
 const defaultExerciseFilter: ExerciseFilter = {
@@ -63,6 +61,8 @@ const defaultExerciseFilter: ExerciseFilter = {
   searchValue: "",
   tagRegex: "",
   tagList: [],
+  page: 1,
+  limit: 50,
 };
 
 const ExerciseList = () => {
@@ -74,52 +74,60 @@ const ExerciseList = () => {
   const [showFilters, setShowFilters] = useState<boolean>(false);
   const [viewType, setViewType] = useState<ViewType>(ViewType.Cards);
   const { status: userStatus } = useAuth();
+  const [loadedExercises, setLoadedExercises] = useState<Exercise[]>([]);
 
   useEffect(() => {
     if (isUpMd) return;
     setViewType(ViewType.Cards);
   }, [isUpMd]);
 
-  const [exerciseFilter, setExerciseFilter] = useState<ExerciseFilter>(
-    defaultExerciseFilter,
-  );
+  const [exerciseFilter, setExerciseFilter] = useState<ExerciseFilter>({
+    ...defaultExerciseFilter,
+  });
 
   const onExerciseFilterValueChange =
     (exerciseFilterProperty: keyof ExerciseFilter) =>
     (event: ChangeEvent<HTMLInputElement>) => {
+      setLoadedExercises([]);
       setExerciseFilter({
         ...exerciseFilter,
         [exerciseFilterProperty]: event.target.value,
+        page: 1,
       });
     };
 
   const handleTagKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Enter" && exerciseFilter.tagRegex.trim() !== "") {
       event.preventDefault();
+      setLoadedExercises([]);
       setExerciseFilter({
         ...exerciseFilter,
         tagList: [...exerciseFilter.tagList, exerciseFilter.tagRegex.trim()],
         tagRegex: "",
+        page: 1,
       });
     }
   };
 
   const handleDeleteTag = (tagToDelete: string) => {
+    setLoadedExercises([]);
     setExerciseFilter({
       ...exerciseFilter,
       tagList: exerciseFilter.tagList.filter((tag) => tag !== tagToDelete),
+      page: 1,
     });
   };
 
   const [
     getExercises,
     {
-      data: exercises,
+      data: exercisesData,
       isError: isExercisesError,
       isLoading: isExercisesLoading,
     },
   ] = useLazyGetExercisesQuery();
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const debouncedGetExercises = useCallback(
     debounce((filter: ExerciseFilter) => {
       getExercises({
@@ -128,6 +136,8 @@ const ExerciseList = () => {
         nameRegex: filter.searchValue,
         tagRegex: filter.tagRegex,
         tagList: filter.tagList,
+        page: filter.page,
+        limit: filter.limit,
       });
     }, 500),
     [getExercises],
@@ -141,16 +151,38 @@ const ExerciseList = () => {
     };
   }, [exerciseFilter, debouncedGetExercises]);
 
+  useEffect(() => {
+    if (exercisesData?.exercises) {
+      setLoadedExercises((prev) => {
+        const newExerciseIds = new Set(
+          exercisesData.exercises.map((e) => e._id),
+        );
+        const filteredPrev = prev.filter((e) => !newExerciseIds.has(e._id));
+        return [...filteredPrev, ...exercisesData.exercises];
+      });
+    }
+  }, [exercisesData]);
+
   const onOpenExerciseClick = (exerciseId: string) => {
     navigate(`/exercises/${exerciseId}`);
   };
 
-  const onViewTypeChange = (
-    _event: MouseEvent<HTMLElement>,
-    newViewType: ViewType,
-  ) => {
-    setViewType(newViewType);
-  };
+  // Load more function
+  const loadMore = useCallback(() => {
+    if (exercisesData && exerciseFilter.page < exercisesData.pagination.pages) {
+      setExerciseFilter((prev) => ({
+        ...prev,
+        page: prev.page + 1,
+      }));
+    }
+  }, [exercisesData, exerciseFilter.page]);
+
+  // Add cleanup effect
+  useEffect(() => {
+    return () => {
+      setLoadedExercises([]); // Clear exercises when component unmounts
+    };
+  }, []);
 
   return (
     <DashboardLayout
@@ -318,20 +350,6 @@ const ExerciseList = () => {
                   {t("ExerciseList:addExercise")}
                 </SoftButton>
               )}
-              <ToggleButtonGroup
-                value={viewType}
-                exclusive
-                onChange={onViewTypeChange}
-                aria-label="text alignment"
-                sx={{ marginLeft: "auto" }}
-              >
-                <ToggleButton value={ViewType.Cards} aria-label="Kartenansicht">
-                  <GridViewIcon />
-                </ToggleButton>
-                <ToggleButton value={ViewType.List} aria-label="Listenansicht">
-                  <ListIcon />
-                </ToggleButton>
-              </ToggleButtonGroup>
             </SoftBox>
           )}
           {isExercisesError && (
@@ -339,25 +357,31 @@ const ExerciseList = () => {
               {t("ExerciseList:errorLoadingExercises")}
             </Alert>
           )}
-          {!isExercisesError && viewType === ViewType.List && (
-            <SoftBox sx={{ mt: 2 }}>
-              <ExercisesListView
-                isExercisesLoading={isExercisesLoading}
-                onOpenExerciseClick={onOpenExerciseClick}
-                exercises={exercises}
-              />
-            </SoftBox>
-          )}
           {!isExercisesError && viewType === ViewType.Cards && (
             <>
               <SoftBox sx={{ mt: 2, flexGrow: 1, overflowY: "auto", p: 2 }}>
                 <ExercisesCardView
                   isExercisesLoading={isExercisesLoading}
                   onOpenExerciseClick={onOpenExerciseClick}
-                  exercises={exercises}
+                  exercises={loadedExercises}
                   scrollTrigger={scrollTrigger}
                 />
               </SoftBox>
+              {exercisesData &&
+                exerciseFilter.page < exercisesData.pagination.pages && (
+                  <SoftBox
+                    display="flex"
+                    justifyContent="center"
+                    sx={{ mt: 2, mb: 2 }}
+                  >
+                    <SoftButton
+                      onClick={loadMore}
+                      disabled={isExercisesLoading}
+                    >
+                      {t("ExerciseList:loadMore")}
+                    </SoftButton>
+                  </SoftBox>
+                )}
             </>
           )}
           <Footer />

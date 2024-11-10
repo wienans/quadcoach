@@ -9,6 +9,18 @@ export type GetExercisesRequest = {
   maxPersons?: number;
   tagRegex?: string;
   tagList?: string[];
+  page?: number;
+  limit?: number;
+};
+
+export type GetExercisesResponse = {
+  exercises: Exercise[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    pages: number;
+  };
 };
 
 export const exerciseApiSlice = quadcoachApi.injectEndpoints({
@@ -151,11 +163,24 @@ export const exerciseApiSlice = quadcoachApi.injectEndpoints({
       },
       providesTags: () => [TagType.material],
     }),
-    getExercises: builder.query<Exercise[], GetExercisesRequest | undefined>({
+    getExercises: builder.query<
+      GetExercisesResponse,
+      GetExercisesRequest | undefined
+    >({
       query: (request) => {
-        const { maxPersons, minPersons, nameRegex, tagRegex, tagList } =
-          request || {};
+        const {
+          maxPersons,
+          minPersons,
+          nameRegex,
+          tagRegex,
+          tagList,
+          page = 1,
+          limit = 50,
+        } = request || {};
         const urlParams = new URLSearchParams();
+
+        urlParams.append("page", page.toString());
+        urlParams.append("limit", limit.toString());
 
         if (nameRegex != null && nameRegex !== "") {
           urlParams.append("name[regex]", nameRegex);
@@ -184,8 +209,8 @@ export const exerciseApiSlice = quadcoachApi.injectEndpoints({
         };
       },
       providesTags: (result) =>
-        result
-          ? result.reduce((allTags, exercise) => {
+        result?.exercises
+          ? result.exercises.reduce((allTags, exercise) => {
               return allTags.concat([
                 { type: TagType.exercise, id: exercise._id },
                 ...(exercise.description_blocks

@@ -1,7 +1,6 @@
 import "./translations";
 import {
   ChangeEvent,
-  MouseEvent,
   useEffect,
   useState,
   useCallback,
@@ -16,7 +15,6 @@ import {
   Grid,
   Theme,
   ToggleButton,
-  ToggleButtonGroup,
   useMediaQuery,
   InputAdornment,
 } from "@mui/material";
@@ -35,15 +33,15 @@ import {
 import { TacticPageWithOutId } from "../../api/quadcoachApi/domain/TacticPage";
 import { useTranslation } from "react-i18next";
 import FilterAltIcon from "@mui/icons-material/FilterAlt";
-import GridViewIcon from "@mui/icons-material/GridView";
-import ListIcon from "@mui/icons-material/List";
-import TacticBoardListView from "./listView/TacticBoardListView";
 import TacticBoardCardView from "./cardView/TacticBoardCardView";
 import AddIcon from "@mui/icons-material/Add";
 import { DashboardLayout } from "../../components/LayoutContainers";
 import { useAuth } from "../../store/hooks";
 import Footer from "../../components/Footer";
-import { TacticBoardWithOutIds } from "../../api/quadcoachApi/domain/TacticBoard";
+import {
+  TacticBoardHeader,
+  TacticBoardWithOutIds,
+} from "../../api/quadcoachApi/domain/TacticBoard";
 import debounce from "lodash/debounce";
 import KeyboardReturnIcon from "@mui/icons-material/KeyboardReturn";
 import { Chip } from "@mui/material";
@@ -57,12 +55,16 @@ type TacticBoardFilter = {
   searchValue: string;
   tagRegex: string;
   tagList: string[];
+  page: number;
+  limit: number;
 };
 
 const defaultTacticBoardFilter: TacticBoardFilter = {
   searchValue: "",
   tagRegex: "",
   tagList: [],
+  page: 1,
+  limit: 50,
 };
 
 const TacticBoardList = () => {
@@ -82,6 +84,10 @@ const TacticBoardList = () => {
     setViewType(ViewType.Cards);
   }, [isUpMd]);
 
+  const [loadedTacticBoards, setLoadedTacticBoards] = useState<
+    TacticBoardHeader[]
+  >([]);
+
   const [tacticBoardFilter, setTacticBoardFilter] = useState<TacticBoardFilter>(
     defaultTacticBoardFilter,
   );
@@ -89,19 +95,22 @@ const TacticBoardList = () => {
   const [
     getTacticBoards,
     {
-      data: tacticBoards,
+      data: tacticBoardsData,
       isError: isTacticBoardsError,
       isLoading: isTacticBoardsLoading,
     },
   ] = useLazyGetTacticBoardHeadersQuery();
 
   // Create debounced search function
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const debouncedSearch = useCallback(
     debounce((filter: TacticBoardFilter) => {
       getTacticBoards({
         nameRegex: filter.searchValue,
         tagRegex: filter.tagRegex,
         tagList: filter.tagList,
+        page: filter.page,
+        limit: filter.limit,
       });
     }, 300),
     [getTacticBoards],
@@ -111,29 +120,21 @@ const TacticBoardList = () => {
   const onTacticBoardFilterValueChange =
     (tacticBoardFilterProperty: keyof TacticBoardFilter) =>
     (event: ChangeEvent<HTMLInputElement>) => {
-      const newFilter = {
+      setLoadedTacticBoards([]);
+      setTacticBoardFilter({
         ...tacticBoardFilter,
         [tacticBoardFilterProperty]: event.target.value,
-      };
-      setTacticBoardFilter(newFilter);
-      debouncedSearch(newFilter);
+        page: 1,
+      });
     };
-
-  // Initial load
-  useEffect(() => {
-    getTacticBoards({
-      nameRegex: defaultTacticBoardFilter.searchValue,
-      tagRegex: defaultTacticBoardFilter.tagRegex,
-      tagList: defaultTacticBoardFilter.tagList,
-    });
-  }, [getTacticBoards]);
 
   // Cleanup
   useEffect(() => {
+    debouncedSearch(tacticBoardFilter);
     return () => {
       debouncedSearch.cancel();
     };
-  }, [debouncedSearch]);
+  }, [debouncedSearch, tacticBoardFilter]);
 
   const [addTacticBoard] = useAddTacticBoardMutation();
 
@@ -178,16 +179,10 @@ const TacticBoardList = () => {
     setOpenAddTacticBoardDialog(false);
   };
 
-  const onViewTypeChange = (
-    _event: MouseEvent<HTMLElement>,
-    newViewType: ViewType,
-  ) => {
-    setViewType(newViewType);
-  };
-
   const handleTagKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Enter" && tacticBoardFilter.tagRegex.trim() !== "") {
       event.preventDefault();
+      setLoadedTacticBoards([]);
       setTacticBoardFilter({
         ...tacticBoardFilter,
         tagList: [
@@ -195,16 +190,45 @@ const TacticBoardList = () => {
           tacticBoardFilter.tagRegex.trim(),
         ],
         tagRegex: "",
+        page: 1,
       });
     }
   };
 
   const handleDeleteTag = (tagToDelete: string) => {
+    setLoadedTacticBoards([]);
     setTacticBoardFilter({
       ...tacticBoardFilter,
       tagList: tacticBoardFilter.tagList.filter((tag) => tag !== tagToDelete),
+      page: 1,
     });
   };
+
+  // Load more function
+  const loadMore = useCallback(() => {
+    if (
+      tacticBoardsData &&
+      tacticBoardFilter.page < tacticBoardsData.pagination.pages
+    ) {
+      setTacticBoardFilter((prev) => ({
+        ...prev,
+        page: prev.page + 1,
+      }));
+    }
+  }, [tacticBoardsData, tacticBoardFilter.page]);
+
+  // Update effect to accumulate loaded tacticboards
+  useEffect(() => {
+    if (tacticBoardsData?.tacticboards) {
+      setLoadedTacticBoards((prev) => {
+        const newTacticBoardIds = new Set(
+          tacticBoardsData.tacticboards.map((t) => t._id),
+        );
+        const filteredPrev = prev.filter((t) => !newTacticBoardIds.has(t._id));
+        return [...filteredPrev, ...tacticBoardsData.tacticboards];
+      });
+    }
+  }, [tacticBoardsData]);
 
   return (
     <DashboardLayout
@@ -351,45 +375,37 @@ const TacticBoardList = () => {
                 handleAddTacticBoard(name, backgroundImage)
               }
             />
-            <ToggleButtonGroup
-              value={viewType}
-              exclusive
-              onChange={onViewTypeChange}
-              aria-label="text alignment"
-              sx={{ marginLeft: "auto" }}
-            >
-              <ToggleButton value={ViewType.Cards} aria-label="Kartenansicht">
-                <GridViewIcon />
-              </ToggleButton>
-              <ToggleButton value={ViewType.List} aria-label="Listenansicht">
-                <ListIcon />
-              </ToggleButton>
-            </ToggleButtonGroup>
           </SoftBox>
           {isTacticBoardsError && (
             <Alert color="error" sx={{ mt: 2 }}>
               {t("TacticBoardList:errorLoadingTacticBoards")}
             </Alert>
           )}
-          {!isTacticBoardsError && viewType === ViewType.List && (
-            <Card sx={{ mt: 2 }}>
-              <CardContent>
-                <TacticBoardListView
+          {!isTacticBoardsError && viewType === ViewType.Cards && (
+            <>
+              <SoftBox sx={{ mt: 2, flexGrow: 1, overflowY: "auto", p: 2 }}>
+                <TacticBoardCardView
                   isTacticBoardsLoading={isTacticBoardsLoading}
                   onOpenTacticBoardClick={onOpenTacticBoardClick}
-                  tacticBoards={tacticBoards}
+                  tacticBoards={loadedTacticBoards}
                 />
-              </CardContent>
-            </Card>
-          )}
-          {!isTacticBoardsError && viewType === ViewType.Cards && (
-            <SoftBox sx={{ mt: 2, flexGrow: 1, overflowY: "auto", p: 2 }}>
-              <TacticBoardCardView
-                isTacticBoardsLoading={isTacticBoardsLoading}
-                onOpenTacticBoardClick={onOpenTacticBoardClick}
-                tacticBoards={tacticBoards}
-              />
-            </SoftBox>
+              </SoftBox>
+              {tacticBoardsData &&
+                tacticBoardFilter.page < tacticBoardsData.pagination.pages && (
+                  <SoftBox
+                    display="flex"
+                    justifyContent="center"
+                    sx={{ mt: 2, mb: 2 }}
+                  >
+                    <SoftButton
+                      onClick={loadMore}
+                      disabled={isTacticBoardsLoading}
+                    >
+                      {t("TacticBoardList:loadMore")}
+                    </SoftButton>
+                  </SoftBox>
+                )}
+            </>
           )}
           <Footer />
         </>

@@ -33,6 +33,15 @@ export const getAllTacticboards = asyncHandler(
 
     let parseObject = JSON.parse(queryString);
 
+    // Extract pagination parameters
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const skip = (page - 1) * limit;
+
+    // Remove pagination params from query object
+    delete parseObject.page;
+    delete parseObject.limit;
+
     parseObject.$or = [{ isPrivate: false }];
 
     if (req.UserInfo?.id) {
@@ -46,8 +55,17 @@ export const getAllTacticboards = asyncHandler(
       parseObject.$or.push({ isPrivate: true });
     }
 
-    const boards = await TacticBoard.find(parseObject);
-    res.send(boards);
+    const totalCount = await TacticBoard.countDocuments(parseObject);
+    const boards = await TacticBoard.find(parseObject).skip(skip).limit(limit);
+
+    res.send({
+      tacticboards: boards,
+      pagination: {
+        total: totalCount,
+        page,
+        pages: Math.ceil(totalCount / limit),
+      },
+    });
   }
 );
 
@@ -64,6 +82,15 @@ export const getAllTacticboardHeaders = asyncHandler(
     );
     let parseObject = JSON.parse(queryString);
 
+    // Extract pagination parameters
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const skip = (page - 1) * limit;
+
+    // Remove pagination params from query object
+    delete parseObject.page;
+    delete parseObject.limit;
+
     parseObject.$or = [{ isPrivate: false }];
 
     if (req.UserInfo?.id) {
@@ -77,10 +104,20 @@ export const getAllTacticboardHeaders = asyncHandler(
       parseObject.$or.push({ isPrivate: true });
     }
 
-    const boards = await TacticBoard.find(parseObject).select(
-      "_id name tags isPrivate creator user"
-    );
-    res.send(boards);
+    const totalCount = await TacticBoard.countDocuments(parseObject);
+    const boards = await TacticBoard.find(parseObject)
+      .select("_id name tags isPrivate creator user")
+      .skip(skip)
+      .limit(limit);
+
+    res.send({
+      tacticboards: boards,
+      pagination: {
+        total: totalCount,
+        page,
+        pages: Math.ceil(totalCount / limit),
+      },
+    });
   }
 );
 

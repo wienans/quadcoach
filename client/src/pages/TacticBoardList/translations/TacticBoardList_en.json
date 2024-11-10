@@ -19,5 +19,6 @@
     "openTacticBoard": "Open tactic board",
     "tags": "Tags"
   },
-  "addTacticBoard": "Add tactic board"
+  "addTacticBoard": "Add tactic board",
+  "loadMore": "Load More"
 }
