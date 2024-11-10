@@ -22,6 +22,9 @@ export enum AccessoryType {
   RedCone = "RedCone",
   YellowCone = "YellowCone",
   BlueCone = "BlueCone",
+  Hoop = "Hoop",
+  Ladder = "Ladder",
+  Hurdle = "Hurdle",
 }
 
 declare module "fabric/fabric-impl" {
