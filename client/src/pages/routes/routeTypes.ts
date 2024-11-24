@@ -11,6 +11,7 @@ export enum RouteHandleType {
   addTacticBoard = "addTacticBoard",
   updateTacticBoard = "updateTacticBoard",
   componentsTest = "componentsTest",
+  userProfile = "userProfile",
 }
 
 export type RouteHandle = {

@@ -267,6 +267,10 @@ const TacticBoardProfile = () => {
                   icon={<EditIcon />}
                   onClick={() => {
                     setIsEditMode(!isEditMode);
+
+                    if (isEditMode && formik.isValid) {
+                      formik.submitForm().then(() => {});
+                    }
                   }}
                 />
               </Tooltip>

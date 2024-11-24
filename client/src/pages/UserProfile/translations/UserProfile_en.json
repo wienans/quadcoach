@@ -1,0 +1,19 @@
+{
+  "errorLoadingUser": "Error while loading User",
+  "info": {
+    "title": "Info",
+    "name": {
+      "label": "Name",
+      "placeholder": "Name",
+      "missing": "Please enter name."
+    },
+    "email": {
+      "label": "E-Mail",
+      "valid": "E-Mail must be a valid E-Mail.",
+      "placeholder": "E-Mail",
+      "missing": "Please enter a E-Mail."
+    }
+  },
+  "editUser": "Edit/save Userdata",
+  "favoritList": "Favorit List"
+}

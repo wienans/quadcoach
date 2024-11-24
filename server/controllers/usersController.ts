@@ -37,20 +37,29 @@ export const getAllUsers = asyncHandler(async (req: Request, res: Response) => {
 // @desc    Get user by ID
 // @route   GET /api/users/:id
 // @access  Private - Admin or User themselves
-export const getUserById = asyncHandler(async (req: Request, res: Response) => {
-  if (mongoose.isValidObjectId(req.params.id)) {
-    const users = await User.findOne({
-      _id: req.params.id,
-    })
-      .select("-password")
-      .lean();
-    if (!users) {
-      res.status(400).json({ message: "User Not found" });
-    } else {
-      res.json(users);
+export const getUserById = asyncHandler(
+  async (req: RequestWithUser, res: Response) => {
+    if (mongoose.isValidObjectId(req.params.id)) {
+      if (
+        (!req.UserInfo?.id || req.UserInfo.id !== req.params.id) &&
+        !req.UserInfo?.roles?.some((role) => role.toLowerCase() === "admin")
+      ) {
+        res.status(403).json({ message: "Forbidden" });
+        return;
+      }
+      const users = await User.findOne({
+        _id: req.params.id,
+      })
+        .select("-password")
+        .lean();
+      if (!users) {
+        res.status(400).json({ message: "User Not found" });
+      } else {
+        res.json(users);
+      }
     }
   }
-});
+);
 
 // @desc    Create new user
 // @route   POST /api/users

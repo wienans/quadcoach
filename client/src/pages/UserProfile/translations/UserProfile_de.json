@@ -1,0 +1,19 @@
+{
+  "errorLoadingUser": "Es ist ein Fehler beim Laden des Nutzers aufgetreten.",
+  "info": {
+    "title": "Info",
+    "name": {
+      "label": "Name",
+      "placeholder": "Name",
+      "missing": "Bitte gib einen Namen ein."
+    },
+    "email": {
+      "label": "E-Mail",
+      "valid": "E-Mail muss eine gültige E-Mail sein.",
+      "placeholder": "E-Mail",
+      "missing": "Bitte gib einen E-Mail ein."
+    }
+  },
+  "editUser": "Nutzerdaten bearbeiten / speichern",
+  "favoritList": "Favoriten Liste"
+}
