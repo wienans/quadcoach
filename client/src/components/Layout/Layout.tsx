@@ -5,6 +5,7 @@ import DeveloperBoardIcon from "@mui/icons-material/DeveloperBoard";
 import ListIcon from "@mui/icons-material/List";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import DeleteIcon from "@mui/icons-material/Delete";
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import LoginIcon from "@mui/icons-material/Login";
 import { PresistLogin } from "..";
 import { useAuth } from "../../store/hooks";
@@ -83,6 +84,16 @@ const Layout = () => {
     },
     ...(userId
       ? [
+          {
+            type: "collapse" as const,
+            nameResourceKey: "Layout:routes.userProfile",
+            key: "userProfile",
+            route: "/users/" + userId,
+            icon: <AccountCircleIcon />,
+            noCollapse: true,
+            protected: true,
+            regExp: new RegExp("\\/users"),
+          },
           {
             type: "collapse" as const,
             nameResourceKey: "Layout:routes.deleteAccount",

@@ -6,6 +6,7 @@
     "tacticBoards": "Tactic Boards",
     "gitHubRepository": "GitHub Repository",
     "deleteAccount": "Delete Account",
-    "login": "Login"
+    "login": "Login",
+    "userProfile": "User Profile"
   }
 }
