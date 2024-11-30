@@ -7,6 +7,7 @@ import corsOptions from "./config/corsOptions";
 
 import Exercise from "./models/exercise";
 import TacticBoard from "./models/tacticboard";
+import ExerciseList from "./models/exerciseLists";
 
 import logger, { logEvents } from "./middleware/logger";
 import errorHandler from "./middleware/errorHandler";
@@ -69,26 +70,6 @@ app.use("/api/exercises", exerciseRoutes);
 
 app.get("/api", (req, res) => {
   res.json({ message: "Hello from server!" });
-});
-
-app.get("/api/search/:key", async (req, res) => {
-  const result = await Exercise.find({
-    $or: [
-      {
-        name: { $regex: req.params.key },
-      },
-      // ,
-      // {
-      //   // name: { $regex: req.params.key },
-      //   tags: { $regex: req.params.key },
-      // }
-    ],
-  });
-  if (result) {
-    res.send(result);
-  } else {
-    res.send({ result: "No Record Found" });
-  }
 });
 
 app.get("/api/materials", async (req, res) => {
