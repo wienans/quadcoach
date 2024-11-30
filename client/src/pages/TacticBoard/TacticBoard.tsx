@@ -217,14 +217,14 @@ const TacticsBoard = (): JSX.Element => {
 
   const onRecordClick = () => {
     const canvas = canvasRef.current?.getElement();
-    if (!canvas) return;
+    if (!canvas || !tacticBoard) return;
 
     if (!isRecording) {
-      startRecording(canvas, tacticBoard ? tacticBoard.pages.length : 0, 2000);
+      startRecording(canvas, tacticBoard.pages.length, 2000);
     } else {
       stopRecording();
       downloadVideo(
-        tacticBoard?.name ? `${tacticBoard.name}.mp4` : "tacticboard.mp4",
+        tacticBoard.name ? `${tacticBoard.name}.mp4` : "tacticboard.mp4",
       );
     }
   };

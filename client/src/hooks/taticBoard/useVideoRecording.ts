@@ -20,12 +20,7 @@ const useVideoRecording = () => {
   const videoChunksRef = useRef<Blob[]>([]);
 
   const getSupportedMimeType = (): string => {
-    const types = [
-      //   "video/webm;codecs=vp9",
-      //   "video/webm;codecs=vp8",
-      "video/webm",
-      "video/mp4",
-    ];
+    const types = ["video/webm", "video/mp4"];
 
     for (const type of types) {
       if (MediaRecorder.isTypeSupported(type)) {
@@ -96,7 +91,7 @@ const useVideoRecording = () => {
 
         const options: MediaRecorderOptions = {
           mimeType,
-          videoBitsPerSecond: 5000000,
+          videoBitsPerSecond: 8000000,
         };
 
         const recorder = new MediaRecorder(stream, options);

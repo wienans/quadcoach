@@ -23,7 +23,7 @@ import useVideoRecording from "../../hooks/taticBoard/useVideoRecording";
 export type TacticBoardInProfileProps = {
   tacticBoardId: string | undefined;
 };
-let mediaRecorder: MediaRecorder;
+
 const TacticBoardInProfile = ({
   tacticBoardId,
 }: TacticBoardInProfileProps): JSX.Element | undefined => {
