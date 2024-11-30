@@ -37,7 +37,7 @@ const Navbar = ({ light }: NavbarProps) => (
         alignContent: "center",
       }}
     >
-      <BackButton
+      {/* <BackButton
         sx={{
           flexGrow: 1,
           display: {
@@ -46,7 +46,7 @@ const Navbar = ({ light }: NavbarProps) => (
           },
         }}
         light={light}
-      />
+      /> */}
       <SoftBox
         sx={{
           flexGrow: {

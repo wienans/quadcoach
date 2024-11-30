@@ -33,12 +33,12 @@ import {
 import EditIcon from "@mui/icons-material/Edit";
 import SaveIcon from "@mui/icons-material/Save";
 import DeleteIcon from "@mui/icons-material/Delete";
+import FavoriteIcon from "@mui/icons-material/Favorite";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { useTranslation } from "react-i18next";
 import { lazy, Suspense, useEffect, useState } from "react";
 import { useAuth } from "../../store/hooks";
 import TacticBoardInProfileWrapper from "./TacticBoardInProfile";
-import FavoriteIcon from "@mui/icons-material/Favorite";
 import MDEditor from "@uiw/react-md-editor";
 // No import is required in the WebPack.
 import "@uiw/react-md-editor/markdown-editor.css";

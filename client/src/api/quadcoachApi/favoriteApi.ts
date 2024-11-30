@@ -137,6 +137,7 @@ export const favoriteApiSlice = quadcoachApi.injectEndpoints({
 export const {
   // Exercise Favorites
   useGetFavoriteExercisesQuery,
+  useLazyGetFavoriteExercisesQuery,
   useAddFavoriteExerciseMutation,
   useRemoveFavoriteExerciseMutation,
 
@@ -148,6 +149,7 @@ export const {
 
   // Exercise List Favorites
   useGetFavoriteExerciseListsQuery,
+  useLazyGetFavoriteExerciseListsQuery,
   useAddFavoriteExerciseListMutation,
   useRemoveFavoriteExerciseListMutation,
 } = favoriteApiSlice;
