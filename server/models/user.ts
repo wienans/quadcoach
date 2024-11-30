@@ -10,9 +10,6 @@ interface IUser {
   isVerified?: boolean;
   emailToken?: string;
   passwordResetToken?: string;
-  exerciseLists?: Types.ObjectId[];
-  favoriteExercises?: Types.ObjectId[];
-  favoriteTacticboards?: Types.ObjectId[];
 }
 
 const userSchema = new Schema<IUser>({
@@ -45,18 +42,6 @@ const userSchema = new Schema<IUser>({
   },
   passwordResetToken: {
     type: String,
-  },
-  exerciseLists: {
-    type: [Types.ObjectId],
-    ref: "exerciseLists",
-  },
-  favoriteExercises: {
-    type: [Types.ObjectId],
-    ref: "exercises",
-  },
-  favoriteTacticboards: {
-    type: [Types.ObjectId],
-    ref: "tacticboards",
   },
 });
 
