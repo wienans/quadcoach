@@ -27,5 +27,7 @@
   "registerBtn": "Register",
   "registerErr": "E-Mail already registered. Please try again.",
   "registerSuccess": "Registration successful! Please check your email (also spam folder) to verify your account before logging in.",
-  "goToLogin": "Go to Login"
+  "goToLogin": "Go to Login",
+  "acceptTerms": "I agree to the terms of use and the privacy policy.",
+  "readTerms": "Read Terms"
 }
