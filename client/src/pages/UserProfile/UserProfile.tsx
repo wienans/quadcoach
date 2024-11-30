@@ -54,6 +54,7 @@ import AddTagDialog from "./AddTagDialog";
 import Footer from "../../components/Footer";
 import { useGetUserQuery, useUpdateUserMutation } from "../userApi";
 import { User, UserPartialId } from "../../api/quadcoachApi/domain";
+import { useGetFavoriteExercisesQuery } from "../../api/quadcoachApi/favoriteApi";
 
 const MarkdownRenderer = lazy(
   () => import("../../components/MarkdownRenderer"),
@@ -85,6 +86,9 @@ const UserProfile = () => {
 
   const [updateUser, { isLoading: isUpdateUserLoading }] =
     useUpdateUserMutation();
+  const { data: favoriteExercises } = useGetFavoriteExercisesQuery({
+    userId: userId,
+  });
 
   const formik = useFormik<UserPartialId>({
     // enableReinitialize : use this flag when initial values needs to be changed
@@ -269,13 +273,15 @@ const UserProfile = () => {
                   </AccordionDetails>
                 </Accordion>
               )}
-              {Boolean(user?.roles) && (
+              {Boolean(favoriteExercises) && (
                 <Accordion>
                   <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                     {t("UserProfile:favoritList")}
                   </AccordionSummary>
                   <AccordionDetails sx={{ ml: 1 }}>
-                    {user?.roles ?? ""}
+                    {favoriteExercises?.map((exercise) => (
+                      <div key={exercise._id}>{exercise.exercise}</div>
+                    )) ?? ""}
                   </AccordionDetails>
                 </Accordion>
               )}

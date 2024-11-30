@@ -163,7 +163,7 @@ export const createNewTacticboard = asyncHandler(
         console.error("Couldn't create Tacticboard");
         res.send({ message: "Couldn't create Tacticboard" });
       } else {
-        res.send({
+        res.status(201).send({
           message: "Tacticboard created successfully",
           _id: result._id,
         });

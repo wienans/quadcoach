@@ -84,7 +84,7 @@ export const createNewExercise = asyncHandler(
       if (!result) {
         console.error("Couldn't create Exercise");
       }
-      res.send(result);
+      res.status(201).send(result);
     } else {
       res.status(403).json({ message: "Forbidden" });
     }
