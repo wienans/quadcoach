@@ -1,5 +1,6 @@
 import { quadcoachApi } from "..";
 import { TagType } from "../enum";
+import { ExerciseHeader } from "./domain/Exercise";
 import {
   ExerciseFavorite,
   ExerciseListFavorite,
@@ -8,6 +9,7 @@ import {
   ExerciseListFavoriteWithOutId,
   TacticBoardFavoriteWithOutId,
 } from "./domain/Favorits";
+import { TacticBoardHeader } from "./domain/TacticBoard";
 
 type FavoriteRequest = {
   userId: string;
@@ -35,6 +37,16 @@ export const favoriteApiSlice = quadcoachApi.injectEndpoints({
         data: request,
       }),
       providesTags: [TagType.favorite],
+    }),
+    getFavoriteExercisesHeaders: builder.query<
+      ExerciseHeader[],
+      FavoriteRequest
+    >({
+      query: (request) => ({
+        url: "/api/favorites/exercisesHeaders",
+        method: "get",
+        data: request,
+      }),
     }),
 
     addFavoriteExercise: builder.mutation<
@@ -70,7 +82,16 @@ export const favoriteApiSlice = quadcoachApi.injectEndpoints({
       }),
       providesTags: [TagType.favorite],
     }),
-
+    getFavoriteTacticboardsHeaders: builder.query<
+      TacticBoardHeader[],
+      FavoriteRequest
+    >({
+      query: (request) => ({
+        url: "/api/favorites/tacticboardsHeaders",
+        method: "get",
+        data: request,
+      }),
+    }),
     addFavoriteTacticboard: builder.mutation<
       TacticBoardFavoriteWithOutId,
       TacticboardFavoriteRequest
@@ -138,12 +159,16 @@ export const {
   // Exercise Favorites
   useGetFavoriteExercisesQuery,
   useLazyGetFavoriteExercisesQuery,
+  useGetFavoriteExercisesHeadersQuery,
+  useLazyGetFavoriteExercisesHeadersQuery,
   useAddFavoriteExerciseMutation,
   useRemoveFavoriteExerciseMutation,
 
   // Tacticboard Favorites
   useGetFavoriteTacticboardsQuery,
   useLazyGetFavoriteTacticboardsQuery,
+  useGetFavoriteTacticboardsHeadersQuery,
+  useLazyGetFavoriteTacticboardsHeadersQuery,
   useAddFavoriteTacticboardMutation,
   useRemoveFavoriteTacticboardMutation,
 

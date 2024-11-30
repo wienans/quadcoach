@@ -4,6 +4,8 @@ import ExerciseFav from "../models/exerciseFav";
 import TacticboardFav from "../models/tacticboardFav";
 import ExerciseListFav from "../models/exerciseListFav";
 import mongoose from "mongoose";
+import Exercise, { IExercise } from "../models/exercise";
+import TacticBoard, { ITacticBoard } from "../models/tacticboard";
 
 interface RequestWithUser extends Request {
   UserInfo?: {
@@ -26,11 +28,41 @@ const checkUserAuthorization = (
 // Exercise Favorites
 export const getFavoriteExercises = asyncHandler(
   async (req: RequestWithUser, res: Response) => {
+    if (!mongoose.isValidObjectId(req.UserInfo?.id)) {
+      res.status(400).json({ message: "Invalid user ID" });
+      return;
+    }
     const favorites = await ExerciseFav.find({ user: req.UserInfo?.id }).sort({
       createdAt: -1,
     });
 
     res.json(favorites);
+  }
+);
+
+export const getFavoriteExercisesHeaders = asyncHandler(
+  async (req: RequestWithUser, res: Response) => {
+    if (!mongoose.isValidObjectId(req.UserInfo?.id)) {
+      res.status(400).json({ message: "Invalid user ID" });
+      return;
+    }
+    const favorites = await ExerciseFav.find({ user: req.UserInfo?.id }).sort({
+      createdAt: -1,
+    });
+    const exerciseHeaders: IExercise[] = [];
+
+    await Promise.all(
+      favorites.map(async (favorite) => {
+        const exercise = await Exercise.findById(favorite.exercise).select(
+          "_id name"
+        );
+        if (exercise) {
+          exerciseHeaders.push(exercise);
+        }
+      })
+    );
+
+    res.json(exerciseHeaders);
   }
 );
 
@@ -108,11 +140,43 @@ export const removeFavoriteExercise = asyncHandler(
 // Tacticboard Favorites
 export const getFavoriteTacticboards = asyncHandler(
   async (req: RequestWithUser, res: Response) => {
+    if (!mongoose.isValidObjectId(req.UserInfo?.id)) {
+      res.status(400).json({ message: "Invalid user ID" });
+      return;
+    }
     const favorites = await TacticboardFav.find({
       user: req.UserInfo?.id,
     }).sort({ createdAt: -1 });
 
     res.json(favorites);
+  }
+);
+
+export const getFavoriteTacticboardsHeaders = asyncHandler(
+  async (req: RequestWithUser, res: Response) => {
+    if (!mongoose.isValidObjectId(req.UserInfo?.id)) {
+      res.status(400).json({ message: "Invalid user ID" });
+      return;
+    }
+    const favorites = await TacticboardFav.find({
+      user: req.UserInfo?.id,
+    }).sort({
+      createdAt: -1,
+    });
+    const tacticboardHeaders: ITacticBoard[] = [];
+
+    await Promise.all(
+      favorites.map(async (favorite) => {
+        const tacticboard = await TacticBoard.findById(
+          favorite.tacticboard
+        ).select("_id name");
+        if (tacticboard) {
+          tacticboardHeaders.push(tacticboard);
+        }
+      })
+    );
+
+    res.json(tacticboardHeaders);
   }
 );
 
@@ -190,6 +254,10 @@ export const removeFavoriteTacticboard = asyncHandler(
 // Exercise List Favorites
 export const getFavoriteExerciseLists = asyncHandler(
   async (req: RequestWithUser, res: Response) => {
+    if (!mongoose.isValidObjectId(req.UserInfo?.id)) {
+      res.status(400).json({ message: "Invalid user ID" });
+      return;
+    }
     const favorites = await ExerciseListFav.find({
       user: req.UserInfo?.id,
     }).sort({ createdAt: -1 });

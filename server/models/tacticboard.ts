@@ -46,7 +46,7 @@ interface ITacticPage {
   objects?: Types.Array<IObject>;
   backgroundImage?: Types.Array<IBackgroundImage>;
 }
-interface ITacticBoard {
+export interface ITacticBoard {
   name?: string;
   isPrivate?: boolean;
   tags?: Types.Array<string>;

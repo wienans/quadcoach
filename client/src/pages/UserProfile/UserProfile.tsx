@@ -6,26 +6,26 @@ import {
   Alert,
   BottomNavigationAction,
   Card,
-  CardHeader,
-  Checkbox,
-  Chip,
-  FormControlLabel,
   FormGroup,
   FormHelperText,
   Grid,
   IconButton,
+  ListItemText,
+  List,
   Skeleton,
   Theme,
   Tooltip,
   useMediaQuery,
+  ListItemButton,
 } from "@mui/material";
 import * as Yup from "yup";
-import { SoftBox, SoftInput, SoftTypography } from "../../components";
 import {
-  useDeleteTacticBoardMutation,
-  useGetTacticBoardQuery,
-  useUpdateTacticBoardMetaMutation,
-} from "../../api/quadcoachApi/tacticboardApi";
+  SoftBox,
+  SoftButton,
+  SoftInput,
+  SoftTypography,
+} from "../../components";
+
 import { useParams, useNavigate } from "react-router-dom";
 import {
   DashboardLayout,
@@ -33,43 +33,36 @@ import {
 } from "../../components/LayoutContainers";
 import EditIcon from "@mui/icons-material/Edit";
 import SaveIcon from "@mui/icons-material/Save";
-import DeleteIcon from "@mui/icons-material/Delete";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { useTranslation } from "react-i18next";
-import { lazy, Suspense, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "../../store/hooks";
-import TacticBoardInProfileWrapper from "./TacticBoardInProfile";
-import MDEditor from "@uiw/react-md-editor";
-// No import is required in the WebPack.
-import "@uiw/react-md-editor/markdown-editor.css";
-// No import is required in the WebPack.
-import "@uiw/react-markdown-preview/markdown.css";
-import {
-  FieldArray,
-  FieldArrayRenderProps,
-  FormikProvider,
-  useFormik,
-} from "formik";
-import AddTagDialog from "./AddTagDialog";
+import { FormikProvider, useFormik } from "formik";
 import Footer from "../../components/Footer";
-import { useGetUserQuery, useUpdateUserMutation } from "../userApi";
-import { User, UserPartialId } from "../../api/quadcoachApi/domain";
-import { useGetFavoriteExercisesQuery } from "../../api/quadcoachApi/favoriteApi";
-
-const MarkdownRenderer = lazy(
-  () => import("../../components/MarkdownRenderer"),
-);
+import {
+  useDeleteUserMutation,
+  useGetUserQuery,
+  useUpdateUserMutation,
+} from "../userApi";
+import { UserPartialId } from "../../api/quadcoachApi/domain";
+import {
+  useGetFavoriteExercisesHeadersQuery,
+  useGetFavoriteTacticboardsHeadersQuery,
+} from "../../api/quadcoachApi/favoriteApi";
+import { useSendLogoutMutation } from "../authApi";
 
 const UserProfile = () => {
-  const { t } = useTranslation("TacticBoardProfile");
+  const { t } = useTranslation("UserProfile");
   const { id: userViewId } = useParams();
   const { id: userId, roles: userRoles } = useAuth();
+  const [deleteUser] = useDeleteUserMutation();
+  const [sendLogout] = useSendLogoutMutation();
   const navigate = useNavigate();
   const {
     data: user,
     isError: isUserError,
     isLoading: isUserLoading,
-  } = useGetUserQuery(userId);
+  } = useGetUserQuery(userViewId ?? "");
   const [isPrivileged, setIsPrivileged] = useState<boolean>(false);
   const isUpMd = useMediaQuery((theme: Theme) => theme.breakpoints.up("md"));
   const [isEditMode, setIsEditMode] = useState<boolean>(false);
@@ -86,9 +79,31 @@ const UserProfile = () => {
 
   const [updateUser, { isLoading: isUpdateUserLoading }] =
     useUpdateUserMutation();
-  const { data: favoriteExercises } = useGetFavoriteExercisesQuery({
-    userId: userId,
+  const { data: favoriteExercises } = useGetFavoriteExercisesHeadersQuery({
+    userId: userViewId ?? "",
   });
+  const { data: favoriteTacticBoards } = useGetFavoriteTacticboardsHeadersQuery(
+    {
+      userId: userViewId ?? "",
+    },
+  );
+
+  const handleDeleteAccount = async () => {
+    try {
+      if (
+        userViewId &&
+        window.confirm(
+          "Are you sure you want to delete your account? This action cannot be undone.",
+        )
+      ) {
+        deleteUser(userViewId).unwrap();
+        sendLogout({}).unwrap();
+        navigate("/");
+      }
+    } catch (err) {
+      console.error("Failed to delete account:", err);
+    }
+  };
 
   const formik = useFormik<UserPartialId>({
     // enableReinitialize : use this flag when initial values needs to be changed
@@ -109,10 +124,10 @@ const UserProfile = () => {
 
     onSubmit: (values) => {
       if (isPrivileged) {
-        if (userId) {
+        if (userViewId) {
           const { name, email, roles, active } = values;
           updateUser({
-            _id: userId,
+            _id: userViewId,
             name,
             email,
             roles,
@@ -184,6 +199,7 @@ const UserProfile = () => {
                     }}
                     color="primary"
                     sx={{ mr: 1 }}
+                    disabled={isUpdateUserLoading}
                   >
                     {isEditMode ? <SaveIcon /> : <EditIcon />}
                   </IconButton>
@@ -276,14 +292,86 @@ const UserProfile = () => {
               {Boolean(favoriteExercises) && (
                 <Accordion>
                   <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                    {t("UserProfile:favoritList")}
+                    {t("UserProfile:favoriteExercisesList")}
                   </AccordionSummary>
                   <AccordionDetails sx={{ ml: 1 }}>
-                    {favoriteExercises?.map((exercise) => (
-                      <div key={exercise._id}>{exercise.exercise}</div>
-                    )) ?? ""}
+                    <List>
+                      {favoriteExercises?.map((exercise) => (
+                        <ListItemButton
+                          key={exercise._id}
+                          href={`/exercises/${exercise._id}`}
+                          sx={{
+                            cursor: "pointer",
+                            "&:hover": {
+                              backgroundColor: "rgba(0, 0, 0, 0.04)",
+                            },
+                          }}
+                        >
+                          <ListItemText
+                            primary={exercise.name}
+                            sx={{
+                              "& .MuiTypography-root": {
+                                fontSize: "1rem",
+                                fontWeight: 400,
+                              },
+                            }}
+                          />
+                        </ListItemButton>
+                      )) ?? ""}
+                    </List>
                   </AccordionDetails>
                 </Accordion>
+              )}
+              {Boolean(favoriteTacticBoards) && (
+                <Accordion>
+                  <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                    {t("UserProfile:favoriteTacticboardsList")}
+                  </AccordionSummary>
+                  <AccordionDetails sx={{ ml: 1 }}>
+                    <List>
+                      {favoriteTacticBoards?.map((tacticBoard) => (
+                        <ListItemButton
+                          key={tacticBoard._id}
+                          href={`/tacticboards/${tacticBoard._id}`}
+                          sx={{
+                            cursor: "pointer",
+                            "&:hover": {
+                              backgroundColor: "rgba(0, 0, 0, 0.04)",
+                            },
+                          }}
+                        >
+                          <ListItemText
+                            primary={tacticBoard.name}
+                            sx={{
+                              "& .MuiTypography-root": {
+                                fontSize: "1rem",
+                                fontWeight: 400,
+                              },
+                            }}
+                          />
+                        </ListItemButton>
+                      )) ?? ""}
+                    </List>
+                  </AccordionDetails>
+                </Accordion>
+              )}
+              {isEditMode && (
+                <SoftBox
+                  sx={{
+                    mt: 2,
+                    mb: 2,
+                    display: "flex",
+                    justifyContent: "center",
+                  }}
+                >
+                  <SoftButton
+                    variant="contained"
+                    color="error"
+                    onClick={handleDeleteAccount}
+                  >
+                    {t("UserProfile:deleteAccount")}
+                  </SoftButton>
+                </SoftBox>
               )}
             </Card>
             <Footer />

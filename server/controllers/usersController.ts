@@ -5,6 +5,8 @@ import { Request, Response } from "express";
 import TacticBoard from "../models/tacticboard";
 import Exercise from "../models/exercise";
 import mongoose from "mongoose";
+import ExerciseFav from "../models/exerciseFav";
+import TacticboardFav from "../models/tacticboardFav";
 
 interface UserInfo {
   id?: string;
@@ -177,6 +179,8 @@ export const deleteUser = asyncHandler(
       res.status(400).json({ message: "User not found" });
       return;
     }
+    await ExerciseFav.deleteMany({ user: id }).exec();
+    await TacticboardFav.deleteMany({ user: id }).exec();
     const result = await user.deleteOne();
     const reply = `Username ${result.email} with ID ${result._id} deleted`;
     res.json({ message: reply });

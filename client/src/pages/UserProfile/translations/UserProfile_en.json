@@ -15,5 +15,7 @@
     }
   },
   "editUser": "Edit/save Userdata",
-  "favoritList": "Favorit List"
+  "favoriteExercisesList": "Favorite Exercises",
+  "favoriteTacticboardsList": "Favorite Tacticboards",
+  "deleteAccount": "Delete Account"
 }

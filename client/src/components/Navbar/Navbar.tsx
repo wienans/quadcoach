@@ -23,7 +23,7 @@ import { SoftBox, Breadcrumbs } from "..";
 // Custom styles for DashboardNavbar
 import Logo from "../../assets/images/logo.png";
 import NavbarMainControls from "../NavbarMainControls";
-import BackButton from "./BackButton";
+//import BackButton from "./BackButton";
 
 export type NavbarProps = {
   light: boolean;

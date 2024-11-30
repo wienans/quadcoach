@@ -8,7 +8,7 @@ interface IBlock {
   time_min?: number;
 }
 
-interface IExercise {
+export interface IExercise {
   name: string;
   materials?: Types.Array<string>;
   time_min: number;

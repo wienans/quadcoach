@@ -15,5 +15,7 @@
     }
   },
   "editUser": "Nutzerdaten bearbeiten / speichern",
-  "favoritList": "Favoriten Liste"
+  "favoriteExercisesList": "Favorisierte Übungen",
+  "favoriteTacticboardsList": "Favorisierte Tacticboards",
+  "deleteAccount": "Account löschen"
 }
