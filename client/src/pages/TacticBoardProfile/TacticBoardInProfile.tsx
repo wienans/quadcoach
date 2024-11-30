@@ -19,10 +19,11 @@ import { useLoadTacticBoard, useTacticBoardFabricJs } from "../../hooks";
 import { FabricJsCanvas, SoftBox } from "../../components";
 import { TacticBoardFabricJsContextProvider } from "../../contexts";
 import { useAuth } from "../../store/hooks";
+import useVideoRecording from "../../hooks/taticBoard/useVideoRecording";
 export type TacticBoardInProfileProps = {
   tacticBoardId: string | undefined;
 };
-let mediaRecorder: MediaRecorder;
+
 const TacticBoardInProfile = ({
   tacticBoardId,
 }: TacticBoardInProfileProps): JSX.Element | undefined => {
@@ -31,10 +32,13 @@ const TacticBoardInProfile = ({
   const { tacticBoard, isTacticBoardError, isTacticBoardLoading } =
     useLoadTacticBoard(tacticBoardId);
 
+  const { isRecording, startRecording, stopRecording, downloadVideo } =
+    useVideoRecording();
+
   const [currentPage, setPage] = useState<number>(1);
   const [maxPages, setMaxPages] = useState<number>(1);
   const [isAnimating, setIsAnimating] = useState<boolean>(false);
-  const [isRecording, setIsRecording] = useState<boolean>(false);
+
   const [isFullScreen, setIsFullScreen] = useState<boolean>(false);
   const [isPrivileged, setIsPrivileged] = useState<boolean>(false);
   const refFullScreenContainer = useRef<HTMLDivElement>(null);
@@ -86,25 +90,17 @@ const TacticBoardInProfile = ({
   }, [isAnimating]);
 
   const onRecordClick = () => {
-    const canvas = canvasRef.current?.getElement() as HTMLCanvasElement;
+    const canvas = canvasRef.current?.getElement();
     if (!canvas) return;
 
-    const canvasStream = canvas.captureStream(60);
-    mediaRecorder = new MediaRecorder(canvasStream, {
-      mimeType: "video/webm",
-    });
-    let chunks: Blob[] = [];
-
-    mediaRecorder.onstop = function () {
-      downloadVideo(chunks);
-      chunks = [];
-    };
-
-    mediaRecorder.ondataavailable = function (e) {
-      chunks.push(e.data);
-    };
-    mediaRecorder.start();
-    setIsRecording(!isRecording);
+    if (!isRecording) {
+      startRecording(canvas, tacticBoard ? tacticBoard.pages.length : 0, 2000);
+    } else {
+      stopRecording();
+      downloadVideo(
+        tacticBoard?.name ? `${tacticBoard.name}.mp4` : "tacticboard.mp4",
+      );
+    }
   };
 
   const onFullScreenClick = () => {
@@ -157,17 +153,6 @@ const TacticBoardInProfile = ({
     };
   }, []);
 
-  const downloadVideo = (chunks: Blob[]) => {
-    const blob = new Blob(chunks, { type: "video/mp4" });
-    const videoURL = URL.createObjectURL(blob);
-    const tag = document.createElement("a");
-    tag.href = videoURL;
-    tag.download = tacticBoard?.name ? tacticBoard?.name : "tacticboard.mp4";
-    document.body.appendChild(tag);
-    tag.click();
-    document.body.removeChild(tag);
-  };
-
   useEffect(() => {
     let interval: NodeJS.Timeout;
     if (isAnimating && tacticBoard) {
@@ -213,11 +198,11 @@ const TacticBoardInProfile = ({
       interval = setInterval(() => {
         setPage((prevPage) => {
           const newPage = (prevPage % tacticBoard.pages.length) + 1;
-          if (prevPage == tacticBoard.pages.length && newPage == 1) {
-            if (mediaRecorder) {
-              mediaRecorder.stop();
-            }
-            setIsRecording(false);
+          if (prevPage === tacticBoard.pages.length && newPage === 1) {
+            stopRecording();
+            downloadVideo(
+              tacticBoard.name ? `${tacticBoard.name}.mp4` : "tacticboard.mp4",
+            );
           }
           getAllObjects().forEach((obj) => {
             const targetObject = tacticBoard.pages[newPage - 1].objects?.find(
@@ -248,8 +233,18 @@ const TacticBoardInProfile = ({
     }
 
     // Clean up the interval on component unmount or when the last page is reached
-    return () => clearInterval(interval);
-  }, [isRecording, onLoadPage, tacticBoard, getAllObjects, canvasRef]);
+    return () => {
+      clearInterval(interval);
+    };
+  }, [
+    isRecording,
+    tacticBoard,
+    stopRecording,
+    downloadVideo,
+    getAllObjects,
+    canvasRef,
+    onLoadPage,
+  ]);
 
   const handleChange = (_: React.ChangeEvent<unknown>, value: number) => {
     setPage(value);

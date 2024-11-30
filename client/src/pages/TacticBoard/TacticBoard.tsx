@@ -23,8 +23,7 @@ import { useAppSelector } from "../../store/hooks";
 import TacticBoardTopMenu from "./TacticBoardTopMenu/TacticBoardTopMenu";
 import TacticBoardTopItemsMenu from "./TacticBoardTopItemsMenu";
 import { useAuth } from "../../store/hooks";
-
-let mediaRecorder: MediaRecorder;
+import useVideoRecording from "../../hooks/taticBoard/useVideoRecording";
 
 const TacticsBoard = (): JSX.Element => {
   const { t } = useTranslation("TacticBoard");
@@ -48,6 +47,9 @@ const TacticsBoard = (): JSX.Element => {
     skip: tacticBoardId == null,
   });
 
+  const { isRecording, startRecording, stopRecording, downloadVideo } =
+    useVideoRecording();
+
   const [updateTacticBoardPage, { isLoading: isUpdatePageLoading }] =
     useUpdateTacticBoardPageMutation();
   const [createTacticBoardPage, { isLoading: isCreatePageLoading }] =
@@ -59,7 +61,6 @@ const TacticsBoard = (): JSX.Element => {
   const [currentPage, setPage] = useState<number>(1);
   const [maxPages, setMaxPages] = useState<number>(1);
   const [isAnimating, setIsAnimating] = useState<boolean>(false);
-  const [isRecording, setIsRecording] = useState<boolean>(false);
   const [isFullScreen, setIsFullScreen] = useState<boolean>(false);
   const [isPrivileged, setIsPrivileged] = useState<boolean>(false);
   const [firstAPICall, setFirstAPICall] = useState<number>(0);
@@ -209,41 +210,23 @@ const TacticsBoard = (): JSX.Element => {
       }
     }
   };
-  const downloadVideo = (chunks: Blob[]) => {
-    const blob = new Blob(chunks, { type: "video/mp4" });
-    const videoURL = URL.createObjectURL(blob);
-    const tag = document.createElement("a");
-    tag.href = videoURL;
-    tag.download = tacticBoard?.name ? tacticBoard?.name : "tacticboard.mp4";
-    document.body.appendChild(tag);
-    tag.click();
-    document.body.removeChild(tag);
-  };
 
   const onAnimateClick = () => {
     setIsAnimating(!isAnimating);
   };
 
   const onRecordClick = () => {
-    const canvas = canvasRef.current?.getElement() as HTMLCanvasElement;
-    if (!canvas) return;
+    const canvas = canvasRef.current?.getElement();
+    if (!canvas || !tacticBoard) return;
 
-    const canvasStream = canvas.captureStream(60);
-    mediaRecorder = new MediaRecorder(canvasStream, {
-      mimeType: "video/webm",
-    });
-    let chunks: Blob[] = [];
-
-    mediaRecorder.onstop = function () {
-      downloadVideo(chunks);
-      chunks = [];
-    };
-
-    mediaRecorder.ondataavailable = function (e) {
-      chunks.push(e.data);
-    };
-    mediaRecorder.start();
-    setIsRecording(!isRecording);
+    if (!isRecording) {
+      startRecording(canvas, tacticBoard.pages.length, 2000);
+    } else {
+      stopRecording();
+      downloadVideo(
+        tacticBoard.name ? `${tacticBoard.name}.mp4` : "tacticboard.mp4",
+      );
+    }
   };
 
   useEffect(() => {
@@ -316,11 +299,11 @@ const TacticsBoard = (): JSX.Element => {
       interval = setInterval(() => {
         setPage((prevPage) => {
           const newPage = (prevPage % tacticBoard.pages.length) + 1;
-          if (prevPage == tacticBoard.pages.length && newPage == 1) {
-            if (mediaRecorder) {
-              mediaRecorder.stop();
-            }
-            setIsRecording(false);
+          if (prevPage === tacticBoard.pages.length && newPage === 1) {
+            stopRecording();
+            downloadVideo(
+              tacticBoard.name ? `${tacticBoard.name}.mp4` : "tacticboard.mp4",
+            );
           }
           getAllObjects().forEach((obj) => {
             const targetObject = tacticBoard.pages[newPage - 1].objects?.find(
@@ -351,8 +334,18 @@ const TacticsBoard = (): JSX.Element => {
     }
 
     // Clean up the interval on component unmount or when the last page is reached
-    return () => clearInterval(interval);
-  }, [isRecording, onLoadPage, tacticBoard, getAllObjects, canvasRef]);
+    return () => {
+      clearInterval(interval);
+    };
+  }, [
+    isRecording,
+    tacticBoard,
+    stopRecording,
+    downloadVideo,
+    getAllObjects,
+    canvasRef,
+    onLoadPage,
+  ]);
 
   useEffect(() => {
     const handleFullScreenChange = () => {
