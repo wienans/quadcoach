@@ -26,19 +26,9 @@ const checkUserAuthorization = (
 // Exercise Favorites
 export const getFavoriteExercises = asyncHandler(
   async (req: RequestWithUser, res: Response) => {
-    const { userId } = req.body;
-
-    if (
-      !req.UserInfo?.id ||
-      !checkUserAuthorization(userId, req.UserInfo.id, req.UserInfo.roles)
-    ) {
-      res.status(403).json({ message: "Forbidden" });
-      return;
-    }
-
-    const favorites = await ExerciseFav.find({ user: userId })
-      .populate("exercise")
-      .sort({ createdAt: -1 });
+    const favorites = await ExerciseFav.find({ user: req.UserInfo?.id }).sort({
+      createdAt: -1,
+    });
 
     res.json(favorites);
   }
@@ -118,19 +108,9 @@ export const removeFavoriteExercise = asyncHandler(
 // Tacticboard Favorites
 export const getFavoriteTacticboards = asyncHandler(
   async (req: RequestWithUser, res: Response) => {
-    const { userId } = req.body;
-
-    if (
-      !req.UserInfo?.id ||
-      !checkUserAuthorization(userId, req.UserInfo.id, req.UserInfo.roles)
-    ) {
-      res.status(403).json({ message: "Forbidden" });
-      return;
-    }
-
-    const favorites = await TacticboardFav.find({ user: userId })
-      .populate("tacticboard")
-      .sort({ createdAt: -1 });
+    const favorites = await TacticboardFav.find({
+      user: req.UserInfo?.id,
+    }).sort({ createdAt: -1 });
 
     res.json(favorites);
   }
@@ -210,19 +190,9 @@ export const removeFavoriteTacticboard = asyncHandler(
 // Exercise List Favorites
 export const getFavoriteExerciseLists = asyncHandler(
   async (req: RequestWithUser, res: Response) => {
-    const { userId } = req.body;
-
-    if (
-      !req.UserInfo?.id ||
-      !checkUserAuthorization(userId, req.UserInfo.id, req.UserInfo.roles)
-    ) {
-      res.status(403).json({ message: "Forbidden" });
-      return;
-    }
-
-    const favorites = await ExerciseListFav.find({ user: userId })
-      .populate("exerciseList")
-      .sort({ createdAt: -1 });
+    const favorites = await ExerciseListFav.find({
+      user: req.UserInfo?.id,
+    }).sort({ createdAt: -1 });
 
     res.json(favorites);
   }

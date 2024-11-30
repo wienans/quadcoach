@@ -142,6 +142,7 @@ export const {
 
   // Tacticboard Favorites
   useGetFavoriteTacticboardsQuery,
+  useLazyGetFavoriteTacticboardsQuery,
   useAddFavoriteTacticboardMutation,
   useRemoveFavoriteTacticboardMutation,
 
