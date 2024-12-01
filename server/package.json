@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.ts",
-    "build": "npx tsc"
+    "build": "npx tsc --build --clean && npx tsc"
   },
   "keywords": [],
   "author": "",
