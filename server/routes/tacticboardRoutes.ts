@@ -20,9 +20,11 @@ router
 
 router
   .route("/:id/access")
-  .get(tacticboardController.checkAccess)
+  .get(tacticboardController.getAllAccessUsers)
   .post(tacticboardController.setAccess)
   .delete(tacticboardController.deleteAccess);
+
+router.route("/:id/checkAccess").get(tacticboardController.checkAccess);
 
 router
   .route("/:id/pages/:pageId")

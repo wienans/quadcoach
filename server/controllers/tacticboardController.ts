@@ -639,3 +639,38 @@ export const deleteAccess = asyncHandler(
     res.json({ message: "Access removed successfully" });
   }
 );
+
+// @desc    Get all users who have access to a tacticboard
+// @route   GET /api/tacticboards/:id/access
+// @access  Private - Owner or Admin only
+export const getAllAccessUsers = asyncHandler(
+  async (req: RequestWithUser, res: Response) => {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      res.status(400).json({ message: "Invalid tacticboard ID" });
+      return;
+    }
+
+    const tacticboard = await TacticBoard.findById(req.params.id);
+    if (!tacticboard) {
+      res.status(404).json({ message: "Tacticboard not found" });
+      return;
+    }
+
+    // Check if user has permission to view access list
+    if (
+      tacticboard.user &&
+      (!req.UserInfo?.id || req.UserInfo.id !== tacticboard.user.toString()) &&
+      !req.UserInfo?.roles?.includes("Admin") &&
+      !req.UserInfo?.roles?.includes("admin")
+    ) {
+      res.status(403).json({ message: "Forbidden" });
+      return;
+    }
+
+    const accessEntries = await TacticboardAccess.find({
+      tacticboard: req.params.id,
+    }).populate("user", "username email"); // Add whatever user fields you want to include
+
+    res.json(accessEntries);
+  }
+);
