@@ -38,5 +38,6 @@
   "deleteTacticBoard": "Taktik Tafel löschen",
   "usedInExercises": "Wird in folgenden Übungen verwendet:",
   "editTacticBoardMeta": "Taktik Tafel Metadaten bearbeiten / speichern",
-  "favoriteTacticBoard": "Favorisierte Taktik Tafel"
+  "favoriteTacticBoard": "Favorisierte Taktik Tafel",
+  "errorUpdatingTacticBoard": "Fehler beim Aktualisieren der Taktik Tafel"
 }

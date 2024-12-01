@@ -38,5 +38,6 @@
   "deleteTacticBoard": "Delete tacticboard",
   "usedInExercises": "Used in exercises:",
   "editTacticBoardMeta": "Edit / Save tacticboard metadata",
-  "favoriteTacticBoard": "Favorite tacticboard"
+  "favoriteTacticBoard": "Favorite tacticboard",
+  "errorUpdatingTacticBoard": "Error updating tacticboard"
 }

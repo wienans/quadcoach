@@ -283,7 +283,28 @@ export const updateMetaById = asyncHandler(
         // Destructure the fields to be updated from req.body, excluding `pages`
         const { name, isPrivate, tags, description, coaching_points } =
           req.body;
-
+        if (isPrivate) {
+          // Check if tacticboard is used in any exercises
+          const exercisesUsingTacticboard = await Exercise.find({
+            description_blocks: {
+              $elemMatch: {
+                tactics_board: tacticBoardId,
+              },
+            },
+          });
+          if (exercisesUsingTacticboard.length > 0) {
+            res.status(400).json({
+              message:
+                "Cannot update tacticboard to private - it is being used in exercises",
+              exercises: exercisesUsingTacticboard.map((ex) => ({
+                id: ex._id,
+                name: ex.name,
+              })),
+            });
+            return;
+          }
+        }
+        // Update the tacticboard with the new fields
         const result = await TacticBoard.updateOne(
           { _id: tacticBoardId },
           {

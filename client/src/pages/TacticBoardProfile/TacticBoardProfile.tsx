@@ -82,8 +82,14 @@ const TacticBoardProfile = () => {
     skip: tacticBoardId == null,
   });
 
-  const [updateTacticBoardMeta, { isLoading: isUpdateTacticBoardMetaLoading }] =
-    useUpdateTacticBoardMetaMutation();
+  const [
+    updateTacticBoardMeta,
+    {
+      isLoading: isUpdateTacticBoardMetaLoading,
+      isError: isUpdateTacticBoardMetaError,
+      error: updateError,
+    },
+  ] = useUpdateTacticBoardMetaMutation();
   const [
     deleteTacticBoard,
     {
@@ -397,6 +403,29 @@ const TacticBoardProfile = () => {
                     {t("TacticBoardProfile:usedInExercises")}
                     {(
                       deleteError as {
+                        data?: {
+                          exercises?: Array<{ id: string; name: string }>;
+                        };
+                      }
+                    )?.data?.exercises?.map((exercise) => (
+                      <div key={exercise.id}>{exercise.name}</div>
+                    ))}
+                  </div>
+                )}
+              </Alert>
+            )}
+            {isUpdateTacticBoardMetaError && (
+              <Alert color="error" sx={{ mt: 5, mb: 3 }}>
+                {t("TacticBoardProfile:errorUpdatingTacticBoard")}
+                {(
+                  updateError as {
+                    data?: { exercises?: Array<{ id: string; name: string }> };
+                  }
+                )?.data?.exercises && (
+                  <div>
+                    {t("TacticBoardProfile:usedInExercises")}
+                    {(
+                      updateError as {
                         data?: {
                           exercises?: Array<{ id: string; name: string }>;
                         };
