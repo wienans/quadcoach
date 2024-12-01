@@ -14,6 +14,12 @@ router
   .put(verifyJWT, exerciseController.updateById)
   .delete(verifyJWT, exerciseController.deleteById);
 
+router
+  .route("/:id/access")
+  .get(verifyJWT, exerciseController.checkAccess)
+  .post(verifyJWT, exerciseController.setAccess)
+  .delete(verifyJWT, exerciseController.deleteAccess);
+
 router.route("/:id/relatedExercises").get(exerciseController.getRelatedById);
 
 export default router;
