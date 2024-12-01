@@ -3,6 +3,7 @@ import { Request, Response } from "express";
 import TacticBoard from "../models/tacticboard";
 import mongoose from "mongoose";
 import Exercise from "../models/exercise";
+import TacticboardFav from "../models/tacticboardFav";
 
 interface UserInfo {
   id?: string;
@@ -372,6 +373,9 @@ export const deleteById = asyncHandler(
           });
           return;
         }
+
+        // Delete Favorite Entries
+        await TacticboardFav.deleteMany({ tacticboard: req.params.id });
 
         // If not used in exercises, proceed with deletion
         const result = await TacticBoard.deleteOne({ _id: req.params.id });

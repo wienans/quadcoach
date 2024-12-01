@@ -2,6 +2,7 @@ import asyncHandler from "express-async-handler";
 import { Request, Response } from "express";
 import Exercise from "../models/exercise";
 import mongoose from "mongoose";
+import ExerciseFav from "../models/exerciseFav";
 
 interface RequestWithUser extends Request {
   UserInfo?: {
@@ -141,6 +142,10 @@ export const deleteById = asyncHandler(
           res.status(403).json({ message: "Forbidden" });
           return;
         }
+
+        // Delete Favorite Entries
+        await ExerciseFav.deleteMany({ exercise: req.params.id });
+
         const result = await Exercise.deleteOne({ _id: req.params.id });
         res.send(result);
       } else {
