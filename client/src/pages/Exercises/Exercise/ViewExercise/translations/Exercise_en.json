@@ -37,6 +37,7 @@
     },
     "visitTacticboard": "show Tacticboard",
     "description": "Description:",
-    "coachingPoints": "Coaching points:"
+    "coachingPoints": "Coaching points:",
+    "favoriteExercise": "Favorite exercise"
   }
 }

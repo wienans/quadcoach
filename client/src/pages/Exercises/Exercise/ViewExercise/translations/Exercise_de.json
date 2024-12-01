@@ -37,6 +37,7 @@
     },
     "visitTacticboard": "Taktik Tafel ansehen",
     "description": "Beschreibung:",
-    "coachingPoints": "Coaching-Punkte:"
+    "coachingPoints": "Coaching-Punkte:",
+    "favoriteExercise": "Favorisiere Übung"
   }
 }
