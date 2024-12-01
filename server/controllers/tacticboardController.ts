@@ -536,7 +536,7 @@ export const checkAccess = asyncHandler(
 
 // @desc    Grant access to a tacticboard for a user
 // @route   POST /api/tacticboards/:id/access
-// @access  Private - Owner or Admin only
+// @access  Private - Users with access
 export const setAccess = asyncHandler(
   async (req: RequestWithUser, res: Response) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
@@ -550,13 +550,22 @@ export const setAccess = asyncHandler(
       return;
     }
 
-    // Check if user has permission to grant access
-    if (
-      tacticboard.user &&
-      (!req.UserInfo?.id || req.UserInfo.id !== tacticboard.user.toString()) &&
-      !req.UserInfo?.roles?.includes("Admin") &&
-      !req.UserInfo?.roles?.includes("admin")
-    ) {
+    // Check if user has access to grant access
+    if (!req.UserInfo?.id) {
+      res.status(401).json({ message: "Unauthorized" });
+      return;
+    }
+
+    const hasAccess =
+      tacticboard.user?.toString() === req.UserInfo.id ||
+      req.UserInfo.roles?.includes("Admin") ||
+      req.UserInfo.roles?.includes("admin") ||
+      (await TacticboardAccess.exists({
+        user: req.UserInfo.id,
+        tacticboard: req.params.id,
+      }));
+
+    if (!hasAccess) {
       res.status(403).json({ message: "Forbidden" });
       return;
     }
@@ -595,7 +604,7 @@ export const setAccess = asyncHandler(
 
 // @desc    Remove access to a tacticboard for a user
 // @route   DELETE /api/tacticboards/:id/access
-// @access  Private - Owner or Admin only
+// @access  Private - Users with access
 export const deleteAccess = asyncHandler(
   async (req: RequestWithUser, res: Response) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
@@ -609,13 +618,22 @@ export const deleteAccess = asyncHandler(
       return;
     }
 
-    // Check if user has permission to remove access
-    if (
-      tacticboard.user &&
-      (!req.UserInfo?.id || req.UserInfo.id !== tacticboard.user.toString()) &&
-      !req.UserInfo?.roles?.includes("Admin") &&
-      !req.UserInfo?.roles?.includes("admin")
-    ) {
+    // Check if user has access to remove access
+    if (!req.UserInfo?.id) {
+      res.status(401).json({ message: "Unauthorized" });
+      return;
+    }
+
+    const hasAccess =
+      tacticboard.user?.toString() === req.UserInfo.id ||
+      req.UserInfo.roles?.includes("Admin") ||
+      req.UserInfo.roles?.includes("admin") ||
+      (await TacticboardAccess.exists({
+        user: req.UserInfo.id,
+        tacticboard: req.params.id,
+      }));
+
+    if (!hasAccess) {
       res.status(403).json({ message: "Forbidden" });
       return;
     }
@@ -642,7 +660,7 @@ export const deleteAccess = asyncHandler(
 
 // @desc    Get all users who have access to a tacticboard
 // @route   GET /api/tacticboards/:id/access
-// @access  Private - Owner or Admin only
+// @access  Private - Users with access
 export const getAllAccessUsers = asyncHandler(
   async (req: RequestWithUser, res: Response) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
@@ -656,20 +674,29 @@ export const getAllAccessUsers = asyncHandler(
       return;
     }
 
-    // Check if user has permission to view access list
-    if (
-      tacticboard.user &&
-      (!req.UserInfo?.id || req.UserInfo.id !== tacticboard.user.toString()) &&
-      !req.UserInfo?.roles?.includes("Admin") &&
-      !req.UserInfo?.roles?.includes("admin")
-    ) {
+    // Check if user has access to view access list
+    if (!req.UserInfo?.id) {
+      res.status(401).json({ message: "Unauthorized" });
+      return;
+    }
+
+    const hasAccess =
+      tacticboard.user?.toString() === req.UserInfo.id ||
+      req.UserInfo.roles?.includes("Admin") ||
+      req.UserInfo.roles?.includes("admin") ||
+      (await TacticboardAccess.exists({
+        user: req.UserInfo.id,
+        tacticboard: req.params.id,
+      }));
+
+    if (!hasAccess) {
       res.status(403).json({ message: "Forbidden" });
       return;
     }
 
     const accessEntries = await TacticboardAccess.find({
       tacticboard: req.params.id,
-    }).populate("user", "username email"); // Add whatever user fields you want to include
+    }).populate("user", "name");
 
     res.json(accessEntries);
   }

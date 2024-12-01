@@ -201,7 +201,7 @@ export const getRelatedById = asyncHandler(
 
 // @desc    Grant access to an exercise for a user
 // @route   POST /api/exercises/:id/access
-// @access  Private - Owner or Admin only
+// @access  Private - Users with access
 export const setAccess = asyncHandler(
   async (req: RequestWithUser, res: Response) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
@@ -215,13 +215,22 @@ export const setAccess = asyncHandler(
       return;
     }
 
-    // Check if user has permission to grant access
-    if (
-      exercise.user &&
-      (!req.UserInfo?.id || req.UserInfo.id !== exercise.user.toString()) &&
-      !req.UserInfo?.roles?.includes("Admin") &&
-      !req.UserInfo?.roles?.includes("admin")
-    ) {
+    // Check if user has access to grant access
+    if (!req.UserInfo?.id) {
+      res.status(401).json({ message: "Unauthorized" });
+      return;
+    }
+
+    const hasAccess =
+      exercise.user?.toString() === req.UserInfo.id ||
+      req.UserInfo.roles?.includes("Admin") ||
+      req.UserInfo.roles?.includes("admin") ||
+      (await ExerciseAccess.exists({
+        user: req.UserInfo.id,
+        exercise: req.params.id,
+      }));
+
+    if (!hasAccess) {
       res.status(403).json({ message: "Forbidden" });
       return;
     }
@@ -253,7 +262,7 @@ export const setAccess = asyncHandler(
 
 // @desc    Remove access to an exercise for a user
 // @route   DELETE /api/exercises/:id/access
-// @access  Private - Owner or Admin only
+// @access  Private - Users with access
 export const deleteAccess = asyncHandler(
   async (req: RequestWithUser, res: Response) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
@@ -267,13 +276,22 @@ export const deleteAccess = asyncHandler(
       return;
     }
 
-    // Check if user has permission to remove access
-    if (
-      exercise.user &&
-      (!req.UserInfo?.id || req.UserInfo.id !== exercise.user.toString()) &&
-      !req.UserInfo?.roles?.includes("Admin") &&
-      !req.UserInfo?.roles?.includes("admin")
-    ) {
+    // Check if user has access to remove access
+    if (!req.UserInfo?.id) {
+      res.status(401).json({ message: "Unauthorized" });
+      return;
+    }
+
+    const hasAccess =
+      exercise.user?.toString() === req.UserInfo.id ||
+      req.UserInfo.roles?.includes("Admin") ||
+      req.UserInfo.roles?.includes("admin") ||
+      (await ExerciseAccess.exists({
+        user: req.UserInfo.id,
+        exercise: req.params.id,
+      }));
+
+    if (!hasAccess) {
       res.status(403).json({ message: "Forbidden" });
       return;
     }
@@ -362,14 +380,22 @@ export const getAllAccessUsers = asyncHandler(
       res.status(404).json({ message: "Exercise not found" });
       return;
     }
+    // Check if user has access
+    if (!req.UserInfo?.id) {
+      res.status(401).json({ message: "Unauthorized" });
+      return;
+    }
 
-    // Check if user has permission to view access list
-    if (
-      exercise.user &&
-      (!req.UserInfo?.id || req.UserInfo.id !== exercise.user.toString()) &&
-      !req.UserInfo?.roles?.includes("Admin") &&
-      !req.UserInfo?.roles?.includes("admin")
-    ) {
+    const hasAccess =
+      exercise.user?.toString() === req.UserInfo.id ||
+      req.UserInfo.roles?.includes("Admin") ||
+      req.UserInfo.roles?.includes("admin") ||
+      (await ExerciseAccess.exists({
+        user: req.UserInfo.id,
+        exercise: req.params.id,
+      }));
+
+    if (!hasAccess) {
       res.status(403).json({ message: "Forbidden" });
       return;
     }

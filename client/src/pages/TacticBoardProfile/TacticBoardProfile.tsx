@@ -13,16 +13,25 @@ import {
   FormHelperText,
   Grid,
   IconButton,
+  ListItem,
+  List,
   Skeleton,
   Theme,
   Tooltip,
   useMediaQuery,
+  TextField,
+  Box,
+  ListItemText,
+  Button,
 } from "@mui/material";
 import * as Yup from "yup";
 import { SoftBox, SoftInput, SoftTypography } from "../../components";
 import {
+  useDeleteTacticboardAccessMutation,
   useDeleteTacticBoardMutation,
+  useGetAllTacticboardAccessUsersQuery,
   useGetTacticBoardQuery,
+  useSetTacticboardAccessMutation,
   useUpdateTacticBoardMetaMutation,
 } from "../../api/quadcoachApi/tacticboardApi";
 import { useParams, useNavigate } from "react-router-dom";
@@ -111,6 +120,18 @@ const TacticBoardProfile = () => {
   const [getFavoriteTacticboards, { data: favoriteTacticboards }] =
     useLazyGetFavoriteTacticboardsQuery();
 
+  const { data: accessUsers } = useGetAllTacticboardAccessUsersQuery(
+    tacticBoardId || "",
+  );
+
+  const [setTacticboardAccess, { isLoading: isSetTacticboardAccessLoading }] =
+    useSetTacticboardAccessMutation();
+
+  const [
+    deleteTacticboardAccess,
+    { isLoading: isDeleteTacticboardAccessLoading },
+  ] = useDeleteTacticboardAccessMutation();
+
   useEffect(() => {
     if (userId) {
       getFavoriteTacticboards({ userId });
@@ -172,8 +193,15 @@ const TacticBoardProfile = () => {
       userRoles.includes("admin")
     ) {
       setIsPrivileged(true);
+    } else {
+      if (accessUsers) {
+        console.log(accessUsers);
+        setIsPrivileged(
+          accessUsers.some((user) => user.user._id.toString() === userId),
+        );
+      }
     }
-  }, [tacticBoard, userId, userRoles]);
+  }, [tacticBoard, userId, userRoles, accessUsers]);
 
   useEffect(() => {
     if (favoriteTacticboards) {
@@ -649,6 +677,70 @@ const TacticBoardProfile = () => {
                       }}
                       onBlur={formik.handleBlur}
                     />
+                  </AccordionDetails>
+                </Accordion>
+              )}
+              {isEditMode && (
+                <Accordion defaultExpanded>
+                  <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                    {t("TacticBoardProfile:access")}
+                  </AccordionSummary>
+                  <AccordionDetails>
+                    <Box
+                      sx={{ display: "flex", flexDirection: "column", gap: 2 }}
+                    >
+                      <Box
+                        sx={{ display: "flex", gap: 1, alignItems: "center" }}
+                      >
+                        <TextField
+                          size="small"
+                          label={t("TacticBoardProfile:access.add_user")}
+                          fullWidth
+                        />
+                        <Button
+                          variant="contained"
+                          size="small"
+                          disabled={isSetTacticboardAccessLoading}
+                          onClick={() => {
+                            if (tacticBoardId) {
+                              setTacticboardAccess({
+                                tacticboardId: tacticBoardId,
+                                userId: "674c48bac4eb8e77f262fb18", // Add selected user ID
+                                access: "edit",
+                              });
+                            }
+                          }}
+                        >
+                          {t("common:add")}
+                        </Button>
+                      </Box>
+                      <List>
+                        {accessUsers?.map((entry) => (
+                          <ListItem
+                            key={entry.user._id}
+                            secondaryAction={
+                              <Button
+                                size="small"
+                                color="error"
+                                disabled={isDeleteTacticboardAccessLoading}
+                                onClick={() => {
+                                  if (tacticBoardId) {
+                                    deleteTacticboardAccess({
+                                      tacticboardId: tacticBoardId,
+                                      userId: entry.user._id,
+                                    });
+                                  }
+                                }}
+                              >
+                                {t("common:remove")}
+                              </Button>
+                            }
+                          >
+                            <ListItemText primary={entry.user.name} />
+                          </ListItem>
+                        ))}
+                      </List>
+                    </Box>
                   </AccordionDetails>
                 </Accordion>
               )}
