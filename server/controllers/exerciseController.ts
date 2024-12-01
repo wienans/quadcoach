@@ -346,3 +346,38 @@ export const checkAccess = asyncHandler(
     });
   }
 );
+
+// @desc    Get all users who have access to an exercise
+// @route   GET /api/exercises/:id/access
+// @access  Private - Owner or Admin only
+export const getAllAccessUsers = asyncHandler(
+  async (req: RequestWithUser, res: Response) => {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      res.status(400).json({ message: "Invalid exercise ID" });
+      return;
+    }
+
+    const exercise = await Exercise.findById(req.params.id);
+    if (!exercise) {
+      res.status(404).json({ message: "Exercise not found" });
+      return;
+    }
+
+    // Check if user has permission to view access list
+    if (
+      exercise.user &&
+      (!req.UserInfo?.id || req.UserInfo.id !== exercise.user.toString()) &&
+      !req.UserInfo?.roles?.includes("Admin") &&
+      !req.UserInfo?.roles?.includes("admin")
+    ) {
+      res.status(403).json({ message: "Forbidden" });
+      return;
+    }
+
+    const accessEntries = await ExerciseAccess.find({
+      exercise: req.params.id,
+    }).populate("user", "username email"); // Add whatever user fields you want to include
+
+    res.json(accessEntries);
+  }
+);
