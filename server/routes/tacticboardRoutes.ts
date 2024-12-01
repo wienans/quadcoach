@@ -17,6 +17,13 @@ router
   .get(tacticboardController.getById)
   .put(tacticboardController.updateById)
   .delete(tacticboardController.deleteById);
+
+router
+  .route("/:id/access")
+  .get(tacticboardController.checkAccess)
+  .post(tacticboardController.setAccess)
+  .delete(tacticboardController.deleteAccess);
+
 router
   .route("/:id/pages/:pageId")
   .patch(tacticboardController.updatePageById)
