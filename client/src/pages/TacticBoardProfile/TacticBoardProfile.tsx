@@ -33,6 +33,7 @@ import {
 import EditIcon from "@mui/icons-material/Edit";
 import SaveIcon from "@mui/icons-material/Save";
 import DeleteIcon from "@mui/icons-material/Delete";
+import FavoriteIcon from "@mui/icons-material/Favorite";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { useTranslation } from "react-i18next";
 import { lazy, Suspense, useEffect, useState } from "react";
@@ -52,7 +53,11 @@ import {
 import { TacticBoardPartialId } from "../../api/quadcoachApi/domain";
 import AddTagDialog from "./AddTagDialog";
 import Footer from "../../components/Footer";
-
+import {
+  useAddFavoriteTacticboardMutation,
+  useRemoveFavoriteTacticboardMutation,
+  useLazyGetFavoriteTacticboardsQuery,
+} from "../../api/quadcoachApi/favoriteApi";
 const MarkdownRenderer = lazy(
   () => import("../../components/MarkdownRenderer"),
 );
@@ -63,6 +68,7 @@ const TacticBoardProfile = () => {
 
   const navigate = useNavigate();
   const [isPrivileged, setIsPrivileged] = useState<boolean>(false);
+  const [isFavorite, setIsFavorite] = useState<boolean>(false);
   const isUpMd = useMediaQuery((theme: Theme) => theme.breakpoints.up("md"));
   const [isEditMode, setIsEditMode] = useState<boolean>(false);
   const [openTagDialog, setOpenTagDialog] = useState<boolean>(false);
@@ -76,8 +82,14 @@ const TacticBoardProfile = () => {
     skip: tacticBoardId == null,
   });
 
-  const [updateTacticBoardMeta, { isLoading: isUpdateTacticBoardMetaLoading }] =
-    useUpdateTacticBoardMetaMutation();
+  const [
+    updateTacticBoardMeta,
+    {
+      isLoading: isUpdateTacticBoardMetaLoading,
+      isError: isUpdateTacticBoardMetaError,
+      error: updateError,
+    },
+  ] = useUpdateTacticBoardMetaMutation();
   const [
     deleteTacticBoard,
     {
@@ -87,6 +99,23 @@ const TacticBoardProfile = () => {
       error: deleteError,
     },
   ] = useDeleteTacticBoardMutation();
+  const [
+    addFavoriteTacticboard,
+    { isLoading: isAddFavoriteTacticboardLoading },
+  ] = useAddFavoriteTacticboardMutation();
+  const [
+    removeFavoriteTacticboard,
+    { isLoading: isRemoveFavoriteTacticboardLoading },
+  ] = useRemoveFavoriteTacticboardMutation();
+
+  const [getFavoriteTacticboards, { data: favoriteTacticboards }] =
+    useLazyGetFavoriteTacticboardsQuery();
+
+  useEffect(() => {
+    if (userId) {
+      getFavoriteTacticboards({ userId });
+    }
+  }, [userId, getFavoriteTacticboards]);
 
   const formik = useFormik<TacticBoardPartialId>({
     // enableReinitialize : use this flag when initial values needs to be changed
@@ -145,6 +174,17 @@ const TacticBoardProfile = () => {
       setIsPrivileged(true);
     }
   }, [tacticBoard, userId, userRoles]);
+
+  useEffect(() => {
+    if (favoriteTacticboards) {
+      setIsFavorite(
+        favoriteTacticboards.some(
+          (favoriteTacticboard) =>
+            favoriteTacticboard.tacticboard === tacticBoardId,
+        ),
+      );
+    }
+  }, [favoriteTacticboards, setIsFavorite, tacticBoardId]);
 
   const onDeleteTacticBoardClick = () => {
     if (!tacticBoard) return;
@@ -222,8 +262,33 @@ const TacticBoardProfile = () => {
         showScrollToTopButton={(scrollTrigger) => scrollTrigger && isUpMd}
         headerAction={
           <>
-            {isPrivileged && (
-              <SoftBox display="flex">
+            <SoftBox display="flex">
+              {userId && userId !== "" && tacticBoardId && (
+                <Tooltip title={t("TacticBoardProfile:favoriteTacticBoard")}>
+                  <IconButton
+                    disabled={
+                      isAddFavoriteTacticboardLoading ||
+                      isRemoveFavoriteTacticboardLoading
+                    }
+                    onClick={() => {
+                      if (isFavorite) {
+                        removeFavoriteTacticboard({
+                          tacticboardId: tacticBoardId,
+                          userId: userId,
+                        });
+                      } else {
+                        addFavoriteTacticboard({
+                          tacticboardId: tacticBoardId,
+                          userId: userId,
+                        });
+                      }
+                    }}
+                  >
+                    <FavoriteIcon color={isFavorite ? "error" : "inherit"} />
+                  </IconButton>
+                </Tooltip>
+              )}
+              {isPrivileged && (
                 <Tooltip title={t("TacticBoardProfile:editTacticBoardMeta")}>
                   <IconButton
                     onClick={() => {
@@ -234,11 +299,12 @@ const TacticBoardProfile = () => {
                       }
                     }}
                     color="primary"
-                    sx={{ mr: 1 }}
                   >
                     {isEditMode ? <SaveIcon /> : <EditIcon />}
                   </IconButton>
                 </Tooltip>
+              )}
+              {isPrivileged && (
                 <Tooltip title={t("TacticBoardProfile:deleteTacticBoard")}>
                   <IconButton
                     onClick={onDeleteTacticBoardClick}
@@ -252,12 +318,41 @@ const TacticBoardProfile = () => {
                     <DeleteIcon />
                   </IconButton>
                 </Tooltip>
-              </SoftBox>
-            )}
+              )}
+            </SoftBox>
           </>
         }
         bottomNavigation={
           !isUpMd && [
+            userId && userId !== "" && tacticBoardId && (
+              <Tooltip
+                key="favorite"
+                title={t("TacticBoardProfile:favoriteTacticBoard")}
+              >
+                <BottomNavigationAction
+                  icon={
+                    <FavoriteIcon color={isFavorite ? "error" : "inherit"} />
+                  }
+                  disabled={
+                    isAddFavoriteTacticboardLoading ||
+                    isRemoveFavoriteTacticboardLoading
+                  }
+                  onClick={() => {
+                    if (isFavorite) {
+                      removeFavoriteTacticboard({
+                        tacticboardId: tacticBoardId,
+                        userId: userId,
+                      });
+                    } else {
+                      addFavoriteTacticboard({
+                        tacticboardId: tacticBoardId,
+                        userId: userId,
+                      });
+                    }
+                  }}
+                />
+              </Tooltip>
+            ),
             isPrivileged && (
               <Tooltip
                 key="edit"
@@ -267,6 +362,10 @@ const TacticBoardProfile = () => {
                   icon={<EditIcon />}
                   onClick={() => {
                     setIsEditMode(!isEditMode);
+
+                    if (isEditMode && formik.isValid) {
+                      formik.submitForm().then(() => {});
+                    }
                   }}
                 />
               </Tooltip>
@@ -304,6 +403,29 @@ const TacticBoardProfile = () => {
                     {t("TacticBoardProfile:usedInExercises")}
                     {(
                       deleteError as {
+                        data?: {
+                          exercises?: Array<{ id: string; name: string }>;
+                        };
+                      }
+                    )?.data?.exercises?.map((exercise) => (
+                      <div key={exercise.id}>{exercise.name}</div>
+                    ))}
+                  </div>
+                )}
+              </Alert>
+            )}
+            {isUpdateTacticBoardMetaError && (
+              <Alert color="error" sx={{ mt: 5, mb: 3 }}>
+                {t("TacticBoardProfile:errorUpdatingTacticBoard")}
+                {(
+                  updateError as {
+                    data?: { exercises?: Array<{ id: string; name: string }> };
+                  }
+                )?.data?.exercises && (
+                  <div>
+                    {t("TacticBoardProfile:usedInExercises")}
+                    {(
+                      updateError as {
                         data?: {
                           exercises?: Array<{ id: string; name: string }>;
                         };

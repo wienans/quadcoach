@@ -1,6 +1,14 @@
 import { PartialBy } from "../../../helpers/typeHelpers";
 import Block from "./Block";
 
+export type ExerciseHeader = {
+  _id: string;
+  name?: string;
+  tags?: string[];
+  creator?: string;
+  user?: string;
+};
+
 type Exercise = {
   _id: string;
   name: string;

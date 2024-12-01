@@ -3,6 +3,7 @@ import { Request, Response } from "express";
 import TacticBoard from "../models/tacticboard";
 import mongoose from "mongoose";
 import Exercise from "../models/exercise";
+import TacticboardFav from "../models/tacticboardFav";
 
 interface UserInfo {
   id?: string;
@@ -163,7 +164,7 @@ export const createNewTacticboard = asyncHandler(
         console.error("Couldn't create Tacticboard");
         res.send({ message: "Couldn't create Tacticboard" });
       } else {
-        res.send({
+        res.status(201).send({
           message: "Tacticboard created successfully",
           _id: result._id,
         });
@@ -283,7 +284,28 @@ export const updateMetaById = asyncHandler(
         // Destructure the fields to be updated from req.body, excluding `pages`
         const { name, isPrivate, tags, description, coaching_points } =
           req.body;
-
+        if (isPrivate) {
+          // Check if tacticboard is used in any exercises
+          const exercisesUsingTacticboard = await Exercise.find({
+            description_blocks: {
+              $elemMatch: {
+                tactics_board: tacticBoardId,
+              },
+            },
+          });
+          if (exercisesUsingTacticboard.length > 0) {
+            res.status(400).json({
+              message:
+                "Cannot update tacticboard to private - it is being used in exercises",
+              exercises: exercisesUsingTacticboard.map((ex) => ({
+                id: ex._id,
+                name: ex.name,
+              })),
+            });
+            return;
+          }
+        }
+        // Update the tacticboard with the new fields
         const result = await TacticBoard.updateOne(
           { _id: tacticBoardId },
           {
@@ -351,6 +373,9 @@ export const deleteById = asyncHandler(
           });
           return;
         }
+
+        // Delete Favorite Entries
+        await TacticboardFav.deleteMany({ tacticboard: req.params.id });
 
         // If not used in exercises, proceed with deletion
         const result = await TacticBoard.deleteOne({ _id: req.params.id });

@@ -12,7 +12,7 @@ import {
   Theme,
   BottomNavigationAction,
 } from "@mui/material";
-import { SoftBox, SoftButton } from "../../../../components";
+import { SoftBox } from "../../../../components";
 import {
   useDeleteExerciseMutation,
   useGetExerciseQuery,
@@ -30,10 +30,16 @@ import {
 } from "../../../../helpers/exerciseHelpers";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
+import FavoriteIcon from "@mui/icons-material/Favorite";
 import ExerciseBlock from "./ExerciseBlock";
 import ExerciseInfo from "./ExerciseInfo";
 import { useAuth } from "../../../../store/hooks";
 import Footer from "../../../../components/Footer";
+import {
+  useAddFavoriteExerciseMutation,
+  useLazyGetFavoriteExercisesQuery,
+  useRemoveFavoriteExerciseMutation,
+} from "../../../../api/quadcoachApi/favoriteApi";
 
 const Exercise = () => {
   const { t } = useTranslation("Exercise");
@@ -41,10 +47,10 @@ const Exercise = () => {
   const navigate = useNavigate();
   const [isPrivileged, setIsPrivileged] = useState<boolean>(false);
   const { id: userId, roles: userRoles } = useAuth();
+  const [isFavorite, setIsFavorite] = useState<boolean>(false);
 
   const theme = useTheme();
 
-  const isUpXl = useMediaQuery((theme: Theme) => theme.breakpoints.up("xl"));
   const isUpMd = useMediaQuery((theme: Theme) => theme.breakpoints.up("md"));
 
   const {
@@ -63,6 +69,22 @@ const Exercise = () => {
     skip: exerciseId == null,
   });
 
+  const [getFavoriteExercises, { data: favoriteExercises }] =
+    useLazyGetFavoriteExercisesQuery();
+
+  const [addFavoriteExercise, { isLoading: isAddFavoriteExerciseLoading }] =
+    useAddFavoriteExerciseMutation();
+  const [
+    removeFavoriteExercise,
+    { isLoading: isRemoveFavoriteExerciseLoading },
+  ] = useRemoveFavoriteExerciseMutation();
+
+  useEffect(() => {
+    if (userId) {
+      getFavoriteExercises({ userId });
+    }
+  }, [userId, getFavoriteExercises]);
+
   const [exerciseType, setExerciseType] = useState<ExerciseType | undefined>();
   const [headerBackgroundImage, setHeaderBackgroundImage] = useState<
     string | undefined
@@ -71,6 +93,16 @@ const Exercise = () => {
   useEffect(() => {
     setExerciseType(exercise ? getExerciseType(exercise) : undefined);
   }, [exercise]);
+
+  useEffect(() => {
+    if (favoriteExercises) {
+      setIsFavorite(
+        favoriteExercises.some(
+          (favoriteExercise) => favoriteExercise.exercise === exerciseId,
+        ),
+      );
+    }
+  }, [favoriteExercises, setIsFavorite, exerciseId]);
 
   useEffect(() => {
     setHeaderBackgroundImage(
@@ -156,53 +188,79 @@ const Exercise = () => {
       headerBackgroundImage={headerBackgroundImage}
       isDataLoading={isExerciseLoading}
       headerAction={
-        <>
-          {isPrivileged && (
-            <SoftBox display="flex">
-              {isUpXl ? (
-                <>
-                  <SoftButton onClick={update} color="primary" sx={{ mr: 1 }}>
-                    {t("Exercise:updateExercise")}
-                  </SoftButton>
-                  <SoftButton
-                    onClick={onDeleteExerciseClick}
-                    color="error"
-                    disabled={!exercise || isDeleteExerciseLoading}
-                  >
-                    {t("Exercise:deleteExercise")}
-                  </SoftButton>
-                </>
-              ) : (
-                isUpMd && (
-                  <>
-                    <Tooltip title={t("Exercise:updateExercise")}>
-                      <IconButton
-                        onClick={update}
-                        color="primary"
-                        sx={{ mr: 1 }}
-                      >
-                        <EditIcon />
-                      </IconButton>
-                    </Tooltip>
-                    <Tooltip title={t("Exercise:deleteExercise")}>
-                      <IconButton
-                        onClick={onDeleteExerciseClick}
-                        color="error"
-                        disabled={!exercise || isDeleteExerciseLoading}
-                      >
-                        <DeleteIcon />
-                      </IconButton>
-                    </Tooltip>
-                  </>
-                )
-              )}
-            </SoftBox>
+        <SoftBox display="flex">
+          {userId && userId !== "" && exerciseId && (
+            <Tooltip title={t("Exercise:favoriteExercise")}>
+              <IconButton
+                disabled={
+                  isAddFavoriteExerciseLoading ||
+                  isRemoveFavoriteExerciseLoading
+                }
+                onClick={() => {
+                  if (isFavorite) {
+                    removeFavoriteExercise({
+                      exerciseId: exerciseId,
+                      userId: userId,
+                    });
+                  } else {
+                    addFavoriteExercise({
+                      exerciseId: exerciseId,
+                      userId: userId,
+                    });
+                  }
+                }}
+              >
+                <FavoriteIcon color={isFavorite ? "error" : "inherit"} />
+              </IconButton>
+            </Tooltip>
           )}
-        </>
+          {isPrivileged && (
+            <Tooltip title={t("Exercise:updateExercise")}>
+              <IconButton onClick={update} color="primary">
+                <EditIcon />
+              </IconButton>
+            </Tooltip>
+          )}
+          {isPrivileged && (
+            <Tooltip title={t("Exercise:deleteExercise")}>
+              <IconButton
+                onClick={onDeleteExerciseClick}
+                color="error"
+                disabled={!exercise || isDeleteExerciseLoading}
+              >
+                <DeleteIcon />
+              </IconButton>
+            </Tooltip>
+          )}
+        </SoftBox>
       }
       showScrollToTopButton={(scrollTrigger) => scrollTrigger && isUpMd}
       bottomNavigation={
         !isUpMd && [
+          userId && userId !== "" && exerciseId && (
+            <Tooltip key="favorite" title={t("Exercise:favoriteExercise")}>
+              <BottomNavigationAction
+                icon={<FavoriteIcon color={isFavorite ? "error" : "inherit"} />}
+                disabled={
+                  isAddFavoriteExerciseLoading ||
+                  isRemoveFavoriteExerciseLoading
+                }
+                onClick={() => {
+                  if (isFavorite) {
+                    removeFavoriteExercise({
+                      exerciseId: exerciseId,
+                      userId: userId,
+                    });
+                  } else {
+                    addFavoriteExercise({
+                      exerciseId: exerciseId,
+                      userId: userId,
+                    });
+                  }
+                }}
+              />
+            </Tooltip>
+          ),
           isPrivileged && (
             <Tooltip key="edit" title={t("Exercise:updateExercise")}>
               <BottomNavigationAction icon={<EditIcon />} onClick={update} />

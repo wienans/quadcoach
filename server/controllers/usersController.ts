@@ -5,6 +5,8 @@ import { Request, Response } from "express";
 import TacticBoard from "../models/tacticboard";
 import Exercise from "../models/exercise";
 import mongoose from "mongoose";
+import ExerciseFav from "../models/exerciseFav";
+import TacticboardFav from "../models/tacticboardFav";
 
 interface UserInfo {
   id?: string;
@@ -37,20 +39,29 @@ export const getAllUsers = asyncHandler(async (req: Request, res: Response) => {
 // @desc    Get user by ID
 // @route   GET /api/users/:id
 // @access  Private - Admin or User themselves
-export const getUserById = asyncHandler(async (req: Request, res: Response) => {
-  if (mongoose.isValidObjectId(req.params.id)) {
-    const users = await User.findOne({
-      _id: req.params.id,
-    })
-      .select("-password")
-      .lean();
-    if (!users) {
-      res.status(400).json({ message: "User Not found" });
-    } else {
-      res.json(users);
+export const getUserById = asyncHandler(
+  async (req: RequestWithUser, res: Response) => {
+    if (mongoose.isValidObjectId(req.params.id)) {
+      if (
+        (!req.UserInfo?.id || req.UserInfo.id !== req.params.id) &&
+        !req.UserInfo?.roles?.some((role) => role.toLowerCase() === "admin")
+      ) {
+        res.status(403).json({ message: "Forbidden" });
+        return;
+      }
+      const users = await User.findOne({
+        _id: req.params.id,
+      })
+        .select("-password")
+        .lean();
+      if (!users) {
+        res.status(400).json({ message: "User Not found" });
+      } else {
+        res.json(users);
+      }
     }
   }
-});
+);
 
 // @desc    Create new user
 // @route   POST /api/users
@@ -155,19 +166,21 @@ export const deleteUser = asyncHandler(
       res.status(400).json({ message: "User ID Required" });
       return;
     }
-    const boards = await TacticBoard.findOne({ user: id }).lean().exec();
-    const exercises = await Exercise.findOne({ user: id }).lean().exec();
-    if (boards || exercises) {
-      res
-        .status(400)
-        .json({ message: "User has assigned Exercises or Tacticboards" });
-      return;
-    }
+    // const boards = await TacticBoard.findOne({ user: id }).lean().exec();
+    // const exercises = await Exercise.findOne({ user: id }).lean().exec();
+    // if (boards || exercises) {
+    //   res
+    //     .status(400)
+    //     .json({ message: "User has assigned Exercises or Tacticboards" });
+    //   return;
+    // }
     const user = await User.findById(id).exec();
     if (!user) {
       res.status(400).json({ message: "User not found" });
       return;
     }
+    await ExerciseFav.deleteMany({ user: id }).exec();
+    await TacticboardFav.deleteMany({ user: id }).exec();
     const result = await user.deleteOne();
     const reply = `Username ${result.email} with ID ${result._id} deleted`;
     res.json({ message: reply });

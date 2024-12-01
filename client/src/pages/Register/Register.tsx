@@ -1,5 +1,14 @@
 import "./translations";
-import { Card, FormGroup, Grid, FormHelperText, Alert } from "@mui/material";
+import {
+  Card,
+  FormGroup,
+  Grid,
+  FormHelperText,
+  Alert,
+  Checkbox,
+  FormControlLabel,
+  Link,
+} from "@mui/material";
 import {
   SoftBox,
   SoftButton,
@@ -16,6 +25,7 @@ import * as Yup from "yup";
 
 import { DashboardLayout } from "../../components/LayoutContainers";
 import Footer from "../../components/Footer";
+import { useFooter } from "../../components/Footer/FooterContext";
 
 import { useState } from "react";
 
@@ -30,6 +40,8 @@ const Register = (): JSX.Element => {
   const { t } = useTranslation("Register");
   const navigate = useNavigate();
   const [showSuccess, setShowSuccess] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const { toggleFooter } = useFooter();
 
   const [register, { isLoading: isRegisterLoading, isError: isRegisterError }] =
     useRegisterMutation();
@@ -80,6 +92,20 @@ const Register = (): JSX.Element => {
   const translateError = (
     errorResourceKey: string | undefined,
   ): string | undefined => (errorResourceKey ? t(errorResourceKey) : undefined);
+
+  const handleTermsClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    toggleFooter();
+    setTimeout(() => {
+      const footerElement = document.getElementById("footer-content");
+      if (footerElement) {
+        window.scrollTo({
+          top: 700,
+          behavior: "smooth",
+        });
+      }
+    }, 500);
+  };
 
   return (
     <FormikProvider value={formik}>
@@ -212,6 +238,28 @@ const Register = (): JSX.Element => {
                       )}
                   </FormGroup>
                 </Grid>
+                <Grid item xs={12} p={1}>
+                  <Link component="button" onClick={handleTermsClick}>
+                    <SoftTypography variant="button" fontSize="small">
+                      {t("Register:readTerms")}
+                    </SoftTypography>
+                  </Link>
+
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={termsAccepted}
+                        onChange={(e) => setTermsAccepted(e.target.checked)}
+                        sx={{ ml: 2 }}
+                      />
+                    }
+                    label={
+                      <SoftTypography variant="button" fontSize="small">
+                        {t("Register:acceptTerms")}{" "}
+                      </SoftTypography>
+                    }
+                  />
+                </Grid>
                 {isRegisterError && (
                   <Grid item xs={12} justifyContent="center" display="flex">
                     <Alert color="error" sx={{ mt: 2 }}>
@@ -227,16 +275,32 @@ const Register = (): JSX.Element => {
                   </Grid>
                 )}
                 <Grid item xs={12} p={1}>
-                  <SoftButton
-                    sx={{ marginRight: 1 }}
-                    type="submit"
-                    color="primary"
-                    disabled={isRegisterLoading || showSuccess}
-                  >
-                    {t("Register:registerBtn")}
-                  </SoftButton>
+                  {!showSuccess && (
+                    <SoftButton
+                      sx={{
+                        marginRight: 1,
+                        margin: "0 auto",
+                        display: "block",
+                      }}
+                      type="submit"
+                      color="primary"
+                      disabled={
+                        isRegisterLoading || showSuccess || !termsAccepted
+                      }
+                    >
+                      {t("Register:registerBtn")}
+                    </SoftButton>
+                  )}
                   {showSuccess && (
-                    <SoftButton color="info" onClick={() => navigate("/login")}>
+                    <SoftButton
+                      sx={{
+                        marginRight: 1,
+                        margin: "0 auto",
+                        display: "block",
+                      }}
+                      color="info"
+                      onClick={() => navigate("/login")}
+                    >
                       {t("Register:goToLogin")}
                     </SoftButton>
                   )}

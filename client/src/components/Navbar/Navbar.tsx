@@ -23,7 +23,7 @@ import { SoftBox, Breadcrumbs } from "..";
 // Custom styles for DashboardNavbar
 import Logo from "../../assets/images/logo.png";
 import NavbarMainControls from "../NavbarMainControls";
-import BackButton from "./BackButton";
+//import BackButton from "./BackButton";
 
 export type NavbarProps = {
   light: boolean;
@@ -37,7 +37,7 @@ const Navbar = ({ light }: NavbarProps) => (
         alignContent: "center",
       }}
     >
-      <BackButton
+      {/* <BackButton
         sx={{
           flexGrow: 1,
           display: {
@@ -46,7 +46,7 @@ const Navbar = ({ light }: NavbarProps) => (
           },
         }}
         light={light}
-      />
+      /> */}
       <SoftBox
         sx={{
           flexGrow: {

@@ -1,15 +1,15 @@
-import mongoose from "mongoose";
+import mongoose, { Types } from "mongoose";
 const Schema = mongoose.Schema;
 
 interface IUser {
   name: string;
   email: string;
   password: string;
-  roles: string[];
-  active: boolean;
-  isVerified: boolean;
-  emailToken: string;
-  passwordResetToken: string;
+  roles?: string[];
+  active?: boolean;
+  isVerified?: boolean;
+  emailToken?: string;
+  passwordResetToken?: string;
 }
 
 const userSchema = new Schema<IUser>({

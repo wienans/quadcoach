@@ -1,14 +1,13 @@
 import { Collapse, Icon, Link } from "@mui/material";
 import SoftBox from "../SoftBox";
 import SoftTypography from "../SoftTypography";
-import { useState } from "react";
+import { useFooter } from "./FooterContext";
+import { useTranslation } from "react-i18next";
+import "./translations";
 
 const Footer = (): JSX.Element => {
-  const [open, setOpen] = useState<boolean>(false);
-  const toggle = () => {
-    setOpen(!open);
-  };
-
+  const { isFooterOpen, toggleFooter } = useFooter();
+  const { t } = useTranslation("Footer");
   return (
     <>
       <SoftBox
@@ -64,7 +63,7 @@ const Footer = (): JSX.Element => {
                 fontSize="small"
                 fontWeight="regular"
                 color="text"
-                onClick={toggle}
+                onClick={toggleFooter}
               >
                 Impressum
               </SoftTypography>
@@ -72,8 +71,8 @@ const Footer = (): JSX.Element => {
           </SoftBox>
         </SoftBox>
       </SoftBox>
-      <Collapse in={open} timeout="auto" unmountOnExit>
-        <SoftBox width="100%" px={3.0}>
+      <Collapse in={isFooterOpen} timeout="auto" unmountOnExit>
+        <SoftBox id="footer-content" width="100%" px={3.0}>
           <SoftTypography fontSize="small">
             <br />
             {import.meta.env.VITE_NAME || process.env.VITE_NAME} <br />
@@ -90,61 +89,28 @@ const Footer = (): JSX.Element => {
             <br /> <br />
           </SoftTypography>
           <SoftTypography fontSize="small" fontWeight="medium">
-            Disclaimer – rechtliche Hinweise
+            {t("Footer:t0")}
           </SoftTypography>
           <SoftTypography fontSize="small">
             <br />
-            § 1 Warnhinweis zu Inhalten
+            {t("Footer:t1")}
             <br />
-            Die kostenlosen und frei zugänglichen Inhalte dieser Webseite wurden
-            mit größtmöglicher Sorgfalt erstellt. Der Anbieter dieser Webseite
-            übernimmt jedoch keine Gewähr für die Richtigkeit, Vollständigkeit
-            und Aktualität der bereitgestellten kostenlosen und frei
-            zugänglichen journalistischen Ratgeber und Nachrichten. Namentlich
-            gekennzeichnete Beiträge geben die Meinung des jeweiligen Autors und
-            nicht immer die Meinung des Anbieters wieder. Allein durch den
-            Aufruf der kostenlosen und frei zugänglichen Inhalte kommt keinerlei
-            Vertragsverhältnis zwischen dem Nutzer und dem Anbieter zustande,
-            insoweit fehlt es am Rechtsbindungswillen des Anbieters.
+            {t("Footer:b1")}
             <br />
             <br />
-            § 2 Externe Links
+            {t("Footer:t2")}
             <br />
-            Diese Website enthält Verknüpfungen zu Websites Dritter ("externe
-            Links"). Diese Websites unterliegen der Haftung der jeweiligen
-            Betreiber. Der Anbieter hat bei der erstmaligen Verknüpfung der
-            externen Links die fremden Inhalte daraufhin überprüft, ob etwaige
-            Rechtsverstöße bestehen. Zu dem Zeitpunkt waren keine Rechtsverstöße
-            ersichtlich. Der Anbieter hat keinerlei Einfluss auf die aktuelle
-            und zukünftige Gestaltung und auf die Inhalte der verknüpften
-            Seiten. Das Setzen von externen Links bedeutet nicht, dass sich der
-            Anbieter die hinter dem Verweis oder Link liegenden Inhalte zu Eigen
-            macht. Eine ständige Kontrolle der externen Links ist für den
-            Anbieter ohne konkrete Hinweise auf Rechtsverstöße nicht zumutbar.
-            Bei Kenntnis von Rechtsverstößen werden jedoch derartige externe
-            Links unverzüglich gelöscht.
+            {t("Footer:b2")}
             <br />
             <br />
-            § 3 Urheber- und Leistungsschutzrechte
+            {t("Footer:t3")}
             <br />
-            Die auf dieser Website veröffentlichten Inhalte unterliegen dem
-            deutschen Urheber- und Leistungsschutzrecht. Jede vom deutschen
-            Urheber- und Leistungsschutzrecht nicht zugelassene Verwertung
-            bedarf der vorherigen schriftlichen Zustimmung des Anbieters oder
-            jeweiligen Rechteinhabers. Dies gilt insbesondere für
-            Vervielfältigung, Bearbeitung, Übersetzung, Einspeicherung,
-            Verarbeitung bzw. Wiedergabe von Inhalten in Datenbanken oder
-            anderen elektronischen Medien und Systemen. Inhalte und Rechte
-            Dritter sind dabei als solche gekennzeichnet. Die unerlaubte
-            Vervielfältigung oder Weitergabe einzelner Inhalte oder kompletter
-            Seiten ist nicht gestattet und strafbar. Lediglich die Herstellung
-            von Kopien und Downloads für den persönlichen, privaten und nicht
-            kommerziellen Gebrauch ist erlaubt.
+            {t("Footer:b3")}
             <br />
             <br />
           </SoftTypography>
           <SoftTypography fontSize="small" fontWeight="medium">
-            Verandwortlich für den Inhalt
+            {t("Footer:t4")}
           </SoftTypography>
           <SoftTypography fontSize="small">
             {import.meta.env.VITE_NAME} <br />
@@ -154,27 +120,10 @@ const Footer = (): JSX.Element => {
             <br />
           </SoftTypography>
           <SoftTypography fontSize="small" fontWeight="medium">
-            Datenschutz
+            {t("Footer:t5")}
           </SoftTypography>
           <SoftTypography fontSize="small">
-            Die Nutzung unserer Webseite ist in der Regel ohne Angabe
-            personenbezogener Daten möglich. Soweit auf unseren Seiten
-            personenbezogene Daten (beispielsweise eMail-Adressen) erhoben
-            werden, erfolgt dies, soweit möglich, stets auf freiwilliger Basis.
-            Für die Authentifizierung beim Login wird eine E-Mail-Adresse
-            erhoben, um sicherzustellen, dass es sich um echte Benutzer handelt
-            und Private Features zu ermöglichen. Diese Daten werden ohne Ihre
-            ausdrückliche Zustimmung nicht an Dritte weitergegeben. <br />
-            Wir weisen darauf hin, dass die Datenübertragung im Internet (z.B.
-            bei der Kommunikation per E-Mail) Sicherheitslücken aufweisen kann.
-            Ein lückenloser Schutz der Daten vor dem Zugriff durch Dritte ist
-            nicht möglich. Der Nutzung von im Rahmen der Impressumspflicht
-            veröffentlichten Kontaktdaten durch Dritte zur Übersendung von nicht
-            ausdrücklich angeforderter Werbung und Informationsmaterialien wird
-            hiermit ausdrücklich widersprochen. Die Betreiber der Seiten
-            behalten sich ausdrücklich rechtliche Schritte im Falle der
-            unverlangten Zusendung von Werbeinformationen, etwa durch
-            Spam-Mails, vor.
+            {t("Footer:b5")}
             <br />
             <br />
           </SoftTypography>

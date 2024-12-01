@@ -6,6 +6,7 @@
     "tacticBoards": "Taktik Tafeln",
     "gitHubRepository": "GitHub Repository",
     "deleteAccount": "Konto löschen",
-    "login": "Login"
+    "login": "Login",
+    "userProfile": "Nutzerprofil"
   }
 }

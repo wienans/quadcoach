@@ -10,4 +10,5 @@ export enum TagType {
   material = "material",
   tacticboard = "tacticboard",
   tacticboardTag = "tacticboardTag",
+  favorite = "favorite",
 }

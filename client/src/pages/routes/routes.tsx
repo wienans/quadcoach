@@ -123,6 +123,32 @@ const routes = [
         ],
       },
       {
+        path: "/users",
+        handle: {
+          type: RouteHandleType.tacticBoards,
+        },
+        // async lazy() {
+        //   // const Home = (await import("../Home")).default;
+        //   // return {
+        //   //   element: <Home />,
+        //   // };
+        // },
+        children: [
+          {
+            path: ":id",
+            handle: {
+              type: RouteHandleType.userProfile,
+            },
+            async lazy() {
+              const UserProfileRoot = (await import("../UserProfile")).default;
+              return {
+                element: <UserProfileRoot />,
+              };
+            },
+          },
+        ],
+      },
+      {
         path: "/login",
         handle: {
           type: RouteHandleType.dashboard,
