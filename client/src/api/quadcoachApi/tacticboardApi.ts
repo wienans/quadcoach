@@ -32,6 +32,24 @@ export type GetTacticBoardResponse = {
   };
 };
 
+export type AccessLevel = "view" | "edit";
+
+export type AccessEntry = {
+  user: {
+    _id: string;
+    name: string;
+  };
+  tacticboard: string;
+  access: AccessLevel;
+  createdAt: string;
+};
+
+export type AccessResponse = {
+  hasAccess: boolean;
+  type: "owner" | "admin" | "granted" | null;
+  level: AccessLevel | null;
+};
+
 export const tacticBoardApiSlice = quadcoachApi.injectEndpoints({
   endpoints: (builder) => ({
     getTacticBoard: builder.query<TacticBoard, string>({
@@ -271,6 +289,50 @@ export const tacticBoardApiSlice = quadcoachApi.injectEndpoints({
             ]
           : [TagType.tacticboard],
     }),
+    checkTacticboardAccess: builder.query<AccessResponse, string>({
+      query: (tacticboardId) => ({
+        url: `/api/tacticboards/${tacticboardId}/checkAccess`,
+        method: "get",
+      }),
+      providesTags: (_result, _error, tacticboardId) => [
+        { type: TagType.tacticboard, id: `${tacticboardId}-access` },
+      ],
+    }),
+    getAllTacticboardAccessUsers: builder.query<AccessEntry[], string>({
+      query: (tacticboardId) => ({
+        url: `/api/tacticboards/${tacticboardId}/access`,
+        method: "get",
+      }),
+      providesTags: (_result, _error, tacticboardId) => [
+        { type: TagType.tacticboard, id: `${tacticboardId}-access` },
+      ],
+    }),
+    setTacticboardAccess: builder.mutation<
+      AccessEntry,
+      { tacticboardId: string; userId: string; access: AccessLevel }
+    >({
+      query: ({ tacticboardId, userId, access }) => ({
+        url: `/api/tacticboards/${tacticboardId}/access`,
+        method: "post",
+        data: { userId, access },
+      }),
+      invalidatesTags: (_result, _error, { tacticboardId }) => [
+        { type: TagType.tacticboard, id: `${tacticboardId}-access` },
+      ],
+    }),
+    deleteTacticboardAccess: builder.mutation<
+      { message: string },
+      { tacticboardId: string; userId: string }
+    >({
+      query: ({ tacticboardId, userId }) => ({
+        url: `/api/tacticboards/${tacticboardId}/access`,
+        method: "delete",
+        data: { userId },
+      }),
+      invalidatesTags: (_result, _error, { tacticboardId }) => [
+        { type: TagType.tacticboard, id: `${tacticboardId}-access` },
+      ],
+    }),
   }),
 });
 
@@ -289,4 +351,8 @@ export const {
   useDeleteTacticBoardPageMutation,
   useGetTacticBoardHeadersQuery,
   useLazyGetTacticBoardHeadersQuery,
+  useCheckTacticboardAccessQuery,
+  useGetAllTacticboardAccessUsersQuery,
+  useSetTacticboardAccessMutation,
+  useDeleteTacticboardAccessMutation,
 } = tacticBoardApiSlice;

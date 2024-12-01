@@ -23,6 +23,21 @@ export type GetExercisesResponse = {
   };
 };
 
+export type ExerciseAccessEntry = {
+  user: {
+    _id: string;
+    username: string;
+    email: string;
+  };
+  exercise: string;
+  createdAt: string;
+};
+
+export type ExerciseAccessResponse = {
+  hasAccess: boolean;
+  type: "owner" | "admin" | "granted" | null;
+};
+
 export const exerciseApiSlice = quadcoachApi.injectEndpoints({
   endpoints: (builder) => ({
     getExercise: builder.query<Exercise, string>({
@@ -223,6 +238,50 @@ export const exerciseApiSlice = quadcoachApi.injectEndpoints({
             }, new Array<TagDescription<TagType>>())
           : [TagType.exercise, TagType.block],
     }),
+    checkExerciseAccess: builder.query<ExerciseAccessResponse, string>({
+      query: (exerciseId) => ({
+        url: `/api/exercises/${exerciseId}/checkAccess`,
+        method: "get",
+      }),
+      providesTags: (_result, _error, exerciseId) => [
+        { type: TagType.exercise, id: `${exerciseId}-access` },
+      ],
+    }),
+    getAllExerciseAccessUsers: builder.query<ExerciseAccessEntry[], string>({
+      query: (exerciseId) => ({
+        url: `/api/exercises/${exerciseId}/access`,
+        method: "get",
+      }),
+      providesTags: (_result, _error, exerciseId) => [
+        { type: TagType.exercise, id: `${exerciseId}-access` },
+      ],
+    }),
+    setExerciseAccess: builder.mutation<
+      ExerciseAccessEntry,
+      { exerciseId: string; userId: string }
+    >({
+      query: ({ exerciseId, userId }) => ({
+        url: `/api/exercises/${exerciseId}/access`,
+        method: "post",
+        data: { userId },
+      }),
+      invalidatesTags: (_result, _error, { exerciseId }) => [
+        { type: TagType.exercise, id: `${exerciseId}-access` },
+      ],
+    }),
+    deleteExerciseAccess: builder.mutation<
+      { message: string },
+      { exerciseId: string; userId: string }
+    >({
+      query: ({ exerciseId, userId }) => ({
+        url: `/api/exercises/${exerciseId}/access`,
+        method: "delete",
+        data: { userId },
+      }),
+      invalidatesTags: (_result, _error, { exerciseId }) => [
+        { type: TagType.exercise, id: `${exerciseId}-access` },
+      ],
+    }),
   }),
 });
 
@@ -238,4 +297,8 @@ export const {
   useLazyGetAllMaterialsQuery,
   useGetExercisesQuery,
   useLazyGetExercisesQuery,
+  useCheckExerciseAccessQuery,
+  useGetAllExerciseAccessUsersQuery,
+  useSetExerciseAccessMutation,
+  useDeleteExerciseAccessMutation,
 } = exerciseApiSlice;
