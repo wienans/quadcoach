@@ -166,14 +166,14 @@ export const deleteUser = asyncHandler(
       res.status(400).json({ message: "User ID Required" });
       return;
     }
-    const boards = await TacticBoard.findOne({ user: id }).lean().exec();
-    const exercises = await Exercise.findOne({ user: id }).lean().exec();
-    if (boards || exercises) {
-      res
-        .status(400)
-        .json({ message: "User has assigned Exercises or Tacticboards" });
-      return;
-    }
+    // const boards = await TacticBoard.findOne({ user: id }).lean().exec();
+    // const exercises = await Exercise.findOne({ user: id }).lean().exec();
+    // if (boards || exercises) {
+    //   res
+    //     .status(400)
+    //     .json({ message: "User has assigned Exercises or Tacticboards" });
+    //   return;
+    // }
     const user = await User.findById(id).exec();
     if (!user) {
       res.status(400).json({ message: "User not found" });

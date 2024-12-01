@@ -275,18 +275,32 @@ const Register = (): JSX.Element => {
                   </Grid>
                 )}
                 <Grid item xs={12} p={1}>
-                  <SoftButton
-                    sx={{ marginRight: 1, margin: "0 auto", display: "block" }}
-                    type="submit"
-                    color="primary"
-                    disabled={
-                      isRegisterLoading || showSuccess || !termsAccepted
-                    }
-                  >
-                    {t("Register:registerBtn")}
-                  </SoftButton>
+                  {!showSuccess && (
+                    <SoftButton
+                      sx={{
+                        marginRight: 1,
+                        margin: "0 auto",
+                        display: "block",
+                      }}
+                      type="submit"
+                      color="primary"
+                      disabled={
+                        isRegisterLoading || showSuccess || !termsAccepted
+                      }
+                    >
+                      {t("Register:registerBtn")}
+                    </SoftButton>
+                  )}
                   {showSuccess && (
-                    <SoftButton color="info" onClick={() => navigate("/login")}>
+                    <SoftButton
+                      sx={{
+                        marginRight: 1,
+                        margin: "0 auto",
+                        display: "block",
+                      }}
+                      color="info"
+                      onClick={() => navigate("/login")}
+                    >
                       {t("Register:goToLogin")}
                     </SoftButton>
                   )}
