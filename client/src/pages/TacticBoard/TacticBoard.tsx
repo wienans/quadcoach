@@ -10,6 +10,7 @@ import {
   useCreateTacticBoardPageMutation,
   useDeleteTacticBoardMutation,
   useDeleteTacticBoardPageMutation,
+  useGetAllTacticboardAccessUsersQuery,
   useGetTacticBoardQuery,
   useUpdateTacticBoardPageMutation,
 } from "../../api/quadcoachApi/tacticboardApi";
@@ -57,6 +58,10 @@ const TacticsBoard = (): JSX.Element => {
   const [deleteTacticBoardPage, { isLoading: isDeletePageLoading }] =
     useDeleteTacticBoardPageMutation();
   const [deleteTacticBoard] = useDeleteTacticBoardMutation();
+
+  const { data: accessUsers } = useGetAllTacticboardAccessUsersQuery(
+    tacticBoardId || "",
+  );
 
   const [currentPage, setPage] = useState<number>(1);
   const [maxPages, setMaxPages] = useState<number>(1);
@@ -366,8 +371,15 @@ const TacticsBoard = (): JSX.Element => {
       userRoles.includes("admin")
     ) {
       setIsPrivileged(true);
+    } else {
+      if (accessUsers) {
+        console.log(accessUsers);
+        setIsPrivileged(
+          accessUsers.some((user) => user.user._id.toString() === userId),
+        );
+      }
     }
-  }, [userId, tacticBoard, userRoles]);
+  }, [userId, tacticBoard, userRoles, accessUsers]);
 
   return (
     <SoftBox

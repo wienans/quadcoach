@@ -20,6 +20,7 @@ import { FabricJsCanvas, SoftBox } from "../../components";
 import { TacticBoardFabricJsContextProvider } from "../../contexts";
 import { useAuth } from "../../store/hooks";
 import useVideoRecording from "../../hooks/taticBoard/useVideoRecording";
+import { useGetAllTacticboardAccessUsersQuery } from "../../api/quadcoachApi/tacticboardApi";
 export type TacticBoardInProfileProps = {
   tacticBoardId: string | undefined;
 };
@@ -52,6 +53,10 @@ const TacticBoardInProfile = ({
 
   const { id: userId, roles: userRoles } = useAuth();
 
+  const { data: accessUsers } = useGetAllTacticboardAccessUsersQuery(
+    tacticBoardId || "",
+  );
+
   useEffect(() => {
     if (
       userId == tacticBoard?.user ||
@@ -59,8 +64,15 @@ const TacticBoardInProfile = ({
       userRoles.includes("admin")
     ) {
       setIsPrivileged(true);
+    } else {
+      if (accessUsers) {
+        console.log(accessUsers);
+        setIsPrivileged(
+          accessUsers.some((user) => user.user._id.toString() === userId),
+        );
+      }
     }
-  }, [userId, tacticBoard, userRoles]);
+  }, [userId, tacticBoard, userRoles, accessUsers]);
 
   useEffect(() => {
     if (!isTacticBoardLoading && !isTacticBoardError && tacticBoard) {
