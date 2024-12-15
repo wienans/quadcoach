@@ -23,10 +23,12 @@ import {
   Box,
   ListItemText,
   Button,
+  MenuItem,
 } from "@mui/material";
 import * as Yup from "yup";
 import { SoftBox, SoftInput, SoftTypography } from "../../components";
 import {
+  AccessLevel,
   useDeleteTacticboardAccessMutation,
   useDeleteTacticBoardMutation,
   useGetAllTacticboardAccessUsersQuery,
@@ -81,6 +83,7 @@ const TacticBoardProfile = () => {
   const isUpMd = useMediaQuery((theme: Theme) => theme.breakpoints.up("md"));
   const [isEditMode, setIsEditMode] = useState<boolean>(false);
   const [openTagDialog, setOpenTagDialog] = useState<boolean>(false);
+  const [accessMode, setAccessMode] = useState<AccessLevel>("view");
   const { id: userId, roles: userRoles } = useAuth();
 
   const {
@@ -195,9 +198,12 @@ const TacticBoardProfile = () => {
       setIsPrivileged(true);
     } else {
       if (accessUsers) {
-        console.log(accessUsers);
         setIsPrivileged(
-          accessUsers.some((user) => user.user._id.toString() === userId),
+          accessUsers.some((user) => {
+            return (
+              user.user._id.toString() === userId && user.access === "edit"
+            );
+          }),
         );
       }
     }
@@ -683,7 +689,7 @@ const TacticBoardProfile = () => {
               {isEditMode && (
                 <Accordion defaultExpanded>
                   <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                    {t("TacticBoardProfile:access")}
+                    {t("TacticBoardProfile:access.title")}
                   </AccordionSummary>
                   <AccordionDetails>
                     <Box
@@ -697,6 +703,23 @@ const TacticBoardProfile = () => {
                           label={t("TacticBoardProfile:access.add_user")}
                           fullWidth
                         />
+                        <TextField
+                          select
+                          size="small"
+                          label={t("TacticBoardProfile:access.mode")}
+                          value={accessMode}
+                          onChange={(event) =>
+                            setAccessMode(event.target.value as AccessLevel)
+                          }
+                          sx={{ minWidth: 100, width: 200 }}
+                        >
+                          <MenuItem value="edit">
+                            {t("TacticBoardProfile:access.edit")}
+                          </MenuItem>
+                          <MenuItem value="view">
+                            {t("TacticBoardProfile:access.view")}
+                          </MenuItem>
+                        </TextField>
                         <Button
                           variant="contained"
                           size="small"
@@ -706,12 +729,12 @@ const TacticBoardProfile = () => {
                               setTacticboardAccess({
                                 tacticboardId: tacticBoardId,
                                 userId: "674c48bac4eb8e77f262fb18", // Add selected user ID
-                                access: "edit",
+                                access: accessMode,
                               });
                             }
                           }}
                         >
-                          {t("common:add")}
+                          {t("TacticBoardProfile:access.add")}
                         </Button>
                       </Box>
                       <List>
@@ -736,7 +759,11 @@ const TacticBoardProfile = () => {
                               </Button>
                             }
                           >
-                            <ListItemText primary={entry.user.name} />
+                            <ListItemText
+                              primary={
+                                entry.user.name + " (" + entry.access + ")"
+                              }
+                            />
                           </ListItem>
                         ))}
                       </List>

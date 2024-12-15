@@ -66,9 +66,12 @@ const TacticBoardInProfile = ({
       setIsPrivileged(true);
     } else {
       if (accessUsers) {
-        console.log(accessUsers);
         setIsPrivileged(
-          accessUsers.some((user) => user.user._id.toString() === userId),
+          accessUsers.some((user) => {
+            return (
+              user.user._id.toString() === userId && user.access === "edit"
+            );
+          }),
         );
       }
     }

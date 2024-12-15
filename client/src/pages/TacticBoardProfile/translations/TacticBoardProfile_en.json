@@ -33,6 +33,14 @@
       "tooltip": "Enables the fullscreen mode"
     }
   },
+  "access":{
+    "title": "Access",
+    "view": "View",
+    "edit": "Edit",
+    "add_user": "Add User",
+    "mode": "Mode",
+    "add": "Add"
+  },
   "description": "Description",
   "coaching_points": "Coaching points",
   "deleteTacticBoard": "Delete tacticboard",
