@@ -8,6 +8,7 @@ export { default as NotificationItem } from "./NotificationItem";
 export { default as SettingsMenu } from "./SettingsMenu";
 export { default as Collapsible } from "./Collapsible";
 export { default as FabricJsCanvas } from "./FabricJsCanvas";
+export { CanvasErrorBoundary } from "./CanvasErrorBoundary";
 export { default as TacticsBoardToolBar } from "./TacticsBoardToolBar";
 export { default as AddTacticBoardDialog } from "./AddTacticBoardDialog";
 export { default as PresistLogin } from "./PresistLogin";

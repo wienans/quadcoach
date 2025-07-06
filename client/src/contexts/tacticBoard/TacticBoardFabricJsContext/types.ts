@@ -27,10 +27,93 @@ export enum AccessoryType {
   Hurdle = "Hurdle",
 }
 
+// Enhanced TypeScript definitions for fabric.js extensions
 declare module "fabric/fabric-impl" {
   export interface IObjectOptions {
     id?: string;
     objectType?: ObjectType;
+    uuid?: string;
+  }
+
+  export interface Object {
+    id?: string;
+    objectType?: ObjectType;
+    uuid?: string;
+  }
+
+  export interface Canvas {
+    freeDrawingBrush: {
+      color: string;
+      width: number;
+      strokeDashArray?: number[] | null;
+    } & fabric.BaseBrush;
+  }
+}
+
+// Type-safe object creation interfaces that extend the existing TacticsObject
+export interface FabricObjectData {
+  uuid?: string;
+  type: string;
+  left?: number;
+  top?: number;
+  width?: number;
+  height?: number;
+  fill?: string;
+  stroke?: string;
+  strokeWidth?: number;
+  strokeDashArray?: number[];
+  strokeLineCap?: string;
+  strokeDashOffset?: number;
+  strokeLineJoin?: string;
+  strokeUniform?: boolean;
+  strokeMiterLimit?: number;
+  scaleX?: number;
+  scaleY?: number;
+  angle?: number;
+  opacity?: number;
+  objects?: FabricObjectData[];
+  visible?: boolean;
+  backgroundColor?: string;
+  radius?: number;
+  startAngle?: number;
+  endAngle?: number;
+  path?: string | [[string | number]];
+  text?: string;
+  originX?: string;
+  originY?: string;
+  fontFamily?: string;
+  fontSize?: number;
+  textAlign?: string;
+  objectType?: string;
+  [key: string]: unknown;
+}
+
+export interface TacticPageObject extends FabricObjectData {
+  uuid: string;
+}
+
+// Error types for better error handling
+export class FabricObjectCreationError extends Error {
+  public cause?: Error;
+  
+  constructor(objectType: string, originalError?: Error) {
+    super(`Failed to create fabric object of type: ${objectType}`);
+    this.name = 'FabricObjectCreationError';
+    if (originalError) {
+      this.cause = originalError;
+    }
+  }
+}
+
+export class CanvasOperationError extends Error {
+  public cause?: Error;
+  
+  constructor(operation: string, originalError?: Error) {
+    super(`Canvas operation failed: ${operation}`);
+    this.name = 'CanvasOperationError';
+    if (originalError) {
+      this.cause = originalError;
+    }
   }
 }
 

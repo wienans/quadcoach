@@ -68,6 +68,12 @@ export const useContainerResizeEvent = (
 
   const initializeContainerResizeObserver = useCallback(() => {
     if (!container.current) return;
+    
+    // Cleanup existing observer
+    if (containerResizeObserverRef.current) {
+      containerResizeObserverRef.current.disconnect();
+    }
+    
     containerResizeObserverRef.current = new ResizeObserver(
       (entries: ResizeObserverEntry[]) => {
         if (!canvas.current) return;
@@ -79,8 +85,17 @@ export const useContainerResizeEvent = (
     containerResizeObserverRef.current.observe(container.current);
   }, [canvas, container, resize]);
 
+  // Cleanup function
+  const cleanup = useCallback(() => {
+    if (containerResizeObserverRef.current) {
+      containerResizeObserverRef.current.disconnect();
+      containerResizeObserverRef.current = null;
+    }
+  }, []);
+
   return {
     containerResizeObserverRef,
     initializeContainerResizeObserver,
+    cleanup,
   };
 };

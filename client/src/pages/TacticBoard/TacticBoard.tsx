@@ -268,8 +268,7 @@ const TacticsBoard = (): JSX.Element => {
           const newPage = (prevPage % tacticBoard.pages.length) + 1;
           getAllObjects().forEach((obj) => {
             const targetObject = tacticBoard.pages[newPage - 1].objects?.find(
-              // @ts-ignore
-              (nextObject) => nextObject.uuid == obj.uuid,
+              (nextObject) => (nextObject as { uuid?: string }).uuid === (obj as fabric.Object & { uuid?: string }).uuid,
             );
             if (targetObject && canvasRef.current) {
               obj.animate("left", targetObject.left, {
@@ -312,8 +311,7 @@ const TacticsBoard = (): JSX.Element => {
           }
           getAllObjects().forEach((obj) => {
             const targetObject = tacticBoard.pages[newPage - 1].objects?.find(
-              // @ts-ignore
-              (nextObject) => nextObject.uuid == obj.uuid,
+              (nextObject) => (nextObject as { uuid?: string }).uuid === (obj as fabric.Object & { uuid?: string }).uuid,
             );
             if (targetObject && canvasRef.current) {
               obj.animate("left", targetObject.left, {
@@ -421,8 +419,7 @@ const TacticsBoard = (): JSX.Element => {
       )}
       {!isTacticBoardError && !isTacticBoardLoading && tacticBoard && (
         <SoftBox
-          // @ts-ignore
-          ref={refFullScreenContainer}
+          ref={refFullScreenContainer as any}
           sx={{
             display: "flex",
             flexGrow: 1,
