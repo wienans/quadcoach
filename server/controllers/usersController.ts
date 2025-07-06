@@ -149,6 +149,35 @@ export const updateUser = asyncHandler(async (req: Request, res: Response) => {
   res.json({ message: `${updatedUser.email} updated` });
 });
 
+// @desc    Get user by email
+// @route   GET /api/users/email/:email
+// @access  Private - Authenticated users only
+export const getUserByEmail = asyncHandler(
+  async (req: RequestWithUser, res: Response) => {
+    if (!req.UserInfo?.id) {
+      res.status(401).json({ message: "Unauthorized" });
+      return;
+    }
+
+    const { email } = req.params;
+    if (!email) {
+      res.status(400).json({ message: "Email is required" });
+      return;
+    }
+
+    const user = await User.findOne({ email: email.toLowerCase() })
+      .select("_id name email")
+      .lean();
+
+    if (!user) {
+      res.status(404).json({ message: "User not found" });
+      return;
+    }
+
+    res.json(user);
+  }
+);
+
 // @desc    Delete user account
 // @route   DELETE /api/users
 // @access  Private - Admin only

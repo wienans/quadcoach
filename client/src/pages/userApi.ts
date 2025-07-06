@@ -79,6 +79,13 @@ export const userApiSlice = quadcoachApi.injectEndpoints({
       },
       providesTags: () => [TagType.user],
     }),
+    getUserByEmail: builder.query<User, string>({
+      query: (email: string) => ({
+        url: `/api/user/email/${encodeURIComponent(email)}`,
+        method: "get",
+      }),
+      providesTags: () => [TagType.user],
+    }),
   }),
 });
 
@@ -89,4 +96,5 @@ export const {
   useUpdateUserMutation,
   useAddUserMutation,
   useGetUsersQuery,
+  useLazyGetUserByEmailQuery,
 } = userApiSlice;

@@ -69,6 +69,7 @@ import {
   useRemoveFavoriteTacticboardMutation,
   useLazyGetFavoriteTacticboardsQuery,
 } from "../../api/quadcoachApi/favoriteApi";
+import { useLazyGetUserByEmailQuery } from "../userApi";
 const MarkdownRenderer = lazy(
   () => import("../../components/MarkdownRenderer"),
 );
@@ -84,6 +85,8 @@ const TacticBoardProfile = () => {
   const [isEditMode, setIsEditMode] = useState<boolean>(false);
   const [openTagDialog, setOpenTagDialog] = useState<boolean>(false);
   const [accessMode, setAccessMode] = useState<AccessLevel>("view");
+  const [userEmail, setUserEmail] = useState<string>("");
+  const [emailError, setEmailError] = useState<string>("");
   const { id: userId, roles: userRoles } = useAuth();
 
   const {
@@ -122,6 +125,9 @@ const TacticBoardProfile = () => {
 
   const [getFavoriteTacticboards, { data: favoriteTacticboards }] =
     useLazyGetFavoriteTacticboardsQuery();
+
+  const [getUserByEmail, { isLoading: isGetUserByEmailLoading }] =
+    useLazyGetUserByEmailQuery();
 
   const { data: accessUsers } = useGetAllTacticboardAccessUsersQuery(
     tacticBoardId || "",
@@ -251,6 +257,35 @@ const TacticBoardProfile = () => {
   const translateError = (
     errorResourceKey: string | undefined,
   ): string | undefined => (errorResourceKey ? t(errorResourceKey) : undefined);
+
+  const handleAddAccess = async () => {
+    if (!tacticBoardId || !userEmail.trim()) {
+      setEmailError("Email is required");
+      return;
+    }
+
+    setEmailError("");
+    
+    try {
+      const userResult = await getUserByEmail(userEmail.trim()).unwrap();
+      
+      if (userResult && userResult._id) {
+        await setTacticboardAccess({
+          tacticboardId: tacticBoardId,
+          userId: userResult._id,
+          access: accessMode,
+        }).unwrap();
+        
+        setUserEmail("");
+      }
+    } catch (error: any) {
+      if (error?.status === 404) {
+        setEmailError("User not found with this email");
+      } else {
+        setEmailError("Failed to add user access");
+      }
+    }
+  };
 
   if (isTacticBoardLoading) {
     return (
@@ -703,7 +738,15 @@ const TacticBoardProfile = () => {
                         <TextField
                           size="small"
                           label={t("TacticBoardProfile:access.add_user")}
+                          placeholder="Enter user email"
                           fullWidth
+                          value={userEmail}
+                          onChange={(e) => {
+                            setUserEmail(e.target.value);
+                            if (emailError) setEmailError("");
+                          }}
+                          error={!!emailError}
+                          helperText={emailError}
                           sx={{
                             "& .MuiInputBase-root": {
                               height: "40px",
@@ -742,16 +785,8 @@ const TacticBoardProfile = () => {
                         <Button
                           variant="contained"
                           size="small"
-                          disabled={isSetTacticboardAccessLoading}
-                          onClick={() => {
-                            if (tacticBoardId) {
-                              setTacticboardAccess({
-                                tacticboardId: tacticBoardId,
-                                userId: "674c48bac4eb8e77f262fb18", // Add selected user ID
-                                access: accessMode,
-                              });
-                            }
-                          }}
+                          disabled={isSetTacticboardAccessLoading || isGetUserByEmailLoading || !userEmail.trim()}
+                          onClick={handleAddAccess}
                         >
                           {t("TacticBoardProfile:access.add")}
                         </Button>
