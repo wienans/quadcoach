@@ -630,23 +630,21 @@ export const setAccess = asyncHandler(
       return;
     }
 
-    // Check if user has access to grant access
+    // Check if user is the creator/owner or admin (only they can grant access)
     if (!req.UserInfo?.id) {
       res.status(401).json({ message: "Unauthorized" });
       return;
     }
 
-    const hasAccess =
+    const isCreator =
       tacticboard.user?.toString() === req.UserInfo.id ||
       req.UserInfo.roles?.includes("Admin") ||
-      req.UserInfo.roles?.includes("admin") ||
-      (await TacticboardAccess.exists({
-        user: req.UserInfo.id,
-        tacticboard: req.params.id,
-      }));
+      req.UserInfo.roles?.includes("admin");
 
-    if (!hasAccess) {
-      res.status(403).json({ message: "Forbidden" });
+    if (!isCreator) {
+      res
+        .status(403)
+        .json({ message: "Only the creator can modify access settings" });
       return;
     }
 
@@ -698,23 +696,21 @@ export const deleteAccess = asyncHandler(
       return;
     }
 
-    // Check if user has access to remove access
+    // Check if user is the creator/owner or admin (only they can remove access)
     if (!req.UserInfo?.id) {
       res.status(401).json({ message: "Unauthorized" });
       return;
     }
 
-    const hasAccess =
+    const isCreator =
       tacticboard.user?.toString() === req.UserInfo.id ||
       req.UserInfo.roles?.includes("Admin") ||
-      req.UserInfo.roles?.includes("admin") ||
-      (await TacticboardAccess.exists({
-        user: req.UserInfo.id,
-        tacticboard: req.params.id,
-      }));
+      req.UserInfo.roles?.includes("admin");
 
-    if (!hasAccess) {
-      res.status(403).json({ message: "Forbidden" });
+    if (!isCreator) {
+      res
+        .status(403)
+        .json({ message: "Only the creator can modify access settings" });
       return;
     }
 

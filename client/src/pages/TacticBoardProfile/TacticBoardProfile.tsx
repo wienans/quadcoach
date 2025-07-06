@@ -209,6 +209,8 @@ const TacticBoardProfile = () => {
     }
   }, [tacticBoard, userId, userRoles, accessUsers]);
 
+  const isCreator = tacticBoard?.user?.toString() === userId || userRoles.includes("Admin") || userRoles.includes("admin");
+
   useEffect(() => {
     if (favoriteTacticboards) {
       setIsFavorite(
@@ -686,7 +688,7 @@ const TacticBoardProfile = () => {
                   </AccordionDetails>
                 </Accordion>
               )}
-              {isEditMode && (
+              {isEditMode && isCreator && (
                 <Accordion defaultExpanded>
                   <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                     {t("TacticBoardProfile:access.title")}
