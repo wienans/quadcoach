@@ -702,6 +702,14 @@ const TacticBoardProfile = () => {
                           size="small"
                           label={t("TacticBoardProfile:access.add_user")}
                           fullWidth
+                          sx={{
+                            "& .MuiInputBase-root": {
+                              height: "40px",
+                            },
+                            "& .MuiInputBase-input": {
+                              padding: "8.5px 14px",
+                            },
+                          }}
                         />
                         <TextField
                           select
@@ -711,7 +719,16 @@ const TacticBoardProfile = () => {
                           onChange={(event) =>
                             setAccessMode(event.target.value as AccessLevel)
                           }
-                          sx={{ minWidth: 100, width: 200 }}
+                          sx={{
+                            minWidth: 100,
+                            width: 200,
+                            "& .MuiInputBase-root": {
+                              height: "40px",
+                            },
+                            "& .MuiInputBase-input": {
+                              padding: "8.5px 14px",
+                            },
+                          }}
                         >
                           <MenuItem value="edit">
                             {t("TacticBoardProfile:access.edit")}
