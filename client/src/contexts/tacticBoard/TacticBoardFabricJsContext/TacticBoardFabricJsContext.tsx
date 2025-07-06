@@ -92,10 +92,13 @@ const TacticBoardFabricJsContextProvider: FC<{
         canvasRef.current,
         canvasDefaultOptions,
       );
+      
+      // Re-initialize resize observer now that canvas is ready
+      initializeContainerResizeObserver();
     } catch (error) {
       throw new CanvasOperationError('Canvas initialization', error as Error);
     }
-  }, []);
+  }, [initializeContainerResizeObserver]);
 
   const setContainerRef = useCallback(
     (instance: HTMLDivElement | null) => {
@@ -368,6 +371,13 @@ const TacticBoardFabricJsContextProvider: FC<{
   const getDrawThickness = useCallback(() => {
     return drawThicknessRef.current;
   }, []);
+
+  // Effect to ensure resize observer is initialized when both refs are ready
+  useEffect(() => {
+    if (containerRef.current && canvasFabricRef.current) {
+      initializeContainerResizeObserver();
+    }
+  }, [initializeContainerResizeObserver]);
 
   // Cleanup effect - only on actual unmount, not on re-renders
   useEffect(() => {
