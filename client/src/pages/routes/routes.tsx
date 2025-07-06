@@ -124,9 +124,9 @@ const routes = [
       },
       {
         path: "/users",
-        handle: {
-          type: RouteHandleType.tacticBoards,
-        },
+        // handle: {
+        //   type: RouteHandleType.userProfile,
+        // },
         // async lazy() {
         //   // const Home = (await import("../Home")).default;
         //   // return {

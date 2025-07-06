@@ -13,16 +13,27 @@ import {
   FormHelperText,
   Grid,
   IconButton,
+  ListItem,
+  List,
   Skeleton,
   Theme,
   Tooltip,
   useMediaQuery,
+  TextField,
+  Box,
+  ListItemText,
+  Button,
+  MenuItem,
 } from "@mui/material";
 import * as Yup from "yup";
 import { SoftBox, SoftInput, SoftTypography } from "../../components";
 import {
+  AccessLevel,
+  useDeleteTacticboardAccessMutation,
   useDeleteTacticBoardMutation,
+  useGetAllTacticboardAccessUsersQuery,
   useGetTacticBoardQuery,
+  useSetTacticboardAccessMutation,
   useUpdateTacticBoardMetaMutation,
 } from "../../api/quadcoachApi/tacticboardApi";
 import { useParams, useNavigate } from "react-router-dom";
@@ -58,6 +69,7 @@ import {
   useRemoveFavoriteTacticboardMutation,
   useLazyGetFavoriteTacticboardsQuery,
 } from "../../api/quadcoachApi/favoriteApi";
+import { useLazyGetUserByEmailQuery } from "../userApi";
 const MarkdownRenderer = lazy(
   () => import("../../components/MarkdownRenderer"),
 );
@@ -72,6 +84,9 @@ const TacticBoardProfile = () => {
   const isUpMd = useMediaQuery((theme: Theme) => theme.breakpoints.up("md"));
   const [isEditMode, setIsEditMode] = useState<boolean>(false);
   const [openTagDialog, setOpenTagDialog] = useState<boolean>(false);
+  const [accessMode, setAccessMode] = useState<AccessLevel>("view");
+  const [userEmail, setUserEmail] = useState<string>("");
+  const [emailError, setEmailError] = useState<string>("");
   const { id: userId, roles: userRoles } = useAuth();
 
   const {
@@ -110,6 +125,21 @@ const TacticBoardProfile = () => {
 
   const [getFavoriteTacticboards, { data: favoriteTacticboards }] =
     useLazyGetFavoriteTacticboardsQuery();
+
+  const [getUserByEmail, { isLoading: isGetUserByEmailLoading }] =
+    useLazyGetUserByEmailQuery();
+
+  const { data: accessUsers } = useGetAllTacticboardAccessUsersQuery(
+    tacticBoardId || "",
+  );
+
+  const [setTacticboardAccess, { isLoading: isSetTacticboardAccessLoading }] =
+    useSetTacticboardAccessMutation();
+
+  const [
+    deleteTacticboardAccess,
+    { isLoading: isDeleteTacticboardAccessLoading },
+  ] = useDeleteTacticboardAccessMutation();
 
   useEffect(() => {
     if (userId) {
@@ -172,8 +202,20 @@ const TacticBoardProfile = () => {
       userRoles.includes("admin")
     ) {
       setIsPrivileged(true);
+    } else {
+      if (accessUsers) {
+        setIsPrivileged(
+          accessUsers.some((user) => {
+            return (
+              user.user._id.toString() === userId && user.access === "edit"
+            );
+          }),
+        );
+      }
     }
-  }, [tacticBoard, userId, userRoles]);
+  }, [tacticBoard, userId, userRoles, accessUsers]);
+
+  const isCreator = tacticBoard?.user?.toString() === userId || userRoles.includes("Admin") || userRoles.includes("admin");
 
   useEffect(() => {
     if (favoriteTacticboards) {
@@ -215,6 +257,35 @@ const TacticBoardProfile = () => {
   const translateError = (
     errorResourceKey: string | undefined,
   ): string | undefined => (errorResourceKey ? t(errorResourceKey) : undefined);
+
+  const handleAddAccess = async () => {
+    if (!tacticBoardId || !userEmail.trim()) {
+      setEmailError("Email is required");
+      return;
+    }
+
+    setEmailError("");
+    
+    try {
+      const userResult = await getUserByEmail(userEmail.trim()).unwrap();
+      
+      if (userResult && userResult._id) {
+        await setTacticboardAccess({
+          tacticboardId: tacticBoardId,
+          userId: userResult._id,
+          access: accessMode,
+        }).unwrap();
+        
+        setUserEmail("");
+      }
+    } catch (error: any) {
+      if (error?.status === 404) {
+        setEmailError("User not found with this email");
+      } else {
+        setEmailError("Failed to add user access");
+      }
+    }
+  };
 
   if (isTacticBoardLoading) {
     return (
@@ -649,6 +720,108 @@ const TacticBoardProfile = () => {
                       }}
                       onBlur={formik.handleBlur}
                     />
+                  </AccordionDetails>
+                </Accordion>
+              )}
+              {isEditMode && isCreator && (
+                <Accordion defaultExpanded>
+                  <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                    {t("TacticBoardProfile:access.title")}
+                  </AccordionSummary>
+                  <AccordionDetails>
+                    <Box
+                      sx={{ display: "flex", flexDirection: "column", gap: 2 }}
+                    >
+                      <Box
+                        sx={{ display: "flex", gap: 1, alignItems: "center" }}
+                      >
+                        <TextField
+                          size="small"
+                          label={t("TacticBoardProfile:access.add_user")}
+                          placeholder="Enter user email"
+                          fullWidth
+                          value={userEmail}
+                          onChange={(e) => {
+                            setUserEmail(e.target.value);
+                            if (emailError) setEmailError("");
+                          }}
+                          error={!!emailError}
+                          helperText={emailError}
+                          sx={{
+                            "& .MuiInputBase-root": {
+                              height: "40px",
+                            },
+                            "& .MuiInputBase-input": {
+                              padding: "8.5px 14px",
+                            },
+                          }}
+                        />
+                        <TextField
+                          select
+                          size="small"
+                          label={t("TacticBoardProfile:access.mode")}
+                          value={accessMode}
+                          onChange={(event) =>
+                            setAccessMode(event.target.value as AccessLevel)
+                          }
+                          sx={{
+                            minWidth: 100,
+                            width: 200,
+                            "& .MuiInputBase-root": {
+                              height: "40px",
+                            },
+                            "& .MuiInputBase-input": {
+                              padding: "8.5px 14px",
+                            },
+                          }}
+                        >
+                          <MenuItem value="edit">
+                            {t("TacticBoardProfile:access.edit")}
+                          </MenuItem>
+                          <MenuItem value="view">
+                            {t("TacticBoardProfile:access.view")}
+                          </MenuItem>
+                        </TextField>
+                        <Button
+                          variant="contained"
+                          size="small"
+                          disabled={isSetTacticboardAccessLoading || isGetUserByEmailLoading || !userEmail.trim()}
+                          onClick={handleAddAccess}
+                        >
+                          {t("TacticBoardProfile:access.add")}
+                        </Button>
+                      </Box>
+                      <List>
+                        {accessUsers?.map((entry) => (
+                          <ListItem
+                            key={entry.user._id}
+                            secondaryAction={
+                              <Button
+                                size="small"
+                                color="error"
+                                disabled={isDeleteTacticboardAccessLoading}
+                                onClick={() => {
+                                  if (tacticBoardId) {
+                                    deleteTacticboardAccess({
+                                      tacticboardId: tacticBoardId,
+                                      userId: entry.user._id,
+                                    });
+                                  }
+                                }}
+                              >
+                                {t("common:remove")}
+                              </Button>
+                            }
+                          >
+                            <ListItemText
+                              primary={
+                                entry.user.name + " (" + entry.access + ")"
+                              }
+                            />
+                          </ListItem>
+                        ))}
+                      </List>
+                    </Box>
                   </AccordionDetails>
                 </Accordion>
               )}

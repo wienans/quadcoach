@@ -33,6 +33,14 @@
       "tooltip": "Vollbildmodus"
     }
   },
+  "access":{
+    "title": "Zugang",
+    "view": "Ansicht",
+    "edit": "Bearbeiten",
+    "add_user": "Benutzer hinzufügen",
+    "mode": "Modus",
+    "add": "Hinzufügen"
+  },
   "description": "Beschreibung",
   "coaching_points": "Coaching Points",
   "deleteTacticBoard": "Taktik Tafel löschen",
