@@ -47,6 +47,7 @@ export const favoriteApiSlice = quadcoachApi.injectEndpoints({
         method: "get",
         data: request,
       }),
+      providesTags: [TagType.favorite],
     }),
 
     addFavoriteExercise: builder.mutation<
@@ -91,6 +92,7 @@ export const favoriteApiSlice = quadcoachApi.injectEndpoints({
         method: "get",
         data: request,
       }),
+      providesTags: [TagType.favorite],
     }),
     addFavoriteTacticboard: builder.mutation<
       TacticBoardFavoriteWithOutId,
