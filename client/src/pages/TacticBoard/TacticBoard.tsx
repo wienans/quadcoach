@@ -114,14 +114,34 @@ const TacticsBoard = (): JSX.Element => {
             pageData: getAllObjectsJson(),
           });
         } else if (removePage) {
-          // Remove Last Page
+          // Remove Current Page
+          const currentPageIndex = page - 1;
+          const pageToDelete = updatedTacticBoard.pages[currentPageIndex];
+          
           deleteTacticBoardPage({
             tacticboardId: tacticBoard._id,
-            pageId:
-              updatedTacticBoard.pages[updatedTacticBoard.pages.length - 1]._id,
+            pageId: pageToDelete._id,
           });
-          updatedTacticBoard.pages.pop();
-          // updateTacticBoard(updatedTacticBoard);
+          
+          // Remove the page from the array
+          updatedTacticBoard.pages.splice(currentPageIndex, 1);
+          
+          // Update maxPages
+          const newMaxPages = updatedTacticBoard.pages.length;
+          setMaxPages(newMaxPages);
+          
+          // Determine new current page after deletion
+          let newCurrentPage = page;
+          if (page > newMaxPages) {
+            // If we deleted the last page, go to the new last page
+            newCurrentPage = newMaxPages;
+          }
+          // If we deleted a middle page, stay on the same page number (which now shows the next page)
+          
+          setPage(newCurrentPage);
+          
+          // Load the new current page (adjust index since page numbers are 1-based)
+          page = newCurrentPage;
         } else if (page > currentPage) {
           // Go to next page
           updatedTacticBoard.pages[page - 2] = {

@@ -167,16 +167,13 @@ const TacticBoardTopMenu = ({
                 <ToggleButton
                   disabled={
                     isTacticBoardLoading ||
-                    maxPages == 1 ||
-                    currentPage != maxPages
+                    maxPages == 1
                   }
                   value={false}
                   selected={false}
                   onChange={() => {
                     if (maxPages > 1) {
-                      setMaxPages(maxPages - 1);
-                      setPage(currentPage - 1);
-                      onLoadPage(currentPage - 1, false, true);
+                      onLoadPage(currentPage, false, true);
                     }
                   }}
                   size="small"
