@@ -16,8 +16,12 @@ import {
 } from "../../api/quadcoachApi/tacticboardApi";
 import "../fullscreen.css";
 import { TacticBoard, TacticPage } from "../../api/quadcoachApi/domain";
-import { useTacticBoardFabricJs } from "../../hooks";
-import { TacticBoardFabricJsContextProvider } from "../../contexts";
+import { 
+  useTacticBoardCanvas, 
+  useTacticBoardData,
+  useKeyboardShortcuts 
+} from "../../hooks/taticBoard";
+import { TacticBoardProvider } from "../../contexts/tacticBoard";
 import Navbar from "../../components/Navbar";
 import TacticBoardItemsDrawerNav from "./TacticBoardItemsDrawerNav";
 import { useAppSelector } from "../../store/hooks";
@@ -31,13 +35,24 @@ const TacticsBoard = (): JSX.Element => {
   const { id: tacticBoardId } = useParams();
   const {
     canvasFabricRef: canvasRef,
-    loadFromTacticPage: loadFromJson,
     setSelection,
     setControls,
     getAllObjects,
-    getAllObjectsJson,
     removeActiveObjects,
-  } = useTacticBoardFabricJs();
+  } = useTacticBoardCanvas();
+  
+  const {
+    loadFromTacticPage: loadFromJson,
+    getAllObjectsJson,
+  } = useTacticBoardData();
+
+  // Enable keyboard shortcuts
+  useKeyboardShortcuts({
+    enableUndo: true,
+    enableRedo: true,
+    enableDelete: true,
+    enableSelectAll: true,
+  });
   const navigate = useNavigate();
   const refFullScreenContainer = useRef<HTMLDivElement>(null);
   const {
@@ -494,9 +509,9 @@ const TacticsBoard = (): JSX.Element => {
 
 const TacticsBoardWrapper = (): JSX.Element => {
   return (
-    <TacticBoardFabricJsContextProvider heightFirstResizing={true}>
+    <TacticBoardProvider heightFirstResizing={true}>
       <TacticsBoard />
-    </TacticBoardFabricJsContextProvider>
+    </TacticBoardProvider>
   );
 };
 

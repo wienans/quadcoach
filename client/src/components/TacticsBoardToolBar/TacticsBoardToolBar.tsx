@@ -8,7 +8,7 @@ import DrawIcon from "@mui/icons-material/Draw";
 import EditIcon from "@mui/icons-material/Edit";
 import { SoftBox, SoftButton } from "..";
 import FullscreenIcon from "@mui/icons-material/Fullscreen";
-import { useTacticBoardFabricJs } from "../../hooks";
+import { useTacticBoardCanvas, useTacticBoardDrawing } from "../../hooks/taticBoard";
 
 export type TacticsBoardToolBarProps = {
   editMode: boolean;
@@ -36,7 +36,8 @@ const TacticsBoardToolBar = ({
   onDelete,
   handleFullScreen,
 }: TacticsBoardToolBarProps): JSX.Element => {
-  const { setSelection, setDrawMode } = useTacticBoardFabricJs();
+  const { setSelection } = useTacticBoardCanvas();
+  const { setDrawMode } = useTacticBoardDrawing();
   const handleChange = (_: React.ChangeEvent<unknown>, value: number) => {
     setPage(value);
     onLoadPage(value);

@@ -8,8 +8,18 @@ export class FabricObjectFactory {
 
   static {
     // Initialize creators in static block to avoid type issues
-    this.creators.set('circle', (data) => new fabric.Circle(data as fabric.ICircleOptions));
-    this.creators.set('rect', (data) => new fabric.Rect(data as fabric.IRectOptions));
+    this.creators.set('circle', (data) => {
+      const options = { ...data } as fabric.ICircleOptions;
+      delete (options as any).type; // Remove type property to avoid fabric.js issues
+      return new fabric.Circle(options);
+    });
+    
+    this.creators.set('rect', (data) => {
+      const options = { ...data } as fabric.IRectOptions;
+      delete (options as any).type;
+      return new fabric.Rect(options);
+    });
+    
     this.creators.set('path', (data) => {
       if (!data.path) return null;
       let pathString: string;
@@ -19,12 +29,21 @@ export class FabricObjectFactory {
       } else {
         pathString = data.path.toString();
       }
-      return new fabric.Path(pathString, data as fabric.IPathOptions);
+      const options = { ...data } as fabric.IPathOptions;
+      delete (options as any).type;
+      delete (options as any).path;
+      return new fabric.Path(pathString, options);
     });
+    
     this.creators.set('text', (data) => {
       if (!data.text) return null;
-      return new fabric.Text(data.text as string, data as fabric.ITextOptions);
+      const options = { ...data } as fabric.ITextOptions;
+      delete (options as any).type;
+      const text = options.text as string;
+      delete (options as any).text;
+      return new fabric.Text(text, options);
     });
+    
     this.creators.set('group', (data) => this.createGroupObject(data));
   }
 

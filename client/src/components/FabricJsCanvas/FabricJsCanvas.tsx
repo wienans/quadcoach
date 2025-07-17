@@ -1,8 +1,10 @@
-import { useTacticBoardFabricJs } from "../../hooks";
+import { useTacticBoardCanvas } from "../../hooks/taticBoard/useTacticBoardCanvas";
+import { useTacticBoardLayout } from "../../hooks/taticBoard/useTacticBoardLayout";
 import { Box } from "@mui/material";
 
 const FabricJsCanvas = (): JSX.Element => {
-  const { setCanvasRef, setContainerRef } = useTacticBoardFabricJs();
+  const { setCanvasRef } = useTacticBoardCanvas();
+  const { setContainerRef } = useTacticBoardLayout();
 
   return (
     <Box

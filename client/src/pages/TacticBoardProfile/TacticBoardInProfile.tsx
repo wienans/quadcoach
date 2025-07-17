@@ -15,9 +15,10 @@ import EditIcon from "@mui/icons-material/Edit";
 import FullscreenIcon from "@mui/icons-material/Fullscreen";
 import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
 import MovieIcon from "@mui/icons-material/Movie";
-import { useLoadTacticBoard, useTacticBoardFabricJs } from "../../hooks";
+import { useLoadTacticBoard } from "../../hooks";
+import { useTacticBoardCanvas, useTacticBoardData } from "../../hooks/taticBoard";
 import { FabricJsCanvas, SoftBox } from "../../components";
-import { TacticBoardFabricJsContextProvider } from "../../contexts";
+import { TacticBoardProvider } from "../../contexts/tacticBoard";
 import { useAuth } from "../../store/hooks";
 import useVideoRecording from "../../hooks/taticBoard/useVideoRecording";
 import { useGetAllTacticboardAccessUsersQuery } from "../../api/quadcoachApi/tacticboardApi";
@@ -45,11 +46,14 @@ const TacticBoardInProfile = ({
   const refFullScreenContainer = useRef<HTMLDivElement>(null);
   const {
     canvasFabricRef: canvasRef,
-    loadFromTacticPage: loadFromJson,
     setSelection,
     setControls,
     getAllObjects,
-  } = useTacticBoardFabricJs();
+  } = useTacticBoardCanvas();
+  
+  const {
+    loadFromTacticPage: loadFromJson,
+  } = useTacticBoardData();
 
   const { id: userId, roles: userRoles } = useAuth();
 
@@ -406,9 +410,9 @@ const TacticBoardInProfileWrapper = ({
 }: TacticBoardInProfileWrapperProps): JSX.Element => {
   return (
     <div>
-      <TacticBoardFabricJsContextProvider heightFirstResizing={false}>
+      <TacticBoardProvider heightFirstResizing={false}>
         <TacticBoardInProfile tacticBoardId={tacticBoardId} />
-      </TacticBoardFabricJsContextProvider>
+      </TacticBoardProvider>
     </div>
   );
 };

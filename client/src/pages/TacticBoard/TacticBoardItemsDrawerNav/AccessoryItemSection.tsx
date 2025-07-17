@@ -16,7 +16,7 @@ import { AccessoryType } from "../../../contexts/tacticBoard/TacticBoardFabricJs
 import { useTranslation } from "react-i18next";
 import { fabric } from "fabric";
 import { v4 as uuidv4 } from "uuid";
-import { useTacticBoardFabricJs } from "../../../hooks";
+import { useTacticBoardCanvas } from "../../../hooks/taticBoard";
 
 const getAccesTypeSvg = (accessType: AccessoryType) => {
   switch (accessType) {
@@ -52,7 +52,7 @@ const getAccesTypeScale = (accessType: AccessoryType) => {
 
 const AccessoryItemSection = (): JSX.Element => {
   const { t } = useTranslation("TacticBoard");
-  const { addObject } = useTacticBoardFabricJs();
+  const { addObject } = useTacticBoardCanvas();
   const [open, setOpen] = useState<boolean>(true);
 
   const handleToggleOpen = () => setOpen(!open);

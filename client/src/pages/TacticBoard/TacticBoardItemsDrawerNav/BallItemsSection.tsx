@@ -16,7 +16,7 @@ import { BallType } from "../../../contexts/tacticBoard/TacticBoardFabricJsConte
 import { useTranslation } from "react-i18next";
 import { fabric } from "fabric";
 import { v4 as uuidv4 } from "uuid";
-import { useTacticBoardFabricJs } from "../../../hooks";
+import { useTacticBoardCanvas } from "../../../hooks/taticBoard";
 
 const getBallTypeColor = (ballType: BallType) => {
   switch (ballType) {
@@ -31,7 +31,7 @@ const getBallTypeColor = (ballType: BallType) => {
 
 const BallItemsSection = (): JSX.Element => {
   const { t } = useTranslation("TacticBoard");
-  const { addObject } = useTacticBoardFabricJs();
+  const { addObject } = useTacticBoardCanvas();
   const [open, setOpen] = useState<boolean>(true);
 
   const handleToggleOpen = () => setOpen(!open);

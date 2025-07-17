@@ -1,10 +1,10 @@
 import { useEffect } from "react";
-import { useTacticBoardFabricJs } from "..";
+import { useTacticBoardCanvas, useTacticBoardData } from ".";
 import { useGetTacticBoardQuery } from "../../api/quadcoachApi/tacticboardApi";
 
 export const useLoadTacticBoard = (tacticBoardId?: string) => {
-  const { loadFromTacticPage: loadFromJson, setSelection } =
-    useTacticBoardFabricJs();
+  const { setSelection } = useTacticBoardCanvas();
+  const { loadFromTacticPage: loadFromJson } = useTacticBoardData();
 
   const {
     data: tacticBoard,

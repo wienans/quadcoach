@@ -8,11 +8,9 @@ import {
 } from "@mui/material";
 import { Block } from "../../../../../api/quadcoachApi/domain";
 import { useTranslation } from "react-i18next";
-import {
-  useLoadTacticBoard,
-  useTacticBoardFabricJs,
-} from "../../../../../hooks";
-import { TacticBoardFabricJsContextProvider } from "../../../../../contexts";
+import { useLoadTacticBoard } from "../../../../../hooks";
+import { useTacticBoardCanvas, useTacticBoardData } from "../../../../../hooks/taticBoard";
+import { TacticBoardProvider } from "../../../../../contexts/tacticBoard";
 import { FabricJsCanvas, SoftBox } from "../../../../../components";
 import { useCallback, useEffect, useState } from "react";
 import PlayCircleIcon from "@mui/icons-material/PlayCircle";
@@ -35,11 +33,14 @@ const TacticBoardInBlock = ({
   const [isAnimating, setIsAnimating] = useState<boolean>(false);
   const {
     canvasFabricRef: canvasRef,
-    loadFromTacticPage: loadFromJson,
     setSelection,
     setControls,
     getAllObjects,
-  } = useTacticBoardFabricJs();
+  } = useTacticBoardCanvas();
+  
+  const {
+    loadFromTacticPage: loadFromJson,
+  } = useTacticBoardData();
 
   useEffect(() => {
     if (!isTacticBoardLoading && !isTacticBoardError && tacticBoard) {
@@ -186,9 +187,9 @@ const TacticBoardInBlockWrapper = ({
 }: TacticBoardInBlockWrapperProps): JSX.Element => {
   return (
     <div>
-      <TacticBoardFabricJsContextProvider heightFirstResizing={false}>
+      <TacticBoardProvider heightFirstResizing={false}>
         <TacticBoardInBlock block={block} />
-      </TacticBoardFabricJsContextProvider>
+      </TacticBoardProvider>
     </div>
   );
 };

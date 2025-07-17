@@ -16,7 +16,7 @@ import { PersonType } from "../../../contexts/tacticBoard/TacticBoardFabricJsCon
 import { useTranslation } from "react-i18next";
 import { fabric } from "fabric";
 import { v4 as uuidv4 } from "uuid";
-import { useTacticBoardFabricJs } from "../../../hooks";
+import { useTacticBoardCanvas, useTacticBoardData } from "../../../hooks/taticBoard";
 import { cloneDeep } from "lodash";
 
 const getFabricPersonColor = (personType: PersonType): string | undefined => {
@@ -65,7 +65,8 @@ const PersonItemsSection = ({
   teamA,
 }: PersonItemsSectionProps): JSX.Element => {
   const { t } = useTranslation("TacticBoard");
-  const { addObject, getAllObjectsJson } = useTacticBoardFabricJs();
+  const { addObject } = useTacticBoardCanvas();
+  const { getAllObjectsJson } = useTacticBoardData();
 
   const [open, setOpen] = useState<boolean>(true);
 

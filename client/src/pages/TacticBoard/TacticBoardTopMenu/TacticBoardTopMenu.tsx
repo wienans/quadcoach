@@ -21,7 +21,7 @@ import { useAppDispatch, useAppSelector } from "../../../store/hooks";
 import { setIsEditMode } from "../tacticBoardSlice";
 import { useTranslation } from "react-i18next";
 import { SoftBox, SoftTypography } from "../../../components";
-import { useTacticBoardFabricJs } from "../../../hooks";
+import { useTacticBoardCanvas } from "../../../hooks/taticBoard";
 import { useNavigate } from "react-router-dom";
 
 type TacticBoardTopMenuProps = {
@@ -63,7 +63,7 @@ const TacticBoardTopMenu = ({
 }: TacticBoardTopMenuProps): JSX.Element => {
   const dispatch = useAppDispatch();
   const { t } = useTranslation("TacticBoard");
-  const { setSelection } = useTacticBoardFabricJs();
+  const { setSelection } = useTacticBoardCanvas();
   const navigate = useNavigate();
   const isEditMode = useAppSelector((state) => state.tacticBoard.isEditMode);
 
