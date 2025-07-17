@@ -31,13 +31,13 @@ export enum AccessoryType {
 declare module "fabric/fabric-impl" {
   export interface IObjectOptions {
     id?: string;
-    objectType?: ObjectType;
+    objectType?: ObjectType | string;
     uuid?: string;
   }
 
   export interface Object {
     id?: string;
-    objectType?: ObjectType;
+    objectType?: ObjectType | string;
     uuid?: string;
   }
 
@@ -50,47 +50,16 @@ declare module "fabric/fabric-impl" {
   }
 }
 
-// Type-safe object creation interfaces that extend the existing TacticsObject
-export interface FabricObjectData {
-  uuid?: string;
-  type: string;
-  left?: number;
-  top?: number;
-  width?: number;
-  height?: number;
-  fill?: string;
-  stroke?: string;
-  strokeWidth?: number;
-  strokeDashArray?: number[];
-  strokeLineCap?: string;
-  strokeDashOffset?: number;
-  strokeLineJoin?: string;
-  strokeUniform?: boolean;
-  strokeMiterLimit?: number;
-  scaleX?: number;
-  scaleY?: number;
-  angle?: number;
-  opacity?: number;
-  objects?: FabricObjectData[];
-  visible?: boolean;
-  backgroundColor?: string;
-  radius?: number;
-  startAngle?: number;
-  endAngle?: number;
-  path?: string | [[string | number]];
-  text?: string;
-  originX?: string;
-  originY?: string;
-  fontFamily?: string;
-  fontSize?: number;
-  textAlign?: string;
-  objectType?: string;
-  [key: string]: unknown;
-}
+// Re-export unified types for backward compatibility
+export type { 
+  TacticBoardObject as FabricObjectData,
+  PartialTacticBoardObject,
+  TacticBoardPage,
+  TacticBoardPageWithoutId,
+  TacticBoardBackgroundImage
+} from './tacticBoardTypes';
 
-export interface TacticPageObject extends FabricObjectData {
-  uuid: string;
-}
+export type { TacticBoardObject as TacticPageObject } from './tacticBoardTypes';
 
 // Error types for better error handling
 export class FabricObjectCreationError extends Error {

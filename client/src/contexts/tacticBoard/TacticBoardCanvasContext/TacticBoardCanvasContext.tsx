@@ -166,7 +166,10 @@ const TacticBoardCanvasContextProvider: FC<{
       const command = new SetBackgroundCommand(canvas, oldBackground, src);
       commandHistory.current.execute(command);
     } catch (error) {
-      throw new CanvasOperationError("Setting background image", error as Error);
+      throw new CanvasOperationError(
+        "Setting background image",
+        error as Error,
+      );
     }
   }, []);
 

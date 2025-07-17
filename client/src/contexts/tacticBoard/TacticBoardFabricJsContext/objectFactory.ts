@@ -1,7 +1,9 @@
 import { fabric } from "fabric";
-import { FabricObjectData, FabricObjectCreationError } from "./types";
+import { FabricObjectCreationError } from "./types";
+import { PartialTacticBoardObject } from "./tacticBoardTypes";
+import { setUuid } from "./fabricTypes";
 
-export type ObjectCreator = (data: FabricObjectData) => fabric.Object | null;
+export type ObjectCreator = (data: PartialTacticBoardObject) => fabric.Object | null;
 
 export class FabricObjectFactory {
   private static creators: Map<string, ObjectCreator> = new Map();
@@ -50,8 +52,13 @@ export class FabricObjectFactory {
     this.creators.set("group", (data) => this.createGroupObject(data));
   }
 
-  static createObject(data: FabricObjectData): fabric.Object | null {
+  static createObject(data: PartialTacticBoardObject): fabric.Object | null {
     try {
+      if (!data.type || typeof data.type !== 'string') {
+        console.warn('Invalid object type:', data.type);
+        return null;
+      }
+      
       const creator = this.creators.get(data.type);
       if (!creator) {
         console.warn(`Unknown object type: ${data.type}`);
@@ -60,17 +67,17 @@ export class FabricObjectFactory {
 
       const obj = creator(data);
       if (obj && data.uuid) {
-        (obj as fabric.Object & { uuid?: string }).uuid = data.uuid;
+        setUuid(obj, data.uuid);
       }
 
       return obj;
     } catch (error) {
-      throw new FabricObjectCreationError(data.type, error as Error);
+      throw new FabricObjectCreationError(typeof data.type === 'string' ? data.type : 'unknown', error as Error);
     }
   }
 
   private static createGroupObject(
-    data: FabricObjectData,
+    data: PartialTacticBoardObject,
   ): fabric.Group | null {
     if (!data.objects || !Array.isArray(data.objects)) {
       return null;

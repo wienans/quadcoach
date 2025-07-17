@@ -14,6 +14,7 @@ import { TacticPage } from "../../../api/quadcoachApi/domain";
 import { useContainerResizeEvent } from "./useResizeEvent";
 
 import { TacticPageValidator } from "./validation";
+import { ExtendedBaseBrush } from "./fabricTypes";
 import { CanvasOperationError } from "./types";
 
 const canvasDefaultOptions: fabric.ICanvasOptions = {
@@ -301,13 +302,11 @@ const TacticBoardFabricJsContextProvider: FC<{
         if (drawMode && canvasFabric.freeDrawingBrush) {
           canvasFabric.freeDrawingBrush.color = drawColorRef.current;
           canvasFabric.freeDrawingBrush.width = drawThicknessRef.current;
-          const brush = canvasFabric.freeDrawingBrush as fabric.BaseBrush & {
-            strokeDashArray?: number[] | null;
-          };
+          const brush = canvasFabric.freeDrawingBrush as ExtendedBaseBrush;
           if (dashArray) {
             brush.strokeDashArray = dashArray;
           } else {
-            brush.strokeDashArray = null;
+            brush.strokeDashArray = [];
           }
         }
         setControls(false);

@@ -14,9 +14,12 @@ import SportsVolleyballIcon from "@mui/icons-material/SportsVolleyball";
 import CircleIcon from "@mui/icons-material/Circle";
 import { BallType } from "../../../contexts/tacticBoard/TacticBoardFabricJsContext/types";
 import { useTranslation } from "react-i18next";
-import { fabric } from "fabric";
 import { v4 as uuidv4 } from "uuid";
 import { useTacticBoardCanvas } from "../../../hooks/taticBoard";
+import {
+  createExtendedCircle,
+  setUuid,
+} from "../../../contexts/tacticBoard/TacticBoardFabricJsContext/fabricTypes";
 
 const getBallTypeColor = (ballType: BallType) => {
   switch (ballType) {
@@ -37,7 +40,7 @@ const BallItemsSection = (): JSX.Element => {
   const handleToggleOpen = () => setOpen(!open);
 
   const onBallAddClick = (ballType: BallType) => () => {
-    const circle = new fabric.Circle({
+    const circle = createExtendedCircle({
       radius: 10,
       stroke: "#000000", // Set the color of the stroke
       strokeWidth: 2, // Set the width of the stroke
@@ -45,8 +48,8 @@ const BallItemsSection = (): JSX.Element => {
       top: 333,
       fill: getBallTypeColor(ballType),
       hasControls: false, // Disable resizing handles
-    } as fabric.ICircleOptions & { uuid?: string });
-    (circle as fabric.Circle & { uuid?: string }).uuid = uuidv4();
+    });
+    setUuid(circle, uuidv4());
     addObject(circle);
   };
 

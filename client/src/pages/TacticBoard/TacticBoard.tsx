@@ -357,14 +357,14 @@ const TacticsBoard = (): JSX.Element => {
                 (obj as fabric.Object & { uuid?: string }).uuid,
             );
             if (targetObject && canvasRef.current) {
-              obj.animate("left", targetObject.left, {
+              obj.animate("left", targetObject.left || 0, {
                 onChange: canvasRef.current.renderAll.bind(canvasRef.current),
                 duration: 1000,
                 onComplete: () => {
                   onLoadPage(newPage);
                 },
               });
-              obj.animate("top", targetObject.top, {
+              obj.animate("top", targetObject.top || 0, {
                 onChange: canvasRef.current.renderAll.bind(canvasRef.current),
                 duration: 1000,
                 onComplete: () => {
@@ -402,14 +402,14 @@ const TacticsBoard = (): JSX.Element => {
                 (obj as fabric.Object & { uuid?: string }).uuid,
             );
             if (targetObject && canvasRef.current) {
-              obj.animate("left", targetObject.left, {
+              obj.animate("left", targetObject.left || 0, {
                 onChange: canvasRef.current.renderAll.bind(canvasRef.current),
                 duration: 1000,
                 onComplete: () => {
                   onLoadPage(newPage);
                 },
               });
-              obj.animate("top", targetObject.top, {
+              obj.animate("top", targetObject.top || 0, {
                 onChange: canvasRef.current.renderAll.bind(canvasRef.current),
                 duration: 1000,
                 onComplete: () => {
@@ -506,9 +506,9 @@ const TacticsBoard = (): JSX.Element => {
         </>
       )}
       {!isTacticBoardError && !isTacticBoardLoading && tacticBoard && (
-        <SoftBox
-          ref={refFullScreenContainer as React.RefObject<HTMLDivElement>}
-          sx={{
+        <div
+          ref={refFullScreenContainer}
+          style={{
             display: "flex",
             flexGrow: 1,
             maxHeight: "100%",
@@ -574,7 +574,7 @@ const TacticsBoard = (): JSX.Element => {
               </SoftBox>
             </SoftBox>
           </SoftBox>
-        </SoftBox>
+        </div>
       )}
     </SoftBox>
   );

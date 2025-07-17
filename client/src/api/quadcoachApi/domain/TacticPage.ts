@@ -1,50 +1,11 @@
-type TacticsBackImg = {
-  type: string;
-  width: number;
-  height: number;
-  src: string;
-};
-type TacticsObject = {
-  uuid: string; // Generated UUID v4
-  type: string;
-  left: number;
-  top: number;
-  width: number;
-  height: number;
-  fill?: string;
-  stroke?: string;
-  strokeWidth?: number;
-  strokeDashArray?: number[];
-  strokeLineCap?: string;
-  strokeDashOffset?: number;
-  strokeLineJoin?: string;
-  strokeUniform?: boolean;
-  strokeMiterLimit?: number;
-  scaleX?: number;
-  scaleY?: number;
-  angle?: number;
-  opacity?: number;
-  objects?: TacticsObject[];
-  visible?: boolean;
-  backgroundColor?: string;
-  radius?: number;
-  startAngle?: number;
-  endAngle?: number;
-  path?: [[string | number]];
-  text?: string;
-  originX?: string;
-  originY?: string;
-  fontFamily?: string;
-  fontSize?: number;
-  textAlign?: string;
-  objectType?: string;
-};
+// Re-export unified types from the centralized location
+export type { 
+  TacticBoardObject as TacticsObject,
+  TacticBoardBackgroundImage as TacticsBackImg,
+  TacticBoardPage as TacticPage,
+  TacticBoardPageWithoutId as TacticPageWithOutId
+} from "../../../contexts/tacticBoard/TacticBoardFabricJsContext/tacticBoardTypes";
 
-type TacticPage = {
-  _id: string;
-  version?: string;
-  objects?: TacticsObject[];
-  backgroundImage: TacticsBackImg;
-};
-export type TacticPageWithOutId = Omit<TacticPage, "_id">;
-export default TacticPage;
+// Default export for backward compatibility
+import type { TacticBoardPage } from "../../../contexts/tacticBoard/TacticBoardFabricJsContext/tacticBoardTypes";
+export default TacticBoardPage;

@@ -1,5 +1,5 @@
-import { TacticPage } from "../../../api/quadcoachApi/domain";
-import { FabricObjectData } from "./types";
+import TacticPage from "../../../api/quadcoachApi/domain/TacticPage";
+import { TacticBoardObject, PartialTacticBoardObject } from "./tacticBoardTypes";
 
 export class ValidationError extends Error {
   constructor(
@@ -68,7 +68,7 @@ export class TacticPageValidator {
       return errors;
     }
 
-    const fabricObj = obj as Partial<FabricObjectData>;
+    const fabricObj = obj as Partial<PartialTacticBoardObject>;
 
     // Validate required type field
     if (!fabricObj.type || typeof fabricObj.type !== "string") {
@@ -163,20 +163,22 @@ export class TacticPageValidator {
     if (sanitized.objects) {
       sanitized.objects = sanitized.objects
         .map((obj) => this.sanitizeObject(obj))
-        .filter((obj): obj is FabricObjectData => obj !== null && !!obj.uuid);
+        .filter(
+          (obj): obj is TacticBoardObject => obj !== null && !!obj.uuid,
+        ) as TacticBoardObject[];
     }
 
     return sanitized;
   }
 
   private static sanitizeObject(
-    obj: FabricObjectData,
-  ): FabricObjectData | null {
+    obj: PartialTacticBoardObject,
+  ): PartialTacticBoardObject | null {
     if (!obj || !obj.type) {
       return null;
     }
 
-    const sanitized: FabricObjectData = {
+    const sanitized: PartialTacticBoardObject = {
       ...obj,
       type: obj.type,
     };
@@ -190,10 +192,10 @@ export class TacticPageValidator {
     }
 
     // Sanitize group objects recursively
-    if (sanitized.type === "group" && sanitized.objects) {
+    if (sanitized.type === "group" && sanitized.objects && Array.isArray(sanitized.objects)) {
       sanitized.objects = sanitized.objects
-        .map((groupObj) => this.sanitizeObject(groupObj))
-        .filter((obj) => obj !== null) as FabricObjectData[];
+        .map((groupObj: PartialTacticBoardObject) => this.sanitizeObject(groupObj))
+        .filter((obj: PartialTacticBoardObject | null): obj is PartialTacticBoardObject => obj !== null);
     }
 
     return sanitized;

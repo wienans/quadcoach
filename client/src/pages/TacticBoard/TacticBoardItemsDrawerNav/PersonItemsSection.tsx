@@ -14,13 +14,19 @@ import PersonAddAlt1Icon from "@mui/icons-material/PersonAddAlt1";
 import CircleIcon from "@mui/icons-material/Circle";
 import { PersonType } from "../../../contexts/tacticBoard/TacticBoardFabricJsContext/types";
 import { useTranslation } from "react-i18next";
-import { fabric } from "fabric";
 import { v4 as uuidv4 } from "uuid";
 import {
   useTacticBoardCanvas,
   useTacticBoardData,
 } from "../../../hooks/taticBoard";
 import { cloneDeep } from "lodash";
+import {
+  createExtendedCircle,
+  createExtendedText,
+  createExtendedGroup,
+  setUuid,
+  setObjectType,
+} from "../../../contexts/tacticBoard/TacticBoardFabricJsContext/fabricTypes";
 
 const getFabricPersonColor = (personType: PersonType): string | undefined => {
   switch (personType) {
@@ -92,18 +98,18 @@ const PersonItemsSection = ({
   };
 
   const onPersonAddClick = (personType: PersonType) => () => {
-    const circle = new fabric.Circle({
+    const circle = createExtendedCircle({
       radius: 15,
       left: teamA ? 250 : 1220 - 250 - 30,
       top: 640,
       stroke: getFabricPersonColor(personType), // Set the color of the stroke
       strokeWidth: 3, // Set the width of the stroke
       fill: teamA ? teamAInfo.color : teamBInfo.color,
-    } as fabric.ICircleOptions & { uuid?: string });
-    (circle as fabric.Circle & { uuid?: string }).uuid = uuidv4();
+    });
+    setUuid(circle, uuidv4());
 
     const newNumber = getNextNumber();
-    const text = new fabric.Text(newNumber.toString(), {
+    const text = createExtendedText(newNumber.toString(), {
       left: teamA ? 250 + 16 : 1220 - 250 - 30 + 16,
       top: 640 + 16,
       fontFamily: "Arial",
@@ -111,17 +117,14 @@ const PersonItemsSection = ({
       textAlign: "center",
       originX: "center",
       originY: "center",
-    } as fabric.ITextOptions & { uuid?: string });
-    (text as fabric.Text & { uuid?: string }).uuid = uuidv4();
+    });
+    setUuid(text, uuidv4());
 
-    const group = new fabric.Group([circle, text], {
+    const group = createExtendedGroup([circle, text], {
       hasControls: false, // Disable resizing handles
-    } as fabric.IGroupOptions & { uuid?: string; objectType?: string });
-    (group as fabric.Group & { uuid?: string; objectType?: string }).uuid =
-      uuidv4();
-    (
-      group as fabric.Group & { uuid?: string; objectType?: string }
-    ).objectType = teamA ? "playerA" : "playerB";
+    });
+    setUuid(group, uuidv4());
+    setObjectType(group, teamA ? "playerA" : "playerB");
     addObject(group);
   };
 

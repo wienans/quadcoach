@@ -8,6 +8,7 @@ import {
   useContext,
 } from "react";
 import { TacticBoardCanvasContext } from "../TacticBoardCanvasContext/TacticBoardCanvasContext";
+import { ExtendedBaseBrush } from "../TacticBoardFabricJsContext/fabricTypes";
 
 export type LineStyle = "solid" | "dashed" | "dotted";
 
@@ -46,13 +47,11 @@ const TacticBoardDrawingContextProvider: FC<{
         if (drawMode && canvasFabric.freeDrawingBrush) {
           canvasFabric.freeDrawingBrush.color = drawColorRef.current;
           canvasFabric.freeDrawingBrush.width = drawThicknessRef.current;
-          const brush = canvasFabric.freeDrawingBrush as fabric.BaseBrush & {
-            strokeDashArray?: number[] | null;
-          };
+          const brush = canvasFabric.freeDrawingBrush as ExtendedBaseBrush;
           if (dashArray) {
             brush.strokeDashArray = dashArray;
           } else {
-            brush.strokeDashArray = null;
+            brush.strokeDashArray = [];
           }
         }
         setControls(false);

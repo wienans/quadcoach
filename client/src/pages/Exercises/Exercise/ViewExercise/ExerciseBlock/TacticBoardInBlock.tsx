@@ -19,6 +19,7 @@ import { useCallback, useEffect, useState } from "react";
 import PlayCircleIcon from "@mui/icons-material/PlayCircle";
 import PauseCircleIcon from "@mui/icons-material/PauseCircle";
 import ContentPasteIcon from "@mui/icons-material/ContentPaste";
+import { getUuid } from "../../../../../contexts/tacticBoard/TacticBoardFabricJsContext/fabricTypes";
 export type TacticBoardInBlockProps = {
   block: Block;
 };
@@ -79,19 +80,17 @@ const TacticBoardInBlock = ({
           const newPage = (prevPage % tacticBoard.pages.length) + 1;
           getAllObjects().forEach((obj) => {
             const targetObject = tacticBoard.pages[newPage - 1].objects?.find(
-              (nextObject) =>
-                nextObject.uuid ==
-                (obj as fabric.Object & { uuid?: string }).uuid,
+              (nextObject) => nextObject.uuid == getUuid(obj),
             );
-            if (targetObject && canvasRef.current) {
-              obj.animate("left", targetObject.left, {
+            if (targetObject && canvasRef.current && targetObject.left !== undefined && targetObject.top !== undefined) {
+              obj.animate("left", targetObject.left || 0, {
                 onChange: canvasRef.current.renderAll.bind(canvasRef.current),
                 duration: 1000,
                 onComplete: () => {
                   onLoadPage(newPage);
                 },
               });
-              obj.animate("top", targetObject.top, {
+              obj.animate("top", targetObject.top || 0, {
                 onChange: canvasRef.current.renderAll.bind(canvasRef.current),
                 duration: 1000,
                 onComplete: () => {

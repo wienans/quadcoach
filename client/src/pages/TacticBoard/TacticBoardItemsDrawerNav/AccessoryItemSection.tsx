@@ -17,6 +17,10 @@ import { useTranslation } from "react-i18next";
 import { fabric } from "fabric";
 import { v4 as uuidv4 } from "uuid";
 import { useTacticBoardCanvas } from "../../../hooks/taticBoard";
+import {
+  createExtendedGroup,
+  setUuid,
+} from "../../../contexts/tacticBoard/TacticBoardFabricJsContext/fabricTypes";
 
 const getAccesTypeSvg = (accessType: AccessoryType) => {
   switch (accessType) {
@@ -70,13 +74,13 @@ const AccessoryItemSection = (): JSX.Element => {
         obj.left = 600;
         obj.top = 333;
         obj.hasControls = false;
-        (obj as fabric.Object & { uuid?: string }).uuid = uuidv4();
+        setUuid(obj, uuidv4());
         if (accessType === AccessoryType.Hoop) {
           // Need to group the hoop as it has some weird behavior when saving to DB
-          const group = new fabric.Group([obj], {
+          const group = createExtendedGroup([obj], {
             hasControls: false, // Disable resizing handles
-          } as fabric.IGroupOptions & { uuid?: string });
-          (group as fabric.Group & { uuid?: string }).uuid = uuidv4();
+          });
+          setUuid(group, uuidv4());
           addObject(group);
         } else {
           addObject(obj);
