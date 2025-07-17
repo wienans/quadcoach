@@ -21,7 +21,7 @@ export const userApiSlice = quadcoachApi.injectEndpoints({
         return {
           url: `/api/user`,
           method: "put",
-          data: {...data, id: data._id},
+          data: { ...data, id: data._id },
         };
       },
       invalidatesTags: () => [TagType.user],
@@ -31,7 +31,7 @@ export const userApiSlice = quadcoachApi.injectEndpoints({
         return {
           url: `/api/user`,
           method: "delete",
-          data: {id: userId},
+          data: { id: userId },
         };
       },
       invalidatesTags: (_result, _error, userId) => [
@@ -48,12 +48,9 @@ export const userApiSlice = quadcoachApi.injectEndpoints({
       },
       invalidatesTags: () => [TagType.user],
     }),
-    getUsers: builder.query<
-      User[],
-      GetUserRequest | undefined
-    >({
+    getUsers: builder.query<User[], GetUserRequest | undefined>({
       query: (request) => {
-        const { nameRegex, emailRegex, roleString} = request || {};
+        const { nameRegex, emailRegex, roleString } = request || {};
         const urlParams = new URLSearchParams();
 
         if (nameRegex != null && nameRegex !== "") {

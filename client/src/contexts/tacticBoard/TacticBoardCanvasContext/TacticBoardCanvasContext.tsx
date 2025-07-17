@@ -8,7 +8,12 @@ import {
   useMemo,
 } from "react";
 import { fabric } from "fabric";
-import { CommandHistory, AddObjectCommand, RemoveMultipleObjectsCommand, SetBackgroundCommand } from "../TacticBoardFabricJsContext/commands";
+import {
+  CommandHistory,
+  AddObjectCommand,
+  RemoveMultipleObjectsCommand,
+  SetBackgroundCommand,
+} from "../TacticBoardFabricJsContext/commands";
 import { CanvasOperationError } from "../TacticBoardFabricJsContext/types";
 
 const canvasDefaultOptions: fabric.ICanvasOptions = {
@@ -71,15 +76,14 @@ const TacticBoardCanvasContextProvider: FC<{
 
       // Set up event listeners for command tracking
       const canvas = canvasFabricRef.current;
-      
+
       // Track object modifications
-      canvas.on('object:modified', () => {
+      canvas.on("object:modified", () => {
         // This would need more sophisticated tracking of before/after states
         // For now, we'll implement this in specific operations
       });
-
     } catch (error) {
-      throw new CanvasOperationError('Canvas initialization', error as Error);
+      throw new CanvasOperationError("Canvas initialization", error as Error);
     }
   }, []);
 
@@ -91,7 +95,7 @@ const TacticBoardCanvasContextProvider: FC<{
       const command = new AddObjectCommand(canvas, object);
       commandHistory.current.execute(command);
     } catch (error) {
-      throw new CanvasOperationError('Adding object', error as Error);
+      throw new CanvasOperationError("Adding object", error as Error);
     }
   }, []);
 
@@ -103,7 +107,7 @@ const TacticBoardCanvasContextProvider: FC<{
       canvas.remove(object);
       canvas.renderAll();
     } catch (error) {
-      throw new CanvasOperationError('Removing object', error as Error);
+      throw new CanvasOperationError("Removing object", error as Error);
     }
   }, []);
 
@@ -111,15 +115,17 @@ const TacticBoardCanvasContextProvider: FC<{
     try {
       const canvas = canvasFabricRef.current;
       if (!canvas) return;
-      
+
       const selectedObjects = canvas.getActiveObjects();
       if (selectedObjects.length === 0) return;
 
-      const command = new RemoveMultipleObjectsCommand(canvas, [...selectedObjects]);
+      const command = new RemoveMultipleObjectsCommand(canvas, [
+        ...selectedObjects,
+      ]);
       commandHistory.current.execute(command);
       canvas.discardActiveObject();
     } catch (error) {
-      throw new CanvasOperationError('Removing active objects', error as Error);
+      throw new CanvasOperationError("Removing active objects", error as Error);
     }
   }, []);
 
@@ -127,7 +133,7 @@ const TacticBoardCanvasContextProvider: FC<{
     try {
       return canvasFabricRef.current?.getActiveObjects() ?? [];
     } catch (error) {
-      console.error('Failed to get active objects:', error);
+      console.error("Failed to get active objects:", error);
       return [];
     }
   }, []);
@@ -136,7 +142,7 @@ const TacticBoardCanvasContextProvider: FC<{
     try {
       return canvasFabricRef.current?.getObjects() ?? [];
     } catch (error) {
-      console.error('Failed to get all objects:', error);
+      console.error("Failed to get all objects:", error);
       return [];
     }
   }, []);
@@ -146,11 +152,21 @@ const TacticBoardCanvasContextProvider: FC<{
       const canvas = canvasFabricRef.current;
       if (!canvas) return;
 
-      const oldBackground = getBackgroundImage();
+      // Get current background directly to avoid circular dependency
+      let oldBackground: string | undefined;
+      try {
+        const bgImage = canvas.backgroundImage as fabric.Image;
+        if (bgImage?.getSrc()) {
+          oldBackground = new URL(bgImage.getSrc()).pathname;
+        }
+      } catch (urlError) {
+        console.warn("Failed to parse background image URL:", urlError);
+      }
+
       const command = new SetBackgroundCommand(canvas, oldBackground, src);
       commandHistory.current.execute(command);
     } catch (error) {
-      throw new CanvasOperationError('Setting background image', error as Error);
+      throw new CanvasOperationError("Setting background image", error as Error);
     }
   }, []);
 
@@ -162,7 +178,7 @@ const TacticBoardCanvasContextProvider: FC<{
       if (!bgImage?.getSrc()) return;
       return new URL(bgImage.getSrc()).pathname;
     } catch (urlError) {
-      console.warn('Failed to parse background image URL:', urlError);
+      console.warn("Failed to parse background image URL:", urlError);
       return undefined;
     }
   }, []);
@@ -183,11 +199,11 @@ const TacticBoardCanvasContextProvider: FC<{
     try {
       const canvas = canvasFabricRef.current;
       if (!canvas) return;
-      
+
       canvas.clear();
       commandHistory.current.clear();
     } catch (error) {
-      throw new CanvasOperationError('Clearing canvas', error as Error);
+      throw new CanvasOperationError("Clearing canvas", error as Error);
     }
   }, []);
 
@@ -213,45 +229,48 @@ const TacticBoardCanvasContextProvider: FC<{
   }, []);
 
   // Memoize context value to prevent unnecessary re-renders
-  const contextValue = useMemo(() => ({
-    canvasRef,
-    setCanvasRef,
-    canvasFabricRef,
-    addObject,
-    getAllObjects,
-    getActiveObjects,
-    removeObject,
-    removeActiveObjects,
-    setSelection,
-    setControls,
-    setBackgroundImage,
-    getBackgroundImage,
-    clearCanvas,
-    undo,
-    redo,
-    canUndo,
-    canRedo,
-    clearHistory,
-  }), [
-    canvasRef,
-    setCanvasRef,
-    canvasFabricRef,
-    addObject,
-    getAllObjects,
-    getActiveObjects,
-    removeObject,
-    removeActiveObjects,
-    setSelection,
-    setControls,
-    setBackgroundImage,
-    getBackgroundImage,
-    clearCanvas,
-    undo,
-    redo,
-    canUndo,
-    canRedo,
-    clearHistory,
-  ]);
+  const contextValue = useMemo(
+    () => ({
+      canvasRef,
+      setCanvasRef,
+      canvasFabricRef,
+      addObject,
+      getAllObjects,
+      getActiveObjects,
+      removeObject,
+      removeActiveObjects,
+      setSelection,
+      setControls,
+      setBackgroundImage,
+      getBackgroundImage,
+      clearCanvas,
+      undo,
+      redo,
+      canUndo,
+      canRedo,
+      clearHistory,
+    }),
+    [
+      canvasRef,
+      setCanvasRef,
+      canvasFabricRef,
+      addObject,
+      getAllObjects,
+      getActiveObjects,
+      removeObject,
+      removeActiveObjects,
+      setSelection,
+      setControls,
+      setBackgroundImage,
+      getBackgroundImage,
+      clearCanvas,
+      undo,
+      redo,
+      canUndo,
+      canRedo,
+      clearHistory,
+    ],
+  );
 
   return (
     <TacticBoardCanvasContext.Provider value={contextValue}>

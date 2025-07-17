@@ -8,7 +8,10 @@ import DrawIcon from "@mui/icons-material/Draw";
 import EditIcon from "@mui/icons-material/Edit";
 import { SoftBox, SoftButton } from "..";
 import FullscreenIcon from "@mui/icons-material/Fullscreen";
-import { useTacticBoardCanvas, useTacticBoardDrawing } from "../../hooks/taticBoard";
+import {
+  useTacticBoardCanvas,
+  useTacticBoardDrawing,
+} from "../../hooks/taticBoard";
 
 export type TacticsBoardToolBarProps = {
   editMode: boolean;

@@ -16,7 +16,10 @@ import { toggleTacticBoardItemsDrawerOpen } from "../tacticBoardSlice";
 import { useAppDispatch, useAppSelector } from "../../../store/hooks";
 import { useTranslation } from "react-i18next";
 import { useEffect, useState } from "react";
-import { useTacticBoardCanvas, useTacticBoardDrawing } from "../../../hooks/taticBoard";
+import {
+  useTacticBoardCanvas,
+  useTacticBoardDrawing,
+} from "../../../hooks/taticBoard";
 import { ChromePicker, ColorResult } from "react-color";
 import Popover from "@mui/material/Popover";
 import ColorLensIcon from "@mui/icons-material/ColorLens";
@@ -35,11 +38,8 @@ const TacticBoardTopItemsMenu = ({
 }: TacticBoardTopItemMenuProps): JSX.Element => {
   const { t } = useTranslation("TacticBoard");
   const dispatch = useAppDispatch();
-  const {
-    setBackgroundImage,
-    getBackgroundImage,
-  } = useTacticBoardCanvas();
-  
+  const { setBackgroundImage, getBackgroundImage } = useTacticBoardCanvas();
+
   const {
     setDrawMode,
     setDrawColor,

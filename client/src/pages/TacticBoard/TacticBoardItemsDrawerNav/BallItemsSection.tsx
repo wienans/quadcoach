@@ -45,9 +45,8 @@ const BallItemsSection = (): JSX.Element => {
       top: 333,
       fill: getBallTypeColor(ballType),
       hasControls: false, // Disable resizing handles
-      // @ts-ignore
-      uuid: uuidv4(),
-    });
+    } as fabric.ICircleOptions & { uuid?: string });
+    (circle as fabric.Circle & { uuid?: string }).uuid = uuidv4();
     addObject(circle);
   };
 

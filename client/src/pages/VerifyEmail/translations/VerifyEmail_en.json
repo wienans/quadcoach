@@ -1,6 +1,6 @@
 {
-  "NoTokenFound":"No Token found",
-  "errorVerifyingEmail":"Error while verifying or already verified",
-  "waitingToVerifyEmail":"Waiting for verification",
-  "redirectingToLogin":"Verified. Redirecting to Login"
+  "NoTokenFound": "No Token found",
+  "errorVerifyingEmail": "Error while verifying or already verified",
+  "waitingToVerifyEmail": "Waiting for verification",
+  "redirectingToLogin": "Verified. Redirecting to Login"
 }

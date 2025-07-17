@@ -17,10 +17,10 @@ import {
 } from "../../api/quadcoachApi/tacticboardApi";
 import "../fullscreen.css";
 import { TacticBoard, TacticPage } from "../../api/quadcoachApi/domain";
-import { 
-  useTacticBoardCanvas, 
+import {
+  useTacticBoardCanvas,
   useTacticBoardData,
-  useKeyboardShortcuts 
+  useKeyboardShortcuts,
 } from "../../hooks/taticBoard";
 import { TacticBoardProvider } from "../../contexts/tacticBoard";
 import Navbar from "../../components/Navbar";
@@ -41,11 +41,9 @@ const TacticsBoard = (): JSX.Element => {
     getAllObjects,
     removeActiveObjects,
   } = useTacticBoardCanvas();
-  
-  const {
-    loadFromTacticPage: loadFromJson,
-    getAllObjectsJson,
-  } = useTacticBoardData();
+
+  const { loadFromTacticPage: loadFromJson, getAllObjectsJson } =
+    useTacticBoardData();
 
   // Enable keyboard shortcuts
   useKeyboardShortcuts({
@@ -97,8 +95,18 @@ const TacticsBoard = (): JSX.Element => {
   };
 
   const onLoadPage = useCallback(
-    (page: number, newPage?: boolean, removePage?: boolean, insertPage?: boolean) => {
-      if ((newPage && removePage) || (newPage && insertPage) || (removePage && insertPage)) return;
+    (
+      page: number,
+      newPage?: boolean,
+      removePage?: boolean,
+      insertPage?: boolean,
+    ) => {
+      if (
+        (newPage && removePage) ||
+        (newPage && insertPage) ||
+        (removePage && insertPage)
+      )
+        return;
       if (!tacticBoard) return;
       const updatedTacticBoard: TacticBoard = cloneDeep(tacticBoard);
       if (isPrivileged && isEditMode) {
@@ -120,56 +128,56 @@ const TacticsBoard = (): JSX.Element => {
           // Insert page after current page, duplicating current page content
           const currentPageData = getAllObjectsJson();
           const insertPosition = page; // Insert after current page (0-based index)
-          
+
           // Save current page first
           updatedTacticBoard.pages[page - 1] = {
             ...updatedTacticBoard.pages[page - 1],
             ...currentPageData,
           } as TacticPage;
-          
+
           updateTacticBoardPage({
             tacticboardId: tacticBoard._id,
             pageId: updatedTacticBoard.pages[page - 1]._id,
             pageData: currentPageData,
           });
-          
+
           // Insert the duplicated page
           insertTacticBoardPage({
             tacticboardId: tacticBoard._id,
             position: insertPosition,
             pageData: currentPageData,
           });
-          
+
           // Update local state - insert the duplicated page
           updatedTacticBoard.pages.splice(insertPosition, 0, {
             ...updatedTacticBoard.pages[page - 1],
             _id: "temp-" + Date.now(), // Temporary ID until refresh
           } as TacticPage);
-          
+
           // Update maxPages and navigate to the new page
           const newMaxPages = updatedTacticBoard.pages.length;
           setMaxPages(newMaxPages);
           setPage(page + 1); // Navigate to the newly inserted page
-          
+
           // Load the new page (adjust index since page numbers are 1-based)
           page = page + 1;
         } else if (removePage) {
           // Remove Current Page
           const currentPageIndex = page - 1;
           const pageToDelete = updatedTacticBoard.pages[currentPageIndex];
-          
+
           deleteTacticBoardPage({
             tacticboardId: tacticBoard._id,
             pageId: pageToDelete._id,
           });
-          
+
           // Remove the page from the array
           updatedTacticBoard.pages.splice(currentPageIndex, 1);
-          
+
           // Update maxPages
           const newMaxPages = updatedTacticBoard.pages.length;
           setMaxPages(newMaxPages);
-          
+
           // Determine new current page after deletion
           let newCurrentPage = page;
           if (page > newMaxPages) {
@@ -177,9 +185,9 @@ const TacticsBoard = (): JSX.Element => {
             newCurrentPage = newMaxPages;
           }
           // If we deleted a middle page, stay on the same page number (which now shows the next page)
-          
+
           setPage(newCurrentPage);
-          
+
           // Load the new current page (adjust index since page numbers are 1-based)
           page = newCurrentPage;
         } else if (page > currentPage) {
@@ -344,7 +352,9 @@ const TacticsBoard = (): JSX.Element => {
           const newPage = (prevPage % tacticBoard.pages.length) + 1;
           getAllObjects().forEach((obj) => {
             const targetObject = tacticBoard.pages[newPage - 1].objects?.find(
-              (nextObject) => (nextObject as { uuid?: string }).uuid === (obj as fabric.Object & { uuid?: string }).uuid,
+              (nextObject) =>
+                (nextObject as { uuid?: string }).uuid ===
+                (obj as fabric.Object & { uuid?: string }).uuid,
             );
             if (targetObject && canvasRef.current) {
               obj.animate("left", targetObject.left, {
@@ -387,7 +397,9 @@ const TacticsBoard = (): JSX.Element => {
           }
           getAllObjects().forEach((obj) => {
             const targetObject = tacticBoard.pages[newPage - 1].objects?.find(
-              (nextObject) => (nextObject as { uuid?: string }).uuid === (obj as fabric.Object & { uuid?: string }).uuid,
+              (nextObject) =>
+                (nextObject as { uuid?: string }).uuid ===
+                (obj as fabric.Object & { uuid?: string }).uuid,
             );
             if (targetObject && canvasRef.current) {
               obj.animate("left", targetObject.left, {
@@ -495,7 +507,7 @@ const TacticsBoard = (): JSX.Element => {
       )}
       {!isTacticBoardError && !isTacticBoardLoading && tacticBoard && (
         <SoftBox
-          ref={refFullScreenContainer as any}
+          ref={refFullScreenContainer as React.RefObject<HTMLDivElement>}
           sx={{
             display: "flex",
             flexGrow: 1,

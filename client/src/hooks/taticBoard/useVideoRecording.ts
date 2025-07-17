@@ -152,7 +152,7 @@ const useVideoRecording = () => {
         }));
       }
     },
-    [],
+    [recordingState.expectedDuration, recordingState.recordingStartTime],
   );
 
   const stopRecording = useCallback(() => {

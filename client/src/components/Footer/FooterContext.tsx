@@ -1,11 +1,13 @@
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useState } from "react";
 
 interface FooterContextType {
   isFooterOpen: boolean;
   toggleFooter: () => void;
 }
 
-const FooterContext = createContext<FooterContextType | undefined>(undefined);
+export const FooterContext = createContext<FooterContextType | undefined>(
+  undefined,
+);
 
 export const FooterProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -21,12 +23,4 @@ export const FooterProvider: React.FC<{ children: React.ReactNode }> = ({
       {children}
     </FooterContext.Provider>
   );
-};
-
-export const useFooter = () => {
-  const context = useContext(FooterContext);
-  if (context === undefined) {
-    throw new Error("useFooter must be used within a FooterProvider");
-  }
-  return context;
 };

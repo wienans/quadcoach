@@ -23,28 +23,25 @@ export interface TacticBoardPageManagerActions {
   initializeFromTacticBoard: (tacticBoard: TacticBoard) => void;
 }
 
-export interface TacticBoardPageManagerReturn extends TacticBoardPageManagerState, TacticBoardPageManagerActions {
+export interface TacticBoardPageManagerReturn
+  extends TacticBoardPageManagerState,
+    TacticBoardPageManagerActions {
   isLoading: boolean;
 }
 
 export const useTacticBoardPageManager = (
   tacticBoard: TacticBoard | undefined,
   isPrivileged: boolean,
-  isEditMode: boolean
+  isEditMode: boolean,
 ): TacticBoardPageManagerReturn => {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [maxPages, setMaxPages] = useState<number>(1);
   const [isAnimating, setIsAnimating] = useState<boolean>(false);
 
-  const {
-    setSelection,
-    setControls,
-  } = useTacticBoardCanvas();
-  
-  const {
-    loadFromTacticPage: loadFromJson,
-    getAllObjectsJson,
-  } = useTacticBoardData();
+  const { setSelection, setControls } = useTacticBoardCanvas();
+
+  const { loadFromTacticPage: loadFromJson, getAllObjectsJson } =
+    useTacticBoardData();
 
   const [updateTacticBoardPage, { isLoading: isUpdatePageLoading }] =
     useUpdateTacticBoardPageMutation();
@@ -53,7 +50,8 @@ export const useTacticBoardPageManager = (
   const [deleteTacticBoardPage, { isLoading: isDeletePageLoading }] =
     useDeleteTacticBoardPageMutation();
 
-  const isLoading = isUpdatePageLoading || isCreatePageLoading || isDeletePageLoading;
+  const isLoading =
+    isUpdatePageLoading || isCreatePageLoading || isDeletePageLoading;
 
   const setPage = useCallback((page: number) => {
     setCurrentPage(page);
@@ -67,25 +65,28 @@ export const useTacticBoardPageManager = (
     setIsAnimating(animating);
   }, []);
 
-  const initializeFromTacticBoard = useCallback((board: TacticBoard) => {
-    if (board.pages && board.pages.length > 0) {
-      loadFromJson(board.pages[0]);
-      setMaxPages(board.pages.length);
-      setCurrentPage(1);
-      setSelection(false);
-      setControls(false);
-    }
-  }, [loadFromJson, setSelection, setControls]);
+  const initializeFromTacticBoard = useCallback(
+    (board: TacticBoard) => {
+      if (board.pages && board.pages.length > 0) {
+        loadFromJson(board.pages[0]);
+        setMaxPages(board.pages.length);
+        setCurrentPage(1);
+        setSelection(false);
+        setControls(false);
+      }
+    },
+    [loadFromJson, setSelection, setControls],
+  );
 
   const saveTacticBoard = useCallback(() => {
     if (!tacticBoard) return;
-    
+
     const updatedTacticBoard: TacticBoard = cloneDeep(tacticBoard);
     updatedTacticBoard.pages[currentPage - 1] = {
       ...updatedTacticBoard.pages[currentPage - 1],
       ...getAllObjectsJson(),
     } as TacticPage;
-    
+
     updateTacticBoardPage({
       tacticboardId: tacticBoard._id,
       pageId: updatedTacticBoard.pages[currentPage - 1]._id,
@@ -97,9 +98,9 @@ export const useTacticBoardPageManager = (
     (page: number, newPage?: boolean, removePage?: boolean) => {
       if (newPage && removePage) return;
       if (!tacticBoard) return;
-      
+
       const updatedTacticBoard: TacticBoard = cloneDeep(tacticBoard);
-      
+
       if (isPrivileged && isEditMode) {
         if (newPage) {
           // Create new page
@@ -107,13 +108,13 @@ export const useTacticBoardPageManager = (
             ...updatedTacticBoard.pages[page - 1],
             ...getAllObjectsJson(),
           } as TacticPage;
-          
+
           updateTacticBoardPage({
             tacticboardId: tacticBoard._id,
             pageId: updatedTacticBoard.pages[page - 2]._id,
             pageData: getAllObjectsJson(),
           });
-          
+
           createTacticBoardPage({
             tacticboardId: tacticBoard._id,
             pageData: getAllObjectsJson(),
@@ -122,7 +123,8 @@ export const useTacticBoardPageManager = (
           // Remove last page
           deleteTacticBoardPage({
             tacticboardId: tacticBoard._id,
-            pageId: updatedTacticBoard.pages[updatedTacticBoard.pages.length - 1]._id,
+            pageId:
+              updatedTacticBoard.pages[updatedTacticBoard.pages.length - 1]._id,
           });
           updatedTacticBoard.pages.pop();
         } else if (page > currentPage) {
@@ -131,7 +133,7 @@ export const useTacticBoardPageManager = (
             ...updatedTacticBoard.pages[page - 2],
             ...getAllObjectsJson(),
           } as TacticPage;
-          
+
           updateTacticBoardPage({
             tacticboardId: tacticBoard._id,
             pageId: updatedTacticBoard.pages[page - 2]._id,
@@ -143,7 +145,7 @@ export const useTacticBoardPageManager = (
             ...updatedTacticBoard.pages[page],
             ...getAllObjectsJson(),
           } as TacticPage;
-          
+
           updateTacticBoardPage({
             tacticboardId: tacticBoard._id,
             pageId: updatedTacticBoard.pages[page]._id,
@@ -151,9 +153,9 @@ export const useTacticBoardPageManager = (
           });
         }
       }
-      
+
       loadFromJson(updatedTacticBoard.pages[page - 1]);
-      
+
       if (isPrivileged && isEditMode) {
         setSelection(true);
       } else {
@@ -173,7 +175,7 @@ export const useTacticBoardPageManager = (
       createTacticBoardPage,
       deleteTacticBoardPage,
       setSelection,
-    ]
+    ],
   );
 
   return {

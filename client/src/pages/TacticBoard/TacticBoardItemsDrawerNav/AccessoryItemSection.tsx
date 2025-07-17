@@ -70,15 +70,13 @@ const AccessoryItemSection = (): JSX.Element => {
         obj.left = 600;
         obj.top = 333;
         obj.hasControls = false;
-        // @ts-ignore
-        obj.uuid = uuidv4();
+        (obj as fabric.Object & { uuid?: string }).uuid = uuidv4();
         if (accessType === AccessoryType.Hoop) {
           // Need to group the hoop as it has some weird behavior when saving to DB
           const group = new fabric.Group([obj], {
-            // @ts-ignore
-            uuid: uuidv4(),
             hasControls: false, // Disable resizing handles
-          });
+          } as fabric.IGroupOptions & { uuid?: string });
+          (group as fabric.Group & { uuid?: string }).uuid = uuidv4();
           addObject(group);
         } else {
           addObject(obj);

@@ -215,7 +215,10 @@ const TacticBoardProfile = () => {
     }
   }, [tacticBoard, userId, userRoles, accessUsers]);
 
-  const isCreator = tacticBoard?.user?.toString() === userId || userRoles.includes("Admin") || userRoles.includes("admin");
+  const isCreator =
+    tacticBoard?.user?.toString() === userId ||
+    userRoles.includes("Admin") ||
+    userRoles.includes("admin");
 
   useEffect(() => {
     if (favoriteTacticboards) {
@@ -265,21 +268,21 @@ const TacticBoardProfile = () => {
     }
 
     setEmailError("");
-    
+
     try {
       const userResult = await getUserByEmail(userEmail.trim()).unwrap();
-      
+
       if (userResult && userResult._id) {
         await setTacticboardAccess({
           tacticboardId: tacticBoardId,
           userId: userResult._id,
           access: accessMode,
         }).unwrap();
-        
+
         setUserEmail("");
       }
-    } catch (error: any) {
-      if (error?.status === 404) {
+    } catch (error: unknown) {
+      if ((error as { status?: number })?.status === 404) {
         setEmailError("User not found with this email");
       } else {
         setEmailError("Failed to add user access");
@@ -785,7 +788,11 @@ const TacticBoardProfile = () => {
                         <Button
                           variant="contained"
                           size="small"
-                          disabled={isSetTacticboardAccessLoading || isGetUserByEmailLoading || !userEmail.trim()}
+                          disabled={
+                            isSetTacticboardAccessLoading ||
+                            isGetUserByEmailLoading ||
+                            !userEmail.trim()
+                          }
                           onClick={handleAddAccess}
                         >
                           {t("TacticBoardProfile:access.add")}

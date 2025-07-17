@@ -28,8 +28,10 @@ export const TacticBoardDrawingContext = createContext<
 const TacticBoardDrawingContextProvider: FC<{
   children: ReactNode;
 }> = ({ children }) => {
-  const { canvasFabricRef, setControls } = useContext(TacticBoardCanvasContext)!;
-  
+  const { canvasFabricRef, setControls } = useContext(
+    TacticBoardCanvasContext,
+  )!;
+
   const drawColorRef = useRef<string>("#000000");
   const drawThicknessRef = useRef<number>(2);
   const lineStyleRef = useRef<LineStyle>("solid");
@@ -44,7 +46,9 @@ const TacticBoardDrawingContextProvider: FC<{
         if (drawMode && canvasFabric.freeDrawingBrush) {
           canvasFabric.freeDrawingBrush.color = drawColorRef.current;
           canvasFabric.freeDrawingBrush.width = drawThicknessRef.current;
-          const brush = canvasFabric.freeDrawingBrush as any;
+          const brush = canvasFabric.freeDrawingBrush as fabric.BaseBrush & {
+            strokeDashArray?: number[] | null;
+          };
           if (dashArray) {
             brush.strokeDashArray = dashArray;
           } else {
@@ -53,7 +57,7 @@ const TacticBoardDrawingContextProvider: FC<{
         }
         setControls(false);
       } catch (error) {
-        console.error('Failed to set draw mode:', error);
+        console.error("Failed to set draw mode:", error);
       }
     },
     [canvasFabricRef, setControls],
@@ -85,33 +89,39 @@ const TacticBoardDrawingContextProvider: FC<{
     return lineStyleRef.current;
   }, []);
 
-  const setDrawColor = useCallback((color: string) => {
-    try {
-      const canvasFabric = canvasFabricRef.current;
-      if (!canvasFabric) return;
+  const setDrawColor = useCallback(
+    (color: string) => {
+      try {
+        const canvasFabric = canvasFabricRef.current;
+        if (!canvasFabric) return;
 
-      drawColorRef.current = color;
-      if (canvasFabric.isDrawingMode && canvasFabric.freeDrawingBrush) {
-        canvasFabric.freeDrawingBrush.color = color;
+        drawColorRef.current = color;
+        if (canvasFabric.isDrawingMode && canvasFabric.freeDrawingBrush) {
+          canvasFabric.freeDrawingBrush.color = color;
+        }
+      } catch (error) {
+        console.error("Failed to set draw color:", error);
       }
-    } catch (error) {
-      console.error('Failed to set draw color:', error);
-    }
-  }, [canvasFabricRef]);
+    },
+    [canvasFabricRef],
+  );
 
-  const setDrawThickness = useCallback((thickness: number) => {
-    try {
-      const canvasFabric = canvasFabricRef.current;
-      if (!canvasFabric) return;
+  const setDrawThickness = useCallback(
+    (thickness: number) => {
+      try {
+        const canvasFabric = canvasFabricRef.current;
+        if (!canvasFabric) return;
 
-      drawThicknessRef.current = thickness;
-      if (canvasFabric.isDrawingMode && canvasFabric.freeDrawingBrush) {
-        canvasFabric.freeDrawingBrush.width = thickness;
+        drawThicknessRef.current = thickness;
+        if (canvasFabric.isDrawingMode && canvasFabric.freeDrawingBrush) {
+          canvasFabric.freeDrawingBrush.width = thickness;
+        }
+      } catch (error) {
+        console.error("Failed to set draw thickness:", error);
       }
-    } catch (error) {
-      console.error('Failed to set draw thickness:', error);
-    }
-  }, [canvasFabricRef]);
+    },
+    [canvasFabricRef],
+  );
 
   const getDrawColor = useCallback(() => {
     return drawColorRef.current;
@@ -122,23 +132,26 @@ const TacticBoardDrawingContextProvider: FC<{
   }, []);
 
   // Memoize context value to prevent unnecessary re-renders
-  const contextValue = useMemo(() => ({
-    setDrawMode,
-    setDrawColor,
-    setDrawThickness,
-    getDrawColor,
-    getDrawThickness,
-    setLineStyle,
-    getLineStyle,
-  }), [
-    setDrawMode,
-    setDrawColor,
-    setDrawThickness,
-    getDrawColor,
-    getDrawThickness,
-    setLineStyle,
-    getLineStyle,
-  ]);
+  const contextValue = useMemo(
+    () => ({
+      setDrawMode,
+      setDrawColor,
+      setDrawThickness,
+      getDrawColor,
+      getDrawThickness,
+      setLineStyle,
+      getLineStyle,
+    }),
+    [
+      setDrawMode,
+      setDrawColor,
+      setDrawThickness,
+      getDrawColor,
+      getDrawThickness,
+      setLineStyle,
+      getLineStyle,
+    ],
+  );
 
   return (
     <TacticBoardDrawingContext.Provider value={contextValue}>

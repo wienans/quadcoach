@@ -16,7 +16,10 @@ import { PersonType } from "../../../contexts/tacticBoard/TacticBoardFabricJsCon
 import { useTranslation } from "react-i18next";
 import { fabric } from "fabric";
 import { v4 as uuidv4 } from "uuid";
-import { useTacticBoardCanvas, useTacticBoardData } from "../../../hooks/taticBoard";
+import {
+  useTacticBoardCanvas,
+  useTacticBoardData,
+} from "../../../hooks/taticBoard";
 import { cloneDeep } from "lodash";
 
 const getFabricPersonColor = (personType: PersonType): string | undefined => {
@@ -73,10 +76,16 @@ const PersonItemsSection = ({
   const handleToggleOpen = () => setOpen(!open);
   const getNextNumber = () => {
     let numbers: number[] = [0];
-    // @ts-ignore
-    getAllObjectsJson().objects.forEach((obj) => {
+    (
+      getAllObjectsJson() as {
+        objects: Array<{
+          objectType?: string;
+          objects?: Array<{ text?: string }>;
+        }>;
+      }
+    ).objects.forEach((obj) => {
       if (obj.objectType == (teamA ? "playerA" : "playerB")) {
-        numbers = [...numbers, parseInt(obj.objects[1].text)];
+        numbers = [...numbers, parseInt(obj.objects?.[1]?.text || "0")];
       }
     });
     return findNumberInArray(numbers);
@@ -90,9 +99,9 @@ const PersonItemsSection = ({
       stroke: getFabricPersonColor(personType), // Set the color of the stroke
       strokeWidth: 3, // Set the width of the stroke
       fill: teamA ? teamAInfo.color : teamBInfo.color,
-      // @ts-ignore
-      uuid: uuidv4(),
-    });
+    } as fabric.ICircleOptions & { uuid?: string });
+    (circle as fabric.Circle & { uuid?: string }).uuid = uuidv4();
+
     const newNumber = getNextNumber();
     const text = new fabric.Text(newNumber.toString(), {
       left: teamA ? 250 + 16 : 1220 - 250 - 30 + 16,
@@ -102,15 +111,17 @@ const PersonItemsSection = ({
       textAlign: "center",
       originX: "center",
       originY: "center",
-      // @ts-ignore
-      uuid: uuidv4(),
-    });
+    } as fabric.ITextOptions & { uuid?: string });
+    (text as fabric.Text & { uuid?: string }).uuid = uuidv4();
+
     const group = new fabric.Group([circle, text], {
-      uuid: uuidv4(),
-      // @ts-ignore
-      objectType: teamA ? "playerA" : "playerB",
       hasControls: false, // Disable resizing handles
-    });
+    } as fabric.IGroupOptions & { uuid?: string; objectType?: string });
+    (group as fabric.Group & { uuid?: string; objectType?: string }).uuid =
+      uuidv4();
+    (
+      group as fabric.Group & { uuid?: string; objectType?: string }
+    ).objectType = teamA ? "playerA" : "playerB";
     addObject(group);
   };
 

@@ -16,24 +16,24 @@ export class CommandHistory {
   execute(command: Command): void {
     // Remove any commands after current index (when undoing then executing new command)
     this.history = this.history.slice(0, this.currentIndex + 1);
-    
+
     // Add new command
     this.history.push(command);
     this.currentIndex++;
-    
+
     // Limit history size
     if (this.history.length > this.maxHistorySize) {
       this.history.shift();
       this.currentIndex--;
     }
-    
+
     // Execute the command
     command.execute();
   }
 
   undo(): boolean {
     if (!this.canUndo()) return false;
-    
+
     const command = this.history[this.currentIndex];
     command.undo();
     this.currentIndex--;
@@ -42,7 +42,7 @@ export class CommandHistory {
 
   redo(): boolean {
     if (!this.canRedo()) return false;
-    
+
     this.currentIndex++;
     const command = this.history[this.currentIndex];
     command.execute();
@@ -63,7 +63,7 @@ export class CommandHistory {
   }
 
   getHistory(): string[] {
-    return this.history.map(cmd => cmd.getDescription());
+    return this.history.map((cmd) => cmd.getDescription());
   }
 }
 
@@ -71,7 +71,7 @@ export class CommandHistory {
 export class AddObjectCommand implements Command {
   constructor(
     private canvas: fabric.Canvas,
-    private object: fabric.Object
+    private object: fabric.Object,
   ) {}
 
   execute(): void {
@@ -85,14 +85,14 @@ export class AddObjectCommand implements Command {
   }
 
   getDescription(): string {
-    return `Add ${this.object.type || 'object'}`;
+    return `Add ${this.object.type || "object"}`;
   }
 }
 
 export class RemoveObjectCommand implements Command {
   constructor(
     private canvas: fabric.Canvas,
-    private object: fabric.Object
+    private object: fabric.Object,
   ) {}
 
   execute(): void {
@@ -106,7 +106,7 @@ export class RemoveObjectCommand implements Command {
   }
 
   getDescription(): string {
-    return `Remove ${this.object.type || 'object'}`;
+    return `Remove ${this.object.type || "object"}`;
   }
 }
 
@@ -114,13 +114,13 @@ export class MoveObjectCommand implements Command {
   constructor(
     private object: fabric.Object,
     private oldPosition: { left: number; top: number },
-    private newPosition: { left: number; top: number }
+    private newPosition: { left: number; top: number },
   ) {}
 
   execute(): void {
     this.object.set({
       left: this.newPosition.left,
-      top: this.newPosition.top
+      top: this.newPosition.top,
     });
     this.object.canvas?.renderAll();
   }
@@ -128,13 +128,13 @@ export class MoveObjectCommand implements Command {
   undo(): void {
     this.object.set({
       left: this.oldPosition.left,
-      top: this.oldPosition.top
+      top: this.oldPosition.top,
     });
     this.object.canvas?.renderAll();
   }
 
   getDescription(): string {
-    return `Move ${this.object.type || 'object'}`;
+    return `Move ${this.object.type || "object"}`;
   }
 }
 
@@ -142,7 +142,7 @@ export class ModifyObjectCommand implements Command {
   constructor(
     private object: fabric.Object,
     private oldProperties: Partial<fabric.Object>,
-    private newProperties: Partial<fabric.Object>
+    private newProperties: Partial<fabric.Object>,
   ) {}
 
   execute(): void {
@@ -156,23 +156,23 @@ export class ModifyObjectCommand implements Command {
   }
 
   getDescription(): string {
-    return `Modify ${this.object.type || 'object'}`;
+    return `Modify ${this.object.type || "object"}`;
   }
 }
 
 export class RemoveMultipleObjectsCommand implements Command {
   constructor(
     private canvas: fabric.Canvas,
-    private objects: fabric.Object[]
+    private objects: fabric.Object[],
   ) {}
 
   execute(): void {
-    this.objects.forEach(obj => this.canvas.remove(obj));
+    this.objects.forEach((obj) => this.canvas.remove(obj));
     this.canvas.renderAll();
   }
 
   undo(): void {
-    this.objects.forEach(obj => this.canvas.add(obj));
+    this.objects.forEach((obj) => this.canvas.add(obj));
     this.canvas.renderAll();
   }
 
@@ -185,13 +185,13 @@ export class SetBackgroundCommand implements Command {
   constructor(
     private canvas: fabric.Canvas,
     private oldBackground: string | undefined,
-    private newBackground: string
+    private newBackground: string,
   ) {}
 
   execute(): void {
     this.canvas.setBackgroundImage(
       this.newBackground,
-      this.canvas.renderAll.bind(this.canvas)
+      this.canvas.renderAll.bind(this.canvas),
     );
   }
 
@@ -199,17 +199,17 @@ export class SetBackgroundCommand implements Command {
     if (this.oldBackground) {
       this.canvas.setBackgroundImage(
         this.oldBackground,
-        this.canvas.renderAll.bind(this.canvas)
+        this.canvas.renderAll.bind(this.canvas),
       );
     } else {
       this.canvas.setBackgroundImage(
-        '',
-        this.canvas.renderAll.bind(this.canvas)
+        "",
+        this.canvas.renderAll.bind(this.canvas),
       );
     }
   }
 
   getDescription(): string {
-    return 'Change background';
+    return "Change background";
   }
 }

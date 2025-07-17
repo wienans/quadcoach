@@ -32,7 +32,7 @@ const PresistLogin = (): JSX.Element => {
     return () => {
       effectRan.current = true;
     };
-  }, []);
+  }, [refresh, token]);
 
   if (isError) {
     // Error no Login verification

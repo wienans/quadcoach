@@ -35,7 +35,12 @@ type TacticBoardTopMenuProps = {
   isTacticBoardLoading: boolean;
   isPrivileged: boolean;
   currentPage: number;
-  onLoadPage: (page: number, newPage?: boolean, removePage?: boolean, insertPage?: boolean) => void;
+  onLoadPage: (
+    page: number,
+    newPage?: boolean,
+    removePage?: boolean,
+    insertPage?: boolean,
+  ) => void;
   setPage: (page: number) => void;
   maxPages: number;
   isAnimating: boolean;
@@ -178,10 +183,7 @@ const TacticBoardTopMenu = ({
             >
               <span>
                 <ToggleButton
-                  disabled={
-                    isTacticBoardLoading ||
-                    maxPages == 1
-                  }
+                  disabled={isTacticBoardLoading || maxPages == 1}
                   value={false}
                   selected={false}
                   onChange={() => {
@@ -314,10 +316,12 @@ const TacticBoardTopMenu = ({
         )}
         {/* EDIT/SAVE BUTTON END */}
       </Toolbar>
-      
+
       {/* Delete Confirmation Dialog */}
       <Dialog open={showDeleteConfirmation} onClose={handleDeleteCancel}>
-        <DialogTitle>{t("TacticBoard:topMenu.deleteConfirmation.title")}</DialogTitle>
+        <DialogTitle>
+          {t("TacticBoard:topMenu.deleteConfirmation.title")}
+        </DialogTitle>
         <DialogContent>
           <SoftTypography variant="body2">
             {t("TacticBoard:topMenu.deleteConfirmation.message")}

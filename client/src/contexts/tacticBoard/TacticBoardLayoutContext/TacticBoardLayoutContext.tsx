@@ -42,13 +42,13 @@ const TacticBoardLayoutContextProvider: FC<{
   );
 
   // Memoize context value to prevent unnecessary re-renders
-  const contextValue = useMemo(() => ({
-    containerRef,
-    setContainerRef,
-  }), [
-    containerRef,
-    setContainerRef,
-  ]);
+  const contextValue = useMemo(
+    () => ({
+      containerRef,
+      setContainerRef,
+    }),
+    [containerRef, setContainerRef],
+  );
 
   return (
     <TacticBoardLayoutContext.Provider value={contextValue}>

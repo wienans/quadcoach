@@ -9,7 +9,10 @@ import {
 import { Block } from "../../../../../api/quadcoachApi/domain";
 import { useTranslation } from "react-i18next";
 import { useLoadTacticBoard } from "../../../../../hooks";
-import { useTacticBoardCanvas, useTacticBoardData } from "../../../../../hooks/taticBoard";
+import {
+  useTacticBoardCanvas,
+  useTacticBoardData,
+} from "../../../../../hooks/taticBoard";
 import { TacticBoardProvider } from "../../../../../contexts/tacticBoard";
 import { FabricJsCanvas, SoftBox } from "../../../../../components";
 import { useCallback, useEffect, useState } from "react";
@@ -37,10 +40,8 @@ const TacticBoardInBlock = ({
     setControls,
     getAllObjects,
   } = useTacticBoardCanvas();
-  
-  const {
-    loadFromTacticPage: loadFromJson,
-  } = useTacticBoardData();
+
+  const { loadFromTacticPage: loadFromJson } = useTacticBoardData();
 
   useEffect(() => {
     if (!isTacticBoardLoading && !isTacticBoardError && tacticBoard) {
@@ -78,8 +79,9 @@ const TacticBoardInBlock = ({
           const newPage = (prevPage % tacticBoard.pages.length) + 1;
           getAllObjects().forEach((obj) => {
             const targetObject = tacticBoard.pages[newPage - 1].objects?.find(
-              // @ts-ignore
-              (nextObject) => nextObject.uuid == obj.uuid,
+              (nextObject) =>
+                nextObject.uuid ==
+                (obj as fabric.Object & { uuid?: string }).uuid,
             );
             if (targetObject && canvasRef.current) {
               obj.animate("left", targetObject.left, {

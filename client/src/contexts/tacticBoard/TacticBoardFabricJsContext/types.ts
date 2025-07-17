@@ -95,10 +95,10 @@ export interface TacticPageObject extends FabricObjectData {
 // Error types for better error handling
 export class FabricObjectCreationError extends Error {
   public cause?: Error;
-  
+
   constructor(objectType: string, originalError?: Error) {
     super(`Failed to create fabric object of type: ${objectType}`);
-    this.name = 'FabricObjectCreationError';
+    this.name = "FabricObjectCreationError";
     if (originalError) {
       this.cause = originalError;
     }
@@ -107,10 +107,10 @@ export class FabricObjectCreationError extends Error {
 
 export class CanvasOperationError extends Error {
   public cause?: Error;
-  
+
   constructor(operation: string, originalError?: Error) {
     super(`Canvas operation failed: ${operation}`);
-    this.name = 'CanvasOperationError';
+    this.name = "CanvasOperationError";
     if (originalError) {
       this.cause = originalError;
     }

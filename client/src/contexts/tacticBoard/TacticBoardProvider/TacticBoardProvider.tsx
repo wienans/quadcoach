@@ -9,14 +9,16 @@ interface TacticBoardProviderProps {
   heightFirstResizing: boolean;
 }
 
-const TacticBoardProvider: FC<TacticBoardProviderProps> = ({ 
-  children, 
-  heightFirstResizing 
+const TacticBoardProvider: FC<TacticBoardProviderProps> = ({
+  children,
+  heightFirstResizing,
 }) => {
   return (
     <TacticBoardCanvasContextProvider>
       <TacticBoardDrawingContextProvider>
-        <TacticBoardLayoutContextProvider heightFirstResizing={heightFirstResizing}>
+        <TacticBoardLayoutContextProvider
+          heightFirstResizing={heightFirstResizing}
+        >
           <TacticBoardDataContextProvider>
             {children}
           </TacticBoardDataContextProvider>

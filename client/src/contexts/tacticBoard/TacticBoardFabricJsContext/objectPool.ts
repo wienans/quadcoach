@@ -11,10 +11,14 @@ export class ObjectPool<T extends PoolableObject> {
   private createFn: () => T;
   private maxSize: number;
 
-  constructor(createFn: () => T, initialSize: number = 5, maxSize: number = 50) {
+  constructor(
+    createFn: () => T,
+    initialSize: number = 5,
+    maxSize: number = 50,
+  ) {
     this.createFn = createFn;
     this.maxSize = maxSize;
-    
+
     // Pre-populate pool
     for (let i = 0; i < initialSize; i++) {
       this.pool.push(this.createFn());
@@ -23,8 +27,8 @@ export class ObjectPool<T extends PoolableObject> {
 
   acquire(): T {
     // Find an unused object in the pool
-    const obj = this.pool.find(item => !item.isInUse());
-    
+    const obj = this.pool.find((item) => !item.isInUse());
+
     if (obj) {
       obj.setInUse(true);
       obj.reset();
@@ -40,7 +44,7 @@ export class ObjectPool<T extends PoolableObject> {
     }
 
     // Pool is full, create temporary object (not pooled)
-    console.warn('Object pool exhausted, creating temporary object');
+    console.warn("Object pool exhausted, creating temporary object");
     const tempObj = this.createFn();
     tempObj.setInUse(true);
     return tempObj;
@@ -52,15 +56,15 @@ export class ObjectPool<T extends PoolableObject> {
   }
 
   clear(): void {
-    this.pool.forEach(obj => obj.setInUse(false));
+    this.pool.forEach((obj) => obj.setInUse(false));
   }
 
   getStats(): { total: number; inUse: number; available: number } {
-    const inUse = this.pool.filter(obj => obj.isInUse()).length;
+    const inUse = this.pool.filter((obj) => obj.isInUse()).length;
     return {
       total: this.pool.length,
       inUse,
-      available: this.pool.length - inUse
+      available: this.pool.length - inUse,
     };
   }
 }
@@ -101,19 +105,19 @@ export class FabricObjectPools {
   private static circlePool = new ObjectPool<PoolableFabricObject>(
     () => new PoolableFabricObject(new fabric.Circle({ radius: 15 })),
     10,
-    100
+    100,
   );
 
   private static rectPool = new ObjectPool<PoolableFabricObject>(
     () => new PoolableFabricObject(new fabric.Rect({ width: 50, height: 50 })),
     10,
-    100
+    100,
   );
 
   private static textPool = new ObjectPool<PoolableFabricObject>(
-    () => new PoolableFabricObject(new fabric.Text('', { fontSize: 16 })),
+    () => new PoolableFabricObject(new fabric.Text("", { fontSize: 16 })),
     5,
-    50
+    50,
   );
 
   static getCircle(): PoolableFabricObject {

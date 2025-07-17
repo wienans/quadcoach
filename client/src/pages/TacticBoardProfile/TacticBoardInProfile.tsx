@@ -16,7 +16,10 @@ import FullscreenIcon from "@mui/icons-material/Fullscreen";
 import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
 import MovieIcon from "@mui/icons-material/Movie";
 import { useLoadTacticBoard } from "../../hooks";
-import { useTacticBoardCanvas, useTacticBoardData } from "../../hooks/taticBoard";
+import {
+  useTacticBoardCanvas,
+  useTacticBoardData,
+} from "../../hooks/taticBoard";
 import { FabricJsCanvas, SoftBox } from "../../components";
 import { TacticBoardProvider } from "../../contexts/tacticBoard";
 import { useAuth } from "../../store/hooks";
@@ -50,10 +53,8 @@ const TacticBoardInProfile = ({
     setControls,
     getAllObjects,
   } = useTacticBoardCanvas();
-  
-  const {
-    loadFromTacticPage: loadFromJson,
-  } = useTacticBoardData();
+
+  const { loadFromTacticPage: loadFromJson } = useTacticBoardData();
 
   const { id: userId, roles: userRoles } = useAuth();
 
@@ -181,8 +182,9 @@ const TacticBoardInProfile = ({
           const newPage = (prevPage % tacticBoard.pages.length) + 1;
           getAllObjects().forEach((obj) => {
             const targetObject = tacticBoard.pages[newPage - 1].objects?.find(
-              // @ts-ignore
-              (nextObject) => nextObject.uuid == obj.uuid,
+              (nextObject) =>
+                nextObject.uuid ==
+                (obj as fabric.Object & { uuid?: string }).uuid,
             );
             if (targetObject && canvasRef.current) {
               obj.animate("left", targetObject.left, {
@@ -225,8 +227,9 @@ const TacticBoardInProfile = ({
           }
           getAllObjects().forEach((obj) => {
             const targetObject = tacticBoard.pages[newPage - 1].objects?.find(
-              // @ts-ignore
-              (nextObject) => nextObject.uuid == obj.uuid,
+              (nextObject) =>
+                nextObject.uuid ==
+                (obj as fabric.Object & { uuid?: string }).uuid,
             );
             if (targetObject && canvasRef.current) {
               obj.animate("left", targetObject.left, {
