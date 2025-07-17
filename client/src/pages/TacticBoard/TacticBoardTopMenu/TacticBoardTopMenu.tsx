@@ -30,9 +30,8 @@ type TacticBoardTopMenuProps = {
   isTacticBoardLoading: boolean;
   isPrivileged: boolean;
   currentPage: number;
-  onLoadPage: (page: number, newPage?: boolean, removePage?: boolean) => void;
+  onLoadPage: (page: number, newPage?: boolean, removePage?: boolean, insertPage?: boolean) => void;
   setPage: (page: number) => void;
-  setMaxPages: (maxPages: number) => void;
   maxPages: number;
   isAnimating: boolean;
   onAnimateClick: () => void;
@@ -51,7 +50,6 @@ const TacticBoardTopMenu = ({
   currentPage,
   onLoadPage,
   setPage,
-  setMaxPages,
   maxPages,
   isAnimating,
   onAnimateClick,
@@ -201,13 +199,11 @@ const TacticBoardTopMenu = ({
             >
               <span>
                 <ToggleButton
-                  disabled={isTacticBoardLoading || currentPage != maxPages}
+                  disabled={isTacticBoardLoading}
                   value={false}
                   selected={false}
                   onChange={() => {
-                    setMaxPages(maxPages + 1);
-                    setPage(currentPage + 1);
-                    onLoadPage(currentPage + 1, true, false);
+                    onLoadPage(currentPage, false, false, true);
                   }}
                   size="small"
                   sx={{

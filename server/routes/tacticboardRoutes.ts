@@ -32,5 +32,6 @@ router
   .delete(tacticboardController.deletePageById);
 router.route("/:id/meta").patch(tacticboardController.updateMetaById);
 router.route("/:id/newPage").post(tacticboardController.createNewPage);
+router.route("/:id/insertPage/:position").post(tacticboardController.insertPageAtPosition);
 
 export default router;

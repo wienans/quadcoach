@@ -512,6 +512,70 @@ export const createNewPage = asyncHandler(
   }
 );
 
+// @desc    Insert page at specific position in tacticboard
+// @route   POST /api/tacticboards/:id/insertPage/:position
+// @access  Private - Owner or Admin only
+export const insertPageAtPosition = asyncHandler(
+  async (req: RequestWithUser, res: Response) => {
+    const { id: tacticBoardId, position } = req.params;
+    const insertPosition = parseInt(position);
+
+    if (mongoose.isValidObjectId(tacticBoardId) && !isNaN(insertPosition)) {
+      const findResult = await TacticBoard.findOne({ _id: tacticBoardId });
+      if (findResult) {
+        // Authorization check
+        if (!req.UserInfo?.id) {
+          res.status(401).json({ message: "Unauthorized" });
+          return;
+        }
+        const accessUser = await TacticboardAccess.findOne({
+          user: req.UserInfo.id,
+          tacticboard: req.params.id,
+        });
+        const hasAccess =
+          findResult.user?.toString() === req.UserInfo.id ||
+          req.UserInfo.roles?.includes("Admin") ||
+          req.UserInfo.roles?.includes("admin") ||
+          (accessUser && accessUser.access == "edit");
+
+        if (!hasAccess) {
+          res.status(403).json({ message: "Forbidden" });
+          return;
+        }
+
+        // Validate position is within bounds
+        if (insertPosition < 0 || insertPosition > (findResult.pages?.length || 0)) {
+          res.status(400).json({ message: "Invalid position" });
+          return;
+        }
+
+        // Insert page at specific position using $push with $position
+        const result = await TacticBoard.findOneAndUpdate(
+          { _id: tacticBoardId },
+          { 
+            $push: { 
+              pages: { 
+                $each: [req.body], 
+                $position: insertPosition 
+              } 
+            } 
+          }
+        );
+
+        if (result) {
+          res.json({ message: "Page inserted successfully" });
+        } else {
+          res.status(404).json({ message: "Failed to insert page" });
+        }
+      } else {
+        res.status(404).json({ message: "TacticBoard not found" });
+      }
+    } else {
+      res.status(400).json({ message: "Invalid ID format or position" });
+    }
+  }
+);
+
 // @desc    Delete page from tacticboard
 // @route   DELETE /api/tacticboards/:id/:pageId
 // @access  Private - Owner or Admin only

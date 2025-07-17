@@ -201,6 +201,21 @@ export const tacticBoardApiSlice = quadcoachApi.injectEndpoints({
         { type: TagType.tacticboard, id: tacticboardId },
       ],
     }),
+    insertTacticBoardPage: builder.mutation<
+      { message: string },
+      { tacticboardId: string; position: number; pageData: Partial<TacticPage> }
+    >({
+      query({ tacticboardId, position, pageData }) {
+        return {
+          url: `/api/tacticboards/${tacticboardId}/insertPage/${position}`,
+          method: "post",
+          data: pageData,
+        };
+      },
+      invalidatesTags: (_result, _error, { tacticboardId }) => [
+        { type: TagType.tacticboard, id: tacticboardId },
+      ],
+    }),
     deleteTacticBoardPage: builder.mutation<
       { message: string; exercises?: { id: string; name: string }[] },
       { tacticboardId: string; pageId: string }
@@ -348,6 +363,7 @@ export const {
   useGetAllTacticBoardTagsQuery,
   useLazyGetAllTacticBoardTagsQuery,
   useCreateTacticBoardPageMutation,
+  useInsertTacticBoardPageMutation,
   useDeleteTacticBoardPageMutation,
   useGetTacticBoardHeadersQuery,
   useLazyGetTacticBoardHeadersQuery,

@@ -12,6 +12,7 @@ import {
   useDeleteTacticBoardPageMutation,
   useGetAllTacticboardAccessUsersQuery,
   useGetTacticBoardQuery,
+  useInsertTacticBoardPageMutation,
   useUpdateTacticBoardPageMutation,
 } from "../../api/quadcoachApi/tacticboardApi";
 import "../fullscreen.css";
@@ -70,6 +71,8 @@ const TacticsBoard = (): JSX.Element => {
     useUpdateTacticBoardPageMutation();
   const [createTacticBoardPage, { isLoading: isCreatePageLoading }] =
     useCreateTacticBoardPageMutation();
+  const [insertTacticBoardPage, { isLoading: isInsertPageLoading }] =
+    useInsertTacticBoardPageMutation();
   const [deleteTacticBoardPage, { isLoading: isDeletePageLoading }] =
     useDeleteTacticBoardPageMutation();
   const [deleteTacticBoard] = useDeleteTacticBoardMutation();
@@ -94,8 +97,8 @@ const TacticsBoard = (): JSX.Element => {
   };
 
   const onLoadPage = useCallback(
-    (page: number, newPage?: boolean, removePage?: boolean) => {
-      if (newPage && removePage) return;
+    (page: number, newPage?: boolean, removePage?: boolean, insertPage?: boolean) => {
+      if ((newPage && removePage) || (newPage && insertPage) || (removePage && insertPage)) return;
       if (!tacticBoard) return;
       const updatedTacticBoard: TacticBoard = cloneDeep(tacticBoard);
       if (isPrivileged && isEditMode) {
@@ -113,6 +116,43 @@ const TacticsBoard = (): JSX.Element => {
             tacticboardId: tacticBoard._id,
             pageData: getAllObjectsJson(),
           });
+        } else if (insertPage) {
+          // Insert page after current page, duplicating current page content
+          const currentPageData = getAllObjectsJson();
+          const insertPosition = page; // Insert after current page (0-based index)
+          
+          // Save current page first
+          updatedTacticBoard.pages[page - 1] = {
+            ...updatedTacticBoard.pages[page - 1],
+            ...currentPageData,
+          } as TacticPage;
+          
+          updateTacticBoardPage({
+            tacticboardId: tacticBoard._id,
+            pageId: updatedTacticBoard.pages[page - 1]._id,
+            pageData: currentPageData,
+          });
+          
+          // Insert the duplicated page
+          insertTacticBoardPage({
+            tacticboardId: tacticBoard._id,
+            position: insertPosition,
+            pageData: currentPageData,
+          });
+          
+          // Update local state - insert the duplicated page
+          updatedTacticBoard.pages.splice(insertPosition, 0, {
+            ...updatedTacticBoard.pages[page - 1],
+            _id: "temp-" + Date.now(), // Temporary ID until refresh
+          } as TacticPage);
+          
+          // Update maxPages and navigate to the new page
+          const newMaxPages = updatedTacticBoard.pages.length;
+          setMaxPages(newMaxPages);
+          setPage(page + 1); // Navigate to the newly inserted page
+          
+          // Load the new page (adjust index since page numbers are 1-based)
+          page = page + 1;
         } else if (removePage) {
           // Remove Current Page
           const currentPageIndex = page - 1;
@@ -187,6 +227,7 @@ const TacticsBoard = (): JSX.Element => {
       getAllObjectsJson,
       updateTacticBoardPage,
       createTacticBoardPage,
+      insertTacticBoardPage,
       deleteTacticBoardPage,
       setSelection,
     ],
@@ -468,6 +509,7 @@ const TacticsBoard = (): JSX.Element => {
               isTacticBoardLoading ||
               isUpdatePageLoading ||
               isCreatePageLoading ||
+              isInsertPageLoading ||
               isDeletePageLoading
             }
             tacticBoard={tacticBoard}
@@ -475,7 +517,6 @@ const TacticsBoard = (): JSX.Element => {
             currentPage={currentPage}
             onLoadPage={onLoadPage}
             setPage={setPage}
-            setMaxPages={setMaxPages}
             maxPages={maxPages}
             isAnimating={isAnimating}
             onAnimateClick={onAnimateClick}
