@@ -1,4 +1,8 @@
 import {
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   Pagination,
   Skeleton,
   ToggleButton,
@@ -20,7 +24,8 @@ import { TacticBoard } from "../../../api/quadcoachApi/domain";
 import { useAppDispatch, useAppSelector } from "../../../store/hooks";
 import { setIsEditMode } from "../tacticBoardSlice";
 import { useTranslation } from "react-i18next";
-import { SoftBox, SoftTypography } from "../../../components";
+import { useState } from "react";
+import { SoftBox, SoftButton, SoftTypography } from "../../../components";
 import { useTacticBoardCanvas } from "../../../hooks/taticBoard";
 import { useNavigate } from "react-router-dom";
 
@@ -64,6 +69,7 @@ const TacticBoardTopMenu = ({
   const { setSelection } = useTacticBoardCanvas();
   const navigate = useNavigate();
   const isEditMode = useAppSelector((state) => state.tacticBoard.isEditMode);
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
 
   const onToggleEditMode = () => {
     if (isPrivileged && isEditMode) {
@@ -76,6 +82,15 @@ const TacticBoardTopMenu = ({
   const handleChange = (_: React.ChangeEvent<unknown>, value: number) => {
     setPage(value);
     onLoadPage(value);
+  };
+
+  const handleDeleteConfirm = () => {
+    onLoadPage(currentPage, false, true);
+    setShowDeleteConfirmation(false);
+  };
+
+  const handleDeleteCancel = () => {
+    setShowDeleteConfirmation(false);
   };
 
   return (
@@ -171,7 +186,7 @@ const TacticBoardTopMenu = ({
                   selected={false}
                   onChange={() => {
                     if (maxPages > 1) {
-                      onLoadPage(currentPage, false, true);
+                      setShowDeleteConfirmation(true);
                     }
                   }}
                   size="small"
@@ -299,6 +314,24 @@ const TacticBoardTopMenu = ({
         )}
         {/* EDIT/SAVE BUTTON END */}
       </Toolbar>
+      
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={showDeleteConfirmation} onClose={handleDeleteCancel}>
+        <DialogTitle>{t("TacticBoard:topMenu.deleteConfirmation.title")}</DialogTitle>
+        <DialogContent>
+          <SoftTypography variant="body2">
+            {t("TacticBoard:topMenu.deleteConfirmation.message")}
+          </SoftTypography>
+        </DialogContent>
+        <DialogActions>
+          <SoftButton color="secondary" onClick={handleDeleteCancel}>
+            {t("TacticBoard:topMenu.deleteConfirmation.cancel")}
+          </SoftButton>
+          <SoftButton color="error" onClick={handleDeleteConfirm}>
+            {t("TacticBoard:topMenu.deleteConfirmation.confirm")}
+          </SoftButton>
+        </DialogActions>
+      </Dialog>
     </SoftBox>
   );
 };
