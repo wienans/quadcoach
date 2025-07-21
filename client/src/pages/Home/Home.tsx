@@ -51,13 +51,13 @@ const Home = () => {
                   </SoftTypography>
                 </SoftBox>
                 <SoftTypography>
-                  Major system improvements including multi-user access for tacticboards, 
-                  enhanced type system for better code reliability, comprehensive refactoring 
-                  for improved performance, and delete confirmation dialogs for safer operations. 
-                  Fixed canvas resizing issues and removed lint errors across the entire codebase.
+                  As a new Main Feature i added the posibility for Creators of a
+                  Tacticboard or Exercise to add additional persons to edit /
+                  view it.
                   <br />
-                  The multi-user access feature now allows multiple users to collaborate on 
-                  tacticboards with proper access management and email-based user invitations.
+                  Second of all i reworked a bunch of stuff in the background
+                  for Tacticboards, you can now remove and add inbetween pages
+                  and have some keyboard control.
                 </SoftTypography>
               </SoftBox>
             </Card>
