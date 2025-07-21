@@ -23,13 +23,15 @@ export type GetExercisesResponse = {
   };
 };
 
+export type AccessLevel = "edit";
+
 export type ExerciseAccessEntry = {
   user: {
     _id: string;
     username: string;
-    email: string;
   };
   exercise: string;
+  access: AccessLevel;
   createdAt: string;
 };
 
@@ -258,12 +260,12 @@ export const exerciseApiSlice = quadcoachApi.injectEndpoints({
     }),
     setExerciseAccess: builder.mutation<
       ExerciseAccessEntry,
-      { exerciseId: string; userId: string }
+      { exerciseId: string; userId: string; access: AccessLevel }
     >({
-      query: ({ exerciseId, userId }) => ({
+      query: ({ exerciseId, userId, access }) => ({
         url: `/api/exercises/${exerciseId}/access`,
         method: "post",
-        data: { userId },
+        data: { userId, access },
       }),
       invalidatesTags: (_result, _error, { exerciseId }) => [
         { type: TagType.exercise, id: `${exerciseId}-access` },
@@ -282,6 +284,20 @@ export const exerciseApiSlice = quadcoachApi.injectEndpoints({
         { type: TagType.exercise, id: `${exerciseId}-access` },
       ],
     }),
+    shareExercise: builder.mutation<
+      { message: string },
+      { exerciseId: string; email: string; access: AccessLevel }
+    >({
+      query: ({ exerciseId, email, access }) => ({
+        url: `/api/exercises/${exerciseId}/share`,
+        method: "post",
+        data: { email, access },
+      }),
+      invalidatesTags: (_result, _error, { exerciseId }) => [
+        { type: TagType.exercise, id: `${exerciseId}-access` },
+      ],
+    }),
+
   }),
 });
 
@@ -301,4 +317,5 @@ export const {
   useGetAllExerciseAccessUsersQuery,
   useSetExerciseAccessMutation,
   useDeleteExerciseAccessMutation,
+  useShareExerciseMutation,
 } = exerciseApiSlice;
