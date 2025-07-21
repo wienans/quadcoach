@@ -40,6 +40,41 @@ const Home = () => {
                     fontWeight="bold"
                     textTransform="uppercase"
                   >
+                    Multi-User Access & System Improvements
+                  </SoftTypography>
+                  <SoftTypography
+                    variant="h3"
+                    fontWeight="bold"
+                    textTransform="uppercase"
+                  >
+                    17.Jul.2025
+                  </SoftTypography>
+                </SoftBox>
+                <SoftTypography>
+                  Major system improvements including multi-user access for tacticboards, 
+                  enhanced type system for better code reliability, comprehensive refactoring 
+                  for improved performance, and delete confirmation dialogs for safer operations. 
+                  Fixed canvas resizing issues and removed lint errors across the entire codebase.
+                  <br />
+                  The multi-user access feature now allows multiple users to collaborate on 
+                  tacticboards with proper access management and email-based user invitations.
+                </SoftTypography>
+              </SoftBox>
+            </Card>
+          </SoftBox>
+          <SoftBox mt={5}>
+            <Card sx={{ height: "100%" }}>
+              <SoftBox p={2}>
+                <SoftBox
+                  display="flex"
+                  justifyContent="space-between"
+                  width="100%"
+                >
+                  <SoftTypography
+                    variant="h3"
+                    fontWeight="bold"
+                    textTransform="uppercase"
+                  >
                     Favorite Lists and User Profile
                   </SoftTypography>
                   <SoftTypography

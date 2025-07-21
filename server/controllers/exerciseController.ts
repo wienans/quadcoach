@@ -402,7 +402,7 @@ export const getAllAccessUsers = asyncHandler(
 
     const accessEntries = await ExerciseAccess.find({
       exercise: req.params.id,
-    }).populate("user", "username email"); // Add whatever user fields you want to include
+    }).populate("user", "username");
 
     res.json(accessEntries);
   }

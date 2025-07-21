@@ -1,13 +1,14 @@
 import express from "express";
 import * as usersController from "../controllers/usersController";
 import verifyJWT from "../middleware/verifyJWT";
+import { verifyAdmin } from "../middleware/verifyAdmin";
 const router = express.Router();
 
 router.use(verifyJWT);
 
 router
   .route("/")
-  .get(usersController.getAllUsers)
+  .get(verifyAdmin, usersController.getAllUsers)
   .post(usersController.createNewUser)
   .put(usersController.updateUser)
   .patch(usersController.updateUser)

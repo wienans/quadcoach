@@ -348,6 +348,19 @@ export const tacticBoardApiSlice = quadcoachApi.injectEndpoints({
         { type: TagType.tacticboard, id: `${tacticboardId}-access` },
       ],
     }),
+    shareTacticBoard: builder.mutation<
+      { message: string },
+      { tacticboardId: string; email: string; access: AccessLevel }
+    >({
+      query: ({ tacticboardId, email, access }) => ({
+        url: `/api/tacticboards/${tacticboardId}/share`,
+        method: "post",
+        data: { email, access },
+      }),
+      invalidatesTags: (_result, _error, { tacticboardId }) => [
+        { type: TagType.tacticboard, id: `${tacticboardId}-access` },
+      ],
+    }),
   }),
 });
 
@@ -371,4 +384,5 @@ export const {
   useGetAllTacticboardAccessUsersQuery,
   useSetTacticboardAccessMutation,
   useDeleteTacticboardAccessMutation,
+  useShareTacticBoardMutation,
 } = tacticBoardApiSlice;

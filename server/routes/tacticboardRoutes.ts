@@ -26,6 +26,8 @@ router
 
 router.route("/:id/checkAccess").get(tacticboardController.checkAccess);
 
+router.route("/:id/share").post(tacticboardController.shareTacticBoard);
+
 router
   .route("/:id/pages/:pageId")
   .patch(tacticboardController.updatePageById)
