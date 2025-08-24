@@ -22,6 +22,8 @@ router
 
 router.route("/:id/checkAccess").get(verifyJWT, exerciseController.checkAccess);
 
+router.route("/:id/share").post(verifyJWT, exerciseController.shareExercise);
+
 router.route("/:id/relatedExercises").get(exerciseController.getRelatedById);
 
 export default router;

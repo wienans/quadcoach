@@ -4,6 +4,7 @@ const Schema = mongoose.Schema;
 interface IExerciseAccess {
   user: Types.ObjectId;
   exercise: Types.ObjectId;
+  access: "view" | "edit";
   createdAt: Date;
 }
 
@@ -16,6 +17,11 @@ const exerciseAccessSchema = new Schema<IExerciseAccess>({
   exercise: {
     type: Schema.Types.ObjectId,
     ref: "exercises",
+    required: true,
+  },
+  access: {
+    type: String,
+    enum: ["view", "edit"],
     required: true,
   },
   createdAt: {

@@ -11,8 +11,9 @@ export const tacticBoardItemsDrawerWidth = 240;
 
 const TacticBoardItemsDrawerNav = (): JSX.Element | null => {
   const dispatch = useAppDispatch();
-  //@ts-ignore
-  const isUpSm = useMediaQuery((theme: Theme) => theme.breakpoints.up("xxxl"));
+  const isUpSm = useMediaQuery((theme: Theme) =>
+    (theme.breakpoints as { up: (key: string) => string }).up("xxxl"),
+  );
 
   const tacticBoardItemsDrawerOpen = useAppSelector(
     (state) => state.tacticBoard.tacticBoardItemsDrawerOpen,

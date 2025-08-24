@@ -1,0 +1,1 @@
+export { CanvasErrorBoundary } from "./CanvasErrorBoundary";

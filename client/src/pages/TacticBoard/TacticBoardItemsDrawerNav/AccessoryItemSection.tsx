@@ -16,7 +16,11 @@ import { AccessoryType } from "../../../contexts/tacticBoard/TacticBoardFabricJs
 import { useTranslation } from "react-i18next";
 import { fabric } from "fabric";
 import { v4 as uuidv4 } from "uuid";
-import { useTacticBoardFabricJs } from "../../../hooks";
+import { useTacticBoardCanvas } from "../../../hooks/taticBoard";
+import {
+  createExtendedGroup,
+  setUuid,
+} from "../../../contexts/tacticBoard/TacticBoardFabricJsContext/fabricTypes";
 
 const getAccesTypeSvg = (accessType: AccessoryType) => {
   switch (accessType) {
@@ -52,7 +56,7 @@ const getAccesTypeScale = (accessType: AccessoryType) => {
 
 const AccessoryItemSection = (): JSX.Element => {
   const { t } = useTranslation("TacticBoard");
-  const { addObject } = useTacticBoardFabricJs();
+  const { addObject } = useTacticBoardCanvas();
   const [open, setOpen] = useState<boolean>(true);
 
   const handleToggleOpen = () => setOpen(!open);
@@ -70,15 +74,13 @@ const AccessoryItemSection = (): JSX.Element => {
         obj.left = 600;
         obj.top = 333;
         obj.hasControls = false;
-        // @ts-ignore
-        obj.uuid = uuidv4();
+        setUuid(obj, uuidv4());
         if (accessType === AccessoryType.Hoop) {
           // Need to group the hoop as it has some weird behavior when saving to DB
-          const group = new fabric.Group([obj], {
-            // @ts-ignore
-            uuid: uuidv4(),
+          const group = createExtendedGroup([obj], {
             hasControls: false, // Disable resizing handles
           });
+          setUuid(group, uuidv4());
           addObject(group);
         } else {
           addObject(obj);

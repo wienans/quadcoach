@@ -67,11 +67,30 @@ export const useContainerResizeEvent = (
   );
 
   const initializeContainerResizeObserver = useCallback(() => {
-    if (!container.current) return;
+    if (!container.current) {
+      console.log("ResizeObserver: No container ref");
+      return;
+    }
+
+    if (!canvas.current) {
+      console.log("ResizeObserver: No canvas ref");
+      return;
+    }
+
+    // Cleanup existing observer
+    if (containerResizeObserverRef.current) {
+      containerResizeObserverRef.current.disconnect();
+    }
+
+    console.log("ResizeObserver: Initializing observer");
     containerResizeObserverRef.current = new ResizeObserver(
       (entries: ResizeObserverEntry[]) => {
-        if (!canvas.current) return;
+        if (!canvas.current) {
+          console.log("ResizeObserver: Canvas not ready during resize");
+          return;
+        }
         const { width = 0, height = 0 } = entries[0]?.contentRect || {};
+        console.log("ResizeObserver: Resizing to", width, "x", height);
         resize(width, height);
       },
     );
@@ -79,8 +98,17 @@ export const useContainerResizeEvent = (
     containerResizeObserverRef.current.observe(container.current);
   }, [canvas, container, resize]);
 
+  // Cleanup function
+  const cleanup = useCallback(() => {
+    if (containerResizeObserverRef.current) {
+      containerResizeObserverRef.current.disconnect();
+      containerResizeObserverRef.current = null;
+    }
+  }, []);
+
   return {
     containerResizeObserverRef,
     initializeContainerResizeObserver,
+    cleanup,
   };
 };

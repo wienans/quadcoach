@@ -33,8 +33,8 @@ import {
   useDeleteTacticBoardMutation,
   useGetAllTacticboardAccessUsersQuery,
   useGetTacticBoardQuery,
-  useSetTacticboardAccessMutation,
   useUpdateTacticBoardMetaMutation,
+  useShareTacticBoardMutation,
 } from "../../api/quadcoachApi/tacticboardApi";
 import { useParams, useNavigate } from "react-router-dom";
 import {
@@ -69,7 +69,6 @@ import {
   useRemoveFavoriteTacticboardMutation,
   useLazyGetFavoriteTacticboardsQuery,
 } from "../../api/quadcoachApi/favoriteApi";
-import { useLazyGetUserByEmailQuery } from "../userApi";
 const MarkdownRenderer = lazy(
   () => import("../../components/MarkdownRenderer"),
 );
@@ -126,15 +125,14 @@ const TacticBoardProfile = () => {
   const [getFavoriteTacticboards, { data: favoriteTacticboards }] =
     useLazyGetFavoriteTacticboardsQuery();
 
-  const [getUserByEmail, { isLoading: isGetUserByEmailLoading }] =
-    useLazyGetUserByEmailQuery();
+  const [shareTacticBoard, { isLoading: isShareTacticBoardLoading }] =
+    useShareTacticBoardMutation();
 
   const { data: accessUsers } = useGetAllTacticboardAccessUsersQuery(
     tacticBoardId || "",
   );
 
-  const [setTacticboardAccess, { isLoading: isSetTacticboardAccessLoading }] =
-    useSetTacticboardAccessMutation();
+
 
   const [
     deleteTacticboardAccess,
@@ -215,7 +213,10 @@ const TacticBoardProfile = () => {
     }
   }, [tacticBoard, userId, userRoles, accessUsers]);
 
-  const isCreator = tacticBoard?.user?.toString() === userId || userRoles.includes("Admin") || userRoles.includes("admin");
+  const isCreator =
+    tacticBoard?.user?.toString() === userId ||
+    userRoles.includes("Admin") ||
+    userRoles.includes("admin");
 
   useEffect(() => {
     if (favoriteTacticboards) {
@@ -265,21 +266,17 @@ const TacticBoardProfile = () => {
     }
 
     setEmailError("");
-    
+
     try {
-      const userResult = await getUserByEmail(userEmail.trim()).unwrap();
-      
-      if (userResult && userResult._id) {
-        await setTacticboardAccess({
-          tacticboardId: tacticBoardId,
-          userId: userResult._id,
-          access: accessMode,
-        }).unwrap();
-        
-        setUserEmail("");
-      }
-    } catch (error: any) {
-      if (error?.status === 404) {
+      await shareTacticBoard({
+        tacticboardId: tacticBoardId,
+        email: userEmail.trim(),
+        access: accessMode,
+      }).unwrap();
+
+      setUserEmail("");
+    } catch (error: unknown) {
+      if ((error as { status?: number })?.status === 404) {
         setEmailError("User not found with this email");
       } else {
         setEmailError("Failed to add user access");
@@ -785,7 +782,10 @@ const TacticBoardProfile = () => {
                         <Button
                           variant="contained"
                           size="small"
-                          disabled={isSetTacticboardAccessLoading || isGetUserByEmailLoading || !userEmail.trim()}
+                          disabled={
+                            isShareTacticBoardLoading ||
+                            !userEmail.trim()
+                          }
                           onClick={handleAddAccess}
                         >
                           {t("TacticBoardProfile:access.add")}

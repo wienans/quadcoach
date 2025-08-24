@@ -4,6 +4,7 @@ import Exercise from "../models/exercise";
 import mongoose from "mongoose";
 import ExerciseFav from "../models/exerciseFav";
 import ExerciseAccess from "../models/exerciseAccess";
+import User from "../models/user";
 
 interface RequestWithUser extends Request {
   UserInfo?: {
@@ -235,18 +236,24 @@ export const setAccess = asyncHandler(
       return;
     }
 
-    const { userId } = req.body;
+    const { userId, access } = req.body;
     if (!userId || !mongoose.isValidObjectId(userId)) {
       res.status(400).json({ message: "Invalid user ID provided" });
       return;
     }
 
+    if (access !== "edit") {
+      res.status(400).json({ message: "Access level must be 'edit' (view access is public for all exercises)" });
+      return;
+    }
+
     try {
-      const access = await ExerciseAccess.create({
+      const accessEntry = await ExerciseAccess.create({
         user: userId,
         exercise: req.params.id,
+        access,
       });
-      res.status(201).json(access);
+      res.status(201).json(accessEntry);
     } catch (error) {
       // Handle duplicate access grants
       if (isMongoError(error) && error.code === 11000) {
@@ -344,13 +351,23 @@ export const checkAccess = asyncHandler(
     }
 
     // Check if user is an admin
-    if (
-      req.UserInfo.roles?.includes("Admin") ||
-      req.UserInfo.roles?.includes("admin")
-    ) {
+    if (req.UserInfo.roles?.includes("Admin") || req.UserInfo.roles?.includes("admin")) {
       res.json({ hasAccess: true, type: "admin" });
       return;
     }
+
+    // Check if user has been granted access
+    const accessEntry = await ExerciseAccess.findOne({
+      user: req.UserInfo.id,
+      exercise: req.params.id,
+    });
+
+    if (accessEntry) {
+      res.json({ hasAccess: true, type: "granted" });
+      return;
+    }
+
+    res.json({ hasAccess: false, type: null });
 
     // Check if user has been granted access
     const access = await ExerciseAccess.findOne({
@@ -402,8 +419,70 @@ export const getAllAccessUsers = asyncHandler(
 
     const accessEntries = await ExerciseAccess.find({
       exercise: req.params.id,
-    }).populate("user", "username email"); // Add whatever user fields you want to include
+    }).populate("user", "username");
 
     res.json(accessEntries);
+  }
+);
+
+// @desc    Share exercise with user by email
+// @route   POST /api/exercises/:id/share
+// @access  Private - Owner or Admin only
+export const shareExercise = asyncHandler(
+  async (req: RequestWithUser, res: Response) => {
+    if (!req.UserInfo?.id) {
+      res.status(401).json({ message: "Unauthorized" });
+      return;
+    }
+
+    const { email, access } = req.body;
+    if (!email || !access) {
+      res.status(400).json({ message: "Email and access level are required" });
+      return;
+    }
+
+    if (access !== "edit") {
+      res.status(400).json({ message: "Access must be 'edit' (view access is public for all exercises)" });
+      return;
+    }
+
+    const exercise = await Exercise.findById(req.params.id);
+    if (!exercise) {
+      res.status(404).json({ message: "Exercise not found" });
+      return;
+    }
+
+    const isOwner = exercise.user?.toString() === req.UserInfo.id;
+    const isAdmin = req.UserInfo.roles?.some(role => role.toLowerCase() === "admin");
+
+    if (!isOwner && !isAdmin) {
+      res.status(403).json({ message: "Forbidden" });
+      return;
+    }
+
+    const targetUser = await User.findOne({ email: email.toLowerCase() }).select("_id");
+    if (!targetUser) {
+      res.status(404).json({ message: "User not found with this email" });
+      return;
+    }
+
+    const existingAccess = await ExerciseAccess.findOne({
+      exercise: req.params.id,
+      user: targetUser._id,
+    });
+
+    if (existingAccess) {
+      existingAccess.access = access;
+      await existingAccess.save();
+      res.json({ message: "Access updated successfully" });
+    } else {
+      const newAccess = new ExerciseAccess({
+        exercise: req.params.id,
+        user: targetUser._id,
+        access,
+      });
+      await newAccess.save();
+      res.status(201).json({ message: "Access granted successfully" });
+    }
   }
 );

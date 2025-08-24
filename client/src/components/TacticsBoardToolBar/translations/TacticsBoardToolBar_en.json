@@ -1,6 +1,6 @@
 {
-    "removeBtn": "Remove",
-    "backBtn": "Back",
-    "editMode": "edit mode",
-    "drawMode": "draw mode"
+  "removeBtn": "Remove",
+  "backBtn": "Back",
+  "editMode": "edit mode",
+  "drawMode": "draw mode"
 }

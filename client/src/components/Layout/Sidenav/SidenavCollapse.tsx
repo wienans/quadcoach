@@ -59,7 +59,6 @@ const SidenavCollapse = <C extends React.ElementType>({
   name,
   children = false,
   active = false,
-  noCollapse = false,
   open = false,
   ...rest
 }: SidenavCollapseProps<C>) => {

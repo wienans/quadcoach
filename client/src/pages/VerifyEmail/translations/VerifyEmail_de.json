@@ -1,6 +1,6 @@
 {
-  "NoTokenFound":"Keine Token gefunden",
-  "errorVerifyingEmail":"Fehler bei der Verifikation oder bereits verifiziert",
-  "waitingToVerifyEmail":"Warten auf die Verifikation",
-  "redirectingToLogin":"Verifiziert. Weiterleiten zu Anmeldung"
+  "NoTokenFound": "Keine Token gefunden",
+  "errorVerifyingEmail": "Fehler bei der Verifikation oder bereits verifiziert",
+  "waitingToVerifyEmail": "Warten auf die Verifikation",
+  "redirectingToLogin": "Verifiziert. Weiterleiten zu Anmeldung"
 }

@@ -27,10 +27,62 @@ export enum AccessoryType {
   Hurdle = "Hurdle",
 }
 
+// Enhanced TypeScript definitions for fabric.js extensions
 declare module "fabric/fabric-impl" {
   export interface IObjectOptions {
     id?: string;
-    objectType?: ObjectType;
+    objectType?: ObjectType | string;
+    uuid?: string;
+  }
+
+  export interface Object {
+    id?: string;
+    objectType?: ObjectType | string;
+    uuid?: string;
+  }
+
+  export interface Canvas {
+    freeDrawingBrush: {
+      color: string;
+      width: number;
+      strokeDashArray?: number[] | null;
+    } & fabric.BaseBrush;
+  }
+}
+
+// Re-export unified types for backward compatibility
+export type { 
+  TacticBoardObject as FabricObjectData,
+  PartialTacticBoardObject,
+  TacticBoardPage,
+  TacticBoardPageWithoutId,
+  TacticBoardBackgroundImage
+} from './tacticBoardTypes';
+
+export type { TacticBoardObject as TacticPageObject } from './tacticBoardTypes';
+
+// Error types for better error handling
+export class FabricObjectCreationError extends Error {
+  public cause?: Error;
+
+  constructor(objectType: string, originalError?: Error) {
+    super(`Failed to create fabric object of type: ${objectType}`);
+    this.name = "FabricObjectCreationError";
+    if (originalError) {
+      this.cause = originalError;
+    }
+  }
+}
+
+export class CanvasOperationError extends Error {
+  public cause?: Error;
+
+  constructor(operation: string, originalError?: Error) {
+    super(`Canvas operation failed: ${operation}`);
+    this.name = "CanvasOperationError";
+    if (originalError) {
+      this.cause = originalError;
+    }
   }
 }
 

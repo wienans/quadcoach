@@ -25,7 +25,7 @@ import * as Yup from "yup";
 
 import { DashboardLayout } from "../../components/LayoutContainers";
 import Footer from "../../components/Footer";
-import { useFooter } from "../../components/Footer/FooterContext";
+import { useFooter } from "../../components/Footer";
 
 import { useState } from "react";
 

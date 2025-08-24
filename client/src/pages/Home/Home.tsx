@@ -40,6 +40,41 @@ const Home = () => {
                     fontWeight="bold"
                     textTransform="uppercase"
                   >
+                    Multi-User Access & System Improvements
+                  </SoftTypography>
+                  <SoftTypography
+                    variant="h3"
+                    fontWeight="bold"
+                    textTransform="uppercase"
+                  >
+                    17.Jul.2025
+                  </SoftTypography>
+                </SoftBox>
+                <SoftTypography>
+                  As a new Main Feature i added the posibility for Creators of a
+                  Tacticboard or Exercise to add additional persons to edit /
+                  view it.
+                  <br />
+                  Second of all i reworked a bunch of stuff in the background
+                  for Tacticboards, you can now remove and add inbetween pages
+                  and have some keyboard control.
+                </SoftTypography>
+              </SoftBox>
+            </Card>
+          </SoftBox>
+          <SoftBox mt={5}>
+            <Card sx={{ height: "100%" }}>
+              <SoftBox p={2}>
+                <SoftBox
+                  display="flex"
+                  justifyContent="space-between"
+                  width="100%"
+                >
+                  <SoftTypography
+                    variant="h3"
+                    fontWeight="bold"
+                    textTransform="uppercase"
+                  >
                     Favorite Lists and User Profile
                   </SoftTypography>
                   <SoftTypography

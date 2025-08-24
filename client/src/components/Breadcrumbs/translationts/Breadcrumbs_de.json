@@ -4,9 +4,9 @@
   "addExercise": "hinzufügen",
   "exercise": "Übung",
   "updateExercise": "bearbeiten",
-  "tacticBoards" : "Taktik Tafeln",
-  "updateTacticBoard" : "Taktik Tafel bearbeiten",
-  "addTacticBoard" : "Taktik Tafel hinzufügen",
-  "tacticBoard" : "Taktik Tafel",
+  "tacticBoards": "Taktik Tafeln",
+  "updateTacticBoard": "Taktik Tafel bearbeiten",
+  "addTacticBoard": "Taktik Tafel hinzufügen",
+  "tacticBoard": "Taktik Tafel",
   "componentsTest": "Komponententest"
 }

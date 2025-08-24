@@ -10,8 +10,4 @@ export type {
   TacticBoardWithOutId,
   TacticBoardPartialId,
 } from "./TacticBoard";
-export type {
-  default as User,
-  UserWithOutId,
-  UserPartialId,
-} from "./User"
+export type { default as User, UserWithOutId, UserPartialId } from "./User";

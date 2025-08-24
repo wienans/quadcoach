@@ -15,12 +15,17 @@ import EditIcon from "@mui/icons-material/Edit";
 import FullscreenIcon from "@mui/icons-material/Fullscreen";
 import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
 import MovieIcon from "@mui/icons-material/Movie";
-import { useLoadTacticBoard, useTacticBoardFabricJs } from "../../hooks";
+import { useLoadTacticBoard } from "../../hooks";
+import {
+  useTacticBoardCanvas,
+  useTacticBoardData,
+} from "../../hooks/taticBoard";
 import { FabricJsCanvas, SoftBox } from "../../components";
-import { TacticBoardFabricJsContextProvider } from "../../contexts";
+import { TacticBoardProvider } from "../../contexts/tacticBoard";
 import { useAuth } from "../../store/hooks";
 import useVideoRecording from "../../hooks/taticBoard/useVideoRecording";
 import { useGetAllTacticboardAccessUsersQuery } from "../../api/quadcoachApi/tacticboardApi";
+import { getUuid } from "../../contexts/tacticBoard/TacticBoardFabricJsContext/fabricTypes";
 export type TacticBoardInProfileProps = {
   tacticBoardId: string | undefined;
 };
@@ -45,11 +50,12 @@ const TacticBoardInProfile = ({
   const refFullScreenContainer = useRef<HTMLDivElement>(null);
   const {
     canvasFabricRef: canvasRef,
-    loadFromTacticPage: loadFromJson,
     setSelection,
     setControls,
     getAllObjects,
-  } = useTacticBoardFabricJs();
+  } = useTacticBoardCanvas();
+
+  const { loadFromTacticPage: loadFromJson } = useTacticBoardData();
 
   const { id: userId, roles: userRoles } = useAuth();
 
@@ -177,18 +183,17 @@ const TacticBoardInProfile = ({
           const newPage = (prevPage % tacticBoard.pages.length) + 1;
           getAllObjects().forEach((obj) => {
             const targetObject = tacticBoard.pages[newPage - 1].objects?.find(
-              // @ts-ignore
-              (nextObject) => nextObject.uuid == obj.uuid,
+              (nextObject) => nextObject.uuid == getUuid(obj),
             );
-            if (targetObject && canvasRef.current) {
-              obj.animate("left", targetObject.left, {
+            if (targetObject && canvasRef.current && targetObject.left !== undefined && targetObject.top !== undefined) {
+              obj.animate("left", targetObject.left || 0, {
                 onChange: canvasRef.current.renderAll.bind(canvasRef.current),
                 duration: 1000,
                 onComplete: () => {
                   onLoadPage(newPage);
                 },
               });
-              obj.animate("top", targetObject.top, {
+              obj.animate("top", targetObject.top || 0, {
                 onChange: canvasRef.current.renderAll.bind(canvasRef.current),
                 duration: 1000,
                 onComplete: () => {
@@ -221,18 +226,17 @@ const TacticBoardInProfile = ({
           }
           getAllObjects().forEach((obj) => {
             const targetObject = tacticBoard.pages[newPage - 1].objects?.find(
-              // @ts-ignore
-              (nextObject) => nextObject.uuid == obj.uuid,
+              (nextObject) => nextObject.uuid == getUuid(obj),
             );
-            if (targetObject && canvasRef.current) {
-              obj.animate("left", targetObject.left, {
+            if (targetObject && canvasRef.current && targetObject.left !== undefined && targetObject.top !== undefined) {
+              obj.animate("left", targetObject.left || 0, {
                 onChange: canvasRef.current.renderAll.bind(canvasRef.current),
                 duration: 1000,
                 onComplete: () => {
                   onLoadPage(newPage);
                 },
               });
-              obj.animate("top", targetObject.top, {
+              obj.animate("top", targetObject.top || 0, {
                 onChange: canvasRef.current.renderAll.bind(canvasRef.current),
                 duration: 1000,
                 onComplete: () => {
@@ -406,9 +410,9 @@ const TacticBoardInProfileWrapper = ({
 }: TacticBoardInProfileWrapperProps): JSX.Element => {
   return (
     <div>
-      <TacticBoardFabricJsContextProvider heightFirstResizing={false}>
+      <TacticBoardProvider heightFirstResizing={false}>
         <TacticBoardInProfile tacticBoardId={tacticBoardId} />
-      </TacticBoardFabricJsContextProvider>
+      </TacticBoardProvider>
     </div>
   );
 };

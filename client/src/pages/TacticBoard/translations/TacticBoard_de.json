@@ -38,6 +38,12 @@
       "tooltip_removePage": "Löscht die aktuelle Taktik Tafel Seite",
       "tooltip_addPage": "Fügt eine nächste Taktik Tafel Seite hinzu"
     },
+    "deleteConfirmation": {
+      "title": "Seite löschen",
+      "message": "Sind Sie sicher, dass Sie diese Seite löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.",
+      "cancel": "Abbrechen",
+      "confirm": "Löschen"
+    },
     "backButton": {
       "tooltip": "Zurück zur Taktik Tafel Profile"
     }

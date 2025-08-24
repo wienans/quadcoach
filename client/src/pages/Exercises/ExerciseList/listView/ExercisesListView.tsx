@@ -6,11 +6,7 @@ import {
   GridPaginationModel,
   GridRowParams,
 } from "@mui/x-data-grid";
-import {
-  Alert,
-  LinearProgress,
-  styled,
-} from "@mui/material";
+import { Alert, LinearProgress, styled } from "@mui/material";
 import { Chip } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { SoftBox } from "../../../../components";

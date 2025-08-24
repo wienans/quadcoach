@@ -1,7 +1,7 @@
 import { Collapse, Icon, Link } from "@mui/material";
 import SoftBox from "../SoftBox";
 import SoftTypography from "../SoftTypography";
-import { useFooter } from "./FooterContext";
+import { useFooter } from "./useFooter";
 import { useTranslation } from "react-i18next";
 import "./translations";
 

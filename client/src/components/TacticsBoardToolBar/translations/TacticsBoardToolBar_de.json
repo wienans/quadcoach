@@ -1,7 +1,6 @@
 {
-    "removeBtn": "Löschen",
-    "backBtn": "Zurück",
-    "editMode": "bearbeiten",
-    "drawMode": "zeichenen"
+  "removeBtn": "Löschen",
+  "backBtn": "Zurück",
+  "editMode": "bearbeiten",
+  "drawMode": "zeichenen"
 }
-  

@@ -8,16 +8,18 @@ import {
 } from "@mui/material";
 import { Block } from "../../../../../api/quadcoachApi/domain";
 import { useTranslation } from "react-i18next";
+import { useLoadTacticBoard } from "../../../../../hooks";
 import {
-  useLoadTacticBoard,
-  useTacticBoardFabricJs,
-} from "../../../../../hooks";
-import { TacticBoardFabricJsContextProvider } from "../../../../../contexts";
+  useTacticBoardCanvas,
+  useTacticBoardData,
+} from "../../../../../hooks/taticBoard";
+import { TacticBoardProvider } from "../../../../../contexts/tacticBoard";
 import { FabricJsCanvas, SoftBox } from "../../../../../components";
 import { useCallback, useEffect, useState } from "react";
 import PlayCircleIcon from "@mui/icons-material/PlayCircle";
 import PauseCircleIcon from "@mui/icons-material/PauseCircle";
 import ContentPasteIcon from "@mui/icons-material/ContentPaste";
+import { getUuid } from "../../../../../contexts/tacticBoard/TacticBoardFabricJsContext/fabricTypes";
 export type TacticBoardInBlockProps = {
   block: Block;
 };
@@ -35,11 +37,12 @@ const TacticBoardInBlock = ({
   const [isAnimating, setIsAnimating] = useState<boolean>(false);
   const {
     canvasFabricRef: canvasRef,
-    loadFromTacticPage: loadFromJson,
     setSelection,
     setControls,
     getAllObjects,
-  } = useTacticBoardFabricJs();
+  } = useTacticBoardCanvas();
+
+  const { loadFromTacticPage: loadFromJson } = useTacticBoardData();
 
   useEffect(() => {
     if (!isTacticBoardLoading && !isTacticBoardError && tacticBoard) {
@@ -77,18 +80,17 @@ const TacticBoardInBlock = ({
           const newPage = (prevPage % tacticBoard.pages.length) + 1;
           getAllObjects().forEach((obj) => {
             const targetObject = tacticBoard.pages[newPage - 1].objects?.find(
-              // @ts-ignore
-              (nextObject) => nextObject.uuid == obj.uuid,
+              (nextObject) => nextObject.uuid == getUuid(obj),
             );
-            if (targetObject && canvasRef.current) {
-              obj.animate("left", targetObject.left, {
+            if (targetObject && canvasRef.current && targetObject.left !== undefined && targetObject.top !== undefined) {
+              obj.animate("left", targetObject.left || 0, {
                 onChange: canvasRef.current.renderAll.bind(canvasRef.current),
                 duration: 1000,
                 onComplete: () => {
                   onLoadPage(newPage);
                 },
               });
-              obj.animate("top", targetObject.top, {
+              obj.animate("top", targetObject.top || 0, {
                 onChange: canvasRef.current.renderAll.bind(canvasRef.current),
                 duration: 1000,
                 onComplete: () => {
@@ -186,9 +188,9 @@ const TacticBoardInBlockWrapper = ({
 }: TacticBoardInBlockWrapperProps): JSX.Element => {
   return (
     <div>
-      <TacticBoardFabricJsContextProvider heightFirstResizing={false}>
+      <TacticBoardProvider heightFirstResizing={false}>
         <TacticBoardInBlock block={block} />
-      </TacticBoardFabricJsContextProvider>
+      </TacticBoardProvider>
     </div>
   );
 };

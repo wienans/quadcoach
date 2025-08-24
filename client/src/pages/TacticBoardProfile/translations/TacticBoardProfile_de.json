@@ -33,7 +33,7 @@
       "tooltip": "Vollbildmodus"
     }
   },
-  "access":{
+  "access": {
     "title": "Zugang",
     "view": "Ansicht",
     "edit": "Bearbeiten",

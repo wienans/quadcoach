@@ -27,7 +27,6 @@ const TacticBoardCardView = ({
     <Grid container spacing={1}>
       {isTacticBoardsLoading &&
         Array.from(Array(10).keys()).map((loadingNumber) => (
-          // @ts-ignore
           <Grid item xs={12} md={6} xl={4} xxl={3} key={loadingNumber}>
             <TacticBoardLoadingCard />
           </Grid>
@@ -35,7 +34,6 @@ const TacticBoardCardView = ({
       {!isTacticBoardsLoading &&
         tacticBoards?.map((tacticBoard) => {
           return (
-            // @ts-ignore
             <Grid item xs={12} md={6} xl={4} xxl={3} key={tacticBoard._id}>
               <TacticBoardCard
                 tacticBoard={tacticBoard}

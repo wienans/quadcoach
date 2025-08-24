@@ -12,12 +12,17 @@ import {
   useDeleteTacticBoardPageMutation,
   useGetAllTacticboardAccessUsersQuery,
   useGetTacticBoardQuery,
+  useInsertTacticBoardPageMutation,
   useUpdateTacticBoardPageMutation,
 } from "../../api/quadcoachApi/tacticboardApi";
 import "../fullscreen.css";
 import { TacticBoard, TacticPage } from "../../api/quadcoachApi/domain";
-import { useTacticBoardFabricJs } from "../../hooks";
-import { TacticBoardFabricJsContextProvider } from "../../contexts";
+import {
+  useTacticBoardCanvas,
+  useTacticBoardData,
+  useKeyboardShortcuts,
+} from "../../hooks/taticBoard";
+import { TacticBoardProvider } from "../../contexts/tacticBoard";
 import Navbar from "../../components/Navbar";
 import TacticBoardItemsDrawerNav from "./TacticBoardItemsDrawerNav";
 import { useAppSelector } from "../../store/hooks";
@@ -31,13 +36,22 @@ const TacticsBoard = (): JSX.Element => {
   const { id: tacticBoardId } = useParams();
   const {
     canvasFabricRef: canvasRef,
-    loadFromTacticPage: loadFromJson,
     setSelection,
     setControls,
     getAllObjects,
-    getAllObjectsJson,
     removeActiveObjects,
-  } = useTacticBoardFabricJs();
+  } = useTacticBoardCanvas();
+
+  const { loadFromTacticPage: loadFromJson, getAllObjectsJson } =
+    useTacticBoardData();
+
+  // Enable keyboard shortcuts
+  useKeyboardShortcuts({
+    enableUndo: true,
+    enableRedo: true,
+    enableDelete: true,
+    enableSelectAll: true,
+  });
   const navigate = useNavigate();
   const refFullScreenContainer = useRef<HTMLDivElement>(null);
   const {
@@ -55,6 +69,8 @@ const TacticsBoard = (): JSX.Element => {
     useUpdateTacticBoardPageMutation();
   const [createTacticBoardPage, { isLoading: isCreatePageLoading }] =
     useCreateTacticBoardPageMutation();
+  const [insertTacticBoardPage, { isLoading: isInsertPageLoading }] =
+    useInsertTacticBoardPageMutation();
   const [deleteTacticBoardPage, { isLoading: isDeletePageLoading }] =
     useDeleteTacticBoardPageMutation();
   const [deleteTacticBoard] = useDeleteTacticBoardMutation();
@@ -79,8 +95,18 @@ const TacticsBoard = (): JSX.Element => {
   };
 
   const onLoadPage = useCallback(
-    (page: number, newPage?: boolean, removePage?: boolean) => {
-      if (newPage && removePage) return;
+    (
+      page: number,
+      newPage?: boolean,
+      removePage?: boolean,
+      insertPage?: boolean,
+    ) => {
+      if (
+        (newPage && removePage) ||
+        (newPage && insertPage) ||
+        (removePage && insertPage)
+      )
+        return;
       if (!tacticBoard) return;
       const updatedTacticBoard: TacticBoard = cloneDeep(tacticBoard);
       if (isPrivileged && isEditMode) {
@@ -98,15 +124,72 @@ const TacticsBoard = (): JSX.Element => {
             tacticboardId: tacticBoard._id,
             pageData: getAllObjectsJson(),
           });
+        } else if (insertPage) {
+          // Insert page after current page, duplicating current page content
+          const currentPageData = getAllObjectsJson();
+          const insertPosition = page; // Insert after current page (0-based index)
+
+          // Save current page first
+          updatedTacticBoard.pages[page - 1] = {
+            ...updatedTacticBoard.pages[page - 1],
+            ...currentPageData,
+          } as TacticPage;
+
+          updateTacticBoardPage({
+            tacticboardId: tacticBoard._id,
+            pageId: updatedTacticBoard.pages[page - 1]._id,
+            pageData: currentPageData,
+          });
+
+          // Insert the duplicated page
+          insertTacticBoardPage({
+            tacticboardId: tacticBoard._id,
+            position: insertPosition,
+            pageData: currentPageData,
+          });
+
+          // Update local state - insert the duplicated page
+          updatedTacticBoard.pages.splice(insertPosition, 0, {
+            ...updatedTacticBoard.pages[page - 1],
+            _id: "temp-" + Date.now(), // Temporary ID until refresh
+          } as TacticPage);
+
+          // Update maxPages and navigate to the new page
+          const newMaxPages = updatedTacticBoard.pages.length;
+          setMaxPages(newMaxPages);
+          setPage(page + 1); // Navigate to the newly inserted page
+
+          // Load the new page (adjust index since page numbers are 1-based)
+          page = page + 1;
         } else if (removePage) {
-          // Remove Last Page
+          // Remove Current Page
+          const currentPageIndex = page - 1;
+          const pageToDelete = updatedTacticBoard.pages[currentPageIndex];
+
           deleteTacticBoardPage({
             tacticboardId: tacticBoard._id,
-            pageId:
-              updatedTacticBoard.pages[updatedTacticBoard.pages.length - 1]._id,
+            pageId: pageToDelete._id,
           });
-          updatedTacticBoard.pages.pop();
-          // updateTacticBoard(updatedTacticBoard);
+
+          // Remove the page from the array
+          updatedTacticBoard.pages.splice(currentPageIndex, 1);
+
+          // Update maxPages
+          const newMaxPages = updatedTacticBoard.pages.length;
+          setMaxPages(newMaxPages);
+
+          // Determine new current page after deletion
+          let newCurrentPage = page;
+          if (page > newMaxPages) {
+            // If we deleted the last page, go to the new last page
+            newCurrentPage = newMaxPages;
+          }
+          // If we deleted a middle page, stay on the same page number (which now shows the next page)
+
+          setPage(newCurrentPage);
+
+          // Load the new current page (adjust index since page numbers are 1-based)
+          page = newCurrentPage;
         } else if (page > currentPage) {
           // Go to next page
           updatedTacticBoard.pages[page - 2] = {
@@ -152,6 +235,7 @@ const TacticsBoard = (): JSX.Element => {
       getAllObjectsJson,
       updateTacticBoardPage,
       createTacticBoardPage,
+      insertTacticBoardPage,
       deleteTacticBoardPage,
       setSelection,
     ],
@@ -268,18 +352,19 @@ const TacticsBoard = (): JSX.Element => {
           const newPage = (prevPage % tacticBoard.pages.length) + 1;
           getAllObjects().forEach((obj) => {
             const targetObject = tacticBoard.pages[newPage - 1].objects?.find(
-              // @ts-ignore
-              (nextObject) => nextObject.uuid == obj.uuid,
+              (nextObject) =>
+                (nextObject as { uuid?: string }).uuid ===
+                (obj as fabric.Object & { uuid?: string }).uuid,
             );
             if (targetObject && canvasRef.current) {
-              obj.animate("left", targetObject.left, {
+              obj.animate("left", targetObject.left || 0, {
                 onChange: canvasRef.current.renderAll.bind(canvasRef.current),
                 duration: 1000,
                 onComplete: () => {
                   onLoadPage(newPage);
                 },
               });
-              obj.animate("top", targetObject.top, {
+              obj.animate("top", targetObject.top || 0, {
                 onChange: canvasRef.current.renderAll.bind(canvasRef.current),
                 duration: 1000,
                 onComplete: () => {
@@ -312,18 +397,19 @@ const TacticsBoard = (): JSX.Element => {
           }
           getAllObjects().forEach((obj) => {
             const targetObject = tacticBoard.pages[newPage - 1].objects?.find(
-              // @ts-ignore
-              (nextObject) => nextObject.uuid == obj.uuid,
+              (nextObject) =>
+                (nextObject as { uuid?: string }).uuid ===
+                (obj as fabric.Object & { uuid?: string }).uuid,
             );
             if (targetObject && canvasRef.current) {
-              obj.animate("left", targetObject.left, {
+              obj.animate("left", targetObject.left || 0, {
                 onChange: canvasRef.current.renderAll.bind(canvasRef.current),
                 duration: 1000,
                 onComplete: () => {
                   onLoadPage(newPage);
                 },
               });
-              obj.animate("top", targetObject.top, {
+              obj.animate("top", targetObject.top || 0, {
                 onChange: canvasRef.current.renderAll.bind(canvasRef.current),
                 duration: 1000,
                 onComplete: () => {
@@ -420,10 +506,9 @@ const TacticsBoard = (): JSX.Element => {
         </>
       )}
       {!isTacticBoardError && !isTacticBoardLoading && tacticBoard && (
-        <SoftBox
-          // @ts-ignore
+        <div
           ref={refFullScreenContainer}
-          sx={{
+          style={{
             display: "flex",
             flexGrow: 1,
             maxHeight: "100%",
@@ -436,6 +521,7 @@ const TacticsBoard = (): JSX.Element => {
               isTacticBoardLoading ||
               isUpdatePageLoading ||
               isCreatePageLoading ||
+              isInsertPageLoading ||
               isDeletePageLoading
             }
             tacticBoard={tacticBoard}
@@ -443,7 +529,6 @@ const TacticsBoard = (): JSX.Element => {
             currentPage={currentPage}
             onLoadPage={onLoadPage}
             setPage={setPage}
-            setMaxPages={setMaxPages}
             maxPages={maxPages}
             isAnimating={isAnimating}
             onAnimateClick={onAnimateClick}
@@ -489,7 +574,7 @@ const TacticsBoard = (): JSX.Element => {
               </SoftBox>
             </SoftBox>
           </SoftBox>
-        </SoftBox>
+        </div>
       )}
     </SoftBox>
   );
@@ -497,9 +582,9 @@ const TacticsBoard = (): JSX.Element => {
 
 const TacticsBoardWrapper = (): JSX.Element => {
   return (
-    <TacticBoardFabricJsContextProvider heightFirstResizing={true}>
+    <TacticBoardProvider heightFirstResizing={true}>
       <TacticsBoard />
-    </TacticBoardFabricJsContextProvider>
+    </TacticBoardProvider>
   );
 };
 

@@ -33,7 +33,7 @@
       "tooltip": "Enables the fullscreen mode"
     }
   },
-  "access":{
+  "access": {
     "title": "Access",
     "view": "View",
     "edit": "Edit",

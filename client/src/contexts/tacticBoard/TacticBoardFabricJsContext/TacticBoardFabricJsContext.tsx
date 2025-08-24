@@ -6,10 +6,16 @@ import {
   useCallback,
   useRef,
   MutableRefObject,
+  useEffect,
+  useMemo,
 } from "react";
 import { fabric } from "fabric";
 import { TacticPage } from "../../../api/quadcoachApi/domain";
 import { useContainerResizeEvent } from "./useResizeEvent";
+
+import { TacticPageValidator } from "./validation";
+import { ExtendedBaseBrush } from "./fabricTypes";
+import { CanvasOperationError } from "./types";
 
 const canvasDefaultOptions: fabric.ICanvasOptions = {
   preserveObjectStacking: true,
@@ -65,24 +71,35 @@ const TacticBoardFabricJsContextProvider: FC<{
   const drawThicknessRef = useRef<number>(2);
   const lineStyleRef = useRef<LineStyle>("solid");
 
-  const { initializeContainerResizeObserver } = useContainerResizeEvent(
-    containerRef,
-    canvasFabricRef,
-    heightFirstResizing,
+  const { initializeContainerResizeObserver, cleanup: cleanupResizeObserver } =
+    useContainerResizeEvent(containerRef, canvasFabricRef, heightFirstResizing);
+
+  const setCanvasRef = useCallback(
+    (instance: HTMLCanvasElement | null) => {
+      // Cleanup previous canvas
+      if (canvasFabricRef.current) {
+        canvasFabricRef.current.dispose();
+        canvasFabricRef.current = null;
+      }
+
+      canvasRef.current = instance;
+
+      if (!instance) return;
+
+      try {
+        canvasFabricRef.current = new fabric.Canvas(
+          canvasRef.current,
+          canvasDefaultOptions,
+        );
+
+        // Re-initialize resize observer now that canvas is ready
+        initializeContainerResizeObserver();
+      } catch (error) {
+        throw new CanvasOperationError("Canvas initialization", error as Error);
+      }
+    },
+    [initializeContainerResizeObserver],
   );
-
-  const setCanvasRef = useCallback((instance: HTMLCanvasElement | null) => {
-    canvasRef.current = instance;
-
-    if (canvasFabricRef.current) canvasFabricRef.current.dispose();
-
-    if (!instance) return;
-
-    canvasFabricRef.current = new fabric.Canvas(
-      canvasRef.current,
-      canvasDefaultOptions,
-    );
-  }, []);
 
   const setContainerRef = useCallback(
     (instance: HTMLDivElement | null) => {
@@ -94,41 +111,75 @@ const TacticBoardFabricJsContextProvider: FC<{
   );
 
   const addObject = useCallback((object: fabric.Object) => {
-    canvasFabricRef.current?.add(object);
+    try {
+      canvasFabricRef.current?.add(object);
+    } catch (error) {
+      throw new CanvasOperationError("Adding object", error as Error);
+    }
   }, []);
 
   const removeObject = useCallback((object: fabric.Object) => {
-    canvasFabricRef.current?.remove(object);
+    try {
+      canvasFabricRef.current?.remove(object);
+    } catch (error) {
+      throw new CanvasOperationError("Removing object", error as Error);
+    }
   }, []);
 
   const removeActiveObjects = useCallback(() => {
-    const canvasFabric = canvasFabricRef.current;
-    if (!canvasFabric) return;
-    const selectedObjects = canvasFabric.getActiveObjects();
-    canvasFabric.remove(...selectedObjects);
-    canvasFabric.discardActiveObject();
+    try {
+      const canvasFabric = canvasFabricRef.current;
+      if (!canvasFabric) return;
+      const selectedObjects = canvasFabric.getActiveObjects();
+      canvasFabric.remove(...selectedObjects);
+      canvasFabric.discardActiveObject();
+    } catch (error) {
+      throw new CanvasOperationError("Removing active objects", error as Error);
+    }
   }, []);
 
   const getActiveObjects = useCallback(() => {
-    return canvasFabricRef.current?.getActiveObjects() ?? [];
+    try {
+      return canvasFabricRef.current?.getActiveObjects() ?? [];
+    } catch (error) {
+      console.error("Failed to get active objects:", error);
+      return [];
+    }
   }, []);
 
   const getAllObjects = useCallback(() => {
-    return canvasFabricRef.current?.getObjects() ?? [];
+    try {
+      return canvasFabricRef.current?.getObjects() ?? [];
+    } catch (error) {
+      console.error("Failed to get all objects:", error);
+      return [];
+    }
   }, []);
 
   const getAllObjectsJson = useCallback(() => {
-    const canvasFabric = canvasFabricRef.current;
-    if (!canvasFabric) return {};
+    try {
+      const canvasFabric = canvasFabricRef.current;
+      if (!canvasFabric) return {};
 
-    const json = canvasFabric.toJSON([
-      "uuid",
-      "objectType",
-    ]) as unknown as TacticPage;
-    if (json.backgroundImage) {
-      json.backgroundImage.src = new URL(json.backgroundImage.src).pathname;
+      const json = canvasFabric.toJSON([
+        "uuid",
+        "objectType",
+      ]) as unknown as TacticPage;
+
+      if (json.backgroundImage?.src) {
+        try {
+          json.backgroundImage.src = new URL(json.backgroundImage.src).pathname;
+        } catch (urlError) {
+          // If URL parsing fails, keep the original src
+          console.warn("Failed to parse background image URL:", urlError);
+        }
+      }
+
+      return json;
+    } catch (error) {
+      console.error("Failed to get objects JSON:", error);
+      return {};
     }
-    return json;
   }, []);
 
   const setBackgroundImage = useCallback((src: string) => {
@@ -157,47 +208,82 @@ const TacticBoardFabricJsContextProvider: FC<{
   const loadFromTacticPage = useCallback((page: TacticPage) => {
     const canvasFabric = canvasFabricRef.current;
     if (!canvasFabric) return;
-    canvasFabric.remove(...canvasFabric.getObjects());
-    // canvasFabric.getObjects().forEach((obj) => {
-    //   canvasFabric.remove(obj);
-    // });
-    canvasFabric.setBackgroundImage(
-      page.backgroundImage.src,
-      canvasFabric.renderAll.bind(canvasFabric),
-    );
-    page.objects?.forEach((obj) => {
-      if (obj.type == "circle") {
-        const addObj = new fabric.Circle(obj as object);
-        canvasFabric.add(addObj);
-      } else if (obj.type == "rect") {
-        const addObj = new fabric.Rect(obj as object);
-        canvasFabric.add(addObj);
-      } else if (obj.type == "path") {
-        const addObj = new fabric.Path(obj.path?.toString(), obj as object);
-        canvasFabric.add(addObj);
-      } else if (obj.type == "group") {
-        const objects: fabric.Object[] = [];
-        obj.objects?.forEach((obj) => {
-          if (obj.type == "circle") {
+
+    try {
+      // Validate the page data before loading
+      const validation = TacticPageValidator.validate(page);
+      if (!validation.isValid) {
+        console.warn("TacticPage validation failed:", validation.errors);
+        // For now, let's be less strict and just log warnings instead of sanitizing
+        // page = TacticPageValidator.sanitize(page);
+      }
+
+      // Clear existing objects
+      canvasFabric.remove(...canvasFabric.getObjects());
+
+      // Set background image
+      if (page.backgroundImage?.src) {
+        canvasFabric.setBackgroundImage(
+          page.backgroundImage.src,
+          canvasFabric.renderAll.bind(canvasFabric),
+        );
+      }
+
+      // Load objects - temporarily using original logic for debugging
+      console.log("Loading objects:", page.objects?.length || 0);
+      page.objects?.forEach((obj) => {
+        try {
+          if (obj.type === "circle") {
             const addObj = new fabric.Circle(obj as object);
-            objects.push(addObj);
-          } else if (obj.type == "text") {
+            canvasFabric.add(addObj);
+          } else if (obj.type === "rect") {
+            const addObj = new fabric.Rect(obj as object);
+            canvasFabric.add(addObj);
+          } else if (obj.type === "path") {
+            const addObj = new fabric.Path(obj.path?.toString(), obj as object);
+            canvasFabric.add(addObj);
+          } else if (obj.type === "text") {
             if (obj.text) {
               const addObj = new fabric.Text(obj.text, obj as object);
-              objects.push(addObj);
+              canvasFabric.add(addObj);
             }
-          } else if (obj.type == "path") {
-            const addObj = new fabric.Path(obj.path?.toString(), obj as object);
-            objects.push(addObj);
-          } else if (obj.type == "rect") {
-            const addObj = new fabric.Rect(obj as object);
-            objects.push(addObj);
+          } else if (obj.type === "group") {
+            const objects: fabric.Object[] = [];
+            obj.objects?.forEach((groupObj) => {
+              if (groupObj.type === "circle") {
+                const addObj = new fabric.Circle(groupObj as object);
+                objects.push(addObj);
+              } else if (groupObj.type === "text") {
+                if (groupObj.text) {
+                  const addObj = new fabric.Text(
+                    groupObj.text,
+                    groupObj as object,
+                  );
+                  objects.push(addObj);
+                }
+              } else if (groupObj.type === "path") {
+                const addObj = new fabric.Path(
+                  groupObj.path?.toString(),
+                  groupObj as object,
+                );
+                objects.push(addObj);
+              } else if (groupObj.type === "rect") {
+                const addObj = new fabric.Rect(groupObj as object);
+                objects.push(addObj);
+              }
+            });
+            const addObj = new fabric.Group(objects, obj as object);
+            canvasFabric.add(addObj);
           }
-        });
-        const addObj = new fabric.Group(objects, obj as object);
-        canvasFabric.add(addObj);
-      }
-    });
+        } catch (error) {
+          console.error("Failed to create object:", obj, error);
+        }
+      });
+
+      canvasFabric.renderAll();
+    } catch (error) {
+      throw new CanvasOperationError("Loading tactic page", error as Error);
+    }
   }, []);
 
   const setSelection = useCallback((selection: boolean) => {
@@ -208,20 +294,25 @@ const TacticBoardFabricJsContextProvider: FC<{
 
   const setDrawMode = useCallback(
     (drawMode: boolean, dashArray?: number[]) => {
-      const canvasFabric = canvasFabricRef.current;
-      if (!canvasFabric) return;
+      try {
+        const canvasFabric = canvasFabricRef.current;
+        if (!canvasFabric) return;
 
-      canvasFabric.isDrawingMode = drawMode;
-      if (drawMode) {
-        canvasFabric.freeDrawingBrush.color = drawColorRef.current;
-        canvasFabric.freeDrawingBrush.width = drawThicknessRef.current;
-        if (dashArray) {
-          (canvasFabric.freeDrawingBrush as any).strokeDashArray = dashArray;
-        } else {
-          (canvasFabric.freeDrawingBrush as any).strokeDashArray = null;
+        canvasFabric.isDrawingMode = drawMode;
+        if (drawMode && canvasFabric.freeDrawingBrush) {
+          canvasFabric.freeDrawingBrush.color = drawColorRef.current;
+          canvasFabric.freeDrawingBrush.width = drawThicknessRef.current;
+          const brush = canvasFabric.freeDrawingBrush as ExtendedBaseBrush;
+          if (dashArray) {
+            brush.strokeDashArray = dashArray;
+          } else {
+            brush.strokeDashArray = [];
+          }
         }
+        setControls(false);
+      } catch (error) {
+        throw new CanvasOperationError("Setting draw mode", error as Error);
       }
-      setControls(false);
     },
     [setControls],
   );
@@ -253,22 +344,30 @@ const TacticBoardFabricJsContextProvider: FC<{
   }, []);
 
   const setDrawColor = useCallback((color: string) => {
-    const canvasFabric = canvasFabricRef.current;
-    if (!canvasFabric) return;
+    try {
+      const canvasFabric = canvasFabricRef.current;
+      if (!canvasFabric) return;
 
-    drawColorRef.current = color;
-    if (canvasFabric.isDrawingMode) {
-      canvasFabric.freeDrawingBrush.color = color;
+      drawColorRef.current = color;
+      if (canvasFabric.isDrawingMode && canvasFabric.freeDrawingBrush) {
+        canvasFabric.freeDrawingBrush.color = color;
+      }
+    } catch (error) {
+      console.error("Failed to set draw color:", error);
     }
   }, []);
 
   const setDrawThickness = useCallback((thickness: number) => {
-    const canvasFabric = canvasFabricRef.current;
-    if (!canvasFabric) return;
+    try {
+      const canvasFabric = canvasFabricRef.current;
+      if (!canvasFabric) return;
 
-    drawThicknessRef.current = thickness;
-    if (canvasFabric.isDrawingMode) {
-      canvasFabric.freeDrawingBrush.width = thickness;
+      drawThicknessRef.current = thickness;
+      if (canvasFabric.isDrawingMode && canvasFabric.freeDrawingBrush) {
+        canvasFabric.freeDrawingBrush.width = thickness;
+      }
+    } catch (error) {
+      console.error("Failed to set draw thickness:", error);
     }
   }, []);
 
@@ -280,34 +379,78 @@ const TacticBoardFabricJsContextProvider: FC<{
     return drawThicknessRef.current;
   }, []);
 
+  // Effect to ensure resize observer is initialized when both refs are ready
+  useEffect(() => {
+    if (containerRef.current && canvasFabricRef.current) {
+      initializeContainerResizeObserver();
+    }
+  }, [initializeContainerResizeObserver]);
+
+  // Cleanup effect - only on actual unmount, not on re-renders
+  useEffect(() => {
+    return () => {
+      // Only cleanup resize observer on unmount
+      // Canvas cleanup is handled in setCanvasRef when needed
+      cleanupResizeObserver();
+    };
+  }, [cleanupResizeObserver]);
+
+  // Memoize context value to prevent unnecessary re-renders
+  const contextValue = useMemo(
+    () => ({
+      containerRef,
+      canvasRef,
+      setCanvasRef,
+      setContainerRef,
+      canvasFabricRef,
+      addObject,
+      getAllObjects,
+      getAllObjectsJson,
+      getActiveObjects,
+      removeObject,
+      removeActiveObjects,
+      setSelection,
+      loadFromTacticPage,
+      setDrawMode,
+      setControls,
+      setBackgroundImage,
+      getBackgroundImage,
+      setDrawColor,
+      setDrawThickness,
+      getDrawColor,
+      getDrawThickness,
+      setLineStyle,
+      getLineStyle,
+    }),
+    [
+      containerRef,
+      canvasRef,
+      setCanvasRef,
+      setContainerRef,
+      canvasFabricRef,
+      addObject,
+      getAllObjects,
+      getAllObjectsJson,
+      getActiveObjects,
+      removeObject,
+      removeActiveObjects,
+      setSelection,
+      loadFromTacticPage,
+      setDrawMode,
+      setControls,
+      setBackgroundImage,
+      getBackgroundImage,
+      setDrawColor,
+      setDrawThickness,
+      getDrawColor,
+      getDrawThickness,
+      setLineStyle,
+      getLineStyle,
+    ],
+  );
+
   return (
-    <TacticBoardFabricJsContext.Provider
-      value={{
-        containerRef,
-        canvasRef,
-        setCanvasRef,
-        setContainerRef,
-        canvasFabricRef,
-        addObject,
-        getAllObjects,
-        getAllObjectsJson,
-        getActiveObjects,
-        removeObject,
-        removeActiveObjects,
-        setSelection,
-        loadFromTacticPage,
-        setDrawMode,
-        setControls,
-        setBackgroundImage,
-        getBackgroundImage,
-        setDrawColor,
-        setDrawThickness,
-        getDrawColor,
-        getDrawThickness,
-        setLineStyle,
-        getLineStyle,
-      }}
-    >
+    <TacticBoardFabricJsContext.Provider value={contextValue}>
       {children}
     </TacticBoardFabricJsContext.Provider>
   );

@@ -5,6 +5,7 @@ import mongoose from "mongoose";
 import Exercise from "../models/exercise";
 import TacticboardFav from "../models/tacticboardFav";
 import TacticboardAccess from "../models/tacticboardAccess";
+import User from "../models/user";
 
 interface UserInfo {
   id?: string;
@@ -512,6 +513,70 @@ export const createNewPage = asyncHandler(
   }
 );
 
+// @desc    Insert page at specific position in tacticboard
+// @route   POST /api/tacticboards/:id/insertPage/:position
+// @access  Private - Owner or Admin only
+export const insertPageAtPosition = asyncHandler(
+  async (req: RequestWithUser, res: Response) => {
+    const { id: tacticBoardId, position } = req.params;
+    const insertPosition = parseInt(position);
+
+    if (mongoose.isValidObjectId(tacticBoardId) && !isNaN(insertPosition)) {
+      const findResult = await TacticBoard.findOne({ _id: tacticBoardId });
+      if (findResult) {
+        // Authorization check
+        if (!req.UserInfo?.id) {
+          res.status(401).json({ message: "Unauthorized" });
+          return;
+        }
+        const accessUser = await TacticboardAccess.findOne({
+          user: req.UserInfo.id,
+          tacticboard: req.params.id,
+        });
+        const hasAccess =
+          findResult.user?.toString() === req.UserInfo.id ||
+          req.UserInfo.roles?.includes("Admin") ||
+          req.UserInfo.roles?.includes("admin") ||
+          (accessUser && accessUser.access == "edit");
+
+        if (!hasAccess) {
+          res.status(403).json({ message: "Forbidden" });
+          return;
+        }
+
+        // Validate position is within bounds
+        if (insertPosition < 0 || insertPosition > (findResult.pages?.length || 0)) {
+          res.status(400).json({ message: "Invalid position" });
+          return;
+        }
+
+        // Insert page at specific position using $push with $position
+        const result = await TacticBoard.findOneAndUpdate(
+          { _id: tacticBoardId },
+          { 
+            $push: { 
+              pages: { 
+                $each: [req.body], 
+                $position: insertPosition 
+              } 
+            } 
+          }
+        );
+
+        if (result) {
+          res.json({ message: "Page inserted successfully" });
+        } else {
+          res.status(404).json({ message: "Failed to insert page" });
+        }
+      } else {
+        res.status(404).json({ message: "TacticBoard not found" });
+      }
+    } else {
+      res.status(400).json({ message: "Invalid ID format or position" });
+    }
+  }
+);
+
 // @desc    Delete page from tacticboard
 // @route   DELETE /api/tacticboards/:id/:pageId
 // @access  Private - Owner or Admin only
@@ -775,5 +840,67 @@ export const getAllAccessUsers = asyncHandler(
     }).populate("user", "name");
 
     res.json(accessEntries);
+  }
+);
+
+// @desc    Share tacticboard with user by email
+// @route   POST /api/tacticboards/:id/share
+// @access  Private - Owner or Admin only
+export const shareTacticBoard = asyncHandler(
+  async (req: RequestWithUser, res: Response) => {
+    if (!req.UserInfo?.id) {
+      res.status(401).json({ message: "Unauthorized" });
+      return;
+    }
+
+    const { email, access } = req.body;
+    if (!email || !access) {
+      res.status(400).json({ message: "Email and access level are required" });
+      return;
+    }
+
+    if (!["view", "edit"].includes(access)) {
+      res.status(400).json({ message: "Access must be 'view' or 'edit'" });
+      return;
+    }
+
+    const tacticBoard = await TacticBoard.findById(req.params.id);
+    if (!tacticBoard) {
+      res.status(404).json({ message: "Tactic board not found" });
+      return;
+    }
+
+    const isOwner = tacticBoard.user?.toString() === req.UserInfo.id;
+    const isAdmin = req.UserInfo.roles?.some(role => role.toLowerCase() === "admin");
+
+    if (!isOwner && !isAdmin) {
+      res.status(403).json({ message: "Forbidden" });
+      return;
+    }
+
+    const targetUser = await User.findOne({ email: email.toLowerCase() }).select("_id");
+    if (!targetUser) {
+      res.status(404).json({ message: "User not found with this email" });
+      return;
+    }
+
+    const existingAccess = await TacticboardAccess.findOne({
+      tacticboard: req.params.id,
+      user: targetUser._id,
+    });
+
+    if (existingAccess) {
+      existingAccess.access = access;
+      await existingAccess.save();
+      res.json({ message: "Access updated successfully" });
+    } else {
+      const newAccess = new TacticboardAccess({
+        tacticboard: req.params.id,
+        user: targetUser._id,
+        access,
+      });
+      await newAccess.save();
+      res.status(201).json({ message: "Access granted successfully" });
+    }
   }
 );

@@ -38,6 +38,12 @@
       "tooltip_removePage": "Removes current tactic board page",
       "tooltip_addPage": "Adds a new tactic board page"
     },
+    "deleteConfirmation": {
+      "title": "Delete Page",
+      "message": "Are you sure you want to delete this page? This action cannot be undone.",
+      "cancel": "Cancel",
+      "confirm": "Delete"
+    },
     "backButton": {
       "tooltip": "Go back to tactic board profile"
     }

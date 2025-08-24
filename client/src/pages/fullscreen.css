@@ -1,20 +1,19 @@
+:-webkit-full-screen {
+  background-color: rgb(248, 249, 250);
+}
 
-  :-webkit-full-screen {
-    background-color: rgb(248, 249, 250);
-  }
-  
-  :-moz-full-screen {
-    background-color: rgb(248, 249, 250);
-  }
-  
-  :-ms-fullscreen {
-    background-color: rgb(248, 249, 250);
-  }
-  
-  :fullscreen {
-    background-color: rgb(248, 249, 250);
-  }
+:-moz-full-screen {
+  background-color: rgb(248, 249, 250);
+}
 
-  :full-screen {
-    background-color: rgb(248, 249, 250);
-  }
+:-ms-fullscreen {
+  background-color: rgb(248, 249, 250);
+}
+
+:fullscreen {
+  background-color: rgb(248, 249, 250);
+}
+
+:full-screen {
+  background-color: rgb(248, 249, 250);
+}
