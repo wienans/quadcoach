@@ -123,6 +123,18 @@ const routes = [
         ],
       },
       {
+        path: "/drafting-board",
+        handle: {
+          type: RouteHandleType.draftingBoard,
+        },
+        async lazy() {
+          const DraftingBoard = (await import("../DraftingBoard")).default;
+          return {
+            element: <DraftingBoard />,
+          };
+        },
+      },
+      {
         path: "/users",
         // handle: {
         //   type: RouteHandleType.userProfile,

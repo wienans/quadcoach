@@ -3,6 +3,7 @@ import Sidenav, { SidebarNavRoute } from "./Sidenav";
 import HomeIcon from "@mui/icons-material/Home";
 import DeveloperBoardIcon from "@mui/icons-material/DeveloperBoard";
 import ListIcon from "@mui/icons-material/List";
+import EditIcon from "@mui/icons-material/Edit";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import LoginIcon from "@mui/icons-material/Login";
@@ -43,6 +44,16 @@ const Layout = () => {
       noCollapse: true,
       protected: true,
       regExp: new RegExp("\\/tacticsboard$"),
+    },
+    {
+      type: "collapse" as const,
+      nameResourceKey: "Layout:routes.draftingBoard",
+      key: "drafting-board",
+      route: "/drafting-board",
+      icon: <EditIcon />,
+      noCollapse: true,
+      protected: true,
+      regExp: new RegExp("\\/drafting-board$"),
     },
     {
       type: "divider" as const,
