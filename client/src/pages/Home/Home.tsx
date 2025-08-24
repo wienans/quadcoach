@@ -40,6 +40,39 @@ const Home = () => {
                     fontWeight="bold"
                     textTransform="uppercase"
                   >
+                    Drafting Boards
+                  </SoftTypography>
+                  <SoftTypography
+                    variant="h3"
+                    fontWeight="bold"
+                    textTransform="uppercase"
+                  >
+                    24.Aug.2025
+                  </SoftTypography>
+                </SoftBox>
+                <SoftTypography>
+                  This non-persistent workspace allows coaches to quickly sketch
+                  tactical ideas.
+                  <br />
+                  Perfect for brainstorming sessions, temporary demonstrations,
+                  and quick tactical explanations, or ingame coaching.
+                </SoftTypography>
+              </SoftBox>
+            </Card>
+          </SoftBox>
+          <SoftBox mt={5}>
+            <Card sx={{ height: "100%" }}>
+              <SoftBox p={2}>
+                <SoftBox
+                  display="flex"
+                  justifyContent="space-between"
+                  width="100%"
+                >
+                  <SoftTypography
+                    variant="h3"
+                    fontWeight="bold"
+                    textTransform="uppercase"
+                  >
                     Multi-User Access & System Improvements
                   </SoftTypography>
                   <SoftTypography
