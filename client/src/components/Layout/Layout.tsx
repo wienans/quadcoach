@@ -43,7 +43,7 @@ const Layout = () => {
       icon: <DeveloperBoardIcon />,
       noCollapse: true,
       protected: true,
-      regExp: new RegExp("\\/tacticsboard$"),
+      regExp: new RegExp("\\/tacticboards$"),
     },
     {
       type: "collapse" as const,
