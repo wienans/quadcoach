@@ -1,6 +1,6 @@
 import "./translations";
+import "../TacticBoard/translations";
 import { useState, useEffect, useRef, useCallback } from "react";
-import { useTranslation } from "react-i18next";
 import { FabricJsCanvas, SoftBox } from "../../components";
 import {
   useTacticBoardCanvas,
@@ -12,11 +12,10 @@ import Navbar from "../../components/Navbar";
 import TacticBoardItemsDrawerNav from "../TacticBoard/TacticBoardItemsDrawerNav";
 import { useAppSelector, useAppDispatch } from "../../store/hooks";
 import DraftingBoardTopItemsMenu from "./DraftingBoardTopItemsMenu";
-import { setIsEditMode, toggleTacticBoardItemsDrawerOpen } from "../TacticBoard/tacticBoardSlice";
+import { setIsEditMode, toggleTacticBoardItemsDrawerOpen, setTacticBoardItemsDrawerClosing } from "../TacticBoard/tacticBoardSlice";
 import "../fullscreen.css";
 
 const DraftingBoardContent = (): JSX.Element => {
-  const { t } = useTranslation("DraftingBoard");
   const dispatch = useAppDispatch();
   const {
     setSelection,
@@ -37,6 +36,7 @@ const DraftingBoardContent = (): JSX.Element => {
 
   const refFullScreenContainer = useRef<HTMLDivElement>(null);
   const [isFullScreen, setIsFullScreen] = useState<boolean>(false);
+  const drawerInitialized = useRef(false);
 
   const isEditMode = useAppSelector((state) => state.tacticBoard.isEditMode);
   const tacticBoardItemsDrawerOpen = useAppSelector((state) => state.tacticBoard.tacticBoardItemsDrawerOpen);
@@ -115,10 +115,6 @@ const DraftingBoardContent = (): JSX.Element => {
     setBackgroundImage("/empty-court.svg");
     // Enable edit mode for drafting
     dispatch(setIsEditMode(true));
-    // Ensure the items drawer is open
-    if (!tacticBoardItemsDrawerOpen) {
-      dispatch(toggleTacticBoardItemsDrawerOpen());
-    }
     setSelection(true);
     setControls(false);
 
@@ -126,7 +122,22 @@ const DraftingBoardContent = (): JSX.Element => {
     return () => {
       dispatch(setIsEditMode(false));
     };
-  }, [loadFromJson, setSelection, setControls, setBackgroundImage, dispatch, tacticBoardItemsDrawerOpen]);
+  }, [loadFromJson, setSelection, setControls, setBackgroundImage, dispatch]);
+
+  // One-time initialization of drawer state
+  useEffect(() => {
+    if (!drawerInitialized.current) {
+      drawerInitialized.current = true;
+      
+      // Reset drawer closing state to ensure toggle works
+      dispatch(setTacticBoardItemsDrawerClosing(false));
+      
+      // Only open drawer if it's currently closed
+      if (!tacticBoardItemsDrawerOpen) {
+        dispatch(toggleTacticBoardItemsDrawerOpen());
+      }
+    }
+  }, [dispatch, tacticBoardItemsDrawerOpen]);
 
   useEffect(() => {
     const handleFullScreenChange = () => {
@@ -161,67 +172,7 @@ const DraftingBoardContent = (): JSX.Element => {
           flexDirection: "column",
         }}
       >
-        {/* Simplified Top Menu for Drafting Board */}
-        <SoftBox
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            mb: 1,
-            px: 3,
-            py: 1,
-            borderBottom: "1px solid",
-            borderColor: "divider",
-          }}
-        >
-          <SoftBox
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              gap: 2,
-            }}
-          >
-            <span style={{ fontSize: "1.2rem", fontWeight: "bold" }}>
-              {t("DraftingBoard:title")}
-            </span>
-          </SoftBox>
-          <SoftBox
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              gap: 1,
-            }}
-          >
-            <button
-              onClick={onClearCanvas}
-              style={{
-                padding: "8px 16px",
-                backgroundColor: "#f44336",
-                color: "white",
-                border: "none",
-                borderRadius: "4px",
-                cursor: "pointer",
-                fontSize: "0.875rem",
-              }}
-            >
-              {t("DraftingBoard:clearCanvas")}
-            </button>
-            <button
-              onClick={onFullScreenClick}
-              style={{
-                padding: "8px 16px",
-                backgroundColor: "#2196f3",
-                color: "white",
-                border: "none",
-                borderRadius: "4px",
-                cursor: "pointer",
-                fontSize: "0.875rem",
-              }}
-            >
-              {isFullScreen ? t("DraftingBoard:exitFullscreen") : t("DraftingBoard:fullscreen")}
-            </button>
-          </SoftBox>
-        </SoftBox>
+
 
         <SoftBox
           sx={{
@@ -244,6 +195,9 @@ const DraftingBoardContent = (): JSX.Element => {
                 isPrivileged={true}
                 isEditMode={isEditMode}
                 onDelete={onDeleteActiveObject}
+                onClearCanvas={onClearCanvas}
+                onFullScreenClick={onFullScreenClick}
+                isFullScreen={isFullScreen}
               />
             )}
             <SoftBox

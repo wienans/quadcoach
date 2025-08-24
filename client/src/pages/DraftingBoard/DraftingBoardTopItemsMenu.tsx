@@ -12,6 +12,9 @@ import { SoftBox } from "../../components";
 import DrawIcon from "@mui/icons-material/Draw";
 import LayersIcon from "@mui/icons-material/Layers";
 import DeleteIcon from "@mui/icons-material/Delete";
+import ClearIcon from "@mui/icons-material/Clear";
+import FullscreenIcon from "@mui/icons-material/Fullscreen";
+import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
 import { toggleTacticBoardItemsDrawerOpen } from "../TacticBoard/tacticBoardSlice";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { useTranslation } from "react-i18next";
@@ -24,19 +27,27 @@ import { ChromePicker, ColorResult } from "react-color";
 import Popover from "@mui/material/Popover";
 import ColorLensIcon from "@mui/icons-material/ColorLens";
 import { LineStyle } from "../../contexts/tacticBoard/TacticBoardDrawingContext/TacticBoardDrawingContext";
+import "../TacticBoard/translations";
 
 type DraftingBoardTopItemMenuProps = {
   isPrivileged: boolean;
   isEditMode: boolean;
   onDelete: () => void;
+  onClearCanvas: () => void;
+  onFullScreenClick: () => void;
+  isFullScreen: boolean;
 };
 
 const DraftingBoardTopItemsMenu = ({
   isPrivileged,
   isEditMode,
   onDelete,
+  onClearCanvas,
+  onFullScreenClick,
+  isFullScreen,
 }: DraftingBoardTopItemMenuProps): JSX.Element => {
-  const { t } = useTranslation("TacticBoard");
+  const { t: tTacticBoard } = useTranslation("TacticBoard");
+  const { t: tDrafting } = useTranslation("DraftingBoard");
   const dispatch = useAppDispatch();
   const { setBackgroundImage } = useTacticBoardCanvas();
 
@@ -54,7 +65,8 @@ const DraftingBoardTopItemsMenu = ({
   );
   const [drawingEnabled, enableDrawing] = useState<boolean>(false);
   // Always show empty-court as selected in DraftingBoard
-  const [backgroundImageId, setBackgorundImageId] = useState<string>("/empty-court.svg");
+  const [backgroundImageId, setBackgorundImageId] =
+    useState<string>("/empty-court.svg");
   const [colorPickerAnchor, setColorPickerAnchor] =
     useState<HTMLElement | null>(null);
   const [currentColor, setCurrentColor] = useState("#000000");
@@ -133,12 +145,13 @@ const DraftingBoardTopItemsMenu = ({
           mx: 1,
           alignItems: "center",
           height: "100%",
+          width: "100%",
         }}
       >
         {/* MENU BUTTON START */}
         {isPrivileged && isEditMode && (
           <Tooltip
-            title={t("TacticBoard:topMenu.itemsMenuButton.tooltip", {
+            title={tTacticBoard("topMenu.itemsMenuButton.tooltip", {
               context: tacticBoardItemsDrawerOpen ? "open" : "closed",
             })}
           >
@@ -162,7 +175,7 @@ const DraftingBoardTopItemsMenu = ({
         {isPrivileged && isEditMode && (
           <>
             <Tooltip
-              title={t("TacticBoard:topMenu.drawingButton.tooltip", {
+              title={tTacticBoard("topMenu.drawingButton.tooltip", {
                 context: drawingEnabled ? "disable" : "enable",
               })}
             >
@@ -241,7 +254,7 @@ const DraftingBoardTopItemsMenu = ({
         {/* DRAW BUTTON END */}
 
         {isPrivileged && isEditMode && (
-          <Tooltip title={t("TacticBoard:topMenu.deleteButton.tooltip")}>
+          <Tooltip title={tTacticBoard("topMenu.objectDeleteButton.tooltip")}>
             <span>
               <IconButton
                 onClick={onDelete}
@@ -265,7 +278,7 @@ const DraftingBoardTopItemsMenu = ({
             ml: 2,
           }}
           value={backgroundImageId}
-          label={t("TacticBoard:info.backgroundImage.label")}
+          label={tTacticBoard("info.backgroundImage.label")}
           onChange={(event: SelectChangeEvent) => {
             setBackgorundImageId(event.target.value);
             setBackgroundImage(event.target.value);
@@ -275,6 +288,40 @@ const DraftingBoardTopItemsMenu = ({
           <MenuItem value={"/half-court.svg"}>Half Court</MenuItem>
           <MenuItem value={"/empty-court.svg"}>Empty Court</MenuItem>
         </Select>
+
+        {/* SPACER TO PUSH BUTTONS TO THE RIGHT */}
+        <SoftBox sx={{ flexGrow: 1 }} />
+
+        {/* CLEAR CANVAS BUTTON */}
+        <Tooltip title={tDrafting("clearCanvas.tooltip")}>
+          <IconButton
+            onClick={onClearCanvas}
+            size="small"
+            sx={{
+              mr: 1,
+              color: "error.main",
+            }}
+          >
+            <ClearIcon />
+          </IconButton>
+        </Tooltip>
+
+        {/* FULLSCREEN BUTTON */}
+        <Tooltip
+          title={tDrafting(
+            isFullScreen ? "exitFullscreen.tooltip" : "fullscreen.tooltip",
+          )}
+        >
+          <IconButton
+            onClick={onFullScreenClick}
+            size="small"
+            sx={{
+              mr: 1,
+            }}
+          >
+            {isFullScreen ? <FullscreenExitIcon /> : <FullscreenIcon />}
+          </IconButton>
+        </Tooltip>
       </SoftBox>
     </SoftBox>
   );

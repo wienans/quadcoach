@@ -1,0 +1,12 @@
+{
+  "title": "Drafting Board",
+  "clearCanvas": {
+    "tooltip": "Clear all objects from canvas"
+  },
+  "fullscreen": {
+    "tooltip": "Enter fullscreen mode"
+  },
+  "exitFullscreen": {
+    "tooltip": "Exit fullscreen mode"
+  }
+}

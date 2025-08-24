@@ -1,0 +1,12 @@
+{
+  "title": "Entwurfstafel",
+  "clearCanvas": {
+    "tooltip": "Alle Objekte vom Canvas entfernen"
+  },
+  "fullscreen": {
+    "tooltip": "Vollbildmodus aktivieren"
+  },
+  "exitFullscreen": {
+    "tooltip": "Vollbildmodus verlassen"
+  }
+}
