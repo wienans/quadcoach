@@ -9,7 +9,7 @@ import {
 import { detectUrlType, isSocialMediaUrl } from '../../helpers/videoUrlHelpers';
 import { Box } from '@mui/material';
 
-interface VideoOrSocialEmbedProps {
+interface UniversalMediaPlayerProps {
   url: string;
   width?: string | number;
   height?: string | number;
@@ -18,7 +18,7 @@ interface VideoOrSocialEmbedProps {
   light?: boolean;
 }
 
-const VideoOrSocialEmbed: React.FC<VideoOrSocialEmbedProps> = ({
+const UniversalMediaPlayer: React.FC<UniversalMediaPlayerProps> = ({
   url,
   width = '100%',
   height = '100%',
@@ -104,4 +104,4 @@ const VideoOrSocialEmbed: React.FC<VideoOrSocialEmbedProps> = ({
   );
 };
 
-export default VideoOrSocialEmbed;
+export default UniversalMediaPlayer;

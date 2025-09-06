@@ -27,7 +27,7 @@ import PeopleIcon from "@mui/icons-material/People";
 import { SoftBox, SoftButton, SoftTypography } from "../../../../components";
 import TagIcon from "@mui/icons-material/Tag";
 import { Cone, Head, RelationOneToMany } from "mdi-material-ui";
-import VideoOrSocialEmbed from "../../../../components/VideoOrSocialEmbed";
+import UniversalMediaPlayer from "../../../../components/UniversalMediaPlayer";
 import {
   ExerciseType,
   getExerciseType,
@@ -92,7 +92,7 @@ const ExerciseCard = ({
       />
       <CardContent sx={{ height: "194px", position: "relative" }}>
         {availableVideoUrl != null ? (
-          <VideoOrSocialEmbed
+          <UniversalMediaPlayer
             url={availableVideoUrl}
             width="100%"
             height="100%"
