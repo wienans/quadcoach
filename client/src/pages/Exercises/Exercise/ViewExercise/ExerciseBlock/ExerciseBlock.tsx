@@ -8,7 +8,7 @@ import {
   CardHeader,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import ReactPlayer from "react-player";
+import VideoOrSocialEmbed from "../../../../../components/VideoOrSocialEmbed";
 import TacticBoardInBlockWrapper from "./TacticBoardInBlock";
 import { lazy, Suspense } from "react";
 
@@ -49,9 +49,9 @@ const ExerciseBlock = ({
               minHeight: "160px",
             }}
           >
-            <ReactPlayer
+            <VideoOrSocialEmbed
               style={{ position: "absolute", left: 0, top: 0 }}
-              url={block.video_url}
+              url={block.video_url || ""}
               width="100%"
               height="100%"
               controls
