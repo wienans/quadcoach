@@ -3,7 +3,9 @@ import { FabricObjectCreationError } from "./types";
 import { PartialTacticBoardObject } from "./tacticBoardTypes";
 import { setUuid } from "./fabricTypes";
 
-export type ObjectCreator = (data: PartialTacticBoardObject) => fabric.Object | null;
+export type ObjectCreator = (
+  data: PartialTacticBoardObject,
+) => fabric.Object | null;
 
 export class FabricObjectFactory {
   private static creators: Map<string, ObjectCreator> = new Map();
@@ -54,11 +56,11 @@ export class FabricObjectFactory {
 
   static createObject(data: PartialTacticBoardObject): fabric.Object | null {
     try {
-      if (!data.type || typeof data.type !== 'string') {
-        console.warn('Invalid object type:', data.type);
+      if (!data.type || typeof data.type !== "string") {
+        console.warn("Invalid object type:", data.type);
         return null;
       }
-      
+
       const creator = this.creators.get(data.type);
       if (!creator) {
         console.warn(`Unknown object type: ${data.type}`);
@@ -72,7 +74,10 @@ export class FabricObjectFactory {
 
       return obj;
     } catch (error) {
-      throw new FabricObjectCreationError(typeof data.type === 'string' ? data.type : 'unknown', error as Error);
+      throw new FabricObjectCreationError(
+        typeof data.type === "string" ? data.type : "unknown",
+        error as Error,
+      );
     }
   }
 

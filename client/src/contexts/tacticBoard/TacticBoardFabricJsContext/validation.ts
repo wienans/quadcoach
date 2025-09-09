@@ -1,5 +1,8 @@
 import TacticPage from "../../../api/quadcoachApi/domain/TacticPage";
-import { TacticBoardObject, PartialTacticBoardObject } from "./tacticBoardTypes";
+import {
+  TacticBoardObject,
+  PartialTacticBoardObject,
+} from "./tacticBoardTypes";
 
 export class ValidationError extends Error {
   constructor(
@@ -192,10 +195,20 @@ export class TacticPageValidator {
     }
 
     // Sanitize group objects recursively
-    if (sanitized.type === "group" && sanitized.objects && Array.isArray(sanitized.objects)) {
+    if (
+      sanitized.type === "group" &&
+      sanitized.objects &&
+      Array.isArray(sanitized.objects)
+    ) {
       sanitized.objects = sanitized.objects
-        .map((groupObj: PartialTacticBoardObject) => this.sanitizeObject(groupObj))
-        .filter((obj: PartialTacticBoardObject | null): obj is PartialTacticBoardObject => obj !== null);
+        .map((groupObj: PartialTacticBoardObject) =>
+          this.sanitizeObject(groupObj),
+        )
+        .filter(
+          (
+            obj: PartialTacticBoardObject | null,
+          ): obj is PartialTacticBoardObject => obj !== null,
+        );
     }
 
     return sanitized;

@@ -2,7 +2,6 @@ import { quadcoachApi } from "../api";
 import { TagType } from "../api/enum";
 import { User } from "../api/quadcoachApi/domain";
 
-
 export const userApiSlice = quadcoachApi.injectEndpoints({
   endpoints: (builder) => ({
     getUser: builder.query<User, string>({
@@ -44,7 +43,6 @@ export const userApiSlice = quadcoachApi.injectEndpoints({
       },
       invalidatesTags: () => [TagType.user],
     }),
-
   }),
 });
 

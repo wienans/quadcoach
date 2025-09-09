@@ -297,7 +297,6 @@ export const exerciseApiSlice = quadcoachApi.injectEndpoints({
         { type: TagType.exercise, id: `${exerciseId}-access` },
       ],
     }),
-
   }),
 });
 

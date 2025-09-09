@@ -36,11 +36,11 @@ export const hasUuid = (obj: unknown): obj is { uuid: string } => {
 };
 
 // Re-export unified types
-export type { 
+export type {
   TacticBoardObject,
   PartialTacticBoardObject,
-  TacticBoardObject as TacticBoardObjectJson
-} from './tacticBoardTypes';
+  TacticBoardObject as TacticBoardObjectJson,
+} from "./tacticBoardTypes";
 
 // Helper functions for type-safe object creation
 export const createExtendedCircle = (

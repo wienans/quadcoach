@@ -185,7 +185,12 @@ const TacticBoardInProfile = ({
             const targetObject = tacticBoard.pages[newPage - 1].objects?.find(
               (nextObject) => nextObject.uuid == getUuid(obj),
             );
-            if (targetObject && canvasRef.current && targetObject.left !== undefined && targetObject.top !== undefined) {
+            if (
+              targetObject &&
+              canvasRef.current &&
+              targetObject.left !== undefined &&
+              targetObject.top !== undefined
+            ) {
               obj.animate("left", targetObject.left || 0, {
                 onChange: canvasRef.current.renderAll.bind(canvasRef.current),
                 duration: 1000,
@@ -228,7 +233,12 @@ const TacticBoardInProfile = ({
             const targetObject = tacticBoard.pages[newPage - 1].objects?.find(
               (nextObject) => nextObject.uuid == getUuid(obj),
             );
-            if (targetObject && canvasRef.current && targetObject.left !== undefined && targetObject.top !== undefined) {
+            if (
+              targetObject &&
+              canvasRef.current &&
+              targetObject.left !== undefined &&
+              targetObject.top !== undefined
+            ) {
               obj.animate("left", targetObject.left || 0, {
                 onChange: canvasRef.current.renderAll.bind(canvasRef.current),
                 duration: 1000,

@@ -43,7 +43,8 @@ export interface TacticBoardObject {
 }
 
 // For objects that might not have a UUID yet (during creation/validation)
-export interface PartialTacticBoardObject extends Omit<TacticBoardObject, 'uuid'> {
+export interface PartialTacticBoardObject
+  extends Omit<TacticBoardObject, "uuid"> {
   uuid?: string;
 }
 
@@ -76,7 +77,9 @@ export const hasTacticBoardUuid = (obj: unknown): obj is { uuid: string } => {
   );
 };
 
-export const isValidTacticBoardObject = (obj: unknown): obj is TacticBoardObject => {
+export const isValidTacticBoardObject = (
+  obj: unknown,
+): obj is TacticBoardObject => {
   return !!(
     obj &&
     typeof obj === "object" &&
@@ -88,7 +91,9 @@ export const isValidTacticBoardObject = (obj: unknown): obj is TacticBoardObject
   );
 };
 
-export const isPartialTacticBoardObject = (obj: unknown): obj is PartialTacticBoardObject => {
+export const isPartialTacticBoardObject = (
+  obj: unknown,
+): obj is PartialTacticBoardObject => {
   return !!(
     obj &&
     typeof obj === "object" &&
