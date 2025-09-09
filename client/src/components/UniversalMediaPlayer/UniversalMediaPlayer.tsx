@@ -1,10 +1,10 @@
 import React from 'react';
 import ReactPlayer from 'react-player';
-import { 
-  InstagramEmbed, 
-  FacebookEmbed, 
-  TikTokEmbed, 
-  XEmbed 
+import {
+  InstagramEmbed,
+  FacebookEmbed,
+  TikTokEmbed,
+  XEmbed,
 } from 'react-social-media-embed';
 import { detectUrlType, isSocialMediaUrl } from '../../helpers/videoUrlHelpers';
 import { Box } from '@mui/material';
@@ -16,6 +16,11 @@ interface UniversalMediaPlayerProps {
   style?: React.CSSProperties;
   controls?: boolean;
   light?: boolean;
+  /**
+   * When true (and NOT a social media URL) the player is rendered in a responsive 16:9 wrapper.
+   * Ignored for social embeds which size themselves intrinsically.
+   */
+  maintainAspectRatio?: boolean;
 }
 
 const UniversalMediaPlayer: React.FC<UniversalMediaPlayerProps> = ({
@@ -25,25 +30,32 @@ const UniversalMediaPlayer: React.FC<UniversalMediaPlayerProps> = ({
   style,
   controls = true,
   light = true,
+  maintainAspectRatio = false,
 }) => {
   if (!url || url === '') {
     return null;
   }
 
-  // If it's a social media URL, use react-social-media-embed
-  if (isSocialMediaUrl(url)) {
+  const social = isSocialMediaUrl(url);
+
+  if (social) {
     const urlType = detectUrlType(url);
-    
-    // Common props for social embeds
-    const embedProps = {
+
+    // Build embed props, but omit height when "100%" to allow intrinsic sizing.
+    const embedProps: Record<string, unknown> = {
       url,
-      width: typeof width === 'string' ? width : `${width}px`,
-      height: typeof height === 'string' ? height : `${height}px`,
+      width: typeof width === 'number' ? `${width}px` : width,
     };
 
-    const embedStyle = {
+    if (height && height !== '100%') {
+      embedProps.height = typeof height === 'number' ? `${height}px` : height;
+    }
+
+    const embedStyle: React.CSSProperties = {
       display: 'flex',
       justifyContent: 'center',
+      width: typeof width === 'number' ? `${width}px` : width,
+      // Let height grow naturally for social embeds
       ...style,
     };
 
@@ -54,28 +66,24 @@ const UniversalMediaPlayer: React.FC<UniversalMediaPlayerProps> = ({
             <InstagramEmbed {...embedProps} />
           </Box>
         );
-      
       case 'facebook':
         return (
           <Box style={embedStyle}>
             <FacebookEmbed {...embedProps} />
           </Box>
         );
-      
       case 'tiktok':
         return (
           <Box style={embedStyle}>
             <TikTokEmbed {...embedProps} />
           </Box>
         );
-      
       case 'twitter':
         return (
-          <Box style={embedStyle}>
-            <XEmbed {...embedProps} />
-          </Box>
+            <Box style={embedStyle}>
+              <XEmbed {...embedProps} />
+            </Box>
         );
-      
       default:
         // Fallback to ReactPlayer for unknown social media URLs
         return (
@@ -91,7 +99,31 @@ const UniversalMediaPlayer: React.FC<UniversalMediaPlayerProps> = ({
     }
   }
 
-  // For YouTube and other platforms, use react-player
+  // Non-social media: optionally maintain aspect ratio
+  if (maintainAspectRatio) {
+    return (
+      <Box
+        sx={{
+          position: 'relative',
+          width: typeof width === 'number' ? `${width}px` : width,
+          // 16:9 aspect ratio
+          paddingTop: '56.25%',
+        }}
+        style={style}
+      >
+        <ReactPlayer
+          url={url}
+            width="100%"
+            height="100%"
+            style={{ position: 'absolute', top: 0, left: 0 }}
+            controls={controls}
+            light={light}
+          />
+      </Box>
+    );
+  }
+
+  // Default player rendering
   return (
     <ReactPlayer
       url={url}

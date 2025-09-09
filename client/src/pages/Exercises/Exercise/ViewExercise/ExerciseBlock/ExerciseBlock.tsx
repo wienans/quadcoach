@@ -43,20 +43,32 @@ const ExerciseBlock = ({
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
             Video
           </AccordionSummary>
-          <AccordionDetails
-            sx={{
-              position: "relative",
-              minHeight: "160px",
-            }}
-          >
-            <UniversalMediaPlayer
-              style={{ position: "absolute", left: 0, top: 0 }}
-              url={block.video_url || ""}
-              width="100%"
-              height="100%"
-              controls
-              light
-            />
+          <AccordionDetails sx={{ p: 0, pb: 1 }}>
+            {/* Wrapper to limit width on large screens */}
+            <div
+              style={{
+                width: "100%",
+                display: "flex",
+                justifyContent: "center",
+              }}
+            >
+              <div
+                style={{
+                  width: "100%",
+                  // Use clamp to scale: full width on small, ~50% on large screens
+                  maxWidth: "clamp(400px, 50%, 960px)",
+                }}
+              >
+                <UniversalMediaPlayer
+                  url={block.video_url || ""}
+                  width="100%"
+                  // Let social embeds size themselves; maintain aspect ratio for standard videos
+                  maintainAspectRatio
+                  controls
+                  light
+                />
+              </div>
+            </div>
           </AccordionDetails>
         </Accordion>
       )}

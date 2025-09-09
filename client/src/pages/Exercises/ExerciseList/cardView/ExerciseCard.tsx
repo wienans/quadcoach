@@ -27,7 +27,6 @@ import PeopleIcon from "@mui/icons-material/People";
 import { SoftBox, SoftButton, SoftTypography } from "../../../../components";
 import TagIcon from "@mui/icons-material/Tag";
 import { Cone, Head, RelationOneToMany } from "mdi-material-ui";
-import UniversalMediaPlayer from "../../../../components/UniversalMediaPlayer";
 import {
   ExerciseType,
   getExerciseType,
@@ -63,11 +62,7 @@ const ExerciseCard = ({
   const isUpSm = useMediaQuery((theme: Theme) => theme.breakpoints.up("sm"));
   const [moreInformationExpanded, setMoreInformationExpanded] =
     useState<boolean>(false);
-  // TODO: Maybe we should add to exercise a picture or video url, which could be used to show exercise.
-  // For now check if there is one block with video url
-  const availableVideoUrl = exercise.description_blocks.find(
-    (block) => block.video_url != null && block.video_url !== "",
-  )?.video_url;
+
   const exerciseType = getExerciseType(exercise);
 
   return (
@@ -91,44 +86,32 @@ const ExerciseCard = ({
         titleTypographyProps={{ noWrap: true }}
       />
       <CardContent sx={{ height: "194px", position: "relative" }}>
-        {availableVideoUrl != null ? (
-          <UniversalMediaPlayer
-            url={availableVideoUrl}
-            width="100%"
-            height="100%"
-            controls
-            light
-          />
-        ) : (
-          <SoftBox
-            width="100%"
-            height="100%"
-            sx={(theme) => ({
-              bgcolor: theme.palette.grey[300],
-              display: "flex",
-              justifyContent: "space-evenly",
-              alignItems: "center",
-            })}
-          >
-            {[ExerciseType.all, ExerciseType.beater].includes(exerciseType) && (
-              <Head
-                style={{ color: "black", width: "100px", height: "100px" }}
-              />
-            )}
-            {[ExerciseType.all, ExerciseType.chaser].includes(exerciseType) && (
-              <Head
-                style={{
-                  color: "white",
-                  width: "100px",
-                  height: "100px",
-                  ...(exerciseType === ExerciseType.all && {
-                    transform: "scale(-1,1)",
-                  }),
-                }}
-              />
-            )}
-          </SoftBox>
-        )}
+        <SoftBox
+          width="100%"
+          height="100%"
+          sx={(theme) => ({
+            bgcolor: theme.palette.grey[300],
+            display: "flex",
+            justifyContent: "space-evenly",
+            alignItems: "center",
+          })}
+        >
+          {[ExerciseType.all, ExerciseType.beater].includes(exerciseType) && (
+            <Head style={{ color: "black", width: "100px", height: "100px" }} />
+          )}
+          {[ExerciseType.all, ExerciseType.chaser].includes(exerciseType) && (
+            <Head
+              style={{
+                color: "white",
+                width: "100px",
+                height: "100px",
+                ...(exerciseType === ExerciseType.all && {
+                  transform: "scale(-1,1)",
+                }),
+              }}
+            />
+          )}
+        </SoftBox>
       </CardContent>
       <CardActions disableSpacing>
         <Tooltip title={t("ExerciseList:cardView.personAmount")}>
