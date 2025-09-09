@@ -19,6 +19,11 @@ import {
   useMediaQuery,
   Chip,
   InputAdornment,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Button,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import {
@@ -32,6 +37,8 @@ import FilterAltIcon from "@mui/icons-material/FilterAlt";
 import KeyboardReturnIcon from "@mui/icons-material/KeyboardReturn";
 import ExercisesCardView from "./cardView/ExercisesCardView";
 import AddIcon from "@mui/icons-material/Add";
+import ClearIcon from "@mui/icons-material/Clear";
+import SortIcon from "@mui/icons-material/Sort";
 import { useLazyGetExercisesQuery } from "../../exerciseApi";
 import { DashboardLayout } from "../../../components/LayoutContainers";
 import { useAuth } from "../../../store/hooks";
@@ -51,9 +58,21 @@ type ExerciseFilter = {
   maxPersons: number;
   tagRegex: string;
   tagList: string[];
+  materialRegex: string;
+  materialList: string[];
+  minTime: number;
+  maxTime: number;
+  minBeaters: number;
+  maxBeaters: number;
+  minChasers: number;
+  maxChasers: number;
+  sortBy: 'name' | 'time' | 'persons' | 'created' | 'updated';
+  sortOrder: 'asc' | 'desc';
   page: number;
   limit: number;
 };
+
+const maxTime = 200; // Maximum time in minutes
 
 const defaultExerciseFilter: ExerciseFilter = {
   maxPersons: maxPersons,
@@ -61,6 +80,16 @@ const defaultExerciseFilter: ExerciseFilter = {
   searchValue: "",
   tagRegex: "",
   tagList: [],
+  materialRegex: "",
+  materialList: [],
+  minTime: 0,
+  maxTime: maxTime,
+  minBeaters: 0,
+  maxBeaters: 10,
+  minChasers: 0,
+  maxChasers: 10,
+  sortBy: 'name',
+  sortOrder: 'asc',
   page: 1,
   limit: 50,
 };
@@ -118,6 +147,35 @@ const ExerciseList = () => {
     });
   };
 
+  const handleMaterialKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Enter" && exerciseFilter.materialRegex.trim() !== "") {
+      event.preventDefault();
+      setLoadedExercises([]);
+      setExerciseFilter({
+        ...exerciseFilter,
+        materialList: [...exerciseFilter.materialList, exerciseFilter.materialRegex.trim()],
+        materialRegex: "",
+        page: 1,
+      });
+    }
+  };
+
+  const handleDeleteMaterial = (materialToDelete: string) => {
+    setLoadedExercises([]);
+    setExerciseFilter({
+      ...exerciseFilter,
+      materialList: exerciseFilter.materialList.filter((material) => material !== materialToDelete),
+      page: 1,
+    });
+  };
+
+  const handleClearAllFilters = () => {
+    setLoadedExercises([]);
+    setExerciseFilter({
+      ...defaultExerciseFilter,
+    });
+  };
+
   const [
     getExercises,
     {
@@ -136,6 +194,16 @@ const ExerciseList = () => {
         nameRegex: filter.searchValue,
         tagRegex: filter.tagRegex,
         tagList: filter.tagList,
+        materialRegex: filter.materialRegex,
+        materialList: filter.materialList,
+        minTime: filter.minTime,
+        maxTime: filter.maxTime,
+        minBeaters: filter.minBeaters,
+        maxBeaters: filter.maxBeaters,
+        minChasers: filter.minChasers,
+        maxChasers: filter.maxChasers,
+        sortBy: filter.sortBy,
+        sortOrder: filter.sortOrder,
         page: filter.page,
         limit: filter.limit,
       });
@@ -237,6 +305,44 @@ const ExerciseList = () => {
                     })}
                   />
                 )}
+                <FormControl size="small" sx={{ minWidth: 120, mr: 1 }}>
+                  <InputLabel id="sort-select-label">Sort by</InputLabel>
+                  <Select
+                    labelId="sort-select-label"
+                    value={exerciseFilter.sortBy}
+                    label="Sort by"
+                    onChange={(event) => {
+                      setLoadedExercises([]);
+                      setExerciseFilter({
+                        ...exerciseFilter,
+                        sortBy: event.target.value as 'name' | 'time' | 'persons' | 'created' | 'updated',
+                        page: 1,
+                      });
+                    }}
+                  >
+                    <MenuItem value="name">Name</MenuItem>
+                    <MenuItem value="time">Duration</MenuItem>
+                    <MenuItem value="persons">Persons</MenuItem>
+                    <MenuItem value="created">Created</MenuItem>
+                    <MenuItem value="updated">Updated</MenuItem>
+                  </Select>
+                </FormControl>
+                <ToggleButton
+                  value={exerciseFilter.sortOrder}
+                  selected={exerciseFilter.sortOrder === 'desc'}
+                  onChange={() => {
+                    setLoadedExercises([]);
+                    setExerciseFilter({
+                      ...exerciseFilter,
+                      sortOrder: exerciseFilter.sortOrder === 'asc' ? 'desc' : 'asc',
+                      page: 1,
+                    });
+                  }}
+                  size="small"
+                  sx={{ mr: 1 }}
+                >
+                  <SortIcon />
+                </ToggleButton>
                 <ToggleButton
                   value={showFilters ? "shown" : "hide"}
                   selected={showFilters}
@@ -261,7 +367,18 @@ const ExerciseList = () => {
           )}
           <Collapse in={showFilters} timeout="auto" unmountOnExit>
             <CardContent sx={{ p: 2 }}>
-              <Grid container spacing={2} sx={{ pl: 2, width: "100%" }}>
+              <SoftBox display="flex" justifyContent="flex-end" sx={{ mb: 2 }}>
+                <Button
+                  startIcon={<ClearIcon />}
+                  onClick={handleClearAllFilters}
+                  size="small"
+                  color="secondary"
+                >
+                  Clear All Filters
+                </Button>
+              </SoftBox>
+              <Grid container spacing={3} sx={{ pl: 2, width: "100%" }}>
+                {/* Persons Filter */}
                 <Grid item xs={12} md={6}>
                   <SoftTypography variant="body2">
                     {t("ExerciseList:filter.persons.titleWithNumbers", {
@@ -277,10 +394,12 @@ const ExerciseList = () => {
                     ]}
                     onChange={(_event: Event, newValue: number | number[]) => {
                       const [newMin, newMax] = newValue as number[];
+                      setLoadedExercises([]);
                       setExerciseFilter({
                         ...exerciseFilter,
                         maxPersons: newMax,
                         minPersons: newMin,
+                        page: 1,
                       });
                     }}
                     valueLabelDisplay="auto"
@@ -289,6 +408,83 @@ const ExerciseList = () => {
                     min={0}
                   />
                 </Grid>
+
+                {/* Time Duration Filter */}
+                <Grid item xs={12} md={6}>
+                  <SoftTypography variant="body2">
+                    Duration (min): {exerciseFilter.minTime} - {exerciseFilter.maxTime}
+                  </SoftTypography>
+                  <Slider
+                    getAriaLabel={() => "Exercise Duration"}
+                    value={[exerciseFilter.minTime, exerciseFilter.maxTime]}
+                    onChange={(_event: Event, newValue: number | number[]) => {
+                      const [newMin, newMax] = newValue as number[];
+                      setLoadedExercises([]);
+                      setExerciseFilter({
+                        ...exerciseFilter,
+                        minTime: newMin,
+                        maxTime: newMax,
+                        page: 1,
+                      });
+                    }}
+                    valueLabelDisplay="auto"
+                    getAriaValueText={(value: number) => `${value} minutes`}
+                    max={maxTime}
+                    min={0}
+                  />
+                </Grid>
+
+                {/* Beaters Filter */}
+                <Grid item xs={12} md={6}>
+                  <SoftTypography variant="body2">
+                    Beaters: {exerciseFilter.minBeaters} - {exerciseFilter.maxBeaters}
+                  </SoftTypography>
+                  <Slider
+                    getAriaLabel={() => "Number of Beaters"}
+                    value={[exerciseFilter.minBeaters, exerciseFilter.maxBeaters]}
+                    onChange={(_event: Event, newValue: number | number[]) => {
+                      const [newMin, newMax] = newValue as number[];
+                      setLoadedExercises([]);
+                      setExerciseFilter({
+                        ...exerciseFilter,
+                        minBeaters: newMin,
+                        maxBeaters: newMax,
+                        page: 1,
+                      });
+                    }}
+                    valueLabelDisplay="auto"
+                    getAriaValueText={(value: number) => value.toString()}
+                    max={10}
+                    min={0}
+                  />
+                </Grid>
+
+                {/* Chasers Filter */}
+                <Grid item xs={12} md={6}>
+                  <SoftTypography variant="body2">
+                    Chasers: {exerciseFilter.minChasers} - {exerciseFilter.maxChasers}
+                  </SoftTypography>
+                  <Slider
+                    getAriaLabel={() => "Number of Chasers"}
+                    value={[exerciseFilter.minChasers, exerciseFilter.maxChasers]}
+                    onChange={(_event: Event, newValue: number | number[]) => {
+                      const [newMin, newMax] = newValue as number[];
+                      setLoadedExercises([]);
+                      setExerciseFilter({
+                        ...exerciseFilter,
+                        minChasers: newMin,
+                        maxChasers: newMax,
+                        page: 1,
+                      });
+                    }}
+                    valueLabelDisplay="auto"
+                    getAriaValueText={(value: number) => value.toString()}
+                    max={10}
+                    min={0}
+                  />
+                </Grid>
+
+                {/* Tags Filter */}
                 <Grid
                   item
                   xs={12}
@@ -299,7 +495,7 @@ const ExerciseList = () => {
                     {t("ExerciseList:filter.tags.title")}
                   </SoftTypography>
                   <SoftInput
-                    id="outlined-basic"
+                    id="tags-filter"
                     placeholder={t("ExerciseList:filter.tags.placeholder")}
                     value={exerciseFilter.tagRegex}
                     onChange={onExerciseFilterValueChange("tagRegex")}
@@ -325,6 +521,49 @@ const ExerciseList = () => {
                         label={tag}
                         onDelete={() => handleDeleteTag(tag)}
                         color="primary"
+                        variant="outlined"
+                      />
+                    ))}
+                  </SoftBox>
+                </Grid>
+
+                {/* Materials Filter */}
+                <Grid
+                  item
+                  xs={12}
+                  md={6}
+                  sx={{ display: "flex", flexDirection: "column" }}
+                >
+                  <SoftTypography variant="body2">
+                    Materials
+                  </SoftTypography>
+                  <SoftInput
+                    id="materials-filter"
+                    placeholder="Add material (press Enter)"
+                    value={exerciseFilter.materialRegex}
+                    onChange={onExerciseFilterValueChange("materialRegex")}
+                    onKeyDown={handleMaterialKeyDown}
+                    sx={{ width: "100%" }}
+                    endAdornment={
+                      <InputAdornment position="end">
+                        <KeyboardReturnIcon
+                          sx={{
+                            fontSize: 20,
+                            opacity: exerciseFilter.materialRegex != "" ? 1 : 0.4,
+                          }}
+                        />
+                      </InputAdornment>
+                    }
+                  />
+                  <SoftBox
+                    sx={{ display: "flex", flexWrap: "wrap", gap: 1, mt: 1 }}
+                  >
+                    {exerciseFilter.materialList.map((material) => (
+                      <Chip
+                        key={material}
+                        label={material}
+                        onDelete={() => handleDeleteMaterial(material)}
+                        color="secondary"
                         variant="outlined"
                       />
                     ))}

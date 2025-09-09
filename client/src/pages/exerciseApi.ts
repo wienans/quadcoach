@@ -9,6 +9,16 @@ export type GetExercisesRequest = {
   maxPersons?: number;
   tagRegex?: string;
   tagList?: string[];
+  materialRegex?: string;
+  materialList?: string[];
+  minTime?: number;
+  maxTime?: number;
+  minBeaters?: number;
+  maxBeaters?: number;
+  minChasers?: number;
+  maxChasers?: number;
+  sortBy?: 'name' | 'time' | 'persons' | 'created' | 'updated';
+  sortOrder?: 'asc' | 'desc';
   page?: number;
   limit?: number;
 };
@@ -191,6 +201,16 @@ export const exerciseApiSlice = quadcoachApi.injectEndpoints({
           nameRegex,
           tagRegex,
           tagList,
+          materialRegex,
+          materialList,
+          minTime,
+          maxTime,
+          minBeaters,
+          maxBeaters,
+          minChasers,
+          maxChasers,
+          sortBy,
+          sortOrder,
           page = 1,
           limit = 50,
         } = request || {};
@@ -215,6 +235,37 @@ export const exerciseApiSlice = quadcoachApi.injectEndpoints({
         if (tagRegex != null && tagRegex !== "") {
           urlParams.append("tags[regex]", tagRegex);
           urlParams.append("tags[options]", "i");
+        }
+        if (materialList != null && materialList.length > 0) {
+          urlParams.append("materials[all]", materialList.join(","));
+        }
+        if (materialRegex != null && materialRegex !== "") {
+          urlParams.append("materials[regex]", materialRegex);
+          urlParams.append("materials[options]", "i");
+        }
+        if (minTime != null) {
+          urlParams.append("time_min[gte]", minTime.toString());
+        }
+        if (maxTime != null) {
+          urlParams.append("time_min[lte]", maxTime.toString());
+        }
+        if (minBeaters != null) {
+          urlParams.append("beaters[gte]", minBeaters.toString());
+        }
+        if (maxBeaters != null) {
+          urlParams.append("beaters[lte]", maxBeaters.toString());
+        }
+        if (minChasers != null) {
+          urlParams.append("chasers[gte]", minChasers.toString());
+        }
+        if (maxChasers != null) {
+          urlParams.append("chasers[lte]", maxChasers.toString());
+        }
+        if (sortBy != null) {
+          urlParams.append("sortBy", sortBy);
+        }
+        if (sortOrder != null) {
+          urlParams.append("sortOrder", sortOrder);
         }
 
         const urlParamsString = urlParams.toString();
