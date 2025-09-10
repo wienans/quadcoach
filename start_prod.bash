@@ -2,6 +2,7 @@
 # set -euo pipefail
 source env.env
 source secret.env
+source mongo.env
 docker compose -f docker-compose.dev down 
 docker compose -f docker-compose.prod down
 docker rm quadcoach-mongodb quadcoach-backend quadcoach-frontend
