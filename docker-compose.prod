@@ -4,9 +4,19 @@ services:
   app-prod:
     image: quadcoach-app
     container_name: quadcoach-backend
-    env_file:
-      - env.env
-      - secret.env
+    environment:
+      - MONGO_USER=${MONGO_USER}
+      - MONGO_PASSWORD=${MONGO_PASSWORD}
+      - MONGO_DB=${MONGO_DB}
+      - ACCESS_TOKEN_SECRET=${ACCESS_TOKEN_SECRET}
+      - REFRESH_TOKEN_SECRET=${REFRESH_TOKEN_SECRET}
+      - EMAIL_USER=${EMAIL_USER}
+      - EMAIL_PASS=${EMAIL_PASS}
+      - VITE_NAME=${VITE_NAME}
+      - VITE_ADDRESS_L1=${VITE_ADDRESS_L1}
+      - VITE_ADDRESS_L2=${VITE_ADDRESS_L2}
+      - VITE_EMAIL=${VITE_EMAIL}
+      - VITE_TELEFON=${VITE_TELEFON}
     build:
       context: ./
       dockerfile: Dockerfile.prod
@@ -20,9 +30,13 @@ services:
   mongodb-prod:
     image: mongo:latest
     container_name: quadcoach-mongodb
-    env_file:
-      - env.env
-      - mongo.env
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
+      - MONGO_INITDB_DATABASE=${MONGO_INITDB_DATABASE}
+      - MONGO_USER=${MONGO_USER}
+      - MONGO_PASSWORD=${MONGO_PASSWORD}
+      - MONGO_DB=${MONGO_DB}
     volumes:
       - data_db:/data/db
       - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
