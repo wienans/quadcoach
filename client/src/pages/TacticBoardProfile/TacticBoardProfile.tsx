@@ -132,6 +132,8 @@ const TacticBoardProfile = () => {
     tacticBoardId || "",
   );
 
+
+
   const [
     deleteTacticboardAccess,
     { isLoading: isDeleteTacticboardAccessLoading },
@@ -781,7 +783,8 @@ const TacticBoardProfile = () => {
                           variant="contained"
                           size="small"
                           disabled={
-                            isShareTacticBoardLoading || !userEmail.trim()
+                            isShareTacticBoardLoading ||
+                            !userEmail.trim()
                           }
                           onClick={handleAddAccess}
                         >

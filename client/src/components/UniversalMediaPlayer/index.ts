@@ -1,1 +1,1 @@
-export { default } from "./UniversalMediaPlayer";
+export { default } from './UniversalMediaPlayer';

@@ -12,17 +12,17 @@ import Navbar from "../../components/Navbar";
 import TacticBoardItemsDrawerNav from "../TacticBoard/TacticBoardItemsDrawerNav";
 import { useAppSelector, useAppDispatch } from "../../store/hooks";
 import DraftingBoardTopItemsMenu from "./DraftingBoardTopItemsMenu";
-import {
-  setIsEditMode,
-  toggleTacticBoardItemsDrawerOpen,
-  setTacticBoardItemsDrawerClosing,
-} from "../TacticBoard/tacticBoardSlice";
+import { setIsEditMode, toggleTacticBoardItemsDrawerOpen, setTacticBoardItemsDrawerClosing } from "../TacticBoard/tacticBoardSlice";
 import "../fullscreen.css";
 
 const DraftingBoardContent = (): JSX.Element => {
   const dispatch = useAppDispatch();
-  const { setSelection, setControls, removeActiveObjects, setBackgroundImage } =
-    useTacticBoardCanvas();
+  const {
+    setSelection,
+    setControls,
+    removeActiveObjects,
+    setBackgroundImage,
+  } = useTacticBoardCanvas();
 
   const { loadFromTacticPage: loadFromJson } = useTacticBoardData();
 
@@ -39,9 +39,7 @@ const DraftingBoardContent = (): JSX.Element => {
   const drawerInitialized = useRef(false);
 
   const isEditMode = useAppSelector((state) => state.tacticBoard.isEditMode);
-  const tacticBoardItemsDrawerOpen = useAppSelector(
-    (state) => state.tacticBoard.tacticBoardItemsDrawerOpen,
-  );
+  const tacticBoardItemsDrawerOpen = useAppSelector((state) => state.tacticBoard.tacticBoardItemsDrawerOpen);
 
   const onDeleteActiveObject = () => {
     removeActiveObjects();
@@ -130,10 +128,10 @@ const DraftingBoardContent = (): JSX.Element => {
   useEffect(() => {
     if (!drawerInitialized.current) {
       drawerInitialized.current = true;
-
+      
       // Reset drawer closing state to ensure toggle works
       dispatch(setTacticBoardItemsDrawerClosing(false));
-
+      
       // Only open drawer if it's currently closed
       if (!tacticBoardItemsDrawerOpen) {
         dispatch(toggleTacticBoardItemsDrawerOpen());
@@ -174,6 +172,8 @@ const DraftingBoardContent = (): JSX.Element => {
           flexDirection: "column",
         }}
       >
+
+
         <SoftBox
           sx={{
             display: "flex",

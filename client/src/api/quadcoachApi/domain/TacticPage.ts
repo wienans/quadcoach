@@ -1,9 +1,9 @@
 // Re-export unified types from the centralized location
-export type {
+export type { 
   TacticBoardObject as TacticsObject,
   TacticBoardBackgroundImage as TacticsBackImg,
   TacticBoardPage as TacticPage,
-  TacticBoardPageWithoutId as TacticPageWithOutId,
+  TacticBoardPageWithoutId as TacticPageWithOutId
 } from "../../../contexts/tacticBoard/TacticBoardFabricJsContext/tacticBoardTypes";
 
 // Default export for backward compatibility

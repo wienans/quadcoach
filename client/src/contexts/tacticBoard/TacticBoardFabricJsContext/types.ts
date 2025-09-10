@@ -51,15 +51,15 @@ declare module "fabric/fabric-impl" {
 }
 
 // Re-export unified types for backward compatibility
-export type {
+export type { 
   TacticBoardObject as FabricObjectData,
   PartialTacticBoardObject,
   TacticBoardPage,
   TacticBoardPageWithoutId,
-  TacticBoardBackgroundImage,
-} from "./tacticBoardTypes";
+  TacticBoardBackgroundImage
+} from './tacticBoardTypes';
 
-export type { TacticBoardObject as TacticPageObject } from "./tacticBoardTypes";
+export type { TacticBoardObject as TacticPageObject } from './tacticBoardTypes';
 
 // Error types for better error handling
 export class FabricObjectCreationError extends Error {
