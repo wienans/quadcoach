@@ -1,5 +1,7 @@
 #!/bin/bash
 rm -rf client/dist
+npm --prefix ./client install
+npm --prefix ./server install
 npm --prefix ./client run build
 npm --prefix ./server run build
 docker compose -f docker-compose.dev down
