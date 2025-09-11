@@ -11,6 +11,7 @@ import {
   Tooltip,
   Theme,
   BottomNavigationAction,
+  ToggleButton,
 } from "@mui/material";
 import { SoftBox } from "../../../../components";
 import {
@@ -29,6 +30,7 @@ import {
   getExerciseType,
 } from "../../../../helpers/exerciseHelpers";
 import EditIcon from "@mui/icons-material/Edit";
+import SaveIcon from "@mui/icons-material/Save";
 import DeleteIcon from "@mui/icons-material/Delete";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import ExerciseBlock from "./ExerciseBlock";
@@ -40,6 +42,8 @@ import {
   useLazyGetFavoriteExercisesQuery,
   useRemoveFavoriteExerciseMutation,
 } from "../../../../api/quadcoachApi/favoriteApi";
+import { useAppSelector, useAppDispatch } from "../../../../store/hooks";
+import { setIsEditMode } from "../exerciseSlice";
 
 const Exercise = () => {
   const { t } = useTranslation("Exercise");
@@ -48,6 +52,9 @@ const Exercise = () => {
   const [isPrivileged, setIsPrivileged] = useState<boolean>(false);
   const { id: userId, roles: userRoles } = useAuth();
   const [isFavorite, setIsFavorite] = useState<boolean>(false);
+  
+  const dispatch = useAppDispatch();
+  const isEditMode = useAppSelector((state) => state.exercise.isEditMode);
 
   const theme = useTheme();
 
@@ -122,8 +129,9 @@ const Exercise = () => {
     }
   }, [exercise, userId, userRoles]);
 
-  const update = async () => {
-    navigate(`/exercises/${exerciseId}/update`);
+  // Edit mode toggle functionality
+  const onToggleEditMode = () => {
+    dispatch(setIsEditMode(!isEditMode));
   };
 
   const [
@@ -215,10 +223,29 @@ const Exercise = () => {
             </Tooltip>
           )}
           {isPrivileged && (
-            <Tooltip title={t("Exercise:updateExercise")}>
-              <IconButton onClick={update} color="primary">
-                <EditIcon />
-              </IconButton>
+            <Tooltip
+              title={t("Exercise:updateExercise", {
+                context: isEditMode ? "editMode" : "viewMode",
+              })}
+            >
+              <span>
+                <ToggleButton
+                  disabled={isExerciseLoading}
+                  value={isEditMode}
+                  size="small"
+                  selected={isEditMode}
+                  onChange={onToggleEditMode}
+                  sx={{
+                    mr: 1,
+                  }}
+                >
+                  {isEditMode ? (
+                    <SaveIcon color="primary" />
+                  ) : (
+                    <EditIcon color="primary" />
+                  )}
+                </ToggleButton>
+              </span>
             </Tooltip>
           )}
           {isPrivileged && (
@@ -262,8 +289,17 @@ const Exercise = () => {
             </Tooltip>
           ),
           isPrivileged && (
-            <Tooltip key="edit" title={t("Exercise:updateExercise")}>
-              <BottomNavigationAction icon={<EditIcon />} onClick={update} />
+            <Tooltip
+              key="edit"
+              title={t("Exercise:updateExercise", {
+                context: isEditMode ? "editMode" : "viewMode",
+              })}
+            >
+              <BottomNavigationAction
+                icon={isEditMode ? <SaveIcon /> : <EditIcon />}
+                onClick={onToggleEditMode}
+                disabled={isExerciseLoading}
+              />
             </Tooltip>
           ),
           isPrivileged && (
