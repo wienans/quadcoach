@@ -2,9 +2,12 @@ import type { BaseQueryFn } from "@reduxjs/toolkit/query";
 import axios from "axios";
 import type { AxiosRequestConfig, AxiosError } from "axios";
 import { deserializeDatesInObject } from "../helpers/dateHelpers";
-import { store } from "../store";
 import { setCredentials } from "./auth/authSlice";
 
+/**
+ * Base query with automatic re-auth (refresh token) handling.
+ * Avoids importing the store directly to prevent circular dependencies.
+ */
 export const axiosBaseReauthQuery =
   (
     { baseUrl }: { baseUrl: string } = { baseUrl: "" },
@@ -18,7 +21,12 @@ export const axiosBaseReauthQuery =
     unknown,
     unknown
   > =>
-  async ({ url, method, data, params }) => {
+  async ({ url, method, data, params }, api) => {
+    const getToken = () => {
+      const state = api.getState() as { auth?: { token?: string | null } };
+      return state.auth?.token || null;
+    };
+
     try {
       const result = await axios({
         url: baseUrl + url,
@@ -28,14 +36,14 @@ export const axiosBaseReauthQuery =
         withCredentials: true,
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${store.getState().auth.token}`,
+          Authorization: getToken() ? `Bearer ${getToken()}` : undefined,
         },
       });
       return { data: deserializeDatesInObject(result.data) };
     } catch (axiosError) {
       const err = axiosError as AxiosError;
       if (err.response?.status === 403) {
-        // Send the Refresh Token to get a new Access Token
+        // Attempt refresh
         try {
           const refreshResult = await axios({
             url: baseUrl + "/api/auth/refresh",
@@ -45,15 +53,15 @@ export const axiosBaseReauthQuery =
             withCredentials: true,
             headers: {
               "Content-Type": "application/json",
-              Authorization: `Bearer ${store.getState().auth.token}`,
+              Authorization: getToken() ? `Bearer ${getToken()}` : undefined,
             },
           });
           if (refreshResult?.data) {
             // store the new token
-            store.dispatch(setCredentials({ ...refreshResult.data }));
+            api.dispatch(setCredentials({ ...refreshResult.data }));
 
             // retry original query with new access token
-            const result = await axios({
+            const retryResult = await axios({
               url: baseUrl + url,
               method,
               data,
@@ -61,10 +69,10 @@ export const axiosBaseReauthQuery =
               withCredentials: true,
               headers: {
                 "Content-Type": "application/json",
-                Authorization: `Bearer ${store.getState().auth.token}`,
+                Authorization: getToken() ? `Bearer ${getToken()}` : undefined,
               },
             });
-            return { data: deserializeDatesInObject(result.data) };
+            return { data: deserializeDatesInObject(retryResult.data) };
           }
           return {
             error: {
@@ -77,9 +85,7 @@ export const axiosBaseReauthQuery =
           return {
             error: {
               status: errRefresh.response?.status,
-              data: {
-                message: "Login expired",
-              },
+              data: { message: "Login expired" },
             },
           };
         }
@@ -87,12 +93,15 @@ export const axiosBaseReauthQuery =
       return {
         error: {
           status: err.response?.status,
-          data: err.response?.data || err.message,
+            data: err.response?.data || err.message,
         },
       };
     }
   };
 
+/**
+ * Simple base query without refresh logic.
+ */
 export const axiosBaseQuery =
   (
     { baseUrl }: { baseUrl: string } = { baseUrl: "" },
@@ -106,7 +115,9 @@ export const axiosBaseQuery =
     unknown,
     unknown
   > =>
-  async ({ url, method, data, params }) => {
+  async ({ url, method, data, params }, api) => {
+    const state = api.getState() as { auth?: { token?: string | null } };
+    const token = state.auth?.token;
     try {
       const result = await axios({
         url: baseUrl + url,
@@ -116,7 +127,7 @@ export const axiosBaseQuery =
         withCredentials: true,
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${store.getState().auth.token}`,
+          Authorization: token ? `Bearer ${token}` : undefined,
         },
       });
       return { data: deserializeDatesInObject(result.data) };
