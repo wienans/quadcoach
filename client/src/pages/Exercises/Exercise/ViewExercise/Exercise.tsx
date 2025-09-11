@@ -12,7 +12,6 @@ import {
   Theme,
   BottomNavigationAction,
 } from "@mui/material";
-import { SoftBox } from "../../../../components";
 import {
   useDeleteExerciseMutation,
   useGetExerciseQuery,
