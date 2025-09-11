@@ -27,11 +27,15 @@ export const getAllExercises = asyncHandler(
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 50;
     const skip = (page - 1) * limit;
+    const sortBy = (req.query.sortBy as string) || "name";
+    const sortOrder = (req.query.sortOrder as string) || "asc";
 
-    // Remove pagination params from the query string
+    // Remove pagination and sorting params from the query string
     const queryObj = JSON.parse(queryString);
     delete queryObj.page;
     delete queryObj.limit;
+    delete queryObj.sortBy;
+    delete queryObj.sortOrder;
     queryString = JSON.stringify(queryObj);
 
     queryString = queryString.replace(
@@ -47,11 +51,41 @@ export const getAllExercises = asyncHandler(
 
     const query = JSON.parse(queryString);
 
+    // Create sort object
+    const sortObj: { [key: string]: 1 | -1 } = {};
+    const sortDirection = sortOrder === "desc" ? -1 : 1;
+
+    // Map frontend sort fields to database fields
+    switch (sortBy) {
+      case "name":
+        sortObj.name = sortDirection;
+        break;
+      case "time":
+        sortObj.time_min = sortDirection;
+        break;
+      case "persons":
+        sortObj.persons = sortDirection;
+        break;
+      case "created":
+        sortObj.createdAt = sortDirection;
+        break;
+      case "updated":
+        sortObj.updatedAt = sortDirection;
+        break;
+      default:
+        sortObj.name = 1; // Default sort by name ascending
+    }
+
+    sortObj._id = 1; // Always add _id as a secondary sort to ensure consistent ordering
+
     // Get total count for pagination
     const total = await Exercise.countDocuments(query);
 
-    // Execute query with pagination
-    const exercises = await Exercise.find(query).skip(skip).limit(limit);
+    // Execute query with pagination and sorting
+    const exercises = await Exercise.find(query)
+      .sort(sortObj)
+      .skip(skip)
+      .limit(limit);
 
     res.send({
       exercises,
