@@ -483,7 +483,7 @@ const ExerciseList = () => {
                     }}
                     valueLabelDisplay="auto"
                     getAriaValueText={(value: number) => value.toString()}
-                    max={10}
+                    max={maxBeaters}
                     min={0}
                   />
                 </Grid>
@@ -514,7 +514,7 @@ const ExerciseList = () => {
                     }}
                     valueLabelDisplay="auto"
                     getAriaValueText={(value: number) => value.toString()}
-                    max={10}
+                    max={maxChasers}
                     min={0}
                   />
                 </Grid>
