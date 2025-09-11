@@ -62,7 +62,7 @@ const defaultExerciseFilter: ExerciseFilter = {
   tagRegex: "",
   tagList: [],
   page: 1,
-  limit: 50,
+  limit: 3,
 };
 
 const ExerciseList = () => {
@@ -277,11 +277,13 @@ const ExerciseList = () => {
                     ]}
                     onChange={(_event: Event, newValue: number | number[]) => {
                       const [newMin, newMax] = newValue as number[];
-                      setExerciseFilter({
-                        ...exerciseFilter,
+                      setLoadedExercises([]);
+                      setExerciseFilter((prev) => ({
+                        ...prev,
                         maxPersons: newMax,
                         minPersons: newMin,
-                      });
+                        page: 1,
+                      }));
                     }}
                     valueLabelDisplay="auto"
                     getAriaValueText={(value: number) => value.toString()}
