@@ -350,73 +350,29 @@ const TacticsBoard = (): JSX.Element => {
       interval = setInterval(() => {
         setPage((prevPage) => {
           const newPage = (prevPage % tacticBoard.pages.length) + 1;
-          const currentObjects = getAllObjects();
-          const targetObjects = tacticBoard.pages[newPage - 1].objects || [];
-          
-          // Categorize objects for proper animation handling
-          const objectsToAnimate: Array<{
-            currentObj: fabric.Object & { uuid?: string };
-            targetObj: { left?: number; top?: number };
-          }> = [];
-          
-          currentObjects.forEach((obj) => {
-            const objWithUuid = obj as fabric.Object & { uuid?: string };
-            const targetObject = targetObjects.find(
+          getAllObjects().forEach((obj) => {
+            const targetObject = tacticBoard.pages[newPage - 1].objects?.find(
               (nextObject) =>
-                (nextObject as { uuid?: string }).uuid === objWithUuid.uuid,
+                (nextObject as { uuid?: string }).uuid ===
+                (obj as fabric.Object & { uuid?: string }).uuid,
             );
-            
-            // Only animate objects that exist on both pages and have moved
-            if (targetObject && objWithUuid.uuid) {
-              const hasPositionChange = 
-                (targetObject.left || 0) !== (objWithUuid.left || 0) ||
-                (targetObject.top || 0) !== (objWithUuid.top || 0);
-                
-              if (hasPositionChange) {
-                objectsToAnimate.push({
-                  currentObj: objWithUuid,
-                  targetObj: targetObject
-                });
-              }
+            if (targetObject && canvasRef.current) {
+              obj.animate("left", targetObject.left || 0, {
+                onChange: canvasRef.current.renderAll.bind(canvasRef.current),
+                duration: 1000,
+                onComplete: () => {
+                  onLoadPage(newPage);
+                },
+              });
+              obj.animate("top", targetObject.top || 0, {
+                onChange: canvasRef.current.renderAll.bind(canvasRef.current),
+                duration: 1000,
+                onComplete: () => {
+                  onLoadPage(newPage);
+                },
+              });
             }
-            // Objects without matching UUID (deleted on target page) will disappear
-            // when onLoadPage is called - no animation needed
           });
-
-          // Animate only the objects that should move
-          let animationsCompleted = 0;
-          const totalAnimations = objectsToAnimate.length * 2; // left and top for each object
-          
-          if (totalAnimations === 0) {
-            // No animations needed, directly load the page
-            onLoadPage(newPage);
-          } else {
-            objectsToAnimate.forEach(({ currentObj, targetObj }) => {
-              if (canvasRef.current) {
-                currentObj.animate("left", targetObj.left || 0, {
-                  onChange: canvasRef.current.renderAll.bind(canvasRef.current),
-                  duration: 1000,
-                  onComplete: () => {
-                    animationsCompleted++;
-                    if (animationsCompleted === totalAnimations) {
-                      onLoadPage(newPage);
-                    }
-                  },
-                });
-                currentObj.animate("top", targetObj.top || 0, {
-                  onChange: canvasRef.current.renderAll.bind(canvasRef.current),
-                  duration: 1000,
-                  onComplete: () => {
-                    animationsCompleted++;
-                    if (animationsCompleted === totalAnimations) {
-                      onLoadPage(newPage);
-                    }
-                  },
-                });
-              }
-            });
-          }
-          
           return newPage;
         });
       }, 2000);
@@ -429,7 +385,7 @@ const TacticsBoard = (): JSX.Element => {
   useEffect(() => {
     let interval: NodeJS.Timeout;
     if (isRecording && tacticBoard) {
-      // Start the animation only if isRecording is true
+      // Start the animation only if isAnimating is true
       interval = setInterval(() => {
         setPage((prevPage) => {
           const newPage = (prevPage % tacticBoard.pages.length) + 1;
@@ -439,73 +395,29 @@ const TacticsBoard = (): JSX.Element => {
               tacticBoard.name ? `${tacticBoard.name}.mp4` : "tacticboard.mp4",
             );
           }
-          
-          const currentObjects = getAllObjects();
-          const targetObjects = tacticBoard.pages[newPage - 1].objects || [];
-          
-          // Categorize objects for proper animation handling
-          const objectsToAnimate: Array<{
-            currentObj: fabric.Object & { uuid?: string };
-            targetObj: { left?: number; top?: number };
-          }> = [];
-          
-          currentObjects.forEach((obj) => {
-            const objWithUuid = obj as fabric.Object & { uuid?: string };
-            const targetObject = targetObjects.find(
+          getAllObjects().forEach((obj) => {
+            const targetObject = tacticBoard.pages[newPage - 1].objects?.find(
               (nextObject) =>
-                (nextObject as { uuid?: string }).uuid === objWithUuid.uuid,
+                (nextObject as { uuid?: string }).uuid ===
+                (obj as fabric.Object & { uuid?: string }).uuid,
             );
-            
-            // Only animate objects that exist on both pages and have moved
-            if (targetObject && objWithUuid.uuid) {
-              const hasPositionChange = 
-                (targetObject.left || 0) !== (objWithUuid.left || 0) ||
-                (targetObject.top || 0) !== (objWithUuid.top || 0);
-                
-              if (hasPositionChange) {
-                objectsToAnimate.push({
-                  currentObj: objWithUuid,
-                  targetObj: targetObject
-                });
-              }
+            if (targetObject && canvasRef.current) {
+              obj.animate("left", targetObject.left || 0, {
+                onChange: canvasRef.current.renderAll.bind(canvasRef.current),
+                duration: 1000,
+                onComplete: () => {
+                  onLoadPage(newPage);
+                },
+              });
+              obj.animate("top", targetObject.top || 0, {
+                onChange: canvasRef.current.renderAll.bind(canvasRef.current),
+                duration: 1000,
+                onComplete: () => {
+                  onLoadPage(newPage);
+                },
+              });
             }
-            // Objects without matching UUID (deleted on target page) will disappear
-            // when onLoadPage is called - no animation needed
           });
-
-          // Animate only the objects that should move
-          let animationsCompleted = 0;
-          const totalAnimations = objectsToAnimate.length * 2; // left and top for each object
-          
-          if (totalAnimations === 0) {
-            // No animations needed, directly load the page
-            onLoadPage(newPage);
-          } else {
-            objectsToAnimate.forEach(({ currentObj, targetObj }) => {
-              if (canvasRef.current) {
-                currentObj.animate("left", targetObj.left || 0, {
-                  onChange: canvasRef.current.renderAll.bind(canvasRef.current),
-                  duration: 1000,
-                  onComplete: () => {
-                    animationsCompleted++;
-                    if (animationsCompleted === totalAnimations) {
-                      onLoadPage(newPage);
-                    }
-                  },
-                });
-                currentObj.animate("top", targetObj.top || 0, {
-                  onChange: canvasRef.current.renderAll.bind(canvasRef.current),
-                  duration: 1000,
-                  onComplete: () => {
-                    animationsCompleted++;
-                    if (animationsCompleted === totalAnimations) {
-                      onLoadPage(newPage);
-                    }
-                  },
-                });
-              }
-            });
-          }
 
           return newPage;
         });
