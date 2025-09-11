@@ -317,11 +317,13 @@ const ExerciseList = () => {
                   />
                 )}
                 <FormControl size="small" sx={{ minWidth: 120, mr: 1 }}>
-                  <InputLabel id="sort-select-label">Sort by</InputLabel>
+                  <InputLabel id="sort-select-label">
+                    {t("ExerciseList:filter.sort.name")}
+                  </InputLabel>
                   <Select
                     labelId="sort-select-label"
                     value={exerciseFilter.sortBy}
-                    label="Sort by"
+                    label={t("ExerciseList:filter.sort.name")}
                     onChange={(event) => {
                       setLoadedExercises([]);
                       setExerciseFilter({
@@ -336,11 +338,21 @@ const ExerciseList = () => {
                       });
                     }}
                   >
-                    <MenuItem value="name">Name</MenuItem>
-                    <MenuItem value="time">Duration</MenuItem>
-                    <MenuItem value="persons">Persons</MenuItem>
-                    <MenuItem value="created">Created</MenuItem>
-                    <MenuItem value="updated">Updated</MenuItem>
+                    <MenuItem value="name">
+                      {t("ExerciseList:filter.sort.by_name")}
+                    </MenuItem>
+                    <MenuItem value="time">
+                      {t("ExerciseList:filter.sort.by_timeInMinutes")}
+                    </MenuItem>
+                    <MenuItem value="persons">
+                      {t("ExerciseList:filter.sort.by_persons")}
+                    </MenuItem>
+                    <MenuItem value="created">
+                      {t("ExerciseList:filter.sort.by_createdAt")}
+                    </MenuItem>
+                    <MenuItem value="updated">
+                      {t("ExerciseList:filter.sort.by_updatedAt")}
+                    </MenuItem>
                   </Select>
                 </FormControl>
                 <ToggleButton
@@ -391,7 +403,7 @@ const ExerciseList = () => {
                   size="small"
                   color="secondary"
                 >
-                  Clear All Filters
+                  {t("ExerciseList:filter.clear")}
                 </Button>
               </SoftBox>
               <Grid container spacing={3} sx={{ pl: 2, width: "100%" }}>
@@ -432,10 +444,13 @@ const ExerciseList = () => {
                 {/* Time Duration Filter */}
                 <Grid item xs={12} md={6}>
                   <SoftTypography variant="body2">
-                    Duration (min): {exerciseFilter.minTime} -{" "}
-                    {exerciseFilter.maxTime === maxTime
-                      ? `${maxTime}+`
-                      : exerciseFilter.maxTime}
+                    {t("ExerciseList:filter.timeInMinutes.titleWithNumbers", {
+                      minValue: exerciseFilter.minTime,
+                      maxValue:
+                        exerciseFilter.maxTime === maxTime
+                          ? `${maxTime}+`
+                          : exerciseFilter.maxTime,
+                    })}
                   </SoftTypography>
                   <Slider
                     getAriaLabel={() => "Exercise Duration"}
@@ -460,10 +475,13 @@ const ExerciseList = () => {
                 {/* Beaters Filter */}
                 <Grid item xs={12} md={6}>
                   <SoftTypography variant="body2">
-                    Beaters: {exerciseFilter.minBeaters} -{" "}
-                    {exerciseFilter.maxBeaters === maxBeaters
-                      ? `${maxBeaters}+`
-                      : exerciseFilter.maxBeaters}
+                    {t("ExerciseList:filter.beaters.titleWithNumbers", {
+                      minValue: exerciseFilter.minBeaters,
+                      maxValue:
+                        exerciseFilter.maxBeaters === maxBeaters
+                          ? `${maxBeaters}+`
+                          : exerciseFilter.maxBeaters,
+                    })}
                   </SoftTypography>
                   <Slider
                     getAriaLabel={() => "Number of Beaters"}
@@ -491,10 +509,13 @@ const ExerciseList = () => {
                 {/* Chasers Filter */}
                 <Grid item xs={12} md={6}>
                   <SoftTypography variant="body2">
-                    Chasers: {exerciseFilter.minChasers} -{" "}
-                    {exerciseFilter.maxChasers === maxChasers
-                      ? `${maxChasers}+`
-                      : exerciseFilter.maxChasers}
+                    {t("ExerciseList:filter.chasers.titleWithNumbers", {
+                      minValue: exerciseFilter.minChasers,
+                      maxValue:
+                        exerciseFilter.maxChasers === maxChasers
+                          ? `${maxChasers}+`
+                          : exerciseFilter.maxChasers,
+                    })}
                   </SoftTypography>
                   <Slider
                     getAriaLabel={() => "Number of Chasers"}
@@ -569,10 +590,12 @@ const ExerciseList = () => {
                   md={6}
                   sx={{ display: "flex", flexDirection: "column" }}
                 >
-                  <SoftTypography variant="body2">Materials</SoftTypography>
+                  <SoftTypography variant="body2">
+                    {t("ExerciseList:filter.materials.title")}
+                  </SoftTypography>
                   <SoftInput
                     id="materials-filter"
-                    placeholder="Add material (press Enter)"
+                    placeholder={t("ExerciseList:filter.materials.placeholder")}
                     value={exerciseFilter.materialRegex}
                     onChange={onExerciseFilterValueChange("materialRegex")}
                     onKeyDown={handleMaterialKeyDown}
