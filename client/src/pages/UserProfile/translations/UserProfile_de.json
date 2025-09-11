@@ -17,5 +17,9 @@
   "editUser": "Nutzerdaten bearbeiten / speichern",
   "favoriteExercisesList": "Favorisierte Übungen",
   "favoriteTacticboardsList": "Favorisierte Tacticboards",
+  "ownedExercisesList": "Meine Übungen",
+  "ownedTacticboardsList": "Meine Tacticboards",
+  "accessibleExercisesList": "Übungen (Bearbeitungsrechte)",
+  "accessibleTacticboardsList": "Tacticboards (Bearbeitungsrechte)",
   "deleteAccount": "Account löschen"
 }

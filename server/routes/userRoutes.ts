@@ -15,6 +15,8 @@ router
   .delete(usersController.deleteUser);
 
 router.route("/:id").get(usersController.getUserById);
+router.route("/:id/exercises").get(usersController.getUserExercises);
+router.route("/:id/tacticboards").get(usersController.getUserTacticboards);
 router.route("/email/:email").get(usersController.getUserByEmail);
 
 export default router;
