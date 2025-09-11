@@ -243,7 +243,10 @@ export const setAccess = asyncHandler(
     }
 
     if (access !== "edit") {
-      res.status(400).json({ message: "Access level must be 'edit' (view access is public for all exercises)" });
+      res.status(400).json({
+        message:
+          "Access level must be 'edit' (view access is public for all exercises)",
+      });
       return;
     }
 
@@ -351,7 +354,10 @@ export const checkAccess = asyncHandler(
     }
 
     // Check if user is an admin
-    if (req.UserInfo.roles?.includes("Admin") || req.UserInfo.roles?.includes("admin")) {
+    if (
+      req.UserInfo.roles?.includes("Admin") ||
+      req.UserInfo.roles?.includes("admin")
+    ) {
       res.json({ hasAccess: true, type: "admin" });
       return;
     }
@@ -442,7 +448,10 @@ export const shareExercise = asyncHandler(
     }
 
     if (access !== "edit") {
-      res.status(400).json({ message: "Access must be 'edit' (view access is public for all exercises)" });
+      res.status(400).json({
+        message:
+          "Access must be 'edit' (view access is public for all exercises)",
+      });
       return;
     }
 
@@ -453,14 +462,18 @@ export const shareExercise = asyncHandler(
     }
 
     const isOwner = exercise.user?.toString() === req.UserInfo.id;
-    const isAdmin = req.UserInfo.roles?.some(role => role.toLowerCase() === "admin");
+    const isAdmin = req.UserInfo.roles?.some(
+      (role) => role.toLowerCase() === "admin"
+    );
 
     if (!isOwner && !isAdmin) {
       res.status(403).json({ message: "Forbidden" });
       return;
     }
 
-    const targetUser = await User.findOne({ email: email.toLowerCase() }).select("_id");
+    const targetUser = await User.findOne({
+      email: email.toLowerCase(),
+    }).select("_id");
     if (!targetUser) {
       res.status(404).json({ message: "User not found with this email" });
       return;
