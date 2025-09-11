@@ -51,11 +51,6 @@ const maxTime = 60; // Maximum time in minutes
 const maxChasers = 10; // Maximum number of chasers
 const maxBeaters = 10; // Maximum number of beaters
 
-enum ViewType {
-  List = "List",
-  Cards = "Cards",
-}
-
 type ExerciseFilter = {
   searchValue: string;
   minPersons: number;
@@ -103,14 +98,8 @@ const ExerciseList = () => {
   const isUpMd = useMediaQuery((theme: Theme) => theme.breakpoints.up("md"));
 
   const [showFilters, setShowFilters] = useState<boolean>(false);
-  const [viewType, setViewType] = useState<ViewType>(ViewType.Cards);
   const { status: userStatus } = useAuth();
   const [loadedExercises, setLoadedExercises] = useState<Exercise[]>([]);
-
-  useEffect(() => {
-    if (isUpMd) return;
-    setViewType(ViewType.Cards);
-  }, [isUpMd]);
 
   const [exerciseFilter, setExerciseFilter] = useState<ExerciseFilter>({
     ...defaultExerciseFilter,
@@ -653,7 +642,7 @@ const ExerciseList = () => {
               {t("ExerciseList:errorLoadingExercises")}
             </Alert>
           )}
-          {!isExercisesError && viewType === ViewType.Cards && (
+          {!isExercisesError && (
             <>
               <SoftBox sx={{ mt: 2, flexGrow: 1, overflowY: "auto", p: 2 }}>
                 <ExercisesCardView
