@@ -41,6 +41,7 @@ export type ExerciseInfoProps = {
   isRelatedExercisesLoading: boolean;
   relatedExercises: Exercise[] | undefined;
   handleOpenExerciseClick: (exerciseId: string) => void;
+  isEditMode?: boolean;
 };
 
 const ExerciseInfo = ({
@@ -48,13 +49,20 @@ const ExerciseInfo = ({
   isRelatedExercisesLoading,
   relatedExercises,
   handleOpenExerciseClick,
+  isEditMode = false,
 }: ExerciseInfoProps): JSX.Element => {
   const { t } = useTranslation("Exercise");
 
   return (
     <>
-      <Card sx={{ height: "100%" }}>
-        <CardHeader title={t("Exercise:info.title")} />
+      <Card sx={{ height: "100%", border: isEditMode ? "2px solid primary.main" : "none" }}>
+        <CardHeader 
+          title={
+            isEditMode 
+              ? `${t("Exercise:info.title")} (${t("Exercise:editMode")})`
+              : t("Exercise:info.title")
+          }
+        />
         <CardContent>
           <List
             sx={{

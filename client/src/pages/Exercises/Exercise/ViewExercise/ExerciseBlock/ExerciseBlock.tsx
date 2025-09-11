@@ -19,16 +19,18 @@ const MarkdownRenderer = lazy(
 export type ExerciseBlockProps = {
   block: Block;
   blockNumber: number;
+  isEditMode?: boolean;
 };
 
 const ExerciseBlock = ({
   block,
   blockNumber,
+  isEditMode = false,
 }: ExerciseBlockProps): JSX.Element => {
   const { t } = useTranslation("Exercise");
 
   return (
-    <Card sx={{ my: 3, display: "flex" }} key={block._id}>
+    <Card sx={{ my: 3, display: "flex", border: isEditMode ? "2px solid primary.main" : "none" }} key={block._id}>
       <CardHeader
         title={t("Exercise:block.title", { blockNumber })}
         subheader={t("Exercise:block.minutes", {

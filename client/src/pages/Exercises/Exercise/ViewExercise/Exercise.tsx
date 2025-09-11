@@ -331,12 +331,14 @@ const Exercise = () => {
             handleOpenExerciseClick={handleOpenExerciseClick}
             isRelatedExercisesLoading={isRelatedExercisesLoading}
             relatedExercises={relatedExercises}
+            isEditMode={isEditMode}
           />
           {exercise.description_blocks?.map((block, index) => (
             <ExerciseBlock
               block={block}
               blockNumber={index + 1}
               key={block._id}
+              isEditMode={isEditMode}
             />
           ))}
           <Footer />
