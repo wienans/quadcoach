@@ -123,6 +123,70 @@ const routes = [
         ],
       },
       {
+        path: "/practice-planners",
+        handle: {
+          type: RouteHandleType.practicePlanners,
+        },
+        async lazy() {
+          const PracticePlannerListRoot = (await import("../PracticePlanner"))
+            .PracticePlannerListRoot;
+          return {
+            element: <PracticePlannerListRoot />,
+          };
+        },
+        children: [
+          {
+            path: "add",
+            handle: {
+              type: RouteHandleType.addPracticePlanner,
+            },
+            async lazy() {
+              const AddPracticePlanner = (await import("../PracticePlanner")).AddPracticePlanner;
+              return {
+                element: <AddPracticePlanner />,
+              };
+            },
+          },
+          {
+            path: ":id",
+            handle: {
+              type: RouteHandleType.practicePlanner,
+            },
+            async lazy() {
+              const PracticePlannerRoot = (await import("../PracticePlanner")).PracticePlannerRoot;
+              return {
+                element: <PracticePlannerRoot />,
+              };
+            },
+            children: [
+              {
+                index: true,
+                async lazy() {
+                  const ViewPracticePlanner = (await import("../PracticePlanner"))
+                    .ViewPracticePlanner;
+                  return {
+                    element: <ViewPracticePlanner />,
+                  };
+                },
+              },
+              {
+                path: "update",
+                handle: {
+                  type: RouteHandleType.updatePracticePlanner,
+                },
+                async lazy() {
+                  const UpdatePracticePlanner = (await import("../PracticePlanner"))
+                    .UpdatePracticePlanner;
+                  return {
+                    element: <UpdatePracticePlanner />,
+                  };
+                },
+              },
+            ],
+          },
+        ],
+      },
+      {
         path: "/drafting-board",
         handle: {
           type: RouteHandleType.draftingBoard,
