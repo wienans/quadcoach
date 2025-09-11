@@ -21,4 +21,9 @@
   "adminInfo": "Admin Informationen",
   "onlineUsers": "Online Benutzer",
   "onlineUsersDescription": "Benutzer, die in den letzten 15 Minuten aktiv waren"
+  "ownedExercisesList": "Meine Übungen",
+  "ownedTacticboardsList": "Meine Tacticboards",
+  "accessibleExercisesList": "Übungen (Bearbeitungsrechte)",
+  "accessibleTacticboardsList": "Tacticboards (Bearbeitungsrechte)",
+  "deleteAccount": "Account löschen"
 }

@@ -44,6 +44,8 @@ import {
   useGetUserQuery,
   useUpdateUserMutation,
   useGetOnlineUsersCountQuery,
+  useGetUserExercisesQuery,
+  useGetUserTacticboardsQuery,
 } from "../userApi";
 import { UserPartialId } from "../../api/quadcoachApi/domain";
 import {
@@ -95,6 +97,14 @@ const UserProfile = () => {
   // Only fetch online users count if current user is admin
   const { data: onlineUsersData } = useGetOnlineUsersCountQuery(undefined, {
     skip: !isCurrentUserAdmin,
+  });
+
+  // Fetch user's owned and accessible exercises and tacticboards
+  const { data: userExercises } = useGetUserExercisesQuery(userViewId ?? "", {
+    skip: !userViewId,
+  });
+  const { data: userTacticboards } = useGetUserTacticboardsQuery(userViewId ?? "", {
+    skip: !userViewId,
   });
 
   const handleDeleteAccount = async () => {
@@ -356,6 +366,138 @@ const UserProfile = () => {
                   <AccordionDetails sx={{ ml: 1 }}>
                     <List>
                       {favoriteTacticBoards?.map((tacticBoard) => (
+                        <ListItemButton
+                          key={tacticBoard._id}
+                          href={`/tacticboards/${tacticBoard._id}`}
+                          sx={{
+                            cursor: "pointer",
+                            "&:hover": {
+                              backgroundColor: "rgba(0, 0, 0, 0.04)",
+                            },
+                          }}
+                        >
+                          <ListItemText
+                            primary={tacticBoard.name}
+                            sx={{
+                              "& .MuiTypography-root": {
+                                fontSize: "1rem",
+                                fontWeight: 400,
+                              },
+                            }}
+                          />
+                        </ListItemButton>
+                      )) ?? ""}
+                    </List>
+                  </AccordionDetails>
+                </Accordion>
+              )}
+              {Boolean(userExercises?.owned?.length) && (
+                <Accordion>
+                  <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                    {t("UserProfile:ownedExercisesList")}
+                  </AccordionSummary>
+                  <AccordionDetails sx={{ ml: 1 }}>
+                    <List>
+                      {userExercises?.owned?.map((exercise) => (
+                        <ListItemButton
+                          key={exercise._id}
+                          href={`/exercises/${exercise._id}`}
+                          sx={{
+                            cursor: "pointer",
+                            "&:hover": {
+                              backgroundColor: "rgba(0, 0, 0, 0.04)",
+                            },
+                          }}
+                        >
+                          <ListItemText
+                            primary={exercise.name}
+                            sx={{
+                              "& .MuiTypography-root": {
+                                fontSize: "1rem",
+                                fontWeight: 400,
+                              },
+                            }}
+                          />
+                        </ListItemButton>
+                      )) ?? ""}
+                    </List>
+                  </AccordionDetails>
+                </Accordion>
+              )}
+              {Boolean(userExercises?.accessible?.length) && (
+                <Accordion>
+                  <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                    {t("UserProfile:accessibleExercisesList")}
+                  </AccordionSummary>
+                  <AccordionDetails sx={{ ml: 1 }}>
+                    <List>
+                      {userExercises?.accessible?.map((exercise) => (
+                        <ListItemButton
+                          key={exercise._id}
+                          href={`/exercises/${exercise._id}`}
+                          sx={{
+                            cursor: "pointer",
+                            "&:hover": {
+                              backgroundColor: "rgba(0, 0, 0, 0.04)",
+                            },
+                          }}
+                        >
+                          <ListItemText
+                            primary={exercise.name}
+                            sx={{
+                              "& .MuiTypography-root": {
+                                fontSize: "1rem",
+                                fontWeight: 400,
+                              },
+                            }}
+                          />
+                        </ListItemButton>
+                      )) ?? ""}
+                    </List>
+                  </AccordionDetails>
+                </Accordion>
+              )}
+              {Boolean(userTacticboards?.owned?.length) && (
+                <Accordion>
+                  <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                    {t("UserProfile:ownedTacticboardsList")}
+                  </AccordionSummary>
+                  <AccordionDetails sx={{ ml: 1 }}>
+                    <List>
+                      {userTacticboards?.owned?.map((tacticBoard) => (
+                        <ListItemButton
+                          key={tacticBoard._id}
+                          href={`/tacticboards/${tacticBoard._id}`}
+                          sx={{
+                            cursor: "pointer",
+                            "&:hover": {
+                              backgroundColor: "rgba(0, 0, 0, 0.04)",
+                            },
+                          }}
+                        >
+                          <ListItemText
+                            primary={tacticBoard.name}
+                            sx={{
+                              "& .MuiTypography-root": {
+                                fontSize: "1rem",
+                                fontWeight: 400,
+                              },
+                            }}
+                          />
+                        </ListItemButton>
+                      )) ?? ""}
+                    </List>
+                  </AccordionDetails>
+                </Accordion>
+              )}
+              {Boolean(userTacticboards?.accessible?.length) && (
+                <Accordion>
+                  <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                    {t("UserProfile:accessibleTacticboardsList")}
+                  </AccordionSummary>
+                  <AccordionDetails sx={{ ml: 1 }}>
+                    <List>
+                      {userTacticboards?.accessible?.map((tacticBoard) => (
                         <ListItemButton
                           key={tacticBoard._id}
                           href={`/tacticboards/${tacticBoard._id}`}

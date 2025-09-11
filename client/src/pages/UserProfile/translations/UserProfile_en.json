@@ -21,4 +21,9 @@
   "adminInfo": "Admin Information",
   "onlineUsers": "Online Users",
   "onlineUsersDescription": "Users active within the last 15 minutes"
+  "ownedExercisesList": "My Exercises",
+  "ownedTacticboardsList": "My Tacticboards",
+  "accessibleExercisesList": "Exercises (Edit Access)",
+  "accessibleTacticboardsList": "Tacticboards (Edit Access)",
+  "deleteAccount": "Delete Account"
 }
