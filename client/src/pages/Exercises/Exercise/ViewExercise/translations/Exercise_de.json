@@ -21,11 +21,13 @@
   },
   "materials": {
     "title": "Materialien",
-    "none": "Keine Materialien benötigt"
+    "none": "Keine Materialien benötigt",
+    "addNew": "Material hinzufügen..."
   },
   "tags": {
     "title": "Stichwörter",
-    "none": "Keine Stichwörter verfügbar"
+    "none": "Keine Stichwörter verfügbar",
+    "addNew": "Stichwort hinzufügen..."
   },
   "realtedToExercises": {
     "title": "Zugehörige Übungen:",

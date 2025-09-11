@@ -43,7 +43,12 @@ import {
   useRemoveFavoriteExerciseMutation,
 } from "../../../../api/quadcoachApi/favoriteApi";
 
-import { ExerciseWithOutId } from "../../../../api/quadcoachApi/domain";
+import { ExerciseWithOutId, ExercisePartialId } from "../../../../api/quadcoachApi/domain";
+import {
+  FormikProvider,
+  useFormik,
+} from "formik";
+import * as Yup from "yup";
 
 const Exercise = () => {
   const { t } = useTranslation("Exercise");
@@ -138,31 +143,51 @@ const Exercise = () => {
     },
   ] = useUpdateExerciseMutation();
 
+  // Setup formik form for editing
+  const formik = useFormik<ExercisePartialId>({
+    // enableReinitialize : use this flag when initial values needs to be changed
+    enableReinitialize: true,
+    validateOnChange: false,
+    initialValues: {
+      name: exercise?.name ?? "",
+      persons: exercise?.persons ?? 0,
+      time_min: exercise?.time_min ?? 0,
+      beaters: exercise?.beaters ?? 0,
+      chasers: exercise?.chasers ?? 0,
+      materials: exercise?.materials ?? [],
+      tags: exercise?.tags ?? [],
+      description_blocks: exercise?.description_blocks ?? [],
+      related_to: exercise?.related_to ?? [],
+      creator: exercise?.creator ?? "",
+      user: exercise?.user ?? "",
+    },
+    validationSchema: Yup.object({
+      name: Yup.string().required("Exercise:validation.name.required"),
+      persons: Yup.number().min(0, "Exercise:validation.persons.min"),
+      time_min: Yup.number().min(0, "Exercise:validation.time_min.min"),
+      beaters: Yup.number().min(0, "Exercise:validation.beaters.min"),
+      chasers: Yup.number().min(0, "Exercise:validation.chasers.min"),
+      materials: Yup.array().of(Yup.string()),
+      tags: Yup.array().of(Yup.string()),
+      description_blocks: Yup.array(),
+      related_to: Yup.array().of(Yup.string()),
+    }),
+    onSubmit: (values) => {
+      if (exerciseId) {
+        const exerciseUpdate = {
+          _id: exerciseId,
+          ...values,
+        };
+        updateExercise(exerciseUpdate);
+      }
+    },
+  });
+
   // Edit mode toggle functionality
   const onToggleEditMode = () => {
-    if (isPrivileged && isEditMode) {
-      // When exiting edit mode, save the current exercise as-is
-      // This is a placeholder for now - in a full implementation,
-      // child components would provide modified data
-      if (exercise) {
-        const exerciseUpdate: ExerciseWithOutId = {
-          name: exercise.name,
-          persons: exercise.persons,
-          time_min: exercise.time_min,
-          beaters: exercise.beaters,
-          chasers: exercise.chasers,
-          materials: exercise.materials,
-          tags: exercise.tags,
-          description_blocks: exercise.description_blocks,
-          related_to: exercise.related_to,
-          creator: exercise.creator,
-          user: exercise.user,
-        };
-        updateExercise({
-          _id: exercise._id,
-          ...exerciseUpdate,
-        });
-      }
+    if (isPrivileged && isEditMode && formik.isValid) {
+      // When exiting edit mode, save the form
+      formik.submitForm();
     } else {
       setIsEditMode(!isEditMode);
     }
@@ -347,7 +372,7 @@ const Exercise = () => {
       }
     >
       {() => (
-        <>
+        <FormikProvider value={formik}>
           {isDeleteExerciseError && (
             <Alert color="error" sx={{ mt: 5, mb: 3 }}>
               {t("Exercise:errorDeletingExercise")}
@@ -369,17 +394,20 @@ const Exercise = () => {
             isRelatedExercisesLoading={isRelatedExercisesLoading}
             relatedExercises={relatedExercises}
             isEditMode={isEditMode}
+            formik={formik}
           />
-          {exercise.description_blocks?.map((block, index) => (
+          {formik.values.description_blocks?.map((block, index) => (
             <ExerciseBlock
               block={block}
               blockNumber={index + 1}
               key={block._id}
               isEditMode={isEditMode}
+              formik={formik}
+              blockIndex={index}
             />
           ))}
           <Footer />
-        </>
+        </FormikProvider>
       )}
     </ProfileLayout>
   );
