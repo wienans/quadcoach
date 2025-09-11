@@ -1,4 +1,4 @@
-import { quadcoachApi } from "..";
+import quadcoachApi from "./quadcoachApi";
 import { TagType } from "../enum";
 import { ExerciseHeader } from "./domain/Exercise";
 import {
