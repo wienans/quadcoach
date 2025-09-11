@@ -21,11 +21,13 @@
   },
   "materials": {
     "title": "Materials",
-    "none": "No materials needed"
+    "none": "No materials needed",
+    "addNew": "Add material..."
   },
   "tags": {
     "title": "Tags",
-    "none": "No tags available"
+    "none": "No tags available",
+    "addNew": "Add tag..."
   },
   "realtedToExercises": {
     "title": "Related exercises",
