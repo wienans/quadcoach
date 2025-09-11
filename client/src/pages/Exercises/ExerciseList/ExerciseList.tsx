@@ -583,7 +583,7 @@ const ExerciseList = () => {
                           sx={{
                             fontSize: 20,
                             opacity:
-                              exerciseFilter.materialRegex != "" ? 1 : 0.4,
+                              exerciseFilter.materialRegex !== "" ? 1 : 0.4,
                           }}
                         />
                       </InputAdornment>
