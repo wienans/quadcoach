@@ -19,6 +19,7 @@ import exerciseRoutes from "./routes/exerciseRoutes";
 import authRoutes from "./routes/authRoutes";
 import path from "path";
 import favoriteRoutes from "./routes/favoriteRoutes";
+import practicePlanRoutes from "./routes/practicePlanRoutes";
 
 // Read out Port or use Default
 const PORT = process.env.PORT || 3001;
@@ -69,6 +70,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/tacticboards", tacticboardRoutes);
 app.use("/api/exercises", exerciseRoutes);
 app.use("/api/favorites", favoriteRoutes);
+app.use("/api/practice-plans", practicePlanRoutes);
 
 app.get("/api", (req, res) => {
   res.json({ message: "Hello from server!" });

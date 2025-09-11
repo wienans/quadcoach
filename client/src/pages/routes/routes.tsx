@@ -123,6 +123,56 @@ const routes = [
         ],
       },
       {
+        path: "/practice-plans",
+        handle: {
+          type: RouteHandleType.practicePlans,
+        },
+        async lazy() {
+          const PracticePlanListRoot = (await import("../PracticePlans"))
+            .PracticePlanListRoot;
+          return {
+            element: <PracticePlanListRoot />,
+          };
+        },
+        children: [
+          {
+            path: "add",
+            handle: {
+              type: RouteHandleType.addPracticePlan,
+            },
+            async lazy() {
+              const CreatePracticePlan = (await import("../PracticePlans")).CreatePracticePlan;
+              return {
+                element: <CreatePracticePlan />,
+              };
+            },
+          },
+          {
+            path: ":id",
+            handle: {
+              type: RouteHandleType.practicePlan,
+            },
+            async lazy() {
+              const PracticePlanRoot = (await import("../PracticePlans")).PracticePlanRoot;
+              return {
+                element: <PracticePlanRoot />,
+              };
+            },
+            children: [
+              {
+                index: true,
+                async lazy() {
+                  const ViewPracticePlan = (await import("../PracticePlans")).ViewPracticePlan;
+                  return {
+                    element: <ViewPracticePlan />,
+                  };
+                },
+              },
+            ],
+          },
+        ],
+      },
+      {
         path: "/drafting-board",
         handle: {
           type: RouteHandleType.draftingBoard,

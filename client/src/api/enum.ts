@@ -11,4 +11,5 @@ export enum TagType {
   tacticboard = "tacticboard",
   tacticboardTag = "tacticboardTag",
   favorite = "favorite",
+  practicePlan = "practicePlan",
 }
