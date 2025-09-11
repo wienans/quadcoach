@@ -8,12 +8,13 @@ import {
   CardHeader,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import DeleteIcon from "@mui/icons-material/Delete";
 import UniversalMediaPlayer from "../../../../../components/UniversalMediaPlayer";
 import TacticBoardInBlockWrapper from "./TacticBoardInBlock";
 import { lazy, Suspense } from "react";
-import { FormikProps } from "formik";
+import { FormikProps, FieldArray, FieldArrayRenderProps } from "formik";
 import { ExercisePartialId } from "../../../../../api/quadcoachApi/domain";
-import { SoftInput } from "../../../../../components";
+import { SoftInput, SoftButton } from "../../../../../components";
 import MDEditor from "@uiw/react-md-editor";
 import "@uiw/react-md-editor/markdown-editor.css";
 import "@uiw/react-markdown-preview/markdown.css";
@@ -61,6 +62,24 @@ const ExerciseBlock = ({
               minutes: currentBlock.time_min,
             })
           )
+        }
+        action={
+          isEditMode && formik.values.description_blocks && formik.values.description_blocks.length > 1 ? (
+            <FieldArray
+              name="description_blocks"
+              render={(arrayHelpers: FieldArrayRenderProps) => (
+                <SoftButton
+                  variant="outlined"
+                  color="error"
+                  size="small"
+                  onClick={() => arrayHelpers.remove(blockIndex)}
+                  startIcon={<DeleteIcon />}
+                >
+                  Delete Block
+                </SoftButton>
+              )}
+            />
+          ) : null
         }
         sx={{
           pb: 0,

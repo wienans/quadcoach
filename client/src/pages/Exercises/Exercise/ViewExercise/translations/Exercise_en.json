@@ -45,5 +45,23 @@
     "description": "Description:",
     "coachingPoints": "Coaching points:",
     "favoriteExercise": "Favorite exercise"
+  },
+  "addBlock": "Add Block",
+  "validation": {
+    "name": {
+      "required": "Exercise name is required"
+    },
+    "persons": {
+      "min": "Persons must be 0 or greater"
+    },
+    "time_min": {
+      "min": "Time must be 0 or greater"
+    },
+    "beaters": {
+      "min": "Beaters must be 0 or greater"
+    },
+    "chasers": {
+      "min": "Chasers must be 0 or greater"
+    }
   }
 }
