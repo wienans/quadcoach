@@ -4,6 +4,7 @@ import HomeIcon from "@mui/icons-material/Home";
 import DeveloperBoardIcon from "@mui/icons-material/DeveloperBoard";
 import ListIcon from "@mui/icons-material/List";
 import EditIcon from "@mui/icons-material/Edit";
+import EventNoteIcon from "@mui/icons-material/EventNote";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import LoginIcon from "@mui/icons-material/Login";
@@ -54,6 +55,16 @@ const Layout = () => {
       noCollapse: true,
       protected: true,
       regExp: new RegExp("\\/drafting-board$"),
+    },
+    {
+      type: "collapse" as const,
+      nameResourceKey: "Layout:routes.practicePlanner",
+      key: "practice-planner",
+      route: "/practice-planner",
+      icon: <EventNoteIcon />,
+      noCollapse: true,
+      protected: true,
+      regExp: new RegExp("\\/practice-planner$"),
     },
     {
       type: "divider" as const,

@@ -135,6 +135,18 @@ const routes = [
         },
       },
       {
+        path: "/practice-planner",
+        handle: {
+          type: RouteHandleType.practicePlanner,
+        },
+        async lazy() {
+          const PracticePlanner = (await import("../PracticePlanner")).PracticePlanner;
+          return {
+            element: <PracticePlanner />,
+          };
+        },
+      },
+      {
         path: "/users",
         // handle: {
         //   type: RouteHandleType.userProfile,
