@@ -10,12 +10,11 @@ import {
   useMemo,
 } from "react";
 import { fabric } from "fabric";
-import { v4 as uuidv4 } from "uuid";
 import { TacticPage } from "../../../api/quadcoachApi/domain";
 import { useContainerResizeEvent } from "./useResizeEvent";
 
 import { TacticPageValidator } from "./validation";
-import { ExtendedBaseBrush, setUuid } from "./fabricTypes";
+import { ExtendedBaseBrush } from "./fabricTypes";
 import { CanvasOperationError } from "./types";
 
 const canvasDefaultOptions: fabric.ICanvasOptions = {
@@ -92,14 +91,6 @@ const TacticBoardFabricJsContextProvider: FC<{
           canvasRef.current,
           canvasDefaultOptions,
         );
-
-        // Add event handler to assign UUIDs to drawn paths
-        canvasFabricRef.current.on('path:created', (e: fabric.IEvent) => {
-          const path = (e as any).path;
-          if (path) {
-            setUuid(path, uuidv4());
-          }
-        });
 
         // Re-initialize resize observer now that canvas is ready
         initializeContainerResizeObserver();

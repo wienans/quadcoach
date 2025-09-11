@@ -8,8 +8,11 @@ import {
   useContext,
 } from "react";
 import { TacticBoardCanvasContext } from "../TacticBoardCanvasContext/TacticBoardCanvasContext";
-import { ExtendedBaseBrush } from "../TacticBoardFabricJsContext/fabricTypes";
-
+import {
+  ExtendedBaseBrush,
+  setUuid,
+} from "../TacticBoardFabricJsContext/fabricTypes";
+import { v4 as uuidv4 } from "uuid";
 export type LineStyle = "solid" | "dashed" | "dotted";
 
 export interface TacticBoardDrawingContextProps {
@@ -54,6 +57,15 @@ const TacticBoardDrawingContextProvider: FC<{
             brush.strokeDashArray = [];
           }
         }
+        // Add event handler to assign UUIDs to drawn paths
+        canvasFabric.on("path:created", (e: fabric.IEvent) => {
+          console.log("Path created event:", e);
+          const path = (e as any).path;
+          if (path) {
+            setUuid(path, uuidv4());
+          }
+        });
+
         setControls(false);
       } catch (error) {
         console.error("Failed to set draw mode:", error);
