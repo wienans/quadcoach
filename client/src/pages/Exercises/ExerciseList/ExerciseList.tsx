@@ -196,7 +196,8 @@ const ExerciseList = () => {
   const debouncedGetExercises = useCallback(
     debounce((filter: ExerciseFilter) => {
       getExercises({
-        maxPersons: filter.maxPersons,
+        // Treat selecting the UI maximum as "no upper bound" (infinite)
+        maxPersons: filter.maxPersons === maxPersons ? undefined : filter.maxPersons,
         minPersons: filter.minPersons,
         nameRegex: filter.searchValue,
         tagRegex: filter.tagRegex,
@@ -204,11 +205,11 @@ const ExerciseList = () => {
         materialRegex: filter.materialRegex,
         materialList: filter.materialList,
         minTime: filter.minTime,
-        maxTime: filter.maxTime,
+        maxTime: filter.maxTime === maxTime ? undefined : filter.maxTime,
         minBeaters: filter.minBeaters,
-        maxBeaters: filter.maxBeaters,
+        maxBeaters: filter.maxBeaters === maxBeaters ? undefined : filter.maxBeaters,
         minChasers: filter.minChasers,
-        maxChasers: filter.maxChasers,
+        maxChasers: filter.maxChasers === maxChasers ? undefined : filter.maxChasers,
         sortBy: filter.sortBy,
         sortOrder: filter.sortOrder,
         page: filter.page,
@@ -396,7 +397,10 @@ const ExerciseList = () => {
                   <SoftTypography variant="body2">
                     {t("ExerciseList:filter.persons.titleWithNumbers", {
                       minValue: exerciseFilter.minPersons,
-                      maxValue: exerciseFilter.maxPersons,
+                      maxValue:
+                        exerciseFilter.maxPersons === maxPersons
+                          ? `${maxPersons}+`
+                          : exerciseFilter.maxPersons,
                     })}
                   </SoftTypography>
                   <Slider
@@ -426,7 +430,7 @@ const ExerciseList = () => {
                 <Grid item xs={12} md={6}>
                   <SoftTypography variant="body2">
                     Duration (min): {exerciseFilter.minTime} -{" "}
-                    {exerciseFilter.maxTime}
+                    {exerciseFilter.maxTime === maxTime ? `${maxTime}+` : exerciseFilter.maxTime}
                   </SoftTypography>
                   <Slider
                     getAriaLabel={() => "Exercise Duration"}
@@ -452,7 +456,7 @@ const ExerciseList = () => {
                 <Grid item xs={12} md={6}>
                   <SoftTypography variant="body2">
                     Beaters: {exerciseFilter.minBeaters} -{" "}
-                    {exerciseFilter.maxBeaters}
+                    {exerciseFilter.maxBeaters === maxBeaters ? `${maxBeaters}+` : exerciseFilter.maxBeaters}
                   </SoftTypography>
                   <Slider
                     getAriaLabel={() => "Number of Beaters"}
@@ -481,7 +485,7 @@ const ExerciseList = () => {
                 <Grid item xs={12} md={6}>
                   <SoftTypography variant="body2">
                     Chasers: {exerciseFilter.minChasers} -{" "}
-                    {exerciseFilter.maxChasers}
+                    {exerciseFilter.maxChasers === maxChasers ? `${maxChasers}+` : exerciseFilter.maxChasers}
                   </SoftTypography>
                   <Slider
                     getAriaLabel={() => "Number of Chasers"}
