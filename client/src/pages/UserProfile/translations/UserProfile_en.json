@@ -17,5 +17,9 @@
   "editUser": "Edit/save Userdata",
   "favoriteExercisesList": "Favorite Exercises",
   "favoriteTacticboardsList": "Favorite Tacticboards",
+  "ownedExercisesList": "My Exercises",
+  "ownedTacticboardsList": "My Tacticboards",
+  "accessibleExercisesList": "Exercises (Edit Access)",
+  "accessibleTacticboardsList": "Tacticboards (Edit Access)",
   "deleteAccount": "Delete Account"
 }

@@ -1,6 +1,16 @@
 import { quadcoachApi } from "../api";
 import { TagType } from "../api/enum";
-import { User } from "../api/quadcoachApi/domain";
+import { User, Exercise, TacticBoard } from "../api/quadcoachApi/domain";
+
+export type UserExercisesResponse = {
+  owned: Exercise[];
+  accessible: Exercise[];
+};
+
+export type UserTacticboardsResponse = {
+  owned: TacticBoard[];
+  accessible: TacticBoard[];
+};
 
 
 export const userApiSlice = quadcoachApi.injectEndpoints({
@@ -44,6 +54,20 @@ export const userApiSlice = quadcoachApi.injectEndpoints({
       },
       invalidatesTags: () => [TagType.user],
     }),
+    getUserExercises: builder.query<UserExercisesResponse, string>({
+      query: (userId: string) => ({
+        url: `/api/user/${userId}/exercises`,
+        method: "get",
+      }),
+      providesTags: () => [TagType.exercise],
+    }),
+    getUserTacticboards: builder.query<UserTacticboardsResponse, string>({
+      query: (userId: string) => ({
+        url: `/api/user/${userId}/tacticboards`, 
+        method: "get",
+      }),
+      providesTags: () => [TagType.tacticboard],
+    }),
 
   }),
 });
@@ -53,4 +77,6 @@ export const {
   useDeleteUserMutation,
   useUpdateUserMutation,
   useAddUserMutation,
+  useGetUserExercisesQuery,
+  useGetUserTacticboardsQuery,
 } = userApiSlice;
