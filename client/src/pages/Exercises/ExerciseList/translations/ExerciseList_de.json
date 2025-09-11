@@ -10,15 +10,46 @@
   "filter": {
     "title": "Filter",
     "name": "Suche Übung",
+    "clear": "Filter zurücksetzen",
+    "sort":{
+      "name": "Sortieren",
+      "by_name": "Name",
+      "by_persons": "Personenanzahl",
+      "by_timeInMinutes": "Zeit in Minuten",
+      "by_createdAt": "Erstellungsdatum",
+      "by_updatedAt": "Aktualisierungsdatum"
+    },
     "persons": {
       "title": "Personenanzahl",
       "titleWithNumbers": "Personenanzahl: {{minValue}} - {{maxValue}}",
       "min": "min",
       "max": "max"
     },
+    "chasers": {
+      "title": "Chaseranzahl",
+      "titleWithNumbers": "Chaseranzahl: {{minValue}} - {{maxValue}}",
+      "min": "min",
+      "max": "max"
+    },
+    "beaters": {
+      "title": "Beateranzahl",
+      "titleWithNumbers": "Beateranzahl: {{minValue}} - {{maxValue}}",
+      "min": "min",
+      "max": "max"
+    },
+    "timeInMinutes": {
+      "title": "Zeit in Minuten",
+      "titleWithNumbers": "Zeit in Minuten: {{minValue}} - {{maxValue}}",
+      "min": "min",
+      "max": "max"
+    },
     "tags": {
       "title": "Stichwörter",
       "placeholder": "Suche Stichwort und drücke Enter..."
+    },
+    "materials": {
+      "title": "Materialien",
+      "placeholder": "Suche Material und drücke Enter..."
     },
     "apply": "Filter anwenden"
   },
