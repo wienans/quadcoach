@@ -4,6 +4,14 @@ export type {
   ExerciseWithOutId,
   ExercisePartialId,
 } from "./Exercise";
+export type {
+  default as PracticePlan,
+  PracticePlanWithOutId,
+  PracticePlanPartialId,
+  PracticeSection,
+  PlayerGroup,
+  ExerciseAssignment,
+} from "./PracticePlan";
 export type { default as TacticPage } from "./TacticPage";
 export type {
   default as TacticBoard,
