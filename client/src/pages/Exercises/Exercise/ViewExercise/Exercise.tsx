@@ -54,7 +54,7 @@ const Exercise = () => {
   const [isPrivileged, setIsPrivileged] = useState<boolean>(false);
   const { id: userId, roles: userRoles } = useAuth();
   const [isFavorite, setIsFavorite] = useState<boolean>(false);
-  
+
   const dispatch = useAppDispatch();
   const isEditMode = useAppSelector((state) => state.exercise.isEditMode);
 
@@ -271,24 +271,16 @@ const Exercise = () => {
                 context: isEditMode ? "editMode" : "viewMode",
               })}
             >
-              <span>
-                <ToggleButton
-                  disabled={isExerciseLoading || isUpdateExerciseLoading}
-                  value={isEditMode}
-                  size="small"
-                  selected={isEditMode}
-                  onChange={onToggleEditMode}
-                  sx={{
-                    mr: 1,
-                  }}
-                >
-                  {isEditMode ? (
-                    <SaveIcon color="primary" />
-                  ) : (
-                    <EditIcon color="primary" />
-                  )}
-                </ToggleButton>
-              </span>
+              <IconButton
+                disabled={isExerciseLoading || isUpdateExerciseLoading}
+                onClick={onToggleEditMode}
+              >
+                {isEditMode ? (
+                  <SaveIcon color="primary" />
+                ) : (
+                  <EditIcon color="primary" />
+                )}
+              </IconButton>
             </Tooltip>
           )}
           {isPrivileged && (
