@@ -33,6 +33,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import SaveIcon from "@mui/icons-material/Save";
 import DeleteIcon from "@mui/icons-material/Delete";
 import FavoriteIcon from "@mui/icons-material/Favorite";
+import AddIcon from "@mui/icons-material/Add";
 import ExerciseBlock from "./ExerciseBlock";
 import ExerciseInfo from "./ExerciseInfo";
 import { useAuth } from "../../../../store/hooks";
@@ -43,12 +44,15 @@ import {
   useRemoveFavoriteExerciseMutation,
 } from "../../../../api/quadcoachApi/favoriteApi";
 
-import { ExerciseWithOutId, ExercisePartialId } from "../../../../api/quadcoachApi/domain";
+import { ExerciseWithOutId, ExercisePartialId, Block } from "../../../../api/quadcoachApi/domain";
 import {
   FormikProvider,
   useFormik,
+  FieldArray,
+  FieldArrayRenderProps,
 } from "formik";
 import * as Yup from "yup";
+import { SoftButton, SoftBox } from "../../../../components";
 
 const Exercise = () => {
   const { t } = useTranslation("Exercise");
@@ -63,6 +67,16 @@ const Exercise = () => {
   const theme = useTheme();
 
   const isUpMd = useMediaQuery((theme: Theme) => theme.breakpoints.up("md"));
+
+  // Helper function to create a new empty block
+  const createEmptyBlock = (): Block => ({
+    _id: `temp_${Date.now()}_${Math.random()}`, // Temporary ID for new blocks
+    description: "",
+    video_url: "",
+    coaching_points: "",
+    time_min: 0,
+    tactics_board: undefined,
+  });
 
   const {
     data: exercise,
@@ -406,6 +420,28 @@ const Exercise = () => {
               blockIndex={index}
             />
           ))}
+          
+          {/* Add Block Button - only in edit mode */}
+          {isEditMode && (
+            <FieldArray
+              name="description_blocks"
+              render={(arrayHelpers: FieldArrayRenderProps) => (
+                <SoftBox display="flex" justifyContent="center" mt={3} mb={3}>
+                  <SoftButton
+                    variant="outlined"
+                    color="primary"
+                    startIcon={<AddIcon />}
+                    onClick={() => {
+                      arrayHelpers.push(createEmptyBlock());
+                    }}
+                  >
+                    {t("Exercise:addBlock")}
+                  </SoftButton>
+                </SoftBox>
+              )}
+            />
+          )}
+          
           <Footer />
         </FormikProvider>
       )}
