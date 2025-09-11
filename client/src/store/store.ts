@@ -3,7 +3,6 @@ import { LayoutReducer } from "../components/Layout";
 import { quadcoachApi } from "../api";
 import { TacticBoardReducer } from "../pages/TacticBoard";
 import authReducer from "../api/auth/authSlice";
-import { ExerciseReducer } from "../pages/Exercises/Exercise";
 
 const middleware = [quadcoachApi.middleware];
 
@@ -11,7 +10,6 @@ export const store = configureStore({
   reducer: {
     layout: LayoutReducer,
     tacticBoard: TacticBoardReducer,
-    exercise: ExerciseReducer,
     [quadcoachApi.reducerPath]: quadcoachApi.reducer,
     auth: authReducer,
   },

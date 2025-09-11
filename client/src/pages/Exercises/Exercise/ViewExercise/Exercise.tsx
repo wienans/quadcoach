@@ -11,7 +11,6 @@ import {
   Tooltip,
   Theme,
   BottomNavigationAction,
-  ToggleButton,
 } from "@mui/material";
 import { SoftBox } from "../../../../components";
 import {
@@ -43,8 +42,7 @@ import {
   useLazyGetFavoriteExercisesQuery,
   useRemoveFavoriteExerciseMutation,
 } from "../../../../api/quadcoachApi/favoriteApi";
-import { useAppSelector, useAppDispatch } from "../../../../store/hooks";
-import { setIsEditMode } from "../exerciseSlice";
+
 import { ExerciseWithOutId } from "../../../../api/quadcoachApi/domain";
 
 const Exercise = () => {
@@ -55,8 +53,7 @@ const Exercise = () => {
   const { id: userId, roles: userRoles } = useAuth();
   const [isFavorite, setIsFavorite] = useState<boolean>(false);
 
-  const dispatch = useAppDispatch();
-  const isEditMode = useAppSelector((state) => state.exercise.isEditMode);
+  const [isEditMode, setIsEditMode] = useState<boolean>(false);
 
   const theme = useTheme();
 
@@ -167,15 +164,15 @@ const Exercise = () => {
         });
       }
     } else {
-      dispatch(setIsEditMode(!isEditMode));
+      setIsEditMode(!isEditMode);
     }
   };
 
   useEffect(() => {
     if (isUpdateExerciseSuccess) {
-      dispatch(setIsEditMode(false));
+      setIsEditMode(false);
     }
-  }, [isUpdateExerciseSuccess, dispatch]);
+  }, [isUpdateExerciseSuccess]);
 
   const [
     deleteExercise,
