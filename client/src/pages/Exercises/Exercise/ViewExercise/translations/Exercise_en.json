@@ -7,6 +7,7 @@
   "updateExercise_editMode": "Save exercise",
   "updateExercise_viewMode": "Edit exercise",
   "editMode": "Edit Mode",
+  "errorUpdatingExercise": "An error occurred while updating exercise.",
   "deleteExercise": "Delete exercise",
   "errorDeletingExercise": "An error occurred while deleting exercise.",
   "errorLoadingRelatedExercises": "An error occurred while loading related exercises.",

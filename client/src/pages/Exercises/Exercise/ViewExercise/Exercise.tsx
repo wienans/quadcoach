@@ -18,6 +18,7 @@ import {
   useDeleteExerciseMutation,
   useGetExerciseQuery,
   useGetRelatedExercisesQuery,
+  useUpdateExerciseMutation,
 } from "../../../exerciseApi";
 import { useTranslation } from "react-i18next";
 import {
@@ -44,6 +45,7 @@ import {
 } from "../../../../api/quadcoachApi/favoriteApi";
 import { useAppSelector, useAppDispatch } from "../../../../store/hooks";
 import { setIsEditMode } from "../exerciseSlice";
+import { ExerciseWithOutId } from "../../../../api/quadcoachApi/domain";
 
 const Exercise = () => {
   const { t } = useTranslation("Exercise");
@@ -129,10 +131,51 @@ const Exercise = () => {
     }
   }, [exercise, userId, userRoles]);
 
+  // Add update exercise mutation
+  const [
+    updateExercise,
+    {
+      isError: isUpdateExerciseError,
+      isLoading: isUpdateExerciseLoading,
+      isSuccess: isUpdateExerciseSuccess,
+    },
+  ] = useUpdateExerciseMutation();
+
   // Edit mode toggle functionality
   const onToggleEditMode = () => {
-    dispatch(setIsEditMode(!isEditMode));
+    if (isPrivileged && isEditMode) {
+      // When exiting edit mode, save the current exercise as-is
+      // This is a placeholder for now - in a full implementation,
+      // child components would provide modified data
+      if (exercise) {
+        const exerciseUpdate: ExerciseWithOutId = {
+          name: exercise.name,
+          persons: exercise.persons,
+          time_min: exercise.time_min,
+          beaters: exercise.beaters,
+          chasers: exercise.chasers,
+          materials: exercise.materials,
+          tags: exercise.tags,
+          description_blocks: exercise.description_blocks,
+          related_to: exercise.related_to,
+          creator: exercise.creator,
+          user: exercise.user,
+        };
+        updateExercise({
+          _id: exercise._id,
+          ...exerciseUpdate,
+        });
+      }
+    } else {
+      dispatch(setIsEditMode(!isEditMode));
+    }
   };
+
+  useEffect(() => {
+    if (isUpdateExerciseSuccess) {
+      dispatch(setIsEditMode(false));
+    }
+  }, [isUpdateExerciseSuccess, dispatch]);
 
   const [
     deleteExercise,
@@ -230,7 +273,7 @@ const Exercise = () => {
             >
               <span>
                 <ToggleButton
-                  disabled={isExerciseLoading}
+                  disabled={isExerciseLoading || isUpdateExerciseLoading}
                   value={isEditMode}
                   size="small"
                   selected={isEditMode}
@@ -298,7 +341,7 @@ const Exercise = () => {
               <BottomNavigationAction
                 icon={isEditMode ? <SaveIcon /> : <EditIcon />}
                 onClick={onToggleEditMode}
-                disabled={isExerciseLoading}
+                disabled={isExerciseLoading || isUpdateExerciseLoading}
               />
             </Tooltip>
           ),
@@ -319,6 +362,11 @@ const Exercise = () => {
           {isDeleteExerciseError && (
             <Alert color="error" sx={{ mt: 5, mb: 3 }}>
               {t("Exercise:errorDeletingExercise")}
+            </Alert>
+          )}
+          {isUpdateExerciseError && (
+            <Alert color="error" sx={{ mt: 5, mb: 3 }}>
+              {t("Exercise:errorUpdatingExercise")}
             </Alert>
           )}
           {isRelatedExercisesError && (

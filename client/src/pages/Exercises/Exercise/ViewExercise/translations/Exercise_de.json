@@ -7,6 +7,7 @@
   "updateExercise_editMode": "Übung speichern",
   "updateExercise_viewMode": "Übung bearbeiten",
   "editMode": "Bearbeitungsmodus",
+  "errorUpdatingExercise": "Es ist ein Fehler beim Aktualisieren der Übung aufgetreten.",
   "deleteExercise": "Übung löschen",
   "errorDeletingExercise": "Es ist ein Fehler beim Löschen der Übung aufgetreten.",
   "errorLoadingRelatedExercises": "Es ist ein Fehler beim Laden der zugehörigen Übungen aufgetreten.",
