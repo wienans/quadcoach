@@ -1,6 +1,8 @@
-import i18n from "i18next";
-import en from "./PracticePlanner_en.json";
+import i18next from "i18next";
 import de from "./PracticePlanner_de.json";
+import en from "./PracticePlanner_en.json";
 
-i18n.addResourceBundle("en", "practicePlanner", en);
-i18n.addResourceBundle("de", "practicePlanner", de);
+export const namespace = "practicePlanner";
+
+i18next.addResourceBundle("de", namespace, de, true, true);
+i18next.addResourceBundle("en", namespace, en, true, true);
