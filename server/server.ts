@@ -48,6 +48,12 @@ app.use(cookieParser());
 app.use(cors(corsOptions));
 app.use(errorHandler);
 
+console.log(dbURI);
+console.log(MONGO_USER);
+console.log(MONGO_PASSWORD);
+console.log(MONGO_DB);
+console.log(MONGO_HOST);
+
 mongoose
   .connect(dbURI)
   .then((result) => {
@@ -57,6 +63,7 @@ mongoose
       });
   })
   .catch((err) => {
+    console.log(dbURI);
     console.log(err);
     logEvents(
       `${err.no}: ${err.code}\t${err.syscall}\t${err.hostname}`,
