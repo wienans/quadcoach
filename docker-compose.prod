@@ -8,7 +8,6 @@ services:
       - MONGO_USER=${MONGO_USER}
       - MONGO_PASSWORD=${MONGO_PASSWORD}
       - MONGO_DB=${MONGO_DB}
-      - MONGO_HOST=mongodb-prod
       - ACCESS_TOKEN_SECRET=${ACCESS_TOKEN_SECRET}
       - REFRESH_TOKEN_SECRET=${REFRESH_TOKEN_SECRET}
       - EMAIL_USER=${EMAIL_USER}
@@ -27,8 +26,8 @@ services:
       - mern-network
     restart: always
     depends_on:
-      - mongodb-prod
-  mongodb-prod:
+      - mongodb
+  mongodb:
     image: mongo:latest
     container_name: quadcoach-mongodb
     environment:

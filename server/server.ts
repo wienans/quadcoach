@@ -35,7 +35,7 @@ console.warn(process.env.MONGO_DB);
 const MONGO_USER = encodeURIComponent(process.env.MONGO_USER || "");
 const MONGO_PASSWORD = encodeURIComponent(process.env.MONGO_PASSWORD || "");
 const MONGO_DB = process.env.MONGO_DB;
-const MONGO_HOST = process.env.MONGO_HOST || "quadcoach-mongodb";
+const MONGO_HOST = process.env.MONGO_HOST || "mongodb";
 const dbURI = `mongodb://${MONGO_USER}:${MONGO_PASSWORD}@${MONGO_HOST}:27017/${MONGO_DB}?retryWrites=true&w=majority`;
 
 app.use(express.static("dist"));

@@ -38,7 +38,6 @@ services:
     depends_on:
       - mongodb
   mongodb:
-
     image: mongo:latest
     container_name: quadcoach-mongodb
     env_file:
