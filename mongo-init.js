@@ -1,15 +1,15 @@
 db.getSiblingDB('admin').auth(
-    process.env.MONGO_INITDB_ROOT_USERNAME,
-    process.env.MONGO_INITDB_ROOT_PASSWORD
+    "root",
+    "root"
 );
 
 db.createUser({
-    user: process.env.MONGO_USER,
-    pwd: process.env.MONGO_PASSWORD,
+    user: "quadcoach",
+    pwd: "quadcoach",
     roles: [
         {
             role: "readWrite",
-            db: process.env.MONGO_DB
+            db: "quadcoach"
         }
     ],
     mechanisms: ["SCRAM-SHA-1", "SCRAM-SHA-256"]
