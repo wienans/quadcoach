@@ -11,3 +11,11 @@ export type {
   TacticBoardPartialId,
 } from "./TacticBoard";
 export type { default as User, UserWithOutId, UserPartialId } from "./User";
+export type {
+  default as PracticePlan,
+  PracticePlanWithoutId,
+  PracticePlanPartialId,
+  PracticeGroup,
+  SelectedExercise,
+  SelectedBlock,
+} from "./PracticePlan";

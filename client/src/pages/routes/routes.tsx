@@ -123,6 +123,18 @@ const routes = [
         ],
       },
       {
+        path: "/practice-planner",
+        handle: {
+          type: RouteHandleType.practicePlanner,
+        },
+        async lazy() {
+          const PracticePlannerRoot = (await import("../PracticePlanner")).default;
+          return {
+            element: <PracticePlannerRoot />,
+          };
+        },
+      },
+      {
         path: "/drafting-board",
         handle: {
           type: RouteHandleType.draftingBoard,
