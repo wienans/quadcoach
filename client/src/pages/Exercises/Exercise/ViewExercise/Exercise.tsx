@@ -12,11 +12,11 @@ import {
   Theme,
   BottomNavigationAction,
 } from "@mui/material";
-import { SoftBox } from "../../../../components";
 import {
   useDeleteExerciseMutation,
   useGetExerciseQuery,
   useGetRelatedExercisesQuery,
+  useUpdateExerciseMutation,
 } from "../../../exerciseApi";
 import { useTranslation } from "react-i18next";
 import {
@@ -29,8 +29,10 @@ import {
   getExerciseType,
 } from "../../../../helpers/exerciseHelpers";
 import EditIcon from "@mui/icons-material/Edit";
+import SaveIcon from "@mui/icons-material/Save";
 import DeleteIcon from "@mui/icons-material/Delete";
 import FavoriteIcon from "@mui/icons-material/Favorite";
+import AddIcon from "@mui/icons-material/Add";
 import ExerciseBlock from "./ExerciseBlock";
 import ExerciseInfo from "./ExerciseInfo";
 import { useAuth } from "../../../../store/hooks";
@@ -41,6 +43,16 @@ import {
   useRemoveFavoriteExerciseMutation,
 } from "../../../../api/quadcoachApi/favoriteApi";
 
+import { ExerciseWithOutId, ExercisePartialId, Block } from "../../../../api/quadcoachApi/domain";
+import {
+  FormikProvider,
+  useFormik,
+  FieldArray,
+  FieldArrayRenderProps,
+} from "formik";
+import * as Yup from "yup";
+import { SoftButton, SoftBox } from "../../../../components";
+
 const Exercise = () => {
   const { t } = useTranslation("Exercise");
   const { id: exerciseId } = useParams();
@@ -49,9 +61,21 @@ const Exercise = () => {
   const { id: userId, roles: userRoles } = useAuth();
   const [isFavorite, setIsFavorite] = useState<boolean>(false);
 
+  const [isEditMode, setIsEditMode] = useState<boolean>(false);
+
   const theme = useTheme();
 
   const isUpMd = useMediaQuery((theme: Theme) => theme.breakpoints.up("md"));
+
+  // Helper function to create a new empty block
+  const createEmptyBlock = (): Block => ({
+    _id: `temp_${Date.now()}_${Math.random()}`, // Temporary ID for new blocks
+    description: "",
+    video_url: "",
+    coaching_points: "",
+    time_min: 0,
+    tactics_board: undefined,
+  });
 
   const {
     data: exercise,
@@ -122,9 +146,71 @@ const Exercise = () => {
     }
   }, [exercise, userId, userRoles]);
 
-  const update = async () => {
-    navigate(`/exercises/${exerciseId}/update`);
+  // Add update exercise mutation
+  const [
+    updateExercise,
+    {
+      isError: isUpdateExerciseError,
+      isLoading: isUpdateExerciseLoading,
+      isSuccess: isUpdateExerciseSuccess,
+    },
+  ] = useUpdateExerciseMutation();
+
+  // Setup formik form for editing
+  const formik = useFormik<ExercisePartialId>({
+    // enableReinitialize : use this flag when initial values needs to be changed
+    enableReinitialize: true,
+    validateOnChange: false,
+    initialValues: {
+      name: exercise?.name ?? "",
+      persons: exercise?.persons ?? 0,
+      time_min: exercise?.time_min ?? 0,
+      beaters: exercise?.beaters ?? 0,
+      chasers: exercise?.chasers ?? 0,
+      materials: exercise?.materials ?? [],
+      tags: exercise?.tags ?? [],
+      description_blocks: exercise?.description_blocks ?? [],
+      related_to: exercise?.related_to ?? [],
+      creator: exercise?.creator ?? "",
+      user: exercise?.user ?? "",
+    },
+    validationSchema: Yup.object({
+      name: Yup.string().required("Exercise:validation.name.required"),
+      persons: Yup.number().min(0, "Exercise:validation.persons.min"),
+      time_min: Yup.number().min(0, "Exercise:validation.time_min.min"),
+      beaters: Yup.number().min(0, "Exercise:validation.beaters.min"),
+      chasers: Yup.number().min(0, "Exercise:validation.chasers.min"),
+      materials: Yup.array().of(Yup.string()),
+      tags: Yup.array().of(Yup.string()),
+      description_blocks: Yup.array(),
+      related_to: Yup.array().of(Yup.string()),
+    }),
+    onSubmit: (values) => {
+      if (exerciseId) {
+        const exerciseUpdate = {
+          _id: exerciseId,
+          ...values,
+        };
+        updateExercise(exerciseUpdate);
+      }
+    },
+  });
+
+  // Edit mode toggle functionality
+  const onToggleEditMode = () => {
+    if (isPrivileged && isEditMode && formik.isValid) {
+      // When exiting edit mode, save the form
+      formik.submitForm();
+    } else {
+      setIsEditMode(!isEditMode);
+    }
   };
+
+  useEffect(() => {
+    if (isUpdateExerciseSuccess) {
+      setIsEditMode(false);
+    }
+  }, [isUpdateExerciseSuccess]);
 
   const [
     deleteExercise,
@@ -215,9 +301,20 @@ const Exercise = () => {
             </Tooltip>
           )}
           {isPrivileged && (
-            <Tooltip title={t("Exercise:updateExercise")}>
-              <IconButton onClick={update} color="primary">
-                <EditIcon />
+            <Tooltip
+              title={t("Exercise:updateExercise", {
+                context: isEditMode ? "editMode" : "viewMode",
+              })}
+            >
+              <IconButton
+                disabled={isExerciseLoading || isUpdateExerciseLoading}
+                onClick={onToggleEditMode}
+              >
+                {isEditMode ? (
+                  <SaveIcon color="primary" />
+                ) : (
+                  <EditIcon color="primary" />
+                )}
               </IconButton>
             </Tooltip>
           )}
@@ -262,8 +359,17 @@ const Exercise = () => {
             </Tooltip>
           ),
           isPrivileged && (
-            <Tooltip key="edit" title={t("Exercise:updateExercise")}>
-              <BottomNavigationAction icon={<EditIcon />} onClick={update} />
+            <Tooltip
+              key="edit"
+              title={t("Exercise:updateExercise", {
+                context: isEditMode ? "editMode" : "viewMode",
+              })}
+            >
+              <BottomNavigationAction
+                icon={isEditMode ? <SaveIcon /> : <EditIcon />}
+                onClick={onToggleEditMode}
+                disabled={isExerciseLoading || isUpdateExerciseLoading}
+              />
             </Tooltip>
           ),
           isPrivileged && (
@@ -279,10 +385,15 @@ const Exercise = () => {
       }
     >
       {() => (
-        <>
+        <FormikProvider value={formik}>
           {isDeleteExerciseError && (
             <Alert color="error" sx={{ mt: 5, mb: 3 }}>
               {t("Exercise:errorDeletingExercise")}
+            </Alert>
+          )}
+          {isUpdateExerciseError && (
+            <Alert color="error" sx={{ mt: 5, mb: 3 }}>
+              {t("Exercise:errorUpdatingExercise")}
             </Alert>
           )}
           {isRelatedExercisesError && (
@@ -295,16 +406,43 @@ const Exercise = () => {
             handleOpenExerciseClick={handleOpenExerciseClick}
             isRelatedExercisesLoading={isRelatedExercisesLoading}
             relatedExercises={relatedExercises}
+            isEditMode={isEditMode}
+            formik={formik}
           />
-          {exercise.description_blocks?.map((block, index) => (
+          {formik.values.description_blocks?.map((block, index) => (
             <ExerciseBlock
               block={block}
               blockNumber={index + 1}
               key={block._id}
+              isEditMode={isEditMode}
+              formik={formik}
+              blockIndex={index}
             />
           ))}
+          
+          {/* Add Block Button - only in edit mode */}
+          {isEditMode && (
+            <FieldArray
+              name="description_blocks"
+              render={(arrayHelpers: FieldArrayRenderProps) => (
+                <SoftBox display="flex" justifyContent="center" mt={3} mb={3}>
+                  <SoftButton
+                    variant="outlined"
+                    color="primary"
+                    startIcon={<AddIcon />}
+                    onClick={() => {
+                      arrayHelpers.push(createEmptyBlock());
+                    }}
+                  >
+                    {t("Exercise:addBlock")}
+                  </SoftButton>
+                </SoftBox>
+              )}
+            />
+          )}
+          
           <Footer />
-        </>
+        </FormikProvider>
       )}
     </ProfileLayout>
   );
