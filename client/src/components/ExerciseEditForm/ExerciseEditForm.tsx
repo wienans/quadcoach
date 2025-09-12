@@ -25,11 +25,7 @@ import { useTranslation } from "react-i18next";
 import TacticboardAutocomplete from "./TacticboardAutocomplete";
 import { useAuth } from "../../store/hooks";
 
-import MDEditor from "@uiw/react-md-editor";
-// No import is required in the WebPack.
-import "@uiw/react-md-editor/markdown-editor.css";
-// No import is required in the WebPack.
-import "@uiw/react-markdown-preview/markdown.css";
+import LazyMDEditor from "../LazyMDEditor";
 import { TacticBoardHeader } from "../../api/quadcoachApi/domain/TacticBoard";
 
 const exerciseShape = shape({
@@ -708,7 +704,7 @@ const ExerciseEditForm = ({
                                       "ExerciseEditForm:block.description.label",
                                     )}
                                   </SoftTypography>
-                                  <MDEditor
+                                  <LazyMDEditor
                                     height={300}
                                     value={
                                       formik.values.description_blocks[index]
@@ -744,7 +740,7 @@ const ExerciseEditForm = ({
                                       "ExerciseEditForm:block.coachingPoints.label",
                                     )}
                                   </SoftTypography>
-                                  <MDEditor
+                                  <LazyMDEditor
                                     height={300}
                                     value={
                                       formik.values.description_blocks[index]

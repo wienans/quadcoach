@@ -10,12 +10,71 @@ export default defineConfig({
   },
   plugins: [react()],
   build: {
+    // Set a higher chunk size warning limit since we have properly chunked large dependencies
+    chunkSizeWarningLimit: 1000, // 1MB limit for chunks
     rollupOptions: {
       output: {
         manualChunks: {
-          markdown: ["react-markdown", "remark-gfm"],
+          // Core React libraries
           react: ["react", "react-dom"],
-          mui: ["@mui/material", "@mui/icons-material"],
+          
+          // Material-UI split into multiple chunks for better caching
+          "mui-core": ["@mui/material"],
+          "mui-icons": ["@mui/icons-material"],
+          "mui-x": ["@mui/x-data-grid"],
+          
+          // Markdown editor and related dependencies
+          markdown: [
+            "react-markdown", 
+            "remark-gfm",
+            "@uiw/react-md-editor"
+          ],
+          
+          // Fabric.js and canvas-related dependencies
+          fabric: ["fabric", "fabricjs-react"],
+          
+          // Media player dependencies
+          "media-player": [
+            "react-player",
+            "react-social-media-embed"
+          ],
+          
+          // Redux and state management
+          redux: [
+            "@reduxjs/toolkit",
+            "react-redux",
+            "redux-logger"
+          ],
+          
+          // Router
+          router: ["react-router-dom"],
+          
+          // Form libraries
+          forms: ["formik", "yup"],
+          
+          // Utility libraries
+          utils: [
+            "lodash",
+            "chroma-js",
+            "uuid",
+            "axios",
+            "jwt-decode"
+          ],
+          
+          // Internationalization
+          i18n: [
+            "i18next",
+            "react-i18next",
+            "i18next-browser-languagedetector"
+          ],
+          
+          // Color and animation libraries
+          visual: [
+            "@emotion/react",
+            "@emotion/styled",
+            "@react-spring/web",
+            "react-color"
+          ],
         },
       },
     },
