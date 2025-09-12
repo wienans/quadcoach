@@ -30,8 +30,6 @@ const app = express();
 app.set("trust proxy", 1);
 
 // Connect to Mongo DB
-console.warn(process.env.MONGO_USER);
-console.warn(process.env.MONGO_DB);
 const MONGO_USER = encodeURIComponent(process.env.MONGO_USER || "");
 const MONGO_PASSWORD = encodeURIComponent(process.env.MONGO_PASSWORD || "");
 const MONGO_DB = process.env.MONGO_DB;
