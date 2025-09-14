@@ -50,11 +50,7 @@ import { useTranslation } from "react-i18next";
 import { lazy, Suspense, useEffect, useState } from "react";
 import { useAuth } from "../../store/hooks";
 import TacticBoardInProfileWrapper from "./TacticBoardInProfile";
-import MDEditor from "@uiw/react-md-editor";
-// No import is required in the WebPack.
-import "@uiw/react-md-editor/markdown-editor.css";
-// No import is required in the WebPack.
-import "@uiw/react-markdown-preview/markdown.css";
+import LazyMDEditor from "../../components/LazyMDEditor";
 import {
   FieldArray,
   FieldArrayRenderProps,
@@ -678,7 +674,7 @@ const TacticBoardProfile = () => {
                     {t("TacticBoardProfile:description")}
                   </AccordionSummary>
                   <AccordionDetails>
-                    <MDEditor
+                    <LazyMDEditor
                       height={300}
                       value={formik.values.description}
                       onChange={(value) => {
@@ -709,7 +705,7 @@ const TacticBoardProfile = () => {
                     {t("TacticBoardProfile:coaching_points")}
                   </AccordionSummary>
                   <AccordionDetails>
-                    <MDEditor
+                    <LazyMDEditor
                       height={300}
                       value={formik.values.coaching_points}
                       onChange={(value) => {

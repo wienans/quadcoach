@@ -10,10 +10,12 @@ export default defineConfig({
   },
   plugins: [react()],
   build: {
+    // Set a higher chunk size warning limit since we have properly chunked large dependencies
+    chunkSizeWarningLimit: 1000, // 1MB limit for chunks
     rollupOptions: {
       output: {
         manualChunks: {
-          markdown: ["react-markdown", "remark-gfm"],
+          markdown: ["react-markdown", "remark-gfm", "@uiw/react-md-editor"],
           react: ["react", "react-dom"],
           mui: ["@mui/material", "@mui/icons-material"],
         },
