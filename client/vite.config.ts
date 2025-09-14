@@ -17,63 +17,20 @@ export default defineConfig({
         manualChunks: {
           // Core React libraries
           react: ["react", "react-dom"],
-          
-          // Material-UI split into multiple chunks for better caching
-          "mui-core": ["@mui/material"],
+          "mui-core": ["@mui/material", "@emotion/react", "@emotion/styled"],
           "mui-icons": ["@mui/icons-material"],
           "mui-x": ["@mui/x-data-grid"],
-          
-          // Markdown editor and related dependencies
-          markdown: [
-            "react-markdown", 
-            "remark-gfm",
-            "@uiw/react-md-editor"
-          ],
-          
-          // Fabric.js and canvas-related dependencies
+          markdown: ["react-markdown", "remark-gfm", "@uiw/react-md-editor"],
           fabric: ["fabric", "fabricjs-react"],
-          
-          // Media player dependencies
-          "media-player": [
-            "react-player",
-            "react-social-media-embed"
-          ],
-          
-          // Redux and state management
-          redux: [
-            "@reduxjs/toolkit",
-            "react-redux",
-            "redux-logger"
-          ],
-          
-          // Router
+          "media-player": ["react-player", "react-social-media-embed"],
+          redux: ["@reduxjs/toolkit", "react-redux", "redux-logger"],
           router: ["react-router-dom"],
-          
-          // Form libraries
           forms: ["formik", "yup"],
-          
-          // Utility libraries
-          utils: [
-            "lodash",
-            "chroma-js",
-            "uuid",
-            "axios",
-            "jwt-decode"
-          ],
-          
-          // Internationalization
+          utils: ["lodash", "chroma-js", "uuid", "axios", "jwt-decode"],
           i18n: [
             "i18next",
             "react-i18next",
-            "i18next-browser-languagedetector"
-          ],
-          
-          // Color and animation libraries
-          visual: [
-            "@emotion/react",
-            "@emotion/styled",
-            "@react-spring/web",
-            "react-color"
+            "i18next-browser-languagedetector",
           ],
         },
       },
