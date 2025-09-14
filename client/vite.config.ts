@@ -14,24 +14,15 @@ export default defineConfig({
     chunkSizeWarningLimit: 1000, // 1MB limit for chunks
     rollupOptions: {
       output: {
-        manualChunks: {
-          // Core React libraries
-          react: ["react", "react-dom"],
-          "mui-core": ["@mui/material", "@emotion/react", "@emotion/styled"],
-          "mui-icons": ["@mui/icons-material"],
-          "mui-x": ["@mui/x-data-grid"],
-          markdown: ["react-markdown", "remark-gfm", "@uiw/react-md-editor"],
-          fabric: ["fabric", "fabricjs-react"],
-          "media-player": ["react-player", "react-social-media-embed"],
-          redux: ["@reduxjs/toolkit", "react-redux", "redux-logger"],
-          router: ["react-router-dom"],
-          forms: ["formik", "yup"],
-          utils: ["lodash", "chroma-js", "uuid", "axios", "jwt-decode"],
-          i18n: [
-            "i18next",
-            "react-i18next",
-            "i18next-browser-languagedetector",
-          ],
+        manualChunks(id) {
+          if (id.includes("@mui/material") || id.includes("@emotion/"))
+            return "mui-core";
+          if (id.includes("react-router-dom")) return "router";
+          if (id.includes("@reduxjs/toolkit") || id.includes("react-redux"))
+            return "redux";
+          if (id.includes("react-markdown") || id.includes("remark-gfm"))
+            return "markdown";
+          // fall back to default for others
         },
       },
     },
