@@ -31,7 +31,8 @@
   },
   "realtedToExercises": {
     "title": "Related exercises",
-    "none": "No related exercises available"
+    "none": "No related exercises available",
+    "add": "Add Related Exercises"
   },
   "block": {
     "title": "Block {{blockNumber}}",

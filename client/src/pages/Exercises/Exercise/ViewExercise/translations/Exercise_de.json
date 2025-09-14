@@ -31,7 +31,8 @@
   },
   "realtedToExercises": {
     "title": "Zugehörige Übungen:",
-    "none": "Keine zugehörigen Übungen verfügbar"
+    "none": "Keine zugehörigen Übungen verfügbar",
+    "add": "Zugehörige Übungen hinzufügen"
   },
   "block": {
     "title": "Block {{blockNumber}}",

@@ -12,6 +12,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import UniversalMediaPlayer from "../../../../../components/UniversalMediaPlayer";
 import TacticBoardInBlockWrapper from "./TacticBoardInBlock";
 import { lazy, Suspense } from "react";
+import TacticboardAutocomplete from "../../../../../components/ExerciseEditForm/TacticboardAutocomplete/TacticboardAutocomplete";
 import { FormikProps, FieldArray, FieldArrayRenderProps } from "formik";
 import { ExercisePartialId } from "../../../../../api/quadcoachApi/domain";
 import { SoftInput, SoftButton } from "../../../../../components";
@@ -167,18 +168,23 @@ const ExerciseBlock = ({
         </Accordion>
       )}
 
-      {/* Tacticboard Edit Mode - TODO: Add tacticboard selector */}
+      {/* Tacticboard Edit Mode */}
       {isEditMode && (
         <Accordion defaultExpanded>
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
             Tacticboard
           </AccordionSummary>
           <AccordionDetails>
-            {/* TODO: Implement tacticboard selector */}
-            <p>Tacticboard selection will be implemented in a future update</p>
+            <TacticboardAutocomplete
+              value={currentBlock.tactics_board}
+              onChange={(event, value) => {
+                formik.setFieldValue(`description_blocks.${blockIndex}.tactics_board`, value?._id || undefined);
+              }}
+              onBlur={() => {}}
+            />
             {Boolean(currentBlock.tactics_board) && (
               <div style={{ marginTop: 16 }}>
-                <TacticBoardInBlockWrapper block={block} />
+                <TacticBoardInBlockWrapper block={currentBlock} />
               </div>
             )}
           </AccordionDetails>
