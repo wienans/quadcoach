@@ -14,15 +14,10 @@ export default defineConfig({
     chunkSizeWarningLimit: 1000, // 1MB limit for chunks
     rollupOptions: {
       output: {
-        manualChunks(id) {
-          if (id.includes("@mui/material") || id.includes("@emotion/"))
-            return "mui-core";
-          if (id.includes("react-router-dom")) return "router";
-          if (id.includes("@reduxjs/toolkit") || id.includes("react-redux"))
-            return "redux";
-          if (id.includes("react-markdown") || id.includes("remark-gfm"))
-            return "markdown";
-          // fall back to default for others
+        manualChunks: {
+          markdown: ["react-markdown", "remark-gfm", "@uiw/react-md-editor"],
+          react: ["react", "react-dom"],
+          mui: ["@mui/material", "@mui/icons-material"],
         },
       },
     },
