@@ -16,6 +16,8 @@ export enum BallType {
   Volleyball = "Volleyball",
   Dodgeball = "Dodgeball",
   FlagRunner = "FlagRunner",
+  Bludger = "Bludger",
+  Quaffle = "Quaffle",
 }
 
 export enum AccessoryType {

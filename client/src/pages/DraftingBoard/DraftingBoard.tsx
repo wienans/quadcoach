@@ -13,7 +13,7 @@ import TacticBoardItemsDrawerNav from "../TacticBoard/TacticBoardItemsDrawerNav"
 import { useAppSelector, useAppDispatch } from "../../store/hooks";
 import DraftingBoardTopItemsMenu from "./DraftingBoardTopItemsMenu";
 import { setIsEditMode, toggleTacticBoardItemsDrawerOpen, setTacticBoardItemsDrawerClosing } from "../TacticBoard/tacticBoardSlice";
-import { PersonType } from "../../contexts/tacticBoard/TacticBoardFabricJsContext/types";
+import { PersonType, BallType } from "../../contexts/tacticBoard/TacticBoardFabricJsContext/types";
 import { v4 as uuidv4 } from "uuid";
 import {
   createExtendedCircle,
@@ -32,7 +32,7 @@ const teamBInfo = {
   color: "#dd2d2d",
 };
 
-// Helper function to get player stroke color based on person type
+//  Helper function to get player stroke color based on person type
 const getFabricPersonColor = (personType: PersonType): string | undefined => {
   switch (personType) {
     case PersonType.Beater:
@@ -43,6 +43,22 @@ const getFabricPersonColor = (personType: PersonType): string | undefined => {
       return "#03fc35";
     case PersonType.Seeker:
       return "#fcfc00";
+  }
+};
+
+// Helper function to get ball color based on ball type
+const getBallTypeColor = (ballType: BallType): string => {
+  switch (ballType) {
+    case BallType.Dodgeball:
+      return "#808080";
+    case BallType.Volleyball:
+      return "#ffffff";
+    case BallType.FlagRunner:
+      return "#FFD700";
+    case BallType.Bludger:
+      return "#8B4513"; // Brown color for bludgers
+    case BallType.Quaffle:
+      return "#DC143C"; // Crimson red for quaffle
   }
 };
 
@@ -162,6 +178,21 @@ const DraftingBoardContent = (): JSX.Element => {
     addObject(group);
   }, [addObject]);
 
+  // Helper function to create a ball at specific position
+  const createBall = useCallback((ballType: BallType, left: number, top: number) => {
+    const circle = createExtendedCircle({
+      radius: 10,
+      left,
+      top,
+      stroke: "#000000",
+      strokeWidth: 2,
+      fill: getBallTypeColor(ballType),
+      hasControls: false, // Disable resizing handles
+    });
+    setUuid(circle, uuidv4());
+    addObject(circle);
+  }, [addObject]);
+
   // Function to add default players for both teams
   const addDefaultPlayers = useCallback(() => {
     let playerNumber = 0;
@@ -197,7 +228,20 @@ const DraftingBoardContent = (): JSX.Element => {
     teamBPositions.forEach(pos => {
       createPlayer(pos.type, false, pos.x, pos.y, playerNumber++);
     });
-  }, [createPlayer]);
+
+    // Add balls - 3 bludgers and 1 quaffle positioned in center field
+    const ballPositions = [
+      { type: BallType.Quaffle, x: 600, y: 300 }, // Quaffle in center
+      { type: BallType.Bludger, x: 550, y: 250 }, // Bludger 1 center-left
+      { type: BallType.Bludger, x: 650, y: 250 }, // Bludger 2 center-right  
+      { type: BallType.Bludger, x: 600, y: 350 }, // Bludger 3 center-bottom
+    ];
+
+    // Add balls to the field
+    ballPositions.forEach(pos => {
+      createBall(pos.type, pos.x, pos.y);
+    });
+  }, [createPlayer, createBall]);
 
   useEffect(() => {
     // Initialize with empty canvas and enable editing with empty court background
