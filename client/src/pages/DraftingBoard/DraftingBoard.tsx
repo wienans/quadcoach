@@ -13,7 +13,38 @@ import TacticBoardItemsDrawerNav from "../TacticBoard/TacticBoardItemsDrawerNav"
 import { useAppSelector, useAppDispatch } from "../../store/hooks";
 import DraftingBoardTopItemsMenu from "./DraftingBoardTopItemsMenu";
 import { setIsEditMode, toggleTacticBoardItemsDrawerOpen, setTacticBoardItemsDrawerClosing } from "../TacticBoard/tacticBoardSlice";
+import { PersonType } from "../../contexts/tacticBoard/TacticBoardFabricJsContext/types";
+import { v4 as uuidv4 } from "uuid";
+import {
+  createExtendedCircle,
+  createExtendedText,
+  createExtendedGroup,
+  setUuid,
+  setObjectType,
+} from "../../contexts/tacticBoard/TacticBoardFabricJsContext/fabricTypes";
 import "../fullscreen.css";
+
+// Team colors from PersonItemsSection
+const teamAInfo = {
+  color: "#3d85c6",
+};
+const teamBInfo = {
+  color: "#dd2d2d",
+};
+
+// Helper function to get player stroke color based on person type
+const getFabricPersonColor = (personType: PersonType): string | undefined => {
+  switch (personType) {
+    case PersonType.Beater:
+      return "#000000";
+    case PersonType.Chaser:
+      return "#ffffff";
+    case PersonType.Keeper:
+      return "#03fc35";
+    case PersonType.Seeker:
+      return "#fcfc00";
+  }
+};
 
 const DraftingBoardContent = (): JSX.Element => {
   const dispatch = useAppDispatch();
@@ -22,6 +53,7 @@ const DraftingBoardContent = (): JSX.Element => {
     setControls,
     removeActiveObjects,
     setBackgroundImage,
+    addObject,
   } = useTacticBoardCanvas();
 
   const { loadFromTacticPage: loadFromJson } = useTacticBoardData();
@@ -99,6 +131,74 @@ const DraftingBoardContent = (): JSX.Element => {
     setBackgroundImage("/empty-court.svg");
   }, [loadFromJson, setBackgroundImage]);
 
+  // Helper function to create a player at specific position
+  const createPlayer = useCallback((personType: PersonType, teamA: boolean, left: number, top: number, playerNumber: number) => {
+    const circle = createExtendedCircle({
+      radius: 15,
+      left,
+      top,
+      stroke: getFabricPersonColor(personType),
+      strokeWidth: 3,
+      fill: teamA ? teamAInfo.color : teamBInfo.color,
+    });
+    setUuid(circle, uuidv4());
+
+    const text = createExtendedText(playerNumber.toString(), {
+      left: left + 16,
+      top: top + 16,
+      fontFamily: "Arial",
+      fontSize: 20,
+      textAlign: "center",
+      originX: "center",
+      originY: "center",
+    });
+    setUuid(text, uuidv4());
+
+    const group = createExtendedGroup([circle, text], {
+      hasControls: false, // Disable resizing handles
+    });
+    setUuid(group, uuidv4());
+    setObjectType(group, teamA ? "playerA" : "playerB");
+    addObject(group);
+  }, [addObject]);
+
+  // Function to add default players for both teams
+  const addDefaultPlayers = useCallback(() => {
+    let playerNumber = 0;
+    
+    // Team A (left side) positions - avoiding overlap with proper spacing
+    const teamABaseX = 200;
+    const teamAPositions = [
+      { type: PersonType.Keeper, x: teamABaseX, y: 300 }, // Keeper center-left
+      { type: PersonType.Chaser, x: teamABaseX - 50, y: 200 }, // Chaser 1 top-left
+      { type: PersonType.Chaser, x: teamABaseX + 50, y: 200 }, // Chaser 2 top-right  
+      { type: PersonType.Chaser, x: teamABaseX, y: 150 }, // Chaser 3 center-top
+      { type: PersonType.Beater, x: teamABaseX - 50, y: 400 }, // Beater 1 bottom-left
+      { type: PersonType.Beater, x: teamABaseX + 50, y: 400 }, // Beater 2 bottom-right
+    ];
+
+    // Team B (right side) positions - mirror Team A
+    const teamBBaseX = 950;
+    const teamBPositions = [
+      { type: PersonType.Keeper, x: teamBBaseX, y: 300 }, // Keeper center-right
+      { type: PersonType.Chaser, x: teamBBaseX - 50, y: 200 }, // Chaser 1 top-left
+      { type: PersonType.Chaser, x: teamBBaseX + 50, y: 200 }, // Chaser 2 top-right
+      { type: PersonType.Chaser, x: teamBBaseX, y: 150 }, // Chaser 3 center-top
+      { type: PersonType.Beater, x: teamBBaseX - 50, y: 400 }, // Beater 1 bottom-left
+      { type: PersonType.Beater, x: teamBBaseX + 50, y: 400 }, // Beater 2 bottom-right
+    ];
+
+    // Add Team A players
+    teamAPositions.forEach(pos => {
+      createPlayer(pos.type, true, pos.x, pos.y, playerNumber++);
+    });
+
+    // Add Team B players  
+    teamBPositions.forEach(pos => {
+      createPlayer(pos.type, false, pos.x, pos.y, playerNumber++);
+    });
+  }, [createPlayer]);
+
   useEffect(() => {
     // Initialize with empty canvas and enable editing with empty court background
     loadFromJson({
@@ -118,11 +218,17 @@ const DraftingBoardContent = (): JSX.Element => {
     setSelection(true);
     setControls(false);
 
+    // Add default players after a small delay to ensure canvas is ready
+    const timer = setTimeout(() => {
+      addDefaultPlayers();
+    }, 100);
+
     // Cleanup function to disable edit mode when leaving the component
     return () => {
       dispatch(setIsEditMode(false));
+      clearTimeout(timer);
     };
-  }, [loadFromJson, setSelection, setControls, setBackgroundImage, dispatch]);
+  }, [loadFromJson, setSelection, setControls, setBackgroundImage, dispatch, addDefaultPlayers]);
 
   // One-time initialization of drawer state
   useEffect(() => {
