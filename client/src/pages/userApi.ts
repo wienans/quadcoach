@@ -44,6 +44,13 @@ export const userApiSlice = quadcoachApi.injectEndpoints({
       },
       invalidatesTags: () => [TagType.user],
     }),
+    getOnlineUsersCount: builder.query<{ onlineUsersCount: number }, void>({
+      query: () => ({
+        url: "/api/user/online-count",
+        method: "get",
+      }),
+      providesTags: () => [TagType.user],
+    }),
 
   }),
 });
@@ -53,4 +60,5 @@ export const {
   useDeleteUserMutation,
   useUpdateUserMutation,
   useAddUserMutation,
+  useGetOnlineUsersCountQuery,
 } = userApiSlice;
