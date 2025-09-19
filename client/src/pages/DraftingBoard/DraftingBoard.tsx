@@ -196,22 +196,25 @@ const DraftingBoardContent = (): JSX.Element => {
     }
     return lowest;
   };
-  const getNextNumber = (teamA: boolean) => {
-    let numbers: number[] = [0];
-    (
-      getAllObjectsJson() as {
-        objects: Array<{
-          objectType?: string;
-          objects?: Array<{ text?: string }>;
-        }>;
-      }
-    ).objects.forEach((obj) => {
-      if (obj.objectType == (teamA ? "playerA" : "playerB")) {
-        numbers = [...numbers, parseInt(obj.objects?.[1]?.text || "0")];
-      }
-    });
-    return findNumberInArray(numbers);
-  };
+  const getNextNumber = useCallback(
+    (teamA: boolean) => {
+      let numbers: number[] = [0];
+      (
+        getAllObjectsJson() as {
+          objects: Array<{
+            objectType?: string;
+            objects?: Array<{ text?: string }>;
+          }>;
+        }
+      ).objects.forEach((obj) => {
+        if (obj.objectType == (teamA ? "playerA" : "playerB")) {
+          numbers = [...numbers, parseInt(obj.objects?.[1]?.text || "0")];
+        }
+      });
+      return findNumberInArray(numbers);
+    },
+    [getAllObjectsJson],
+  );
   // Function to add default players for both teams
   const addDefaultPlayers = useCallback(() => {
     // Team A (left side) positions - avoiding overlap with proper spacing
@@ -245,7 +248,7 @@ const DraftingBoardContent = (): JSX.Element => {
     teamBPositions.forEach((pos) => {
       createPlayer(pos.type, false, pos.x, pos.y, getNextNumber(false));
     });
-  }, [createPlayer]);
+  }, [createPlayer, getNextNumber]);
 
   useEffect(() => {
     // Initialize with empty canvas and enable editing with empty court background
