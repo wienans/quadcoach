@@ -10,6 +10,7 @@ interface IUser {
   isVerified?: boolean;
   emailToken?: string;
   passwordResetToken?: string;
+  lastActivity?: Date;
 }
 
 const userSchema = new Schema<IUser>({
@@ -42,6 +43,10 @@ const userSchema = new Schema<IUser>({
   },
   passwordResetToken: {
     type: String,
+  },
+  lastActivity: {
+    type: Date,
+    default: Date.now,
   },
 });
 

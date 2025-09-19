@@ -36,6 +36,21 @@ export const getAllUsers = asyncHandler(async (req: Request, res: Response) => {
   }
 });
 
+// @desc    Get online users count
+// @route   GET /api/user/online-count
+// @access  Private - Admin only
+export const getOnlineUsersCount = asyncHandler(async (req: Request, res: Response) => {
+  // Consider users online if they were active within the last 15 minutes (matching JWT expiration)
+  const fifteenMinutesAgo = new Date(Date.now() - 15 * 60 * 1000);
+  
+  const onlineUsersCount = await User.countDocuments({
+    lastActivity: { $gte: fifteenMinutesAgo },
+    active: true
+  });
+
+  res.json({ onlineUsersCount });
+});
+
 // @desc    Get user by ID
 // @route   GET /api/users/:id
 // @access  Private - Admin or User themselves
