@@ -12,7 +12,12 @@ import Navbar from "../../components/Navbar";
 import TacticBoardItemsDrawerNav from "../TacticBoard/TacticBoardItemsDrawerNav";
 import { useAppSelector, useAppDispatch } from "../../store/hooks";
 import DraftingBoardTopItemsMenu from "./DraftingBoardTopItemsMenu";
-import { setIsEditMode, toggleTacticBoardItemsDrawerOpen, setTacticBoardItemsDrawerClosing } from "../TacticBoard/tacticBoardSlice";
+import {
+  setIsEditMode,
+  toggleTacticBoardItemsDrawerOpen,
+  setTacticBoardItemsDrawerClosing,
+} from "../TacticBoard/tacticBoardSlice";
+import { cloneDeep } from "lodash";
 import { PersonType } from "../../contexts/tacticBoard/TacticBoardFabricJsContext/types";
 import { v4 as uuidv4 } from "uuid";
 import {
@@ -55,6 +60,7 @@ const DraftingBoardContent = (): JSX.Element => {
     setBackgroundImage,
     addObject,
   } = useTacticBoardCanvas();
+  const { getAllObjectsJson } = useTacticBoardData();
 
   const { loadFromTacticPage: loadFromJson } = useTacticBoardData();
 
@@ -71,7 +77,9 @@ const DraftingBoardContent = (): JSX.Element => {
   const drawerInitialized = useRef(false);
 
   const isEditMode = useAppSelector((state) => state.tacticBoard.isEditMode);
-  const tacticBoardItemsDrawerOpen = useAppSelector((state) => state.tacticBoard.tacticBoardItemsDrawerOpen);
+  const tacticBoardItemsDrawerOpen = useAppSelector(
+    (state) => state.tacticBoard.tacticBoardItemsDrawerOpen,
+  );
 
   const onDeleteActiveObject = () => {
     removeActiveObjects();
@@ -132,70 +140,110 @@ const DraftingBoardContent = (): JSX.Element => {
   }, [loadFromJson, setBackgroundImage]);
 
   // Helper function to create a player at specific position
-  const createPlayer = useCallback((personType: PersonType, teamA: boolean, left: number, top: number, playerNumber: number) => {
-    const circle = createExtendedCircle({
-      radius: 15,
-      left,
-      top,
-      stroke: getFabricPersonColor(personType),
-      strokeWidth: 3,
-      fill: teamA ? teamAInfo.color : teamBInfo.color,
-    });
-    setUuid(circle, uuidv4());
+  const createPlayer = useCallback(
+    (
+      personType: PersonType,
+      teamA: boolean,
+      left: number,
+      top: number,
+      playerNumber: number,
+    ) => {
+      const circle = createExtendedCircle({
+        radius: 15,
+        left,
+        top,
+        stroke: getFabricPersonColor(personType),
+        strokeWidth: 3,
+        fill: teamA ? teamAInfo.color : teamBInfo.color,
+      });
+      setUuid(circle, uuidv4());
 
-    const text = createExtendedText(playerNumber.toString(), {
-      left: left + 16,
-      top: top + 16,
-      fontFamily: "Arial",
-      fontSize: 20,
-      textAlign: "center",
-      originX: "center",
-      originY: "center",
-    });
-    setUuid(text, uuidv4());
+      const text = createExtendedText(playerNumber.toString(), {
+        left: left + 16,
+        top: top + 16,
+        fontFamily: "Arial",
+        fontSize: 20,
+        textAlign: "center",
+        originX: "center",
+        originY: "center",
+      });
+      setUuid(text, uuidv4());
 
-    const group = createExtendedGroup([circle, text], {
-      hasControls: false, // Disable resizing handles
+      const group = createExtendedGroup([circle, text], {
+        hasControls: false, // Disable resizing handles
+      });
+      setUuid(group, uuidv4());
+      setObjectType(group, teamA ? "playerA" : "playerB");
+      addObject(group);
+    },
+    [addObject],
+  );
+  const findNumberInArray = (array: number[]) => {
+    const clonedArray = cloneDeep(array);
+    clonedArray.sort(function (a, b) {
+      return a - b;
     });
-    setUuid(group, uuidv4());
-    setObjectType(group, teamA ? "playerA" : "playerB");
-    addObject(group);
-  }, [addObject]);
 
+    let lowest = -1;
+    for (let i = 0; i < clonedArray.length; ++i) {
+      if (clonedArray[i] != i) {
+        lowest = i;
+        break;
+      }
+    }
+    if (lowest == -1) {
+      lowest = clonedArray[clonedArray.length - 1] + 1;
+    }
+    return lowest;
+  };
+  const getNextNumber = (teamA: boolean) => {
+    let numbers: number[] = [0];
+    (
+      getAllObjectsJson() as {
+        objects: Array<{
+          objectType?: string;
+          objects?: Array<{ text?: string }>;
+        }>;
+      }
+    ).objects.forEach((obj) => {
+      if (obj.objectType == (teamA ? "playerA" : "playerB")) {
+        numbers = [...numbers, parseInt(obj.objects?.[1]?.text || "0")];
+      }
+    });
+    return findNumberInArray(numbers);
+  };
   // Function to add default players for both teams
   const addDefaultPlayers = useCallback(() => {
-    let playerNumber = 0;
-    
     // Team A (left side) positions - avoiding overlap with proper spacing
-    const teamABaseX = 200;
+    const teamABaseX = 220;
     const teamAPositions = [
-      { type: PersonType.Keeper, x: teamABaseX, y: 300 }, // Keeper center-left
-      { type: PersonType.Chaser, x: teamABaseX - 50, y: 200 }, // Chaser 1 top-left
-      { type: PersonType.Chaser, x: teamABaseX + 50, y: 200 }, // Chaser 2 top-right  
-      { type: PersonType.Chaser, x: teamABaseX, y: 150 }, // Chaser 3 center-top
-      { type: PersonType.Beater, x: teamABaseX - 50, y: 400 }, // Beater 1 bottom-left
-      { type: PersonType.Beater, x: teamABaseX + 50, y: 400 }, // Beater 2 bottom-right
+      { type: PersonType.Keeper, x: teamABaseX, y: 150 },
+      { type: PersonType.Chaser, x: teamABaseX, y: 200 },
+      { type: PersonType.Chaser, x: teamABaseX, y: 250 },
+      { type: PersonType.Chaser, x: teamABaseX, y: 300 },
+      { type: PersonType.Beater, x: teamABaseX, y: 350 },
+      { type: PersonType.Beater, x: teamABaseX, y: 400 },
     ];
 
     // Team B (right side) positions - mirror Team A
-    const teamBBaseX = 950;
+    const teamBBaseX = 980;
     const teamBPositions = [
-      { type: PersonType.Keeper, x: teamBBaseX, y: 300 }, // Keeper center-right
-      { type: PersonType.Chaser, x: teamBBaseX - 50, y: 200 }, // Chaser 1 top-left
-      { type: PersonType.Chaser, x: teamBBaseX + 50, y: 200 }, // Chaser 2 top-right
-      { type: PersonType.Chaser, x: teamBBaseX, y: 150 }, // Chaser 3 center-top
-      { type: PersonType.Beater, x: teamBBaseX - 50, y: 400 }, // Beater 1 bottom-left
-      { type: PersonType.Beater, x: teamBBaseX + 50, y: 400 }, // Beater 2 bottom-right
+      { type: PersonType.Keeper, x: teamBBaseX, y: 150 },
+      { type: PersonType.Chaser, x: teamBBaseX, y: 200 },
+      { type: PersonType.Chaser, x: teamBBaseX, y: 250 },
+      { type: PersonType.Chaser, x: teamBBaseX, y: 300 },
+      { type: PersonType.Beater, x: teamBBaseX, y: 350 },
+      { type: PersonType.Beater, x: teamBBaseX, y: 400 },
     ];
 
     // Add Team A players
-    teamAPositions.forEach(pos => {
-      createPlayer(pos.type, true, pos.x, pos.y, playerNumber++);
+    teamAPositions.forEach((pos) => {
+      createPlayer(pos.type, true, pos.x, pos.y, getNextNumber(true));
     });
 
-    // Add Team B players  
-    teamBPositions.forEach(pos => {
-      createPlayer(pos.type, false, pos.x, pos.y, playerNumber++);
+    // Add Team B players
+    teamBPositions.forEach((pos) => {
+      createPlayer(pos.type, false, pos.x, pos.y, getNextNumber(false));
     });
   }, [createPlayer]);
 
@@ -208,11 +256,11 @@ const DraftingBoardContent = (): JSX.Element => {
         type: "image",
         width: 800,
         height: 600,
-        src: "/empty-court.svg",
+        src: "/half-court.svg",
       },
     });
     // Set the background image directly
-    setBackgroundImage("/empty-court.svg");
+    setBackgroundImage("/half-court.svg");
     // Enable edit mode for drafting
     dispatch(setIsEditMode(true));
     setSelection(true);
@@ -228,16 +276,23 @@ const DraftingBoardContent = (): JSX.Element => {
       dispatch(setIsEditMode(false));
       clearTimeout(timer);
     };
-  }, [loadFromJson, setSelection, setControls, setBackgroundImage, dispatch, addDefaultPlayers]);
+  }, [
+    loadFromJson,
+    setSelection,
+    setControls,
+    setBackgroundImage,
+    dispatch,
+    addDefaultPlayers,
+  ]);
 
   // One-time initialization of drawer state
   useEffect(() => {
     if (!drawerInitialized.current) {
       drawerInitialized.current = true;
-      
+
       // Reset drawer closing state to ensure toggle works
       dispatch(setTacticBoardItemsDrawerClosing(false));
-      
+
       // Only open drawer if it's currently closed
       if (!tacticBoardItemsDrawerOpen) {
         dispatch(toggleTacticBoardItemsDrawerOpen());
@@ -278,8 +333,6 @@ const DraftingBoardContent = (): JSX.Element => {
           flexDirection: "column",
         }}
       >
-
-
         <SoftBox
           sx={{
             display: "flex",
