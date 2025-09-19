@@ -29,10 +29,6 @@ const getBallTypeColor = (ballType: BallType) => {
       return "#ffffff";
     case BallType.FlagRunner:
       return "#FFD700";
-    case BallType.Bludger:
-      return "#8B4513"; // Brown color for bludgers
-    case BallType.Quaffle:
-      return "#DC143C"; // Crimson red for quaffle
   }
 };
 
