@@ -56,7 +56,6 @@ import {
 } from "formik";
 import * as Yup from "yup";
 import { SoftButton, SoftBox, SoftInput } from "../../../../components";
-import { time } from "console";
 
 const Exercise = () => {
   const { t } = useTranslation("Exercise");
@@ -209,9 +208,17 @@ const Exercise = () => {
       );
       values.time_min = calculate_time;
       if (exerciseId) {
-        const exerciseUpdate = {
+        const sanitizedBlocks = values.description_blocks.map((block: any) => {
+          if (typeof block._id === "string" && block._id.startsWith("temp_")) {
+            const { _id, ...rest } = block;
+            return rest; // omit temporary _id so backend generates a valid ObjectId
+          }
+          return block;
+        });
+        const exerciseUpdate: any = {
           _id: exerciseId,
           ...values,
+          description_blocks: sanitizedBlocks,
         };
         updateExercise(exerciseUpdate);
       }
