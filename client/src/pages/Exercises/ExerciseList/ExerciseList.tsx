@@ -265,7 +265,7 @@ const ExerciseList = () => {
       const result = await createExercise(baseExercise).unwrap();
       setOpenAddDialog(false);
       setNewExerciseName("");
-      navigate(`/exercises/${result._id}`);
+      navigate(`/exercises/${result._id}?edit=1`);
     } catch (e) {
       // keep dialog open for retry or allow closing
     }

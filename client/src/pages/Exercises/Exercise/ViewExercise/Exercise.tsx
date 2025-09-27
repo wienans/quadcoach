@@ -1,6 +1,6 @@
 import "./translations";
-import { useParams, useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { useEffect, useState, useRef } from "react";
 import {
   Alert,
   Card,
@@ -54,6 +54,7 @@ import * as Yup from "yup";
 import { SoftButton, SoftBox, SoftInput } from "../../../../components";
 
 const Exercise = () => {
+  const location = useLocation();
   const { t } = useTranslation("Exercise");
   const { id: exerciseId } = useParams();
   const navigate = useNavigate();
@@ -62,6 +63,7 @@ const Exercise = () => {
   const [isFavorite, setIsFavorite] = useState<boolean>(false);
 
   const [isEditMode, setIsEditMode] = useState<boolean>(false);
+  const autoEditAppliedRef = useRef(false);
   // Track whether to show validation summary (only after failed save attempt)
   const [showValidationSummary, setShowValidationSummary] =
     useState<boolean>(false);
@@ -252,6 +254,27 @@ const Exercise = () => {
     },
   });
 
+  // Auto-enter edit mode if URL has ?edit=1 and user is privileged (runs after formik init)
+  useEffect(() => {
+    if (autoEditAppliedRef.current) return;
+    if (!isEditMode && isPrivileged) {
+      const params = new URLSearchParams(location.search);
+      if (params.get("edit") === "1") {
+        autoEditAppliedRef.current = true;
+        setShowValidationSummary(true);
+        formik.setErrors({});
+        formik.setTouched({});
+        setIsEditMode(true);
+        params.delete("edit");
+        const newQuery = params.toString();
+        const newUrl = `${location.pathname}${newQuery ? `?${newQuery}` : ""}`;
+        window.history.replaceState({}, "", newUrl);
+      } else {
+        autoEditAppliedRef.current = true; // no edit flag; avoid re-checking
+      }
+    }
+  }, [location.search, isPrivileged, isEditMode, formik, location.pathname]);
+
   // Edit mode toggle functionality
   const onToggleEditMode = async () => {
     if (!isPrivileged) return;
@@ -270,8 +293,7 @@ const Exercise = () => {
         }
       }
     } else {
-      // Entering edit mode: clear any stale errors & summary
-      setShowValidationSummary(true);
+      setShowValidationSummary(false);
       formik.setErrors({});
       formik.setTouched({});
       setIsEditMode(true);
