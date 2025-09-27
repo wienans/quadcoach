@@ -43,11 +43,7 @@ import {
   useRemoveFavoriteExerciseMutation,
 } from "../../../../api/quadcoachApi/favoriteApi";
 
-import {
-  ExerciseWithOutId,
-  ExercisePartialId,
-  Block,
-} from "../../../../api/quadcoachApi/domain";
+import { ExercisePartialId, Block } from "../../../../api/quadcoachApi/domain";
 import {
   FormikProvider,
   useFormik,
@@ -66,6 +62,9 @@ const Exercise = () => {
   const [isFavorite, setIsFavorite] = useState<boolean>(false);
 
   const [isEditMode, setIsEditMode] = useState<boolean>(false);
+  // Track whether to show validation summary (only after failed save attempt)
+  const [showValidationSummary, setShowValidationSummary] =
+    useState<boolean>(false);
 
   const theme = useTheme();
 
@@ -162,9 +161,9 @@ const Exercise = () => {
 
   // Setup formik form for editing
   const formik = useFormik<ExercisePartialId>({
-    // enableReinitialize : use this flag when initial values needs to be changed
-    enableReinitialize: true,
+    enableReinitialize: false,
     validateOnChange: false,
+    validateOnBlur: true,
     initialValues: {
       name: exercise?.name ?? "",
       persons: exercise?.persons ?? 0,
@@ -180,30 +179,54 @@ const Exercise = () => {
     },
     validationSchema: Yup.object({
       name: Yup.string().required("Exercise:validation.name.required"),
-      persons: Yup.number().min(0, "Exercise:validation.persons.min"),
-      time_min: Yup.number().min(0, "Exercise:validation.time_min.min"),
-      beaters: Yup.number().min(0, "Exercise:validation.beaters.min"),
-      chasers: Yup.number().min(0, "Exercise:validation.chasers.min"),
+      persons: Yup.number()
+        .transform((val, orig) => (orig === "" ? NaN : val))
+        .required("Exercise:validation.persons.required")
+        .min(0, "Exercise:validation.persons.min")
+        .test(
+          "persons-gte-roles",
+          "Exercise:validation.persons.lessThanRoles",
+          function (value) {
+            const { beaters, chasers } = this.parent as any;
+            if (value == null) return false;
+            const rolesTotal = (beaters ?? 0) + (chasers ?? 0);
+            return value >= rolesTotal;
+          },
+        ),
+      time_min: Yup.number()
+        .transform((val, orig) => (orig === "" ? NaN : val))
+        .required("Exercise:validation.time_min.required")
+        .min(0, "Exercise:validation.time_min.min"),
+      beaters: Yup.number()
+        .transform((val, orig) => (orig === "" ? NaN : val))
+        .required("Exercise:validation.beaters.required")
+        .min(0, "Exercise:validation.beaters.min"),
+      chasers: Yup.number()
+        .transform((val, orig) => (orig === "" ? NaN : val))
+        .required("Exercise:validation.chasers.required")
+        .min(0, "Exercise:validation.chasers.min"),
       materials: Yup.array().of(Yup.string()),
       tags: Yup.array().of(Yup.string()),
       description_blocks: Yup.array().of(
         Yup.object({
           description: Yup.string().required(
-            "ExerciseEditForm:block.description.missing",
+            "Exercise:validation.block.description.missing",
           ),
           video_url: Yup.string().url(
-            "ExerciseEditForm:block.videoUrl.notValid",
+            "Exercise:validation.block.video_url.notValid",
           ),
           coaching_points: Yup.string(),
-          time_min: Yup.number(),
+          time_min: Yup.number()
+            .transform((val, orig) => (orig === "" ? NaN : val))
+            .min(0, "Exercise:validation.block.time_min.min"),
           tactics_board: Yup.string(),
         }),
       ),
-      related_to: Yup.array().of(Yup.object()),
+      related_to: Yup.array().of(Yup.string()),
     }),
-    onSubmit: (values) => {
+    onSubmit: async (values) => {
       const calculate_time = values.description_blocks.reduce(
-        (partialSum, current) => partialSum + current.time_min,
+        (partialSum, current) => partialSum + (current.time_min || 0),
         0,
       );
       values.time_min = calculate_time;
@@ -220,18 +243,38 @@ const Exercise = () => {
           ...values,
           description_blocks: sanitizedBlocks,
         };
-        updateExercise(exerciseUpdate);
+        try {
+          await updateExercise(exerciseUpdate).unwrap();
+        } catch (e) {
+          // Error alert handled by isUpdateExerciseError condition
+        }
       }
     },
   });
 
   // Edit mode toggle functionality
-  const onToggleEditMode = () => {
-    if (isPrivileged && isEditMode && formik.isValid) {
-      // When exiting edit mode, save the form
-      formik.submitForm();
+  const onToggleEditMode = async () => {
+    if (!isPrivileged) return;
+    if (isEditMode) {
+      const errors = await formik.validateForm();
+      if (Object.keys(errors).length === 0) {
+        setShowValidationSummary(false);
+        formik.submitForm();
+      } else {
+        setShowValidationSummary(true);
+        Object.keys(errors).forEach((field) =>
+          formik.setFieldTouched(field, true, false),
+        );
+        if (typeof window !== "undefined") {
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        }
+      }
     } else {
-      setIsEditMode(!isEditMode);
+      // Entering edit mode: clear any stale errors & summary
+      setShowValidationSummary(true);
+      formik.setErrors({});
+      formik.setTouched({});
+      setIsEditMode(true);
     }
   };
 
@@ -240,6 +283,34 @@ const Exercise = () => {
       setIsEditMode(false);
     }
   }, [isUpdateExerciseSuccess]);
+
+  useEffect(() => {
+    if (isEditMode && isUpdateExerciseError) {
+      if (typeof window !== "undefined") {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+    }
+  }, [isEditMode, isUpdateExerciseError]);
+
+  // When exercise data first loads (or changes) and not in edit mode, sync form values manually
+  useEffect(() => {
+    if (exercise && !isEditMode) {
+      formik.setValues({
+        name: exercise.name ?? "",
+        persons: exercise.persons ?? 0,
+        time_min: exercise.time_min ?? 0,
+        beaters: exercise.beaters ?? 0,
+        chasers: exercise.chasers ?? 0,
+        materials: exercise.materials ?? [],
+        tags: exercise.tags ?? [],
+        description_blocks: exercise.description_blocks ?? [],
+        related_to: exercise.related_to ?? [],
+        creator: exercise.creator ?? "",
+        user: exercise.user ?? "",
+      });
+      formik.setTouched({});
+    }
+  }, [exercise, isEditMode]);
 
   const [
     deleteExercise,
@@ -440,6 +511,88 @@ const Exercise = () => {
               {t("Exercise:errorUpdatingExercise")}
             </Alert>
           )}
+          {isEditMode &&
+            showValidationSummary &&
+            Object.keys(formik.errors).length > 0 && (
+              <Alert color="warning" sx={{ mt: 2, mb: 2 }}>
+                {t("Exercise:validation.fixValidationErrors", {
+                  defaultValue: "Please fix the highlighted validation errors:",
+                })}
+                <ul style={{ marginTop: 8 }}>
+                  {Object.entries(formik.errors).map(([field, error]) => {
+                    const fieldLabelMap: Record<string, string> = {
+                      name: t("Exercise:exerciseName"),
+                      persons: t("Exercise:info.personNumber"),
+                      time_min: t("Exercise:info.time"),
+                      beaters: t("Exercise:info.beaterNumber"),
+                      chasers: t("Exercise:info.chaserNumber"),
+                      tags: t("Exercise:tags.title"),
+                      materials: t("Exercise:materials.title"),
+                      related_to: t("Exercise:realtedToExercises.title"),
+                    };
+                    const label = fieldLabelMap[field] ?? field;
+                    if (typeof error === "string") {
+                      const translationOptions =
+                        error === "Exercise:validation.persons.lessThanRoles"
+                          ? {
+                              requiredTotal:
+                                (formik.values.beaters ?? 0) +
+                                (formik.values.chasers ?? 0),
+                            }
+                          : undefined;
+                      return (
+                        <li key={field} style={{ fontSize: 12 }}>
+                          <strong>{label}:</strong>{" "}
+                          {t(error, translationOptions)}
+                        </li>
+                      );
+                    }
+                    if (
+                      field === "description_blocks" &&
+                      Array.isArray(error)
+                    ) {
+                      return error.map((blockErr, idx) => {
+                        if (!blockErr || typeof blockErr !== "object")
+                          return null;
+                        const descriptionErr = (blockErr as any).description;
+                        const videoUrlErr = (blockErr as any).video_url;
+                        const timeErr = (blockErr as any).time_min;
+                        const issues: string[] = [];
+                        if (typeof descriptionErr === "string")
+                          issues.push(t(descriptionErr));
+                        if (typeof videoUrlErr === "string")
+                          issues.push(t(videoUrlErr));
+                        if (typeof timeErr === "string")
+                          issues.push(t(timeErr));
+                        if (issues.length === 0) return null;
+                        return (
+                          <li key={`${field}_${idx}`} style={{ fontSize: 12 }}>
+                            <strong>
+                              {t("Exercise:block.title", {
+                                blockNumber: idx + 1,
+                              })}
+                              :
+                            </strong>{" "}
+                            {issues.join("; ")}
+                          </li>
+                        );
+                      });
+                    }
+                    if (error && typeof error === "object") {
+                      return (
+                        <li key={field} style={{ fontSize: 12 }}>
+                          <strong>{label}:</strong>{" "}
+                          {t("Exercise:validation.genericError", {
+                            defaultValue: "Invalid value",
+                          })}
+                        </li>
+                      );
+                    }
+                    return null;
+                  })}
+                </ul>
+              </Alert>
+            )}
           {isRelatedExercisesError && (
             <Alert color="error" sx={{ mt: 5, mb: 3 }}>
               {t("Exercise:errorLoadingRelatedExercises")}

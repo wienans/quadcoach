@@ -50,21 +50,6 @@ const routes = [
                 element: <ExerciseRoot />,
               };
             },
-            children: [
-              {
-                path: "update",
-                handle: {
-                  type: RouteHandleType.updateExercise,
-                },
-                async lazy() {
-                  const UpdateExercise = (await import("../Exercises"))
-                    .UpdateExercise;
-                  return {
-                    element: <UpdateExercise />,
-                  };
-                },
-              },
-            ],
           },
         ],
       },

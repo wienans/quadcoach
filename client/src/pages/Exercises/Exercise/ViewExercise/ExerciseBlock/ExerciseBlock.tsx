@@ -12,7 +12,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import UniversalMediaPlayer from "../../../../../components/UniversalMediaPlayer";
 import TacticBoardInBlockWrapper from "./TacticBoardInBlock";
 import { lazy, Suspense } from "react";
-import TacticboardAutocomplete from "../../../../../components/ExerciseEditForm/TacticboardAutocomplete/TacticboardAutocomplete";
+import { TacticboardAutocomplete } from "../../../../../components/ExerciseParts";
 import { FormikProps, FieldArray, FieldArrayRenderProps } from "formik";
 import { ExercisePartialId } from "../../../../../api/quadcoachApi/domain";
 import {
@@ -57,7 +57,7 @@ const ExerciseBlock = ({
         subheader={
           isEditMode ? (
             <div>
-              <SoftTypography variant="body2" color="textSecondary">
+              <SoftTypography variant="body2" color="secondary">
                 {t("Exercise:info.time")}
                 {"in minutes:"}{" "}
               </SoftTypography>
@@ -209,16 +209,16 @@ const ExerciseBlock = ({
             Tacticboard
           </AccordionSummary>
           <AccordionDetails>
-            <TacticboardAutocomplete
-              value={currentBlock.tactics_board}
-              onChange={(event, value) => {
-                formik.setFieldValue(
-                  `description_blocks.${blockIndex}.tactics_board`,
-                  value?._id || undefined,
-                );
-              }}
-              onBlur={() => {}}
-            />
+              <TacticboardAutocomplete
+                value={currentBlock.tactics_board}
+                onChange={(_event, value) => {
+                  formik.setFieldValue(
+                    `description_blocks.${blockIndex}.tactics_board`,
+                    value?._id || undefined,
+                  );
+                }}
+                onBlur={() => {}}
+              />
             {Boolean(currentBlock.tactics_board) && (
               <div style={{ marginTop: 16 }}>
                 <TacticBoardInBlockWrapper block={currentBlock} />

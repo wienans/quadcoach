@@ -50,20 +50,38 @@
   },
   "addBlock": "Add Block",
   "validation": {
+    "fixValidationErrors": "Please fix the highlighted validation errors before saving.",
+    "genericError": "You have an Invalid value somewhere.",
     "name": {
       "required": "Exercise name is required"
     },
-    "persons": {
-      "min": "Persons must be 0 or greater"
-    },
-    "time_min": {
-      "min": "Time must be 0 or greater"
-    },
-    "beaters": {
-      "min": "Beaters must be 0 or greater"
-    },
-    "chasers": {
-      "min": "Chasers must be 0 or greater"
-    }
+      "persons": {
+        "required": "Persons is required",
+        "min": "Persons must be 0 or greater",
+        "lessThanRoles": "Persons must be >= total roles (min {{requiredTotal}})"
+      },
+      "time_min": {
+        "required": "Time is required",
+        "min": "Time must be 0 or greater"
+      },
+      "beaters": {
+        "required": "Beaters is required",
+        "min": "Beaters must be 0 or greater"
+      },
+      "chasers": {
+        "required": "Chasers is required",
+        "min": "Chasers must be 0 or greater"
+      },
+      "block": {
+        "description": {
+          "missing": "Please enter a description."
+        },
+        "video_url": {
+          "notValid": "Please enter a valid url."
+        },
+        "time_min": {
+          "min": "Block time must be 0 or greater"
+        }
+      }
   }
 }

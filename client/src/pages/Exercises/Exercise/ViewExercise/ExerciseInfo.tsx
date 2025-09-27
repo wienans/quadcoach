@@ -21,9 +21,9 @@ import { FormikProps, FieldArray, FieldArrayRenderProps } from "formik";
 import { SoftInput, SoftTypography } from "../../../../components";
 import { ExercisePartialId } from "../../../../api/quadcoachApi/domain";
 import { useState, useMemo } from "react";
-import MaterialAutocomplete from "../../../../components/ExerciseEditForm/AddMaterialDialog/MaterialAutocomplete";
-import TagAutocomplete from "../../../../components/ExerciseEditForm/AddTagDialog/TagAutocomplete";
-import ExerciseAutocomplete from "../../../../components/ExerciseEditForm/AddRelatedExercisesDialog/ExerciseAutocomplete";
+import { MaterialAutocomplete } from "../../../../components/ExerciseParts";
+import { TagAutocomplete } from "../../../../components/ExerciseParts";
+import { ExerciseAutocomplete } from "../../../../components/ExerciseParts";
 
 export type ExerciseInfoProps = {
   exercise: Exercise;
@@ -137,7 +137,12 @@ const ExerciseInfo = ({
                         <SoftInput
                           type="number"
                           value={formik.values.beaters}
-                          onChange={formik.handleChange}
+                          onChange={(e) => {
+                            formik.setFieldValue(
+                              `beaters`,
+                              parseInt(e.target.value) || 0,
+                            );
+                          }}
                           onBlur={formik.handleBlur}
                           name="beaters"
                           placeholder={t("Exercise:info.beaterNumber")}
@@ -161,7 +166,13 @@ const ExerciseInfo = ({
                         <SoftInput
                           type="number"
                           value={formik.values.chasers}
-                          onChange={formik.handleChange}
+                          // onChange={formik.handleChange}
+                          onChange={(e) => {
+                            formik.setFieldValue(
+                              `chasers`,
+                              parseInt(e.target.value) || 0,
+                            );
+                          }}
                           onBlur={formik.handleBlur}
                           name="chasers"
                           placeholder={t("Exercise:info.chaserNumber")}

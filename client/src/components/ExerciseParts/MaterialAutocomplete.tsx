@@ -1,6 +1,6 @@
 import { Autocomplete, CircularProgress, TextField } from "@mui/material";
 import { useState, useEffect } from "react";
-import { useLazyGetAllMaterialsQuery } from "../../../pages/exerciseApi";
+import { useLazyGetAllMaterialsQuery } from "../../pages/exerciseApi";
 
 export type MaterialAutocompleteProps = {
   selectedMaterials: string[];
