@@ -685,11 +685,14 @@ const ExerciseList = () => {
                       {t("ExerciseList:addExerciseDialog.title")}
                     </DialogTitle>
                     <DialogContent>
-                      <TextField
+                      <SoftInput
                         autoFocus
                         margin="dense"
-                        label={t("ExerciseList:addExerciseDialog.nameLabel")}
+                        placeholder={t(
+                          "ExerciseList:addExerciseDialog.nameLabel",
+                        )}
                         type="text"
+                        size="small"
                         fullWidth
                         value={newExerciseName}
                         onChange={(e) => setNewExerciseName(e.target.value)}
@@ -697,25 +700,27 @@ const ExerciseList = () => {
                       />
                     </DialogContent>
                     <DialogActions>
-                      <Button
+                      <SoftButton
                         startIcon={<CloseIcon />}
                         onClick={() => setOpenAddDialog(false)}
+                        color="secondary"
                         disabled={isCreatingExercise}
                       >
                         {t("ExerciseList:addExerciseDialog.cancel")}
-                      </Button>
-                      <Button
+                      </SoftButton>
+                      <SoftButton
                         onClick={handleCreateExercise}
                         disabled={
                           isCreatingExercise || newExerciseName.trim() === ""
                         }
+                        color="primary"
                         variant="contained"
                       >
                         {isCreatingExercise && (
                           <CircularProgress size={18} sx={{ mr: 1 }} />
                         )}
                         {t("ExerciseList:addExerciseDialog.add")}
-                      </Button>
+                      </SoftButton>
                     </DialogActions>
                   </Dialog>
                 </>
