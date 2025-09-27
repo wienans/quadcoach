@@ -25,7 +25,7 @@ import {
 } from "../../../../components/LayoutContainers";
 import { getExerciseTypeHeaderBackgroundImage } from "../../../../components/LayoutContainers/ProfileLayout";
 import {
-  ExerciseType,
+  ExerciseType as ExerciseTypeEnum,
   getExerciseType,
 } from "../../../../helpers/exerciseHelpers";
 import EditIcon from "@mui/icons-material/Edit";
@@ -43,7 +43,7 @@ import {
   useRemoveFavoriteExerciseMutation,
 } from "../../../../api/quadcoachApi/favoriteApi";
 
-import { ExercisePartialId, Block } from "../../../../api/quadcoachApi/domain";
+import { ExercisePartialId, Block, Exercise } from "../../../../api/quadcoachApi/domain";
 import {
   FormikProvider,
   useFormik,
@@ -114,7 +114,7 @@ const Exercise = () => {
     }
   }, [userId, getFavoriteExercises]);
 
-  const [exerciseType, setExerciseType] = useState<ExerciseType | undefined>();
+  const [exerciseType, setExerciseType] = useState<ExerciseTypeEnum | undefined>();
   const [headerBackgroundImage, setHeaderBackgroundImage] = useState<
     string | undefined
   >();
@@ -189,7 +189,8 @@ const Exercise = () => {
           "persons-gte-roles",
           "Exercise:validation.persons.lessThanRoles",
           function (value) {
-            const { beaters, chasers } = this.parent as any;
+            const parent = this.parent as { beaters?: number; chasers?: number };
+            const { beaters, chasers } = parent;
             if (value == null) return false;
             const rolesTotal = (beaters ?? 0) + (chasers ?? 0);
             return value >= rolesTotal;
@@ -233,18 +234,23 @@ const Exercise = () => {
       );
       values.time_min = calculate_time;
       if (exerciseId) {
-        const sanitizedBlocks = values.description_blocks.map((block: any) => {
+        // Type for blocks that may be missing _id (for new blocks)
+        type BlockForUpdate = Omit<Block, '_id'> & { _id?: string };
+        
+        const sanitizedBlocks: BlockForUpdate[] = values.description_blocks.map((block: Block) => {
           if (typeof block._id === "string" && block._id.startsWith("temp_")) {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const { _id, ...rest } = block;
             return rest; // omit temporary _id so backend generates a valid ObjectId
           }
           return block;
         });
-        const exerciseUpdate: any = {
+        
+        const exerciseUpdate = {
           _id: exerciseId,
           ...values,
           description_blocks: sanitizedBlocks,
-        };
+        } as Exercise;
         try {
           await updateExercise(exerciseUpdate).unwrap();
         } catch (e) {
@@ -332,6 +338,7 @@ const Exercise = () => {
       });
       formik.setTouched({});
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [exercise, isEditMode]);
 
   const [
@@ -576,9 +583,10 @@ const Exercise = () => {
                       return error.map((blockErr, idx) => {
                         if (!blockErr || typeof blockErr !== "object")
                           return null;
-                        const descriptionErr = (blockErr as any).description;
-                        const videoUrlErr = (blockErr as any).video_url;
-                        const timeErr = (blockErr as any).time_min;
+                        const blockError = blockErr as Record<string, string | undefined>;
+                        const descriptionErr = blockError.description;
+                        const videoUrlErr = blockError.video_url;
+                        const timeErr = blockError.time_min;
                         const issues: string[] = [];
                         if (typeof descriptionErr === "string")
                           issues.push(t(descriptionErr));
