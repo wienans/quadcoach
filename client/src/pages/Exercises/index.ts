@@ -4,4 +4,4 @@ export {
   UpdateExercise,
   ViewExercise,
 } from "./Exercise";
-export { default as AddExercise } from "./AddExercise";
+
