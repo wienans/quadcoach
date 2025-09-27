@@ -1,6 +1,6 @@
 import { Autocomplete, CircularProgress, TextField } from "@mui/material";
 import { useState, useEffect } from "react";
-import { useLazyGetAllTagsQuery } from "../../../pages/exerciseApi";
+import { useLazyGetAllTagsQuery } from "../../pages/exerciseApi";
 
 export type TagAutocompleteProps = {
   selectedTags: string[];

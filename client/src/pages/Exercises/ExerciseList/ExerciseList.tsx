@@ -24,6 +24,11 @@ import {
   FormControl,
   InputLabel,
   Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  CircularProgress,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import {
@@ -37,9 +42,13 @@ import FilterAltIcon from "@mui/icons-material/FilterAlt";
 import KeyboardReturnIcon from "@mui/icons-material/KeyboardReturn";
 import ExercisesCardView from "./cardView/ExercisesCardView";
 import AddIcon from "@mui/icons-material/Add";
+import CloseIcon from "@mui/icons-material/Close";
 import ClearIcon from "@mui/icons-material/Clear";
 import SortIcon from "@mui/icons-material/Sort";
-import { useLazyGetExercisesQuery } from "../../exerciseApi";
+import {
+  useLazyGetExercisesQuery,
+  useAddExerciseMutation,
+} from "../../exerciseApi";
 import { DashboardLayout } from "../../../components/LayoutContainers";
 import { useAuth } from "../../../store/hooks";
 import Footer from "../../../components/Footer";
@@ -98,8 +107,10 @@ const ExerciseList = () => {
   const isUpMd = useMediaQuery((theme: Theme) => theme.breakpoints.up("md"));
 
   const [showFilters, setShowFilters] = useState<boolean>(false);
-  const { status: userStatus } = useAuth();
+  const { id: userId, name: userName, status: userStatus } = useAuth();
   const [loadedExercises, setLoadedExercises] = useState<Exercise[]>([]);
+  const [openAddDialog, setOpenAddDialog] = useState(false);
+  const [newExerciseName, setNewExerciseName] = useState("");
 
   const [exerciseFilter, setExerciseFilter] = useState<ExerciseFilter>({
     ...defaultExerciseFilter,
@@ -230,6 +241,34 @@ const ExerciseList = () => {
       });
     }
   }, [exercisesData]);
+
+  const [createExercise, { isLoading: isCreatingExercise }] =
+    useAddExerciseMutation();
+
+  const handleCreateExercise = async () => {
+    if (newExerciseName.trim() === "") return;
+    try {
+      const baseExercise = {
+        name: newExerciseName.trim(),
+        materials: [],
+        time_min: 0,
+        beaters: 0,
+        chasers: 0,
+        persons: 0,
+        creator: userName,
+        user: userId,
+        tags: [],
+        description_blocks: [],
+        related_to: [],
+      } as Omit<Exercise, "_id">;
+      const result = await createExercise(baseExercise).unwrap();
+      setOpenAddDialog(false);
+      setNewExerciseName("");
+      navigate(`/exercises/${result._id}?edit=1`);
+    } catch (e) {
+      // keep dialog open for retry or allow closing
+    }
+  };
 
   const onOpenExerciseClick = (exerciseId: string) => {
     navigate(`/exercises/${exerciseId}`);
@@ -627,13 +666,63 @@ const ExerciseList = () => {
           {isUpMd && (
             <SoftBox sx={{ mt: 2, display: "flex" }}>
               {userStatus != null && (
-                <SoftButton
-                  startIcon={<AddIcon />}
-                  color="secondary"
-                  href="/exercises/add"
-                >
-                  {t("ExerciseList:addExercise")}
-                </SoftButton>
+                <>
+                  <SoftButton
+                    startIcon={<AddIcon />}
+                    color="secondary"
+                    onClick={() => setOpenAddDialog(true)}
+                  >
+                    {t("ExerciseList:addExercise")}
+                  </SoftButton>
+                  <Dialog
+                    open={openAddDialog}
+                    onClose={() => setOpenAddDialog(false)}
+                    fullWidth
+                    maxWidth="xs"
+                  >
+                    <DialogTitle>
+                      {t("ExerciseList:addExerciseDialog.title")}
+                    </DialogTitle>
+                    <DialogContent>
+                      <SoftInput
+                        autoFocus
+                        margin="dense"
+                        placeholder={t(
+                          "ExerciseList:addExerciseDialog.nameLabel",
+                        )}
+                        type="text"
+                        size="small"
+                        fullWidth
+                        value={newExerciseName}
+                        onChange={(e) => setNewExerciseName(e.target.value)}
+                        disabled={isCreatingExercise}
+                      />
+                    </DialogContent>
+                    <DialogActions>
+                      <SoftButton
+                        startIcon={<CloseIcon />}
+                        onClick={() => setOpenAddDialog(false)}
+                        color="secondary"
+                        disabled={isCreatingExercise}
+                      >
+                        {t("ExerciseList:addExerciseDialog.cancel")}
+                      </SoftButton>
+                      <SoftButton
+                        onClick={handleCreateExercise}
+                        disabled={
+                          isCreatingExercise || newExerciseName.trim() === ""
+                        }
+                        color="primary"
+                        variant="contained"
+                      >
+                        {isCreatingExercise && (
+                          <CircularProgress size={18} sx={{ mr: 1 }} />
+                        )}
+                        {t("ExerciseList:addExerciseDialog.add")}
+                      </SoftButton>
+                    </DialogActions>
+                  </Dialog>
+                </>
               )}
             </SoftBox>
           )}

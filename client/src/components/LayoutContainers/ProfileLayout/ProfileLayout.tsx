@@ -29,7 +29,7 @@ const defaultHeaderBackgroundImage = ({
 
 export type ProfileLayoutProps = {
   children: (scrollTrigger: boolean) => ReactNode;
-  title?: string;
+  title?: string | ReactNode;
   headerBackgroundImage?: string;
   isDataLoading?: boolean;
   headerAction?: ReactNode;

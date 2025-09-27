@@ -71,5 +71,11 @@
     "relatedExercises": "Related exercises"
   },
   "addExercise": "Add exercise",
+  "addExerciseDialog": {
+    "title": "Create New Exercise",
+    "nameLabel": "Exercise Name",
+    "cancel": "Cancel",
+    "add": "Add"
+  },
   "loadMore": "Load more"
 }
