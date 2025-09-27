@@ -12,21 +12,18 @@ import {
   ListItemText,
   Skeleton,
   Chip,
-  Button,
-  IconButton,
 } from "@mui/material";
 import { Exercise } from "../../../../api/quadcoachApi/domain";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useTranslation } from "react-i18next";
 import { FormikProps, FieldArray, FieldArrayRenderProps } from "formik";
 import { SoftInput, SoftTypography } from "../../../../components";
 import { ExercisePartialId } from "../../../../api/quadcoachApi/domain";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import MaterialAutocomplete from "../../../../components/ExerciseEditForm/AddMaterialDialog/MaterialAutocomplete";
 import TagAutocomplete from "../../../../components/ExerciseEditForm/AddTagDialog/TagAutocomplete";
-import AddRelatedExercisesDialog from "../../../../components/ExerciseEditForm/AddRelatedExercisesDialog/AddRelatedExercisesDialog";
+import ExerciseAutocomplete from "../../../../components/ExerciseEditForm/AddRelatedExercisesDialog/ExerciseAutocomplete";
 
 type ExerciseValue = {
   labelResourceKey: string;
@@ -66,16 +63,62 @@ const ExerciseInfo = ({
   formik,
 }: ExerciseInfoProps): JSX.Element => {
   const { t } = useTranslation("Exercise");
-  
-  // State for managing related exercises dialog
-  const [isRelatedExercisesDialogOpen, setIsRelatedExercisesDialogOpen] = useState(false);
+
+  // Local state for selecting new related exercises (transient before adding to formik)
+  const [selectedRelatedExercises, setSelectedRelatedExercises] = useState<
+    Exercise[]
+  >([]);
+  // Cache of exercises added so their names are available even before API refetch updates relatedExercises prop
+  const [cachedRelatedExercises, setCachedRelatedExercises] = useState<
+    Exercise[]
+  >([]);
+
+  const relatedExercisesFromFormik = useMemo(() => {
+    const ids = formik.values.related_to || [];
+
+    // Gather map from available relatedExercises (query) plus any transient selected ones and cached ones
+    const byId = new Map<string, Exercise>();
+    relatedExercises?.forEach((ex) => byId.set(ex._id, ex));
+    cachedRelatedExercises.forEach((ex) => {
+      if (!byId.has(ex._id)) byId.set(ex._id, ex);
+    });
+    selectedRelatedExercises.forEach((ex) => {
+      if (!byId.has(ex._id)) byId.set(ex._id, ex);
+    });
+
+    return ids
+      .map((id) => {
+        if (byId.has(id)) return byId.get(id)!;
+        // Fallback minimal placeholder (will be replaced when query refetches after save)
+        return {
+          _id: id,
+          name: id,
+          time_min: 0,
+          beaters: 0,
+          chasers: 0,
+          persons: 0,
+          description_blocks: [],
+        } as Exercise;
+      })
+      .filter(Boolean);
+  }, [
+    formik.values.related_to,
+    relatedExercises,
+    selectedRelatedExercises,
+    cachedRelatedExercises,
+  ]);
 
   return (
     <>
-      <Card sx={{ height: "100%", border: isEditMode ? "2px solid primary.main" : "none" }}>
-        <CardHeader 
+      <Card
+        sx={{
+          height: "100%",
+          border: isEditMode ? "2px solid primary.main" : "none",
+        }}
+      >
+        <CardHeader
           title={
-            isEditMode 
+            isEditMode
               ? `${t("Exercise:info.title")} (${t("Exercise:editMode")})`
               : t("Exercise:info.title")
           }
@@ -90,90 +133,84 @@ const ExerciseInfo = ({
               {/* Persons */}
               <Grid item xs={6} md={3}>
                 <ListItem>
-                  {isEditMode ? (
-                    <SoftInput
-                      type="number"
-                      value={formik.values.persons}
-                      onChange={formik.handleChange}
-                      onBlur={formik.handleBlur}
-                      name="persons"
-                      placeholder={t("Exercise:info.personNumber")}
-                      inputProps={{ min: 0 }}
-                    />
-                  ) : (
-                    <ListItemText
-                      primary={exercise.persons.toString()}
-                      secondary={t("Exercise:info.personNumber")}
-                    />
-                  )}
+                  <ListItemText
+                    primary={
+                      isEditMode ? (
+                        <SoftInput
+                          type="number"
+                          value={formik.values.persons}
+                          onChange={formik.handleChange}
+                          onBlur={formik.handleBlur}
+                          name="persons"
+                          placeholder={t("Exercise:info.personNumber")}
+                          inputProps={{ min: 0 }}
+                        />
+                      ) : (
+                        exercise.persons.toString()
+                      )
+                    }
+                    secondary={t("Exercise:info.personNumber")}
+                  />
                 </ListItem>
               </Grid>
-              
+
               {/* Beaters */}
               <Grid item xs={6} md={3}>
                 <ListItem>
-                  {isEditMode ? (
-                    <SoftInput
-                      type="number"
-                      value={formik.values.beaters}
-                      onChange={formik.handleChange}
-                      onBlur={formik.handleBlur}
-                      name="beaters"
-                      placeholder={t("Exercise:info.beaterNumber")}
-                      inputProps={{ min: 0 }}
-                    />
-                  ) : (
-                    <ListItemText
-                      primary={exercise.beaters.toString()}
-                      secondary={t("Exercise:info.beaterNumber")}
-                    />
-                  )}
+                  <ListItemText
+                    primary={
+                      isEditMode ? (
+                        <SoftInput
+                          type="number"
+                          value={formik.values.beaters}
+                          onChange={formik.handleChange}
+                          onBlur={formik.handleBlur}
+                          name="beaters"
+                          placeholder={t("Exercise:info.beaterNumber")}
+                          inputProps={{ min: 0 }}
+                        />
+                      ) : (
+                        exercise.beaters.toString()
+                      )
+                    }
+                    secondary={t("Exercise:info.beaterNumber")}
+                  />
                 </ListItem>
               </Grid>
-              
+
               {/* Chasers */}
               <Grid item xs={6} md={3}>
                 <ListItem>
-                  {isEditMode ? (
-                    <SoftInput
-                      type="number"
-                      value={formik.values.chasers}
-                      onChange={formik.handleChange}
-                      onBlur={formik.handleBlur}
-                      name="chasers"
-                      placeholder={t("Exercise:info.chaserNumber")}
-                      inputProps={{ min: 0 }}
-                    />
-                  ) : (
-                    <ListItemText
-                      primary={exercise.chasers.toString()}
-                      secondary={t("Exercise:info.chaserNumber")}
-                    />
-                  )}
+                  <ListItemText
+                    primary={
+                      isEditMode ? (
+                        <SoftInput
+                          type="number"
+                          value={formik.values.chasers}
+                          onChange={formik.handleChange}
+                          onBlur={formik.handleBlur}
+                          name="chasers"
+                          placeholder={t("Exercise:info.chaserNumber")}
+                          inputProps={{ min: 0 }}
+                        />
+                      ) : (
+                        exercise.chasers.toString()
+                      )
+                    }
+                    secondary={t("Exercise:info.chaserNumber")}
+                  />
                 </ListItem>
               </Grid>
-              
+
               {/* Time */}
               <Grid item xs={6} md={3}>
                 <ListItem>
-                  {isEditMode ? (
-                    <SoftInput
-                      type="number"
-                      value={formik.values.time_min}
-                      onChange={formik.handleChange}
-                      onBlur={formik.handleBlur}
-                      name="time_min"
-                      placeholder={t("Exercise:info.time")}
-                      inputProps={{ min: 0 }}
-                    />
-                  ) : (
-                    <ListItemText
-                      primary={t("Exercise:info.minutesValue", {
-                        value: exercise.time_min,
-                      })}
-                      secondary={t("Exercise:info.time")}
-                    />
-                  )}
+                  <ListItemText
+                    primary={t("Exercise:info.minutesValue", {
+                      value: exercise.time_min,
+                    })}
+                    secondary={t("Exercise:info.time")}
+                  />
                 </ListItem>
               </Grid>
             </Grid>
@@ -227,12 +264,12 @@ const ExerciseInfo = ({
                           return null;
                         })}
                         {formik.values.materials?.length === 0 && (
-                          <SoftTypography variant="body2" color="textSecondary">
+                          <SoftTypography variant="body2">
                             {t("Exercise:materials.none")}
                           </SoftTypography>
                         )}
                       </div>
-                      
+
                       {/* Material autocomplete */}
                       <MaterialAutocomplete
                         selectedMaterials={[]}
@@ -299,12 +336,12 @@ const ExerciseInfo = ({
                           return null;
                         })}
                         {formik.values.tags?.length === 0 && (
-                          <SoftTypography variant="body2" color="textSecondary">
+                          <SoftTypography variant="body2">
                             {t("Exercise:tags.none")}
                           </SoftTypography>
                         )}
                       </div>
-                      
+
                       {/* Tag autocomplete */}
                       <TagAutocomplete
                         selectedTags={[]}
@@ -365,6 +402,21 @@ const ExerciseInfo = ({
                         </ListItem>
                       ))}
                     </List>
+                  ) : (formik.values.related_to?.length ?? 0) > 0 ? (
+                    // Fallback to show locally cached related exercises right after save before refetch
+                    <List sx={{ width: "100%" }}>
+                      {relatedExercisesFromFormik.map((relatedExercise) => (
+                        <ListItem key={relatedExercise._id}>
+                          <ListItemButton
+                            onClick={() =>
+                              handleOpenExerciseClick(relatedExercise._id)
+                            }
+                          >
+                            <ListItemText primary={relatedExercise.name} />
+                          </ListItemButton>
+                        </ListItem>
+                      ))}
+                    </List>
                   ) : (
                     t("Exercise:realtedToExercises.none")
                   )}
@@ -377,13 +429,19 @@ const ExerciseInfo = ({
                     <div>
                       {/* Display existing related exercises as chips */}
                       <div style={{ marginBottom: 16 }}>
-                        {relatedExercises?.map((relatedExercise, index) => (
+                        {relatedExercisesFromFormik.map((relatedExercise) => (
                           <Chip
                             key={relatedExercise._id}
                             label={relatedExercise.name}
                             onDelete={() => {
-                              const exerciseIdIndex = formik.values.related_to?.findIndex(id => id === relatedExercise._id);
-                              if (exerciseIdIndex !== undefined && exerciseIdIndex !== -1) {
+                              const exerciseIdIndex =
+                                formik.values.related_to?.findIndex(
+                                  (id) => id === relatedExercise._id,
+                                );
+                              if (
+                                exerciseIdIndex !== undefined &&
+                                exerciseIdIndex !== -1
+                              ) {
                                 arrayHelpers.remove(exerciseIdIndex);
                               }
                             }}
@@ -392,21 +450,46 @@ const ExerciseInfo = ({
                             variant="outlined"
                           />
                         ))}
-                        {(!relatedExercises || relatedExercises.length === 0) && (
-                          <SoftTypography variant="body2" color="textSecondary">
+                        {relatedExercisesFromFormik.length === 0 && (
+                          <SoftTypography variant="body2">
                             {t("Exercise:realtedToExercises.none")}
                           </SoftTypography>
                         )}
                       </div>
-                      
-                      {/* Add related exercises button */}
-                      <Button
-                        variant="outlined"
-                        startIcon={<AddIcon />}
-                        onClick={() => setIsRelatedExercisesDialogOpen(true)}
-                      >
-                        {t("Exercise:realtedToExercises.add")}
-                      </Button>
+
+                      {/* Inline autocomplete for adding related exercises */}
+                      <div style={{ marginBottom: 8 }}>
+                        <ExerciseAutocomplete
+                          selectedExercises={selectedRelatedExercises}
+                          onExercisesSelectedChange={(newSelected) => {
+                            setSelectedRelatedExercises(newSelected);
+                            const currentIds = formik.values.related_to || [];
+                            const newExercises = newSelected.filter(
+                              (ex) => !currentIds.includes(ex._id),
+                            );
+                            if (newExercises.length > 0) {
+                              const newIds = newExercises.map((ex) => ex._id);
+                              formik.setFieldValue("related_to", [
+                                ...currentIds,
+                                ...newIds,
+                              ]);
+                              // Cache exercises for display even after clearing selection
+                              setCachedRelatedExercises((prev) => {
+                                const map = new Map(
+                                  prev.map((e) => [e._id, e]),
+                                );
+                                newExercises.forEach((e) => {
+                                  if (!map.has(e._id)) map.set(e._id, e);
+                                });
+                                return Array.from(map.values());
+                              });
+                              // Clear selection to allow adding more without manual deselect
+                              setSelectedRelatedExercises([]);
+                            }
+                          }}
+                          alreadyAddedExercises={relatedExercisesFromFormik}
+                        />
+                      </div>
                     </div>
                   )}
                 />
@@ -415,23 +498,6 @@ const ExerciseInfo = ({
           </Accordion>
         </Grid>
       </Grid>
-      
-      {/* Add Related Exercises Dialog */}
-      <AddRelatedExercisesDialog
-        isOpen={isRelatedExercisesDialogOpen}
-        onConfirm={(selectedExercises) => {
-          if (selectedExercises) {
-            const currentRelatedIds = formik.values.related_to || [];
-            const newIds = selectedExercises
-              .map(ex => ex._id)
-              .filter(id => !currentRelatedIds.includes(id));
-            
-            formik.setFieldValue('related_to', [...currentRelatedIds, ...newIds]);
-          }
-          setIsRelatedExercisesDialogOpen(false);
-        }}
-        alreadyAddedExercises={relatedExercises || []}
-      />
     </>
   );
 };
