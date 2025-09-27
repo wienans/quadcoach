@@ -14,6 +14,7 @@ router
   .patch(usersController.updateUser)
   .delete(usersController.deleteUser);
 
+router.route("/online-count").get(verifyAdmin, usersController.getOnlineUsersCount);
 router.route("/:id").get(usersController.getUserById);
 router.route("/email/:email").get(usersController.getUserByEmail);
 

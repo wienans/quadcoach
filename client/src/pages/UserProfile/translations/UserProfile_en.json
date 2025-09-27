@@ -17,5 +17,8 @@
   "editUser": "Edit/save Userdata",
   "favoriteExercisesList": "Favorite Exercises",
   "favoriteTacticboardsList": "Favorite Tacticboards",
-  "deleteAccount": "Delete Account"
+  "deleteAccount": "Delete Account",
+  "adminInfo": "Admin Information",
+  "onlineUsers": "Online Users",
+  "onlineUsersDescription": "Users active within the last 15 minutes"
 }

@@ -17,5 +17,8 @@
   "editUser": "Nutzerdaten bearbeiten / speichern",
   "favoriteExercisesList": "Favorisierte Übungen",
   "favoriteTacticboardsList": "Favorisierte Tacticboards",
-  "deleteAccount": "Account löschen"
+  "deleteAccount": "Account löschen",
+  "adminInfo": "Admin Informationen",
+  "onlineUsers": "Online Benutzer",
+  "onlineUsersDescription": "Benutzer, die in den letzten 15 Minuten aktiv waren"
 }

@@ -43,6 +43,7 @@ import {
   useDeleteUserMutation,
   useGetUserQuery,
   useUpdateUserMutation,
+  useGetOnlineUsersCountQuery,
 } from "../userApi";
 import { UserPartialId } from "../../api/quadcoachApi/domain";
 import {
@@ -87,6 +88,14 @@ const UserProfile = () => {
       userId: userViewId ?? "",
     },
   );
+
+  // Check if current logged-in user is admin (not the user being viewed)
+  const isCurrentUserAdmin = userRoles.includes("Admin") || userRoles.includes("admin");
+  
+  // Only fetch online users count if current user is admin
+  const { data: onlineUsersData } = useGetOnlineUsersCountQuery(undefined, {
+    skip: !isCurrentUserAdmin,
+  });
 
   const handleDeleteAccount = async () => {
     try {
@@ -286,6 +295,23 @@ const UserProfile = () => {
                           )}
                       </FormGroup>
                     </Grid>
+                  </AccordionDetails>
+                </Accordion>
+              )}
+              {isCurrentUserAdmin && (
+                <Accordion>
+                  <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                    {t("UserProfile:adminInfo")}
+                  </AccordionSummary>
+                  <AccordionDetails>
+                    <SoftBox p={1}>
+                      <SoftTypography variant="body1" fontWeight="medium">
+                        {t("UserProfile:onlineUsers")}: {onlineUsersData?.onlineUsersCount ?? 0}
+                      </SoftTypography>
+                      <SoftTypography variant="body2" color="text" sx={{ mt: 0.5 }}>
+                        {t("UserProfile:onlineUsersDescription")}
+                      </SoftTypography>
+                    </SoftBox>
                   </AccordionDetails>
                 </Accordion>
               )}

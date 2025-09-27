@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import jwt, { JwtPayload, VerifyCallback } from "jsonwebtoken";
 import { logEvents } from "./logger";
+import User from "../models/user";
 
 const verifyJWT = (req: Request, res: Response, next: NextFunction) => {
   const authHeader =
@@ -41,6 +42,13 @@ const verifyJWT = (req: Request, res: Response, next: NextFunction) => {
     req.UserInfo.name = decoded.UserInfo.name;
     // @ts-ignore
     req.UserInfo.id = decoded.UserInfo.id;
+
+    // Update user's last activity timestamp
+    if (decoded.UserInfo.id) {
+      User.findByIdAndUpdate(decoded.UserInfo.id, { lastActivity: new Date() }).catch(() => {
+        // Silently ignore errors to not break auth flow
+      });
+    }
 
     next();
   } catch (e) {
