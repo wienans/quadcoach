@@ -1,4 +1,5 @@
 {
+  "exerciseName": "Übungsname",
   "exerciseTitle": "Übung {{exerciseName}}",
   "exerciseTitleDefault": "Übung ansehen",
   "exercisesBreadcrumb": "Übungen",

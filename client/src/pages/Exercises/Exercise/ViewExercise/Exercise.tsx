@@ -43,7 +43,11 @@ import {
   useRemoveFavoriteExerciseMutation,
 } from "../../../../api/quadcoachApi/favoriteApi";
 
-import { ExerciseWithOutId, ExercisePartialId, Block } from "../../../../api/quadcoachApi/domain";
+import {
+  ExerciseWithOutId,
+  ExercisePartialId,
+  Block,
+} from "../../../../api/quadcoachApi/domain";
 import {
   FormikProvider,
   useFormik,
@@ -51,7 +55,8 @@ import {
   FieldArrayRenderProps,
 } from "formik";
 import * as Yup from "yup";
-import { SoftButton, SoftBox } from "../../../../components";
+import { SoftButton, SoftBox, SoftInput } from "../../../../components";
+import { time } from "console";
 
 const Exercise = () => {
   const { t } = useTranslation("Exercise");
@@ -182,10 +187,27 @@ const Exercise = () => {
       chasers: Yup.number().min(0, "Exercise:validation.chasers.min"),
       materials: Yup.array().of(Yup.string()),
       tags: Yup.array().of(Yup.string()),
-      description_blocks: Yup.array(),
-      related_to: Yup.array().of(Yup.string()),
+      description_blocks: Yup.array().of(
+        Yup.object({
+          description: Yup.string().required(
+            "ExerciseEditForm:block.description.missing",
+          ),
+          video_url: Yup.string().url(
+            "ExerciseEditForm:block.videoUrl.notValid",
+          ),
+          coaching_points: Yup.string(),
+          time_min: Yup.number(),
+          tactics_board: Yup.string(),
+        }),
+      ),
+      related_to: Yup.array().of(Yup.object()),
     }),
     onSubmit: (values) => {
+      const calculate_time = values.description_blocks.reduce(
+        (partialSum, current) => partialSum + current.time_min,
+        0,
+      );
+      values.time_min = calculate_time;
       if (exerciseId) {
         const exerciseUpdate = {
           _id: exerciseId,
@@ -270,7 +292,22 @@ const Exercise = () => {
 
   return (
     <ProfileLayout
-      title={exercise?.name}
+      title={
+        isEditMode ? (
+          <SoftInput
+            error={formik.touched.name && Boolean(formik.errors.name)}
+            name="name"
+            required
+            id="outlined-basic"
+            placeholder={t("Exercise:exerciseName")}
+            value={formik.values.name}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+          />
+        ) : (
+          exercise?.name
+        )
+      }
       headerBackgroundImage={headerBackgroundImage}
       isDataLoading={isExerciseLoading}
       headerAction={
@@ -419,7 +456,7 @@ const Exercise = () => {
               blockIndex={index}
             />
           ))}
-          
+
           {/* Add Block Button - only in edit mode */}
           {isEditMode && (
             <FieldArray
@@ -440,7 +477,7 @@ const Exercise = () => {
               )}
             />
           )}
-          
+
           <Footer />
         </FormikProvider>
       )}

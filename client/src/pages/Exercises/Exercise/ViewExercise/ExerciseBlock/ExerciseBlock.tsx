@@ -15,7 +15,11 @@ import { lazy, Suspense } from "react";
 import TacticboardAutocomplete from "../../../../../components/ExerciseEditForm/TacticboardAutocomplete/TacticboardAutocomplete";
 import { FormikProps, FieldArray, FieldArrayRenderProps } from "formik";
 import { ExercisePartialId } from "../../../../../api/quadcoachApi/domain";
-import { SoftInput, SoftButton } from "../../../../../components";
+import {
+  SoftInput,
+  SoftButton,
+  SoftTypography,
+} from "../../../../../components";
 import MDEditor from "@uiw/react-md-editor";
 import "@uiw/react-md-editor/markdown-editor.css";
 import "@uiw/react-markdown-preview/markdown.css";
@@ -44,20 +48,32 @@ const ExerciseBlock = ({
   const currentBlock = formik.values.description_blocks?.[blockIndex] || block;
 
   return (
-    <Card sx={{ my: 3, border: isEditMode ? "2px solid primary.main" : "none" }} key={block._id}>
+    <Card
+      sx={{ my: 3, border: isEditMode ? "2px solid primary.main" : "none" }}
+      key={block._id}
+    >
       <CardHeader
         title={t("Exercise:block.title", { blockNumber })}
         subheader={
           isEditMode ? (
-            <SoftInput
-              type="number"
-              value={currentBlock.time_min}
-              onChange={(e) => {
-                formik.setFieldValue(`description_blocks.${blockIndex}.time_min`, parseInt(e.target.value) || 0);
-              }}
-              placeholder={t("Exercise:info.time")}
-              inputProps={{ min: 0 }}
-            />
+            <div>
+              <SoftTypography variant="body2" color="textSecondary">
+                {t("Exercise:info.time")}
+                {"in minutes:"}{" "}
+              </SoftTypography>
+              <SoftInput
+                type="number"
+                value={currentBlock.time_min}
+                onChange={(e) => {
+                  formik.setFieldValue(
+                    `description_blocks.${blockIndex}.time_min`,
+                    parseInt(e.target.value) || 0,
+                  );
+                }}
+                placeholder={t("Exercise:info.time")}
+                inputProps={{ min: 0 }}
+              />
+            </div>
           ) : (
             t("Exercise:block.minutes", {
               minutes: currentBlock.time_min,
@@ -65,7 +81,9 @@ const ExerciseBlock = ({
           )
         }
         action={
-          isEditMode && formik.values.description_blocks && formik.values.description_blocks.length > 1 ? (
+          isEditMode &&
+          formik.values.description_blocks &&
+          formik.values.description_blocks.length > 1 ? (
             <FieldArray
               name="description_blocks"
               render={(arrayHelpers: FieldArrayRenderProps) => (
@@ -87,38 +105,40 @@ const ExerciseBlock = ({
         }}
       />
       {/* Video Section */}
-      {(currentBlock.video_url && currentBlock.video_url !== "" && !isEditMode) && (
-        <Accordion defaultExpanded>
-          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-            Video
-          </AccordionSummary>
-          <AccordionDetails sx={{ p: 0, pb: 1 }}>
-            <div
-              style={{
-                width: "100%",
-                display: "flex",
-                justifyContent: "center",
-              }}
-            >
+      {currentBlock.video_url &&
+        currentBlock.video_url !== "" &&
+        !isEditMode && (
+          <Accordion defaultExpanded>
+            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+              Video
+            </AccordionSummary>
+            <AccordionDetails sx={{ p: 0, pb: 1 }}>
               <div
                 style={{
                   width: "100%",
-                  maxWidth: "clamp(400px, 50%, 960px)",
+                  display: "flex",
+                  justifyContent: "center",
                 }}
               >
-                <UniversalMediaPlayer
-                  url={currentBlock.video_url || ""}
-                  width="100%"
-                  maintainAspectRatio
-                  controls
-                  light
-                />
+                <div
+                  style={{
+                    width: "100%",
+                    maxWidth: "clamp(400px, 50%, 960px)",
+                  }}
+                >
+                  <UniversalMediaPlayer
+                    url={currentBlock.video_url || ""}
+                    width="100%"
+                    maintainAspectRatio
+                    controls
+                    light
+                  />
+                </div>
               </div>
-            </div>
-          </AccordionDetails>
-        </Accordion>
-      )}
-      
+            </AccordionDetails>
+          </Accordion>
+        )}
+
       {/* Video URL Edit Mode */}
       {isEditMode && (
         <Accordion defaultExpanded>
@@ -129,14 +149,28 @@ const ExerciseBlock = ({
             <SoftInput
               value={currentBlock.video_url || ""}
               onChange={(e) => {
-                formik.setFieldValue(`description_blocks.${blockIndex}.video_url`, e.target.value);
+                formik.setFieldValue(
+                  `description_blocks.${blockIndex}.video_url`,
+                  e.target.value,
+                );
               }}
-              placeholder="https://www.youtube.com/watch?v=..."
+              placeholder="Youtube or Instagram URL"
               fullWidth
             />
             {currentBlock.video_url && currentBlock.video_url !== "" && (
-              <div style={{ marginTop: 16, display: "flex", justifyContent: "center" }}>
-                <div style={{ width: "100%", maxWidth: "clamp(400px, 50%, 960px)" }}>
+              <div
+                style={{
+                  marginTop: 16,
+                  display: "flex",
+                  justifyContent: "center",
+                }}
+              >
+                <div
+                  style={{
+                    width: "100%",
+                    maxWidth: "clamp(400px, 50%, 960px)",
+                  }}
+                >
                   <UniversalMediaPlayer
                     url={currentBlock.video_url}
                     width="100%"
@@ -178,7 +212,10 @@ const ExerciseBlock = ({
             <TacticboardAutocomplete
               value={currentBlock.tactics_board}
               onChange={(event, value) => {
-                formik.setFieldValue(`description_blocks.${blockIndex}.tactics_board`, value?._id || undefined);
+                formik.setFieldValue(
+                  `description_blocks.${blockIndex}.tactics_board`,
+                  value?._id || undefined,
+                );
               }}
               onBlur={() => {}}
             />
@@ -192,18 +229,20 @@ const ExerciseBlock = ({
       )}
 
       {/* Description Section */}
-      {(currentBlock.description && currentBlock.description !== "" && !isEditMode) && (
-        <Accordion defaultExpanded>
-          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-            {t("Exercise:block.description")}
-          </AccordionSummary>
-          <AccordionDetails sx={{ ml: 2 }}>
-            <Suspense fallback={<div>Loading...</div>}>
-              <MarkdownRenderer>{currentBlock.description}</MarkdownRenderer>
-            </Suspense>
-          </AccordionDetails>
-        </Accordion>
-      )}
+      {currentBlock.description &&
+        currentBlock.description !== "" &&
+        !isEditMode && (
+          <Accordion defaultExpanded>
+            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+              {t("Exercise:block.description")}
+            </AccordionSummary>
+            <AccordionDetails sx={{ ml: 2 }}>
+              <Suspense fallback={<div>Loading...</div>}>
+                <MarkdownRenderer>{currentBlock.description}</MarkdownRenderer>
+              </Suspense>
+            </AccordionDetails>
+          </Accordion>
+        )}
 
       {/* Description Edit Mode */}
       {isEditMode && (
@@ -216,7 +255,10 @@ const ExerciseBlock = ({
               height={300}
               value={currentBlock.description || ""}
               onChange={(value) => {
-                formik.setFieldValue(`description_blocks.${blockIndex}.description`, value || "");
+                formik.setFieldValue(
+                  `description_blocks.${blockIndex}.description`,
+                  value || "",
+                );
               }}
             />
           </AccordionDetails>
@@ -224,18 +266,22 @@ const ExerciseBlock = ({
       )}
 
       {/* Coaching Points Section */}
-      {(currentBlock.coaching_points && currentBlock.coaching_points !== "" && !isEditMode) && (
-        <Accordion defaultExpanded>
-          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-            {t("Exercise:block.coachingPoints")}
-          </AccordionSummary>
-          <AccordionDetails sx={{ ml: 2 }}>
-            <Suspense fallback={<div>Loading...</div>}>
-              <MarkdownRenderer>{currentBlock.coaching_points}</MarkdownRenderer>
-            </Suspense>
-          </AccordionDetails>
-        </Accordion>
-      )}
+      {currentBlock.coaching_points &&
+        currentBlock.coaching_points !== "" &&
+        !isEditMode && (
+          <Accordion defaultExpanded>
+            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+              {t("Exercise:block.coachingPoints")}
+            </AccordionSummary>
+            <AccordionDetails sx={{ ml: 2 }}>
+              <Suspense fallback={<div>Loading...</div>}>
+                <MarkdownRenderer>
+                  {currentBlock.coaching_points}
+                </MarkdownRenderer>
+              </Suspense>
+            </AccordionDetails>
+          </Accordion>
+        )}
 
       {/* Coaching Points Edit Mode */}
       {isEditMode && (
@@ -248,7 +294,10 @@ const ExerciseBlock = ({
               height={300}
               value={currentBlock.coaching_points || ""}
               onChange={(value) => {
-                formik.setFieldValue(`description_blocks.${blockIndex}.coaching_points`, value || "");
+                formik.setFieldValue(
+                  `description_blocks.${blockIndex}.coaching_points`,
+                  value || "",
+                );
               }}
             />
           </AccordionDetails>
