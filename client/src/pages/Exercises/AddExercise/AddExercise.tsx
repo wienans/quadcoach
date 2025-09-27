@@ -23,14 +23,14 @@ const AddExercise = () => {
       isLoading: isAddExerciseLoading,
       isError: isAddExerciseError,
       isSuccess: isAddExerciseSuccess,
+      data: addedExercise,
     },
   ] = useAddExerciseMutation();
 
   useEffect(() => {
-    if (!isAddExerciseSuccess) return;
-
-    navigate("/exercises");
-  }, [isAddExerciseSuccess, navigate]);
+    if (!isAddExerciseSuccess || !addedExercise?._id) return;
+    navigate(`/exercises/${addedExercise._id}`);
+  }, [isAddExerciseSuccess, addedExercise, navigate]);
 
   useEffect(() => {
     if (

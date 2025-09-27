@@ -71,5 +71,11 @@
     "relatedExercises": "Zugehörige Übungen"
   },
   "addExercise": "Übung hinzufügen",
+  "addExerciseDialog": {
+    "title": "Neue Übung erstellen",
+    "nameLabel": "Name der Übung",
+    "cancel": "Abbrechen",
+    "add": "Hinzufügen"
+  },
   "loadMore": "Mehr laden"
 }

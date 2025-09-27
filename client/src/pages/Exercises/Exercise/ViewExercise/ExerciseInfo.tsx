@@ -25,26 +25,6 @@ import MaterialAutocomplete from "../../../../components/ExerciseEditForm/AddMat
 import TagAutocomplete from "../../../../components/ExerciseEditForm/AddTagDialog/TagAutocomplete";
 import ExerciseAutocomplete from "../../../../components/ExerciseEditForm/AddRelatedExercisesDialog/ExerciseAutocomplete";
 
-type ExerciseValue = {
-  labelResourceKey: string;
-  getValue: (exercise: Exercise) => string;
-};
-
-const personValues: ExerciseValue[] = [
-  {
-    labelResourceKey: "Exercise:info.personNumber",
-    getValue: (exercise) => exercise.persons.toString(),
-  },
-  {
-    labelResourceKey: "Exercise:info.beaterNumber",
-    getValue: (exercise) => exercise.beaters.toString(),
-  },
-  {
-    labelResourceKey: "Exercise:info.chaserNumber",
-    getValue: (exercise) => exercise.chasers.toString(),
-  },
-];
-
 export type ExerciseInfoProps = {
   exercise: Exercise;
   isRelatedExercisesLoading: boolean;
@@ -116,13 +96,7 @@ const ExerciseInfo = ({
           border: isEditMode ? "2px solid primary.main" : "none",
         }}
       >
-        <CardHeader
-          title={
-            isEditMode
-              ? `${t("Exercise:info.title")} (${t("Exercise:editMode")})`
-              : t("Exercise:info.title")
-          }
-        />
+        <CardHeader title={t("Exercise:info.title")} />
         <CardContent>
           <List
             sx={{
