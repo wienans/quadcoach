@@ -40,18 +40,6 @@ const routes = [
         },
         children: [
           {
-            path: "add",
-            handle: {
-              type: RouteHandleType.addExercise,
-            },
-            async lazy() {
-              const AddExercise = (await import("../Exercises")).AddExercise;
-              return {
-                element: <AddExercise />,
-              };
-            },
-          },
-          {
             path: ":id",
             handle: {
               type: RouteHandleType.exercise,
