@@ -1,50 +1,54 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+<!--
+Sync Impact Report
+Version change: (template) -> 1.0.0
+Modified principles: (all defined from template placeholders)
+Added sections: Architecture & Technical Constraints; Development Workflow & Quality Gates
+Removed sections: None
+Templates updated:
+ - .specify/templates/plan-template.md ✅ (version reference)
+ - .specify/templates/spec-template.md ✅ (no version reference; aligned)
+ - .specify/templates/tasks-template.md ✅ (no changes required)
+Runtime guidance updated: AGENTS.md ✅ (already consistent; no outdated contradictions)
+Deferred TODOs:
+ - TODO(TEST_FRAMEWORK_SELECTION): Adopt and configure test frameworks (e.g., Vitest/RTL for client, Jest + Supertest for server) before introducing complex new features.
+-->
+
+# QuadCoach Constitution
 
 ## Core Principles
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### I. User Value & Simplicity First
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+QuadCoach features MUST directly support coaching, training, or strategic analysis for Quadball roles: Chaser, Keeper, Beater, Seeker. Every change MUST state its user-facing outcome in the feature spec summary. Reject abstractions or layers that do not remove duplication, improve clarity, or enable a near‑term feature. Prefer the simplest working solution; remove code once obsolete. UI components MUST avoid premature generalization: promote to shared only after a second concrete reuse. Rationale: Focus prevents framework drift and ensures velocity stays tied to tangible coaching value.
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+### II. Type Safety & Explicit Contracts
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+All new frontend logic MUST use strict TypeScript types—no `any` except in narrow, documented interop boundaries. Backend models MUST define explicit Mongoose schemas with validation and indexes where needed for performance. API endpoints MUST document request/response shapes (OpenAPI stub or typed interface) before implementation. Breaking contract changes MUST be versioned or coordinated with the consuming client in the same PR. Rationale: Explicit contracts reduce runtime defects and accelerate safe iteration.
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+### III. Secure & Responsible Data Handling
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+All protected routes MUST enforce JWT verification and role/ownership checks (e.g., only board owners or explicitly granted users access a tactic board). Rate limiting MUST remain enabled on auth-sensitive endpoints. Sensitive operations MUST return consistent generic error messages to avoid information leakage. Never log raw tokens or passwords. Password resets and email verification flows MUST preserve idempotency and token expiry. Rationale: Coaching data and user credentials require trust; security lapses erode adoption.
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+### IV. Operational Clarity: Observability, Performance, Workflow
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+Code MUST pass linting (ESLint) and formatting (Prettier) before merge. Each PR MUST state if it impacts performance or security; if yes, include measurement or rationale. Server endpoints SHOULD target p95 latency <300ms under normal load; client critical interactions (navigation to interactive state) SHOULD complete <1s on a mid‑tier laptop. Introduce logging at: request entry (route + correlation id), auth failures (without sensitive payload), and error boundaries (stack traces server-side only). Avoid silent catches—propagate or handle with user-facing feedback. Rationale: Consistent workflow and observability reduce firefighting and facilitate scaling.
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+## Architecture & Technical Constraints
+
+Stack is fixed unless governance change: Frontend (React + Vite + Material UI + Redux Toolkit), Backend (Node.js + Express + TypeScript + Mongoose + MongoDB), Auth (JWT). Docker Compose orchestrates services; container definitions MUST stay minimal (no dev-only bloat in production images). Feature code aligns with existing directory segmentation: `client/src/{components,pages,api,store}` and `server/{controllers,routes,models,middleware}`. Shared logic SHOULD prefer explicit module exports over deep relative imports. No addition of a second state management library without formal governance approval. Performance-sensitive data access MUST justify added indices in model definition.
+
+## Development Workflow & Quality Gates
+
+1. Spec (WHAT/WHY) → Plan (structure & constitutional check) → Tasks (ordered, TDD) → Implementation → Validation.
+2. Each plan MUST document any constitution deviations under Complexity Tracking with justification and rejected simpler alternative.
+3. Tests (once framework present) MUST fail before implementation for new capabilities; green tests gate merge.
+4. All PRs MUST: pass lint, include user-facing summary, state contract impacts, and list added/changed endpoints.
+5. Breaking changes MUST coordinate client/server in same PR or provide backward compatible layer.
+6. Manual verification steps (if no automated test yet) MUST be documented in the PR until replaced by tests.
+7. Feature branches MUST follow pattern `###-short-description` (issue/sequence number then kebab summary).
 
 ## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
+Amendments: Any principle addition, removal, or redefinition requires PR section "Governance Impact" summarizing rationale and version bump type. Minor wording clarifications (non-semantic) may raise a PATCH version. All contributors MUST enforce principles during review—"nice to have" language is disallowed; violations require revision or documented waiver in Complexity Tracking (temporary, with removal date). Versioning: Semantic rules—MAJOR for removing/replacing a principle or changing enforcement level, MINOR for adding a new principle/section or materially expanding scope, PATCH for clarifications that do not change obligations. Compliance Review: At plan stage and post-design (Plan Phase checkpoints) reviewers confirm alignment; unresolved deviations block progression. Runtime Guidance: Operational norms (build, lint, run) reside in `AGENTS.md`; if a governance change affects that file it MUST be updated in the same PR. Security or performance emergency patches may bypass some workflow steps but MUST backfill tests and governance notes within 48 hours.
 
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+**Version**: 1.0.0 | **Ratified**: 2025-09-28 | **Last Amended**: 2025-09-28
