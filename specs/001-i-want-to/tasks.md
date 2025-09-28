@@ -1,163 +1,161 @@
 # Tasks: Practice Planner
 
-**Feature Directory**: /home/explainingrobotics/quadcoach/specs/001-i-want-to
-**Design Inputs**: plan.md (required), research.md, data-model.md, contracts/practice-plans.openapi.yml, quickstart.md
-**Tech Stack**: React 18 + TypeScript (client), Node.js 18 + Express + TypeScript + Mongoose (server)
+**Input**: Design documents from `/specs/001-i-want-to/`
+**Prerequisites**: plan.md (required), research.md, data-model.md, contracts/
 
-## Generation Summary
-Derived entities (data-model.md): PracticePlan, Section, Group, Item (ExerciseItem|BreakItem), PracticePlanAccess
-Endpoints (contracts): POST /api/practice-plans, GET /api/practice-plans/{id}, PATCH /api/practice-plans/{id}, DELETE /api/practice-plans/{id}, POST /api/practice-plans/{id}/access, DELETE /api/practice-plans/{id}/access/{accessId}
-Integration Scenarios (quickstart steps 1-12): plan creation defaults, rename + target duration, add groups/items + totals, override duration recalculation, duplicate section, delete/undo group, target below total styling, missing exercise placeholder, access grant edit, concurrent edits last-save-wins, empty sections persistence, cleanup delete plan.
-
-## Execution Flow (Phase 3 Main)
+## Execution Flow (main)
 ```
-1. Setup testing + scaffolds (Jest + Supertest for server)
-2. Write contract test files (one per endpoint) – expect failures
-3. Write integration scenario test files – expect failures
-4. Implement Mongoose models (entities) & access model
-5. Implement controller logic (CRUD + access) sequentially
-6. Implement routes and mount in server
-7. Implement frontend slice, API hooks, components
-8. Polish: unit tests (selectors), performance validation notes, docs updates
+1. Load plan.md from feature directory
+   → If not found: ERROR "No implementation plan found"
+   → Extract: tech stack, libraries, structure
+2. Load optional design documents:
+   → data-model.md: Extract entities → model tasks
+   → contracts/: Each file → contract test tasks
+   → research.md: Extract decisions → setup & validation tasks
+   → quickstart.md: Each scenario step → integration test tasks
+3. Generate tasks by category:
+   → Setup: test framework init (repo lacks tests), tooling
+   → Tests: contract tests, validation tests, integration (quickstart) tests
+   → Core: models, services/controllers, routes, frontend state & components
+   → Integration: middleware wiring, rate limiting, logging, API client
+   → Polish: unit calc tests, performance script, docs update, cleanup
+4. Apply task rules:
+   → Different files = mark [P] for parallel
+   → Same file = sequential (no [P])
+   → Tests before implementation (TDD)
+5. Number tasks sequentially (T001, T002...)
+6. Generate dependency graph
+7. Create parallel execution examples
+8. Validate task completeness:
+   → All endpoints have contract tests & implementation tasks
+   → All entities have model tasks
+   → All quickstart steps have integration tests
+9. Return: SUCCESS (tasks ready for execution)
 ```
 
 ## Format: `[ID] [P?] Description`
-[P] = Task can run in parallel (different file & no unmet dependency conflicts). Tasks touching the same file are sequential (no [P]). All file paths are absolute.
+- **[P]**: Can run in parallel (different files, no dependencies)
+- Include exact absolute file paths in descriptions
 
----
 ## Phase 3.1: Setup
-- [ ] T001 Initialize server test infra: add dev deps (jest, ts-jest, @types/jest, supertest, mongodb-memory-server) in `/home/explainingrobotics/quadcoach/server/package.json`; add `test` script and create `/home/explainingrobotics/quadcoach/server/jest.config.cjs`.
-- [ ] T002 [P] Create test folders & config: `/home/explainingrobotics/quadcoach/server/tests/contract/`, `/home/explainingrobotics/quadcoach/server/tests/integration/`, global setup `/home/explainingrobotics/quadcoach/server/tests/setup.ts` (MongoMemoryServer connect) & update Jest config to use it.
-- [ ] T003 [P] Add TypeScript test build support: ensure `/home/explainingrobotics/quadcoach/server/tsconfig.json` includes `tests` paths & ES module interop for jest.
-- [ ] T004 [P] Create empty backend feature scaffold files: models `/home/explainingrobotics/quadcoach/server/models/practicePlan.ts`, `/home/explainingrobotics/quadcoach/server/models/practicePlanAccess.ts`, controller `/home/explainingrobotics/quadcoach/server/controllers/practicePlanController.ts`, routes `/home/explainingrobotics/quadcoach/server/routes/practicePlanRoutes.ts` exporting placeholders so tests compile.
-- [ ] T005 [P] Frontend scaffold: create slice file `/home/explainingrobotics/quadcoach/client/src/store/practicePlan/practicePlanSlice.ts` with placeholder initial state & add to `/home/explainingrobotics/quadcoach/client/src/store/store.ts` (not implemented yet) so future imports resolve.
+- [ ] T001 Add server test dependencies (jest, ts-jest, @types/jest, supertest) in `/home/explainingrobotics/quadcoach/server/package.json` (add devDependencies, do NOT install yet).
+- [ ] T002 Add Jest config `/home/explainingrobotics/quadcoach/server/jest.config.cjs` (ts-jest preset, testMatch = `**/tests/**/*.spec.ts`).
+- [ ] T003 Add test script ("test": "jest --runInBand") to `/home/explainingrobotics/quadcoach/server/package.json` (sequential after T001).
+- [ ] T004 Create test setup file `/home/explainingrobotics/quadcoach/server/tests/setup.ts` (Mongo memory server placeholder or TODO comment) and reference via Jest `setupFilesAfterEnv`.
+- [ ] T005 Configure ts-node / ts-jest type mappings in `/home/explainingrobotics/quadcoach/server/tsconfig.json` (add `types: ["jest"]`).
+- [ ] T006 Ensure lint covers new test dir: update `/home/explainingrobotics/quadcoach/server/package.json` eslintIgnore or config if needed (sequential with package edits).
+- [ ] T007 Create directories: `/home/explainingrobotics/quadcoach/server/tests/contract`, `/home/explainingrobotics/quadcoach/server/tests/integration`, `/home/explainingrobotics/quadcoach/server/tests/unit`.
+- [ ] T008 Document test usage in `/home/explainingrobotics/quadcoach/specs/001-i-want-to/quickstart.md` append "Run tests with npm test" note.
 
-## Phase 3.2: Tests First (Contract & Integration) – MUST FAIL BEFORE IMPLEMENTATION
-### Contract Tests (one per endpoint)
-- [ ] T006 [P] Contract test POST /api/practice-plans in `/home/explainingrobotics/quadcoach/server/tests/contract/practicePlans.post.spec.ts` validating 201 schema vs OpenAPI.
-- [ ] T007 [P] Contract test GET /api/practice-plans/{id} in `/home/explainingrobotics/quadcoach/server/tests/contract/practicePlans.get.spec.ts` validating 200 + 404.
-- [ ] T008 [P] Contract test PATCH /api/practice-plans/{id} in `/home/explainingrobotics/quadcoach/server/tests/contract/practicePlans.patch.spec.ts` validating partial update behavior.
-- [ ] T009 [P] Contract test DELETE /api/practice-plans/{id} in `/home/explainingrobotics/quadcoach/server/tests/contract/practicePlans.delete.spec.ts` validating 204 + 404.
-- [ ] T010 [P] Contract test POST /api/practice-plans/{id}/access in `/home/explainingrobotics/quadcoach/server/tests/contract/practicePlans.access.post.spec.ts` validating access list schema.
-- [ ] T011 [P] Contract test DELETE /api/practice-plans/{id}/access/{accessId} in `/home/explainingrobotics/quadcoach/server/tests/contract/practicePlans.access.delete.spec.ts` validating updated list.
+## Phase 3.2: Tests First (TDD) ⚠️ MUST COMPLETE BEFORE 3.3
+### Contract Tests (one per endpoint — all [P])
+- [ ] T009 [P] Contract test POST /api/practice-plans in `/home/explainingrobotics/quadcoach/server/tests/contract/practicePlans.post.spec.ts` (201, schema match, empty name 400 placeholder TODO).
+- [ ] T010 [P] Contract test GET /api/practice-plans/:id in `/home/explainingrobotics/quadcoach/server/tests/contract/practicePlans.get.spec.ts` (200, 404 cases).
+- [ ] T011 [P] Contract test PATCH /api/practice-plans/:id in `/home/explainingrobotics/quadcoach/server/tests/contract/practicePlans.patch.spec.ts`.
+- [ ] T012 [P] Contract test DELETE /api/practice-plans/:id in `/home/explainingrobotics/quadcoach/server/tests/contract/practicePlans.delete.spec.ts`.
+- [ ] T013 [P] Contract test POST /api/practice-plans/:id/access in `/home/explainingrobotics/quadcoach/server/tests/contract/practicePlans.accessAdd.spec.ts`.
+- [ ] T014 [P] Contract test DELETE /api/practice-plans/:id/access/:accessId in `/home/explainingrobotics/quadcoach/server/tests/contract/practicePlans.accessDelete.spec.ts`.
 
-### Integration Scenario Tests (Quickstart)
-- [ ] T012 [P] Integration: create plan with defaults (steps 1-2) in `/home/explainingrobotics/quadcoach/server/tests/integration/practicePlan.createDefaults.spec.ts`.
-- [ ] T013 [P] Integration: rename section + set targetDuration (step 3) in `/home/explainingrobotics/quadcoach/server/tests/integration/practicePlan.renameTarget.spec.ts`.
-- [ ] T014 [P] Integration: add groups/items + totals calculation (step 4) in `/home/explainingrobotics/quadcoach/server/tests/integration/practicePlan.groupsItemsTotals.spec.ts` (assert derived totals client-simulated function).
-- [ ] T015 [P] Integration: override exercise duration recalculation (step 5) in `/home/explainingrobotics/quadcoach/server/tests/integration/practicePlan.overrideDuration.spec.ts`.
-- [ ] T016 [P] Integration: duplicate section deep copy (step 6) in `/home/explainingrobotics/quadcoach/server/tests/integration/practicePlan.duplicateSection.spec.ts`.
-- [ ] T017 [P] Integration: delete group then reconstruct (step 7) in `/home/explainingrobotics/quadcoach/server/tests/integration/practicePlan.deleteGroupUndo.spec.ts`.
-- [ ] T018 [P] Integration: target below current total style trigger logic (step 8) in `/home/explainingrobotics/quadcoach/server/tests/integration/practicePlan.targetBelowTotal.spec.ts` (verifies server stores unchanged; client calc helper marks exceed).
-- [ ] T019 [P] Integration: missing exercise placeholder (step 9) in `/home/explainingrobotics/quadcoach/server/tests/integration/practicePlan.missingExercise.spec.ts`.
-- [ ] T020 [P] Integration: access grant & edit by second user (step 10) in `/home/explainingrobotics/quadcoach/server/tests/integration/practicePlan.accessGrant.spec.ts`.
-- [ ] T021 [P] Integration: concurrent edits last-save-wins (step 11) in `/home/explainingrobotics/quadcoach/server/tests/integration/practicePlan.concurrentEdits.spec.ts`.
-- [ ] T022 [P] Integration: empty sections persistence + cleanup (steps 12 & 26) in `/home/explainingrobotics/quadcoach/server/tests/integration/practicePlan.emptyAndCleanup.spec.ts`.
+### Validation / Negative Tests
+- [ ] T015 [P] Validation test: reject empty name on create (POST) in `/home/explainingrobotics/quadcoach/server/tests/contract/practicePlans.post.validation.spec.ts`.
+- [ ] T016 [P] Validation test: reject negative targetDuration / item duration in `/home/explainingrobotics/quadcoach/server/tests/contract/practicePlans.negativeDurations.spec.ts`.
+- [ ] T017 [P] Unauthorized access test hitting each endpoint without JWT in `/home/explainingrobotics/quadcoach/server/tests/contract/practicePlans.unauthorized.spec.ts`.
 
-## Phase 3.3: Core Models (Entities)
-- [ ] T023 Implement PracticePlan model (with embedded Section, Group, Item discriminated shapes) in `/home/explainingrobotics/quadcoach/server/models/practicePlan.ts`.
-- [ ] T024 [P] Implement PracticePlanAccess model in `/home/explainingrobotics/quadcoach/server/models/practicePlanAccess.ts`.
+### Integration Tests (Quickstart Scenarios 1-12) — independent flows ([P])
+- [ ] T018 [P] Integration test login (obtain JWT) in `/home/explainingrobotics/quadcoach/server/tests/integration/practicePlans.01.login.spec.ts`.
+- [ ] T019 [P] Integration test create defaults (3 sections + group) in `/home/explainingrobotics/quadcoach/server/tests/integration/practicePlans.02.createDefaults.spec.ts`.
+- [ ] T020 [P] Integration test rename section & set targetDuration in `/home/explainingrobotics/quadcoach/server/tests/integration/practicePlans.03.renameSection.spec.ts`.
+- [ ] T021 [P] Integration test add groups/items/break & totals recompute in `/home/explainingrobotics/quadcoach/server/tests/integration/practicePlans.04.groupsItemsTotals.spec.ts`.
+- [ ] T022 [P] Integration test override exercise duration recompute in `/home/explainingrobotics/quadcoach/server/tests/integration/practicePlans.05.overrideDuration.spec.ts`.
+- [ ] T023 [P] Integration test duplicate section deep copy in `/home/explainingrobotics/quadcoach/server/tests/integration/practicePlans.06.duplicateSection.spec.ts`.
+- [ ] T024 [P] Integration test delete & recreate group (undo via duplicate) in `/home/explainingrobotics/quadcoach/server/tests/integration/practicePlans.07.groupDeleteUndo.spec.ts`.
+- [ ] T025 [P] Integration test targetDuration below totals (red styling server returns structure unchanged) in `/home/explainingrobotics/quadcoach/server/tests/integration/practicePlans.08.targetBelowTotal.spec.ts`.
+- [ ] T026 [P] Integration test missing exercise placeholder (simulate unknown exerciseId) in `/home/explainingrobotics/quadcoach/server/tests/integration/practicePlans.09.missingExercise.spec.ts`.
+- [ ] T027 [P] Integration test grant access edit to second user in `/home/explainingrobotics/quadcoach/server/tests/integration/practicePlans.10.grantAccess.spec.ts`.
+- [ ] T028 [P] Integration test concurrent edit last-save-wins (sequential patch race) in `/home/explainingrobotics/quadcoach/server/tests/integration/practicePlans.11.concurrentSave.spec.ts`.
+- [ ] T029 [P] Integration test empty plan (delete all sections then save) in `/home/explainingrobotics/quadcoach/server/tests/integration/practicePlans.12.emptyPlan.spec.ts`.
 
-## Phase 3.4: Controller (Sequential per shared file)
-- [ ] T025 Scaffold controller structure & create handler stubs (createPlan, getPlan, patchPlan, deletePlan, grantAccess, revokeAccess) in `/home/explainingrobotics/quadcoach/server/controllers/practicePlanController.ts` (no logic yet just signatures).
-- [ ] T026 Implement createPlan logic (POST) with defaults & validation in same controller file.
-- [ ] T027 Implement getPlan logic (GET) with access authorization.
-- [ ] T028 Implement patchPlan logic (PATCH) applying partial updates & updatedAt refresh.
-- [ ] T029 Implement deletePlan logic (DELETE) removing related access docs.
-- [ ] T030 Implement grantAccess logic (POST /:id/access) ensuring unique compound index handling.
-- [ ] T031 Implement revokeAccess logic (DELETE /:id/access/:accessId) with ownership protection.
+## Phase 3.3: Core Backend Implementation (ONLY after tests exist & fail)
+### Models (entities) — Different files ([P])
+- [ ] T030 [P] Implement PracticePlan Mongoose schema in `/home/explainingrobotics/quadcoach/server/models/practicePlan.ts` (embedded Section/Group/Item subdocs, validation rules).
+- [ ] T031 [P] Implement PracticePlanAccess Mongoose schema in `/home/explainingrobotics/quadcoach/server/models/practicePlanAccess.ts` (compound unique index (user, practicePlan)).
 
-## Phase 3.5: Routes & Server Wiring
-- [ ] T032 [P] Define Express routes in `/home/explainingrobotics/quadcoach/server/routes/practicePlanRoutes.ts` mapping endpoints to controller handlers with `verifyJWT` middleware.
-- [ ] T033 Mount practice plan routes in `/home/explainingrobotics/quadcoach/server/server.ts` under `/api/practice-plans` and ensure error handling passes through existing middleware.
+### Controller & Routes
+- [ ] T032 Implement controller skeleton `/home/explainingrobotics/quadcoach/server/controllers/practicePlanController.ts` (create,get,patch,delete,addAccess,removeAccess) with TODO bodies.
+- [ ] T033 Implement route definitions `/home/explainingrobotics/quadcoach/server/routes/practicePlanRoutes.ts` using `verifyJWT` middleware.
+- [ ] T034 Register route in `/home/explainingrobotics/quadcoach/server/server.ts` (mount `/api/practice-plans`).
+- [ ] T035 Fill controller logic for create (validate name, defaults) in `/home/explainingrobotics/quadcoach/server/controllers/practicePlanController.ts`.
+- [ ] T036 Implement get (404 handling) in same controller file.
+- [ ] T037 Implement patch (partial update, updatedAt refresh) in same controller file.
+- [ ] T038 Implement delete with 204 response in same controller file.
+- [ ] T039 Implement addAccess (validate user exists, upsert access) in same controller file.
+- [ ] T040 Implement removeAccess (delete entry, return updated list) in same controller file.
+- [ ] T041 Add validation helpers (non-negative durations) in `/home/explainingrobotics/quadcoach/server/controllers/practicePlanController.ts` or separate util `/home/explainingrobotics/quadcoach/server/controllers/helpers/practicePlanValidation.ts` (if new file create) — sequential with controller tasks (no [P]).
 
-## Phase 3.6: Frontend State & Components
-- [ ] T034 Implement practicePlanSlice (state: plans map, activePlanId, draft editing arrays) & selectors for derived totals in `/home/explainingrobotics/quadcoach/client/src/store/practicePlan/practicePlanSlice.ts`.
-- [ ] T035 [P] Extend RTK Query endpoints (create, get, patch, delete, grantAccess, revokeAccess) in `/home/explainingrobotics/quadcoach/client/src/api/quadcoachApi/index.ts` (or appropriate domain file) reusing axios base query.
-- [ ] T036 Create PracticePlanner page skeleton in `/home/explainingrobotics/quadcoach/client/src/pages/PracticePlanner/index.tsx` with placeholder layout.
-- [ ] T037 [P] Create SectionEditor component in `/home/explainingrobotics/quadcoach/client/src/components/PracticePlanner/SectionEditor/SectionEditor.tsx`.
-- [ ] T038 [P] Create GroupEditor component in `/home/explainingrobotics/quadcoach/client/src/components/PracticePlanner/GroupEditor/GroupEditor.tsx`.
-- [ ] T039 [P] Create ItemList component in `/home/explainingrobotics/quadcoach/client/src/components/PracticePlanner/ItemList/ItemList.tsx`.
-- [ ] T040 [P] Create TimeSummary component in `/home/explainingrobotics/quadcoach/client/src/components/PracticePlanner/TimeSummary/TimeSummary.tsx` computing totals from selectors.
+## Phase 3.4: Core Frontend Implementation (after backend endpoints functional)
+- [ ] T042 Create Redux slice `/home/explainingrobotics/quadcoach/client/src/store/practicePlan/practicePlanSlice.ts` (state: currentPlan, draft edits, selectors for totals).
+- [ ] T043 Extend API client add endpoints in `/home/explainingrobotics/quadcoach/client/src/api/quadcoachApi/practicePlansApi.ts` (RTK Query create/get/update/delete/grant/revoke).
+- [ ] T044 Add components directory `/home/explainingrobotics/quadcoach/client/src/components/PracticePlanner/SectionEditor/SectionEditor.tsx` skeleton.
+- [ ] T045 Add GroupEditor component `/home/explainingrobotics/quadcoach/client/src/components/PracticePlanner/GroupEditor/GroupEditor.tsx`.
+- [ ] T046 Add ItemList component `/home/explainingrobotics/quadcoach/client/src/components/PracticePlanner/ItemList/ItemList.tsx`.
+- [ ] T047 Add TimeSummary component `/home/explainingrobotics/quadcoach/client/src/components/PracticePlanner/TimeSummary/TimeSummary.tsx` (shows per-section vs target, highlight exceeded).
+- [ ] T048 Create page `/home/explainingrobotics/quadcoach/client/src/pages/PracticePlanner/index.tsx` integrating components & API hooks.
+- [ ] T049 Add navigation entry to existing menu (update `/home/explainingrobotics/quadcoach/client/src/pages/routes/` appropriate config file) for Practice Planner.
+- [ ] T050 Implement derived selectors (sectionCurrent, groupTotals) in slice file (update same file as T042 — sequential).
+- [ ] T051 Wire optimistic update logic on PATCH in slice (same slice file — sequential after T050).
 
-## Phase 3.7: Polish & Validation
-- [ ] T041 Unit tests for selector logic (derived totals, overrides) in `/home/explainingrobotics/quadcoach/client/src/store/practicePlan/practicePlanSlice.selectors.spec.ts` (requires frontend jest setup extension of root config or new config).
-- [ ] T042 [P] Add performance measurement script for large plan scenario in `/home/explainingrobotics/quadcoach/client/scripts/measurePracticePlannerPerf.ts` (log recalculation time <100ms).
-- [ ] T043 [P] Update feature documentation: add usage section to `/home/explainingrobotics/quadcoach/specs/001-i-want-to/quickstart.md` for new UI components & commands.
-- [ ] T044 Refactor duplication in controller (shared validation helpers) introducing `/home/explainingrobotics/quadcoach/server/controllers/practicePlanValidation.ts` if needed.
-- [ ] T045 Final manual validation pass executing all quickstart steps; document outcomes in `/home/explainingrobotics/quadcoach/specs/001-i-want-to/quickstart.md` (append Validation Results section).
+## Phase 3.5: Integration & Middleware
+- [ ] T052 Apply rateLimiter middleware to practice plan routes (edit `/home/explainingrobotics/quadcoach/server/routes/practicePlanRoutes.ts`).
+- [ ] T053 Ensure logger middleware captures new endpoints (verify or adjust in `/home/explainingrobotics/quadcoach/server/server.ts`).
+- [ ] T054 Add access control check helper (owner or access record) in `/home/explainingrobotics/quadcoach/server/controllers/practicePlanController.ts` (refactor code) sequential.
+- [ ] T055 Implement error responses for validation failures (shared util) in `/home/explainingrobotics/quadcoach/server/controllers/practicePlanController.ts`.
+- [ ] T056 Update OpenAPI doc `/home/explainingrobotics/quadcoach/specs/001-i-want-to/contracts/practice-plans.openapi.yml` with any new error responses (400 examples).
+
+## Phase 3.6: Polish
+- [ ] T057 [P] Unit test derived time calculation (pure functions) in `/home/explainingrobotics/quadcoach/server/tests/unit/practicePlans.timeCalc.spec.ts` (feed mock plan JSON).
+- [ ] T058 [P] Performance script: generate max-size plan & measure recompute (<100ms) in `/home/explainingrobotics/quadcoach/scripts/perf/practicePlanRecalc.ts`.
+- [ ] T059 [P] Documentation update: append usage section to `/home/explainingrobotics/quadcoach/specs/001-i-want-to/quickstart.md` summarizing UI steps.
+- [ ] T060 Cleanup & dead code removal pass (ensure no leftover TODOs) across new files (no [P] because touches multiple existing files sequentially).
 
 ## Dependencies
-```
-T001 → (T002,T003,T004,T005)
-Contract tests (T006-T011) depend on (T001-T004)
-Integration tests (T012-T022) depend on (T001-T004)
-Models: T023 depends on (T006-T022 written) but before controller impl; T024 parallel with T023
-Controller: T025 depends on (T023,T024); T026-T031 sequential
-Routes: T032 depends on (T025) stubs; T033 depends on (T032, T026-T031 complete for full pass)
-Frontend: T034 depends on (T023 model schema knowledge); T035 depends on (T032 routes mounted); Components (T036-T040) depend on (T034,T035)
-Polish: T041 depends on (T034); T042 depends on (T036-T040); T043 depends on (T036-T040); T044 depends on (T026-T031); T045 depends on all implementation tasks (T023-T044)
-```
+- Setup (T001–T008) before any tests (T009+).
+- All tests (T009–T029) before core backend implementation (T030–T041).
+- Models (T030,T031) before controller logic (T035–T040) & validation helpers (T041).
+- Controller skeleton & routes (T032–T034) before controller method implementations (T035–T040).
+- Backend endpoints (T035–T040) pass before frontend slice & components (T042–T051).
+- Slice foundation (T042) before selectors (T050) before optimistic updates (T051).
+- Middleware integration (T052–T055) after base endpoints (T035–T040).
+- OpenAPI update (T056) after any error response changes (T055).
+- Polish tasks (T057–T060) last.
 
-## Parallel Execution Guidance
-Early Parallel Batch Example (after T001 complete):
+## Parallel Execution Example
 ```
-Task: "T002 Create test folders & setup"
-Task: "T003 Add tsconfig test support"
-Task: "T004 Create backend feature scaffold files"
-Task: "T005 Frontend scaffold slice placeholder"
-```
-Contract Tests Parallel Batch:
-```
-Task: "T006 Contract test POST /api/practice-plans"
-Task: "T007 Contract test GET /api/practice-plans/{id}"
-Task: "T008 Contract test PATCH /api/practice-plans/{id}"
-Task: "T009 Contract test DELETE /api/practice-plans/{id}"
-Task: "T010 Contract test POST /api/practice-plans/{id}/access"
-Task: "T011 Contract test DELETE /api/practice-plans/{id}/access/{accessId}"
-```
-Integration Tests Parallel Batch:
-```
-Task: "T012 Integration create defaults"
-Task: "T013 Integration rename target"
-Task: "T014 Integration groups items totals"
-Task: "T015 Integration override duration"
-Task: "T016 Integration duplicate section"
-Task: "T017 Integration delete group undo"
-Task: "T018 Integration target below total"
-Task: "T019 Integration missing exercise"
-Task: "T020 Integration access grant"
-Task: "T021 Integration concurrent edits"
-Task: "T022 Integration empty and cleanup"
-```
-Frontend Components Parallel Batch (after T034-T035):
-```
-Task: "T037 SectionEditor component"
-Task: "T038 GroupEditor component"
-Task: "T039 ItemList component"
-Task: "T040 TimeSummary component"
-```
-Polish Parallel Batch:
-```
-Task: "T041 Selector unit tests"
-Task: "T042 Performance measurement script"
-Task: "T043 Update feature documentation"
-Task: "T044 Controller validation refactor"  # May serialize if same file edits
-```
-(Note: If T044 touches same controller file as post-refactor changes, run it after completing other polish tasks editing different files.)
+# Launch all independent contract tests after setup:
+Task: "Contract test POST /api/practice-plans in /home/explainingrobotics/quadcoach/server/tests/contract/practicePlans.post.spec.ts"
+Task: "Contract test GET /api/practice-plans/:id in /home/explainingrobotics/quadcoach/server/tests/contract/practicePlans.get.spec.ts"
+Task: "Contract test PATCH /api/practice-plans/:id in /home/explainingrobotics/quadcoach/server/tests/contract/practicePlans.patch.spec.ts"
+Task: "Contract test DELETE /api/practice-plans/:id in /home/explainingrobotics/quadcoach/server/tests/contract/practicePlans.delete.spec.ts"
+Task: "Contract test POST /api/practice-plans/:id/access in /home/explainingrobotics/quadcoach/server/tests/contract/practicePlans.accessAdd.spec.ts"
+Task: "Contract test DELETE /api/practice-plans/:id/access/:accessId in /home/explainingrobotics/quadcoach/server/tests/contract/practicePlans.accessDelete.spec.ts"
 
-## Validation Checklist
-- [ ] All contract endpoints have tests (T006-T011)
-- [ ] All entities have model tasks (T023, T024 include embedded entities)
-- [ ] Tests precede implementation of logic (controllers/routes after tests)
-- [ ] Parallel tasks use distinct files
-- [ ] Each task lists absolute file paths
-- [ ] Controller logic tasks sequential for shared file
+# Launch a subset of integration tests concurrently (independent data):
+Task: "Integration test create defaults in /home/explainingrobotics/quadcoach/server/tests/integration/practicePlans.02.createDefaults.spec.ts"
+Task: "Integration test duplicate section in /home/explainingrobotics/quadcoach/server/tests/integration/practicePlans.06.duplicateSection.spec.ts"
+Task: "Integration test grant access in /home/explainingrobotics/quadcoach/server/tests/integration/practicePlans.10.grantAccess.spec.ts"
+Task: "Integration test concurrent last-save-wins in /home/explainingrobotics/quadcoach/server/tests/integration/practicePlans.11.concurrentSave.spec.ts"
+```
 
 ## Notes
-- Ensure failing state of contract & integration tests before starting T023.
-- Keep model lean (no derived stored fields as per research.md).
-- Access control mirrors existing tacticboard patterns (reuse middleware).
-- Last-save-wins accepted; concurrent test ensures earlier write overwritten.
-- Selector unit tests should simulate exercise defaultDuration absence & override logic.
-- Performance script can rely on Date.now micro-benchmark; no external deps.
+- [P] tasks operate on distinct files with no ordering dependency.
+- Ensure tests fail initially (unimplemented endpoints) to confirm TDD path.
+- Avoid parallel edits to the same controller file (T035–T041 sequential).
+- Frontend tasks assume existing Redux & RTK Query patterns (mirror exercises/tacticboard domains).
+- Performance script is illustrative; may log timing to console.
+
+## Validation Checklist
+- [ ] All endpoints have contract tests (T009–T014)
+- [ ] All entities modeled (T030, T031)
+- [ ] All quickstart steps covered (T018–T029)
+- [ ] Tests precede implementation
+- [ ] Parallel tasks avoid same-file edits
+- [ ] Every task includes absolute path
