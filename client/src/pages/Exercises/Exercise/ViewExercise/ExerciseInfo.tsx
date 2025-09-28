@@ -166,7 +166,6 @@ const ExerciseInfo = ({
                         <SoftInput
                           type="number"
                           value={formik.values.chasers}
-                          // onChange={formik.handleChange}
                           onChange={(e) => {
                             formik.setFieldValue(
                               `chasers`,
