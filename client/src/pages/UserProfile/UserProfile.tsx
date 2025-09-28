@@ -92,8 +92,9 @@ const UserProfile = () => {
   );
 
   // Check if current logged-in user is admin (not the user being viewed)
-  const isCurrentUserAdmin = userRoles.includes("Admin") || userRoles.includes("admin");
-  
+  const isCurrentUserAdmin =
+    userRoles.includes("Admin") || userRoles.includes("admin");
+
   // Only fetch online users count if current user is admin
   const { data: onlineUsersData } = useGetOnlineUsersCountQuery(undefined, {
     skip: !isCurrentUserAdmin,
@@ -103,9 +104,12 @@ const UserProfile = () => {
   const { data: userExercises } = useGetUserExercisesQuery(userViewId ?? "", {
     skip: !userViewId,
   });
-  const { data: userTacticboards } = useGetUserTacticboardsQuery(userViewId ?? "", {
-    skip: !userViewId,
-  });
+  const { data: userTacticboards } = useGetUserTacticboardsQuery(
+    userViewId ?? "",
+    {
+      skip: !userViewId,
+    },
+  );
 
   const handleDeleteAccount = async () => {
     try {
@@ -316,9 +320,14 @@ const UserProfile = () => {
                   <AccordionDetails>
                     <SoftBox p={1}>
                       <SoftTypography variant="body1" fontWeight="medium">
-                        {t("UserProfile:onlineUsers")}: {onlineUsersData?.onlineUsersCount ?? 0}
+                        {t("UserProfile:onlineUsers")}:{" "}
+                        {onlineUsersData?.onlineUsersCount ?? 0}
                       </SoftTypography>
-                      <SoftTypography variant="body2" color="text" sx={{ mt: 0.5 }}>
+                      <SoftTypography
+                        variant="body2"
+                        color="text"
+                        sx={{ mt: 0.5 }}
+                      >
                         {t("UserProfile:onlineUsersDescription")}
                       </SoftTypography>
                     </SoftBox>
@@ -353,7 +362,7 @@ const UserProfile = () => {
                             }}
                           />
                         </ListItemButton>
-                      )) ?? ""}
+                      ))}
                     </List>
                   </AccordionDetails>
                 </Accordion>
@@ -386,7 +395,7 @@ const UserProfile = () => {
                             }}
                           />
                         </ListItemButton>
-                      )) ?? ""}
+                      ))}
                     </List>
                   </AccordionDetails>
                 </Accordion>
@@ -419,7 +428,7 @@ const UserProfile = () => {
                             }}
                           />
                         </ListItemButton>
-                      )) ?? ""}
+                      ))}
                     </List>
                   </AccordionDetails>
                 </Accordion>
@@ -452,7 +461,7 @@ const UserProfile = () => {
                             }}
                           />
                         </ListItemButton>
-                      )) ?? ""}
+                      ))}
                     </List>
                   </AccordionDetails>
                 </Accordion>
@@ -485,7 +494,7 @@ const UserProfile = () => {
                             }}
                           />
                         </ListItemButton>
-                      )) ?? ""}
+                      ))}
                     </List>
                   </AccordionDetails>
                 </Accordion>
@@ -518,7 +527,7 @@ const UserProfile = () => {
                             }}
                           />
                         </ListItemButton>
-                      )) ?? ""}
+                      ))}
                     </List>
                   </AccordionDetails>
                 </Accordion>

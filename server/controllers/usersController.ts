@@ -41,17 +41,19 @@ export const getAllUsers = asyncHandler(async (req: Request, res: Response) => {
 // @desc    Get online users count
 // @route   GET /api/user/online-count
 // @access  Private - Admin only
-export const getOnlineUsersCount = asyncHandler(async (req: Request, res: Response) => {
-  // Consider users online if they were active within the last 15 minutes (matching JWT expiration)
-  const fifteenMinutesAgo = new Date(Date.now() - 15 * 60 * 1000);
-  
-  const onlineUsersCount = await User.countDocuments({
-    lastActivity: { $gte: fifteenMinutesAgo },
-    active: true
-  });
+export const getOnlineUsersCount = asyncHandler(
+  async (req: Request, res: Response) => {
+    // Consider users online if they were active within the last 15 minutes (matching JWT expiration)
+    const fifteenMinutesAgo = new Date(Date.now() - 15 * 60 * 1000);
 
-  res.json({ onlineUsersCount });
-});
+    const onlineUsersCount = await User.countDocuments({
+      lastActivity: { $gte: fifteenMinutesAgo },
+      active: true,
+    });
+
+    res.json({ onlineUsersCount });
+  }
+);
 
 // @desc    Get user by ID
 // @route   GET /api/users/:id
@@ -252,30 +254,31 @@ export const getUserExercises = asyncHandler(
     }
 
     const userId = req.params.id;
-
+    const selectFields =
+      "_id name description time persons tags created updated";
     // Get owned exercises
     const ownedExercises = await Exercise.find({ user: userId })
-      .select('_id name description time persons tags created updated')
+      .select(selectFields)
       .lean();
 
     // Get exercises with edit access
-    const accessEntries = await ExerciseAccess.find({ 
-      user: userId, 
-      access: "edit" 
+    const accessEntries = await ExerciseAccess.find({
+      user: userId,
+      access: "edit",
     })
       .populate({
-        path: 'exercise',
-        select: '_id name description time persons tags created updated'
+        path: "exercise",
+        select: selectFields,
       })
       .lean();
 
     const accessibleExercises = accessEntries
-      .map(entry => entry.exercise)
-      .filter(exercise => exercise != null);
+      .map((entry) => entry.exercise)
+      .filter((exercise) => exercise != null);
 
     res.json({
       owned: ownedExercises,
-      accessible: accessibleExercises
+      accessible: accessibleExercises,
     });
   }
 );
@@ -299,30 +302,30 @@ export const getUserTacticboards = asyncHandler(
     }
 
     const userId = req.params.id;
-
+    const selectFields = "_id name description tags created updated isPrivate";
     // Get owned tacticboards
     const ownedTacticboards = await TacticBoard.find({ user: userId })
-      .select('_id name description tags created updated isPrivate')
+      .select(selectFields)
       .lean();
 
     // Get tacticboards with edit access
-    const accessEntries = await TacticboardAccess.find({ 
-      user: userId, 
-      access: "edit" 
+    const accessEntries = await TacticboardAccess.find({
+      user: userId,
+      access: "edit",
     })
       .populate({
-        path: 'tacticboard',
-        select: '_id name description tags created updated isPrivate'
+        path: "tacticboard",
+        select: selectFields,
       })
       .lean();
 
     const accessibleTacticboards = accessEntries
-      .map(entry => entry.tacticboard)
-      .filter(tacticboard => tacticboard != null);
+      .map((entry) => entry.tacticboard)
+      .filter((tacticboard) => tacticboard != null);
 
     res.json({
       owned: ownedTacticboards,
-      accessible: accessibleTacticboards
+      accessible: accessibleTacticboards,
     });
   }
 );
