@@ -24,6 +24,7 @@ export type ExercisesCardViewProps = {
   isExercisesLoading: boolean;
   onOpenExerciseClick: (exerciseId: string) => void;
   scrollTrigger: boolean;
+  onOpenAddExerciseClick?: () => void;
 };
 
 const ExercisesCardView = ({
@@ -31,6 +32,7 @@ const ExercisesCardView = ({
   isExercisesLoading,
   onOpenExerciseClick,
   scrollTrigger,
+  onOpenAddExerciseClick,
 }: ExercisesCardViewProps): JSX.Element => {
   const dispatch = useAppDispatch();
   const { t } = useTranslation("ExerciseList");
@@ -76,7 +78,7 @@ const ExercisesCardView = ({
             {userStatus != null && (
               <BottomNavigationAction
                 icon={<AddIcon />}
-                href="/exercises/add"
+                onClick={onOpenAddExerciseClick}
               />
             )}
             {scrollTrigger && (
