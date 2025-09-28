@@ -189,7 +189,10 @@ const Exercise = () => {
           "persons-gte-roles",
           "Exercise:validation.persons.lessThanRoles",
           function (value) {
-            const { beaters, chasers } = this.parent as any;
+            const { beaters, chasers } = this.parent as {
+              beaters?: number;
+              chasers?: number;
+            };
             if (value == null) return false;
             const rolesTotal = (beaters ?? 0) + (chasers ?? 0);
             return value >= rolesTotal;
@@ -233,16 +236,19 @@ const Exercise = () => {
       );
       values.time_min = calculate_time;
       if (exerciseId) {
-        const sanitizedBlocks = values.description_blocks.map((block: any) => {
-          if (typeof block._id === "string" && block._id.startsWith("temp_")) {
-            const { _id, ...rest } = block;
-            return rest; // omit temporary _id so backend generates a valid ObjectId
-          }
-          return block;
-        });
-        const exerciseUpdate: any = {
+        const sanitizedBlocks: Block[] = values.description_blocks.map(
+          (block) => {
+            if (typeof block._id === "string" && block._id.startsWith("temp_")) {
+              const { _id: _omitId, ...rest } = block;
+              void _omitId; // mark as used to satisfy lint
+              return rest as Block; // backend will generate a new _id
+            }
+            return block;
+          },
+        );
+        const exerciseUpdate = {
           _id: exerciseId,
-          ...values,
+            ...values,
           description_blocks: sanitizedBlocks,
         };
         try {
@@ -332,7 +338,7 @@ const Exercise = () => {
       });
       formik.setTouched({});
     }
-  }, [exercise, isEditMode]);
+  }, [exercise, isEditMode, formik]);
 
   const [
     deleteExercise,
@@ -510,7 +516,7 @@ const Exercise = () => {
             </Tooltip>
           ),
           isPrivileged && (
-            <Tooltip key="delete" title={t("Exercise:deleteExercise")}>
+            <Tooltip key="delete" title={t("Exercise:deleteExercise")}>           
               <BottomNavigationAction
                 icon={<DeleteIcon />}
                 onClick={onDeleteExerciseClick}
@@ -576,16 +582,21 @@ const Exercise = () => {
                       return error.map((blockErr, idx) => {
                         if (!blockErr || typeof blockErr !== "object")
                           return null;
-                        const descriptionErr = (blockErr as any).description;
-                        const videoUrlErr = (blockErr as any).video_url;
-                        const timeErr = (blockErr as any).time_min;
+                        const {
+                          description: descriptionErr,
+                          video_url: videoUrlErr,
+                          time_min: timeErr,
+                        } = blockErr as {
+                          description?: string;
+                          video_url?: string;
+                          time_min?: string;
+                        };
                         const issues: string[] = [];
                         if (typeof descriptionErr === "string")
                           issues.push(t(descriptionErr));
                         if (typeof videoUrlErr === "string")
                           issues.push(t(videoUrlErr));
-                        if (typeof timeErr === "string")
-                          issues.push(t(timeErr));
+                        if (typeof timeErr === "string") issues.push(t(timeErr));
                         if (issues.length === 0) return null;
                         return (
                           <li key={`${field}_${idx}`} style={{ fontSize: 12 }}>

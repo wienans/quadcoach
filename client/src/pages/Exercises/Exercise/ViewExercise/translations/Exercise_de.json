@@ -12,6 +12,7 @@
   "deleteExercise": "Übung löschen",
   "errorDeletingExercise": "Es ist ein Fehler beim Löschen der Übung aufgetreten.",
   "errorLoadingRelatedExercises": "Es ist ein Fehler beim Laden der zugehörigen Übungen aufgetreten.",
+  "favoriteExercise": "Favorisiere Übung",
   "info": {
     "title": "Info",
     "personNumber": "Personen",
@@ -46,8 +47,7 @@
     },
     "visitTacticboard": "Taktik Tafel ansehen",
     "description": "Beschreibung:",
-    "coachingPoints": "Coaching-Punkte:",
-    "favoriteExercise": "Favorisiere Übung"
+    "coachingPoints": "Coaching-Punkte:"
   },
   "addBlock": "Block hinzufügen",
   "validation": {

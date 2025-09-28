@@ -12,6 +12,7 @@
   "deleteExercise": "Delete exercise",
   "errorDeletingExercise": "An error occurred while deleting exercise.",
   "errorLoadingRelatedExercises": "An error occurred while loading related exercises.",
+  "favoriteExercise": "Favorite exercise",
   "info": {
     "title": "Info",
     "personNumber": "Persons",
@@ -46,8 +47,7 @@
     },
     "visitTacticboard": "show Tacticboard",
     "description": "Description:",
-    "coachingPoints": "Coaching points:",
-    "favoriteExercise": "Favorite exercise"
+    "coachingPoints": "Coaching points:"
   },
   "addBlock": "Add Block",
   "validation": {
