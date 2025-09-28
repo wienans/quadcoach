@@ -84,5 +84,15 @@
           "min": "Block time must be 0 or greater"
         }
       }
+  },
+  "access": {
+    "title": "Access",
+    "add_user": "Add user",
+    "add": "Add",
+    "error": {
+      "emailRequired": "Email is required",
+      "notFound": "User not found with this email",
+      "addFailed": "Failed to add user access"
+    }
   }
 }

@@ -7,6 +7,8 @@ import Exercise from "../models/exercise";
 import mongoose from "mongoose";
 import ExerciseFav from "../models/exerciseFav";
 import TacticboardFav from "../models/tacticboardFav";
+import ExerciseAccess from "../models/exerciseAccess";
+import TacticboardAccess from "../models/tacticboardAccess";
 
 interface UserInfo {
   id?: string;
@@ -39,17 +41,19 @@ export const getAllUsers = asyncHandler(async (req: Request, res: Response) => {
 // @desc    Get online users count
 // @route   GET /api/user/online-count
 // @access  Private - Admin only
-export const getOnlineUsersCount = asyncHandler(async (req: Request, res: Response) => {
-  // Consider users online if they were active within the last 15 minutes (matching JWT expiration)
-  const fifteenMinutesAgo = new Date(Date.now() - 15 * 60 * 1000);
-  
-  const onlineUsersCount = await User.countDocuments({
-    lastActivity: { $gte: fifteenMinutesAgo },
-    active: true
-  });
+export const getOnlineUsersCount = asyncHandler(
+  async (req: Request, res: Response) => {
+    // Consider users online if they were active within the last 15 minutes (matching JWT expiration)
+    const fifteenMinutesAgo = new Date(Date.now() - 15 * 60 * 1000);
 
-  res.json({ onlineUsersCount });
-});
+    const onlineUsersCount = await User.countDocuments({
+      lastActivity: { $gte: fifteenMinutesAgo },
+      active: true,
+    });
+
+    res.json({ onlineUsersCount });
+  }
+);
 
 // @desc    Get user by ID
 // @route   GET /api/users/:id
@@ -228,5 +232,100 @@ export const deleteUser = asyncHandler(
     const result = await user.deleteOne();
     const reply = `Username ${result.email} with ID ${result._id} deleted`;
     res.json({ message: reply });
+  }
+);
+
+// @desc    Get user's owned and accessible exercises
+// @route   GET /api/user/:id/exercises
+// @access  Private - User themselves or Admin
+export const getUserExercises = asyncHandler(
+  async (req: RequestWithUser, res: Response) => {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      res.status(400).json({ message: "Invalid user ID" });
+      return;
+    }
+
+    if (
+      (!req.UserInfo?.id || req.UserInfo.id !== req.params.id) &&
+      !req.UserInfo?.roles?.some((role) => role.toLowerCase() === "admin")
+    ) {
+      res.status(403).json({ message: "Forbidden" });
+      return;
+    }
+
+    const userId = req.params.id;
+    const selectFields =
+      "_id name description time persons tags created updated";
+    // Get owned exercises
+    const ownedExercises = await Exercise.find({ user: userId })
+      .select(selectFields)
+      .lean();
+
+    // Get exercises with edit access
+    const accessEntries = await ExerciseAccess.find({
+      user: userId,
+      access: "edit",
+    })
+      .populate({
+        path: "exercise",
+        select: selectFields,
+      })
+      .lean();
+
+    const accessibleExercises = accessEntries
+      .map((entry) => entry.exercise)
+      .filter((exercise) => exercise != null);
+
+    res.json({
+      owned: ownedExercises,
+      accessible: accessibleExercises,
+    });
+  }
+);
+
+// @desc    Get user's owned and accessible tacticboards
+// @route   GET /api/user/:id/tacticboards
+// @access  Private - User themselves or Admin
+export const getUserTacticboards = asyncHandler(
+  async (req: RequestWithUser, res: Response) => {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      res.status(400).json({ message: "Invalid user ID" });
+      return;
+    }
+
+    if (
+      (!req.UserInfo?.id || req.UserInfo.id !== req.params.id) &&
+      !req.UserInfo?.roles?.some((role) => role.toLowerCase() === "admin")
+    ) {
+      res.status(403).json({ message: "Forbidden" });
+      return;
+    }
+
+    const userId = req.params.id;
+    const selectFields = "_id name description tags created updated isPrivate";
+    // Get owned tacticboards
+    const ownedTacticboards = await TacticBoard.find({ user: userId })
+      .select(selectFields)
+      .lean();
+
+    // Get tacticboards with edit access
+    const accessEntries = await TacticboardAccess.find({
+      user: userId,
+      access: "edit",
+    })
+      .populate({
+        path: "tacticboard",
+        select: selectFields,
+      })
+      .lean();
+
+    const accessibleTacticboards = accessEntries
+      .map((entry) => entry.tacticboard)
+      .filter((tacticboard) => tacticboard != null);
+
+    res.json({
+      owned: ownedTacticboards,
+      accessible: accessibleTacticboards,
+    });
   }
 );

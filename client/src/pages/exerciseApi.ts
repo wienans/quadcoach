@@ -17,8 +17,8 @@ export type GetExercisesRequest = {
   maxBeaters?: number;
   minChasers?: number;
   maxChasers?: number;
-  sortBy?: 'name' | 'time' | 'persons' | 'created' | 'updated';
-  sortOrder?: 'asc' | 'desc';
+  sortBy?: "name" | "time" | "persons" | "created" | "updated";
+  sortOrder?: "asc" | "desc";
   page?: number;
   limit?: number;
 };
@@ -38,7 +38,7 @@ export type AccessLevel = "edit";
 export type ExerciseAccessEntry = {
   user: {
     _id: string;
-    username: string;
+    name: string;
   };
   exercise: string;
   access: AccessLevel;
@@ -348,7 +348,6 @@ export const exerciseApiSlice = quadcoachApi.injectEndpoints({
         { type: TagType.exercise, id: `${exerciseId}-access` },
       ],
     }),
-
   }),
 });
 

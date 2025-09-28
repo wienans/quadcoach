@@ -141,16 +141,25 @@ export const updateById = asyncHandler(
     if (mongoose.isValidObjectId(req.params.id)) {
       const findResult = await Exercise.findOne({ _id: req.params.id });
       if (findResult) {
-        if (
-          findResult.user &&
-          (!req.UserInfo?.id ||
-            req.UserInfo.id != findResult.user?.toString()) &&
-          !req.UserInfo?.roles?.includes("Admin") &&
-          !req.UserInfo?.roles?.includes("admin")
-        ) {
+        if (!req.UserInfo?.id) {
+          res.status(401).json({ message: "Unauthorized" });
+          return;
+        }
+
+        const accessUser = await ExerciseAccess.findOne({
+          user: req.UserInfo.id,
+          exercise: req.params.id,
+        });
+        const hasAccess =
+          findResult.user?.toString() === req.UserInfo.id ||
+          req.UserInfo.roles?.includes("Admin") ||
+          req.UserInfo.roles?.includes("admin") ||
+          (accessUser && accessUser.access == "edit");
+        if (!hasAccess) {
           res.status(403).json({ message: "Forbidden" });
           return;
         }
+
         const result = await Exercise.updateOne(
           { _id: req.params.id },
           { $set: req.body }
@@ -173,13 +182,21 @@ export const deleteById = asyncHandler(
     if (mongoose.isValidObjectId(req.params.id)) {
       const findResult = await Exercise.findOne({ _id: req.params.id });
       if (findResult) {
-        if (
-          findResult.user &&
-          (!req.UserInfo?.id ||
-            req.UserInfo.id != findResult.user?.toString()) &&
-          !req.UserInfo?.roles?.includes("Admin") &&
-          !req.UserInfo?.roles?.includes("admin")
-        ) {
+        if (!req.UserInfo?.id) {
+          res.status(401).json({ message: "Unauthorized" });
+          return;
+        }
+        const accessUser = await ExerciseAccess.findOne({
+          user: req.UserInfo.id,
+          exercise: req.params.id,
+        });
+        const hasAccess =
+          findResult.user?.toString() === req.UserInfo.id ||
+          req.UserInfo.roles?.includes("Admin") ||
+          req.UserInfo.roles?.includes("admin") ||
+          (accessUser && accessUser.access == "edit");
+
+        if (!hasAccess) {
           res.status(403).json({ message: "Forbidden" });
           return;
         }
@@ -459,7 +476,7 @@ export const getAllAccessUsers = asyncHandler(
 
     const accessEntries = await ExerciseAccess.find({
       exercise: req.params.id,
-    }).populate("user", "username");
+    }).populate("user", "name");
 
     res.json(accessEntries);
   }

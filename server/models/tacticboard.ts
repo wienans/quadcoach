@@ -220,6 +220,6 @@ const tacticBoardSchema = new Schema<ITacticBoard>(
   { timestamps: true }
 );
 
-const TacticBoard = model<ITacticBoard>("tacticBoards", tacticBoardSchema);
+const TacticBoard = model<ITacticBoard>("tacticboards", tacticBoardSchema);
 
 export default TacticBoard;
