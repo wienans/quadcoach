@@ -1,0 +1,201 @@
+openapi: 3.0.0
+info:
+  title: Practice Plans API
+  version: 0.1.0
+paths:
+  /api/practice-plans:
+    post:
+      summary: Create new practice plan with default sections
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: Non-empty plan name
+                description:
+                  type: string
+                tags:
+                  type: array
+                  items:
+                    type: string
+              required: [name]
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PracticePlan'
+  /api/practice-plans/{id}:
+    get:
+      summary: Get practice plan by id
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/PracticePlan' } } } }
+        '404': { description: Not found }
+    patch:
+      summary: Update (partial) practice plan
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PracticePlanPatch'
+      responses:
+        '200': { description: Updated, content: { application/json: { schema: { $ref: '#/components/schemas/PracticePlan' } } } }
+        '404': { description: Not found }
+    delete:
+      summary: Delete practice plan
+      parameters:
+        - in: path
+          name: id
+          schema: { type: string }
+          required: true
+      responses:
+        '204': { description: Deleted }
+        '404': { description: Not found }
+  /api/practice-plans/{id}/access:
+    post:
+      summary: Grant access to a coach
+      parameters:
+        - in: path
+          name: id
+          schema: { type: string }
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                coachId:
+                  type: string
+                access:
+                  type: string
+                  enum: [view, edit]
+              required: [coachId, access]
+      responses:
+        '200': { description: Updated access list, content: { application/json: { schema: { $ref: '#/components/schemas/PracticePlanAccessList' } } } }
+        '404': { description: Not found }
+  /api/practice-plans/{id}/access/{accessId}:
+    delete:
+      summary: Revoke access entry
+      parameters:
+        - in: path
+          name: id
+          schema: { type: string }
+          required: true
+        - in: path
+          name: accessId
+          schema: { type: string }
+          required: true
+      responses:
+        '200': { description: Updated access list, content: { application/json: { schema: { $ref: '#/components/schemas/PracticePlanAccessList' } } } }
+        '404': { description: Not found }
+components:
+  schemas:
+    PracticePlan:
+      type: object
+      properties:
+        id: { type: string }
+        name: { type: string }
+        description: { type: string, nullable: true }
+        tags:
+          type: array
+          items: { type: string }
+        sections:
+          type: array
+          items:
+            $ref: '#/components/schemas/Section'
+        user: { type: string }
+        access:
+          type: array
+          description: Access entries (view/edit) including owner with implicit edit
+          items: { $ref: '#/components/schemas/PracticePlanAccess' }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+      required: [id, name, sections, user, createdAt, updatedAt]
+    Section:
+      type: object
+      properties:
+        id: { type: string }
+        name: { type: string }
+        targetDuration: { type: integer, minimum: 0 }
+        groups:
+          type: array
+          items: { $ref: '#/components/schemas/Group' }
+      required: [id, name, targetDuration, groups]
+    Group:
+      type: object
+      properties:
+        id: { type: string }
+        name: { type: string }
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/Item' }
+      required: [id, name, items]
+    Item:
+      oneOf:
+        - $ref: '#/components/schemas/ExerciseItem'
+        - $ref: '#/components/schemas/BreakItem'
+    ExerciseItem:
+      type: object
+      properties:
+        id: { type: string }
+        kind: { type: string, enum: ['exercise'] }
+        exerciseId: { type: string }
+        durationOverride: { type: integer, minimum: 0 }
+      required: [id, kind, exerciseId]
+    BreakItem:
+      type: object
+      properties:
+        id: { type: string }
+        kind: { type: string, enum: ['break'] }
+        name: { type: string }
+        duration: { type: integer, minimum: 0 }
+      required: [id, kind, name, duration]
+    PracticePlanPatch:
+      type: object
+      description: Partial updatable fields; unspecified fields unchanged
+      properties:
+        name: { type: string }
+        description: { type: string }
+        tags:
+          type: array
+          items: { type: string }
+        sections:
+          type: array
+          items: { $ref: '#/components/schemas/Section' }
+    PracticePlanAccess:
+      type: object
+      properties:
+        id: { type: string }
+        user: { type: string }
+        practicePlan: { type: string }
+        access: { type: string, enum: [view, edit] }
+        createdAt: { type: string, format: date-time }
+      required: [id, user, practicePlan, access, createdAt]
+    PracticePlanAccessList:
+      type: object
+      properties:
+        practicePlanId: { type: string }
+        access:
+          type: array
+          items: { $ref: '#/components/schemas/PracticePlanAccess' }
+      required: [practicePlanId, access]

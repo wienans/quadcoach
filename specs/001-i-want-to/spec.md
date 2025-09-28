@@ -138,21 +138,21 @@ A coach creates and manages a structured practice plan divided into sections. In
 - **FR-035**: System MUST adapt group layout responsively: show groups side-by-side where width permits (aiming for 2 common / up to 3 per row) and stack to a single column on narrow screens; additional groups wrap to new rows.
 - **FR-036**: System MUST allow sections and groups to share identical names without warning.
 - **FR-037**: System SHOULD provide clear labeling or context to differentiate identically named sections or groups (e.g., by order) without enforcing uniqueness.
-- **FR-038**: System MUST restrict Practice Plan access so only the owner coach and explicitly shared coaches can view or edit; all others have no access (no read exposure).
-- **FR-039**: System MUST grant shared coaches identical edit capabilities to the owner, including duplication and deletion of sections, groups, and items.
+- **FR-038**: System MUST restrict Practice Plan access so only the owner coach and users with a PracticePlanAccess record (any access level) can view; all others have no access (no read exposure).
+- **FR-039**: System MUST grant users with 'edit' PracticePlanAccess (and the owner) identical edit capabilities including duplication and deletion of sections, groups, and items. (MVP: only 'edit' access entries are created; 'view' reserved for future.)
 - **FR-040**: System MUST retain only the latest saved state of a Practice Plan (no historical version storage or retrieval).
 - **FR-041**: System MUST treat simultaneous edits with last-save-wins semantics (no conflict detection or merge UI; later successful save overwrites prior changes).
 - **FR-042**: System SHOULD maintain perceived recalculation latency <100ms for totals at stated scale (≤10 sections; each ≤5 groups; ≤15 items/group); outside this scale performance is best-effort.
 
 ### Key Entities *(include if feature involves data)*
-- **Practice Plan**: Named collection of ordered Sections with optional description and tags; may be empty; stores metadata, structural composition, owner reference, and list of shared coach identities with full edit access. Holds only current state (no version history).
+- **Practice Plan**: Named collection of ordered Sections with optional description and tags; may be empty; stores metadata, structural composition, owner (field `user`), holds only current state (no version history). Access beyond owner modeled via PracticePlanAccess entries (view/edit).
 - **Section**: Ordered segment within a Practice Plan with name, target duration (minutes, >=0), zero or more Groups, and derived max group total.
 - **Group**: Abstract label-only container within a Section (explicitly no player membership now; player assignment out-of-scope) holding an ordered list of Items (Exercise Blocks or Breaks) and a computed total duration.
 - **Exercise Block**: Referenced activity unit with a default duration which may be overridden per group instance; if underlying block deleted externally it persists as placeholder until removed.
 - **Break**: Named timed non-exercise interval item with duration (>=0) contributing to totals and visually distinct.
 - **Tag**: Free-form label string attached to a Practice Plan (no enforced limit or uniqueness in this scope).
 - **Item (Composite Concept)**: Either an Exercise Block instance or Break within a group's ordered list.
-- **Sharing (Concept)**: Association of a Practice Plan with additional coach identities granted identical edit permissions to owner.
+- **PracticePlanAccess**: Separate records granting a user 'view' or 'edit' on a Practice Plan (owner implicit 'edit'); supports revocation and role differentiation.
 
 ---
 
