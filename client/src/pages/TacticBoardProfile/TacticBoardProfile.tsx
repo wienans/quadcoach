@@ -10,7 +10,6 @@ import {
   Chip,
   FormControlLabel,
   FormGroup,
-  FormHelperText,
   Grid,
   IconButton,
   ListItem,
@@ -252,10 +251,6 @@ const TacticBoardProfile = () => {
 
     setOpenTagDialog(false);
   };
-
-  const translateError = (
-    errorResourceKey: string | undefined,
-  ): string | undefined => (errorResourceKey ? t(errorResourceKey) : undefined);
 
   const handleAddAccess = async () => {
     if (!tacticBoardId || !userEmail.trim()) {
