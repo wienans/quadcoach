@@ -1,31 +1,41 @@
 {
+  "exerciseName": "Exercise name",
   "exerciseTitle": "Exercise {{exerciseName}}",
   "exerciseTitleDefault": "View exercise",
   "exercisesBreadcrumb": "Exercises",
   "errorLoadingExercise": "An error occurred while loading exercise.",
   "updateExercise": "Update exercise",
+  "updateExercise_editMode": "Save exercise",
+  "updateExercise_viewMode": "Edit exercise",
+  "editMode": "Edit Mode",
+  "errorUpdatingExercise": "An error occurred while updating exercise.",
   "deleteExercise": "Delete exercise",
   "errorDeletingExercise": "An error occurred while deleting exercise.",
   "errorLoadingRelatedExercises": "An error occurred while loading related exercises.",
+  "favoriteExercise": "Favorite exercise",
   "info": {
     "title": "Info",
     "personNumber": "Persons",
     "beaterNumber": "Beaters",
     "chaserNumber": "Chasers",
     "time": "Time",
+    "timeInMinutes": "Time (minutes)",
     "minutesValue": "{{value}} Min"
   },
   "materials": {
     "title": "Materials",
-    "none": "No materials needed"
+    "none": "No materials needed",
+    "addNew": "Add material..."
   },
   "tags": {
     "title": "Tags",
-    "none": "No tags available"
+    "none": "No tags available",
+    "addNew": "Add tag..."
   },
   "realtedToExercises": {
     "title": "Related exercises",
-    "none": "No related exercises available"
+    "none": "No related exercises available",
+    "add": "Add Related Exercises"
   },
   "block": {
     "title": "Block {{blockNumber}}",
@@ -37,7 +47,42 @@
     },
     "visitTacticboard": "show Tacticboard",
     "description": "Description:",
-    "coachingPoints": "Coaching points:",
-    "favoriteExercise": "Favorite exercise"
+    "coachingPoints": "Coaching points:"
+  },
+  "addBlock": "Add Block",
+  "validation": {
+    "fixValidationErrors": "Please fix the highlighted validation errors before saving.",
+    "genericError": "You have an Invalid value somewhere.",
+    "name": {
+      "required": "Exercise name is required"
+    },
+      "persons": {
+        "required": "Persons is required",
+        "min": "Persons must be 0 or greater",
+        "lessThanRoles": "Persons must be >= total roles (min {{requiredTotal}})"
+      },
+      "time_min": {
+        "required": "Time is required",
+        "min": "Time must be 0 or greater"
+      },
+      "beaters": {
+        "required": "Beaters is required",
+        "min": "Beaters must be 0 or greater"
+      },
+      "chasers": {
+        "required": "Chasers is required",
+        "min": "Chasers must be 0 or greater"
+      },
+      "block": {
+        "description": {
+          "missing": "Please enter a description."
+        },
+        "video_url": {
+          "notValid": "Please enter a valid url."
+        },
+        "time_min": {
+          "min": "Block time must be 0 or greater"
+        }
+      }
   }
 }

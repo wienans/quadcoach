@@ -1,31 +1,41 @@
 {
+  "exerciseName": "Übungsname",
   "exerciseTitle": "Übung {{exerciseName}}",
   "exerciseTitleDefault": "Übung ansehen",
   "exercisesBreadcrumb": "Übungen",
   "errorLoadingExercise": "Es ist ein Fehler beim Laden der Übung aufgetreten.",
   "updateExercise": "Übung bearbeiten",
+  "updateExercise_editMode": "Übung speichern",
+  "updateExercise_viewMode": "Übung bearbeiten",
+  "editMode": "Bearbeitungsmodus",
+  "errorUpdatingExercise": "Es ist ein Fehler beim Aktualisieren der Übung aufgetreten.",
   "deleteExercise": "Übung löschen",
   "errorDeletingExercise": "Es ist ein Fehler beim Löschen der Übung aufgetreten.",
   "errorLoadingRelatedExercises": "Es ist ein Fehler beim Laden der zugehörigen Übungen aufgetreten.",
+  "favoriteExercise": "Favorisiere Übung",
   "info": {
     "title": "Info",
     "personNumber": "Personen",
     "beaterNumber": "Beater",
     "chaserNumber": "Chaser",
     "time": "Zeit",
+    "timeInMinutes": "Zeit (Minuten)",
     "minutesValue": "{{value}} Min"
   },
   "materials": {
     "title": "Materialien",
-    "none": "Keine Materialien benötigt"
+    "none": "Keine Materialien benötigt",
+    "addNew": "Material hinzufügen..."
   },
   "tags": {
     "title": "Stichwörter",
-    "none": "Keine Stichwörter verfügbar"
+    "none": "Keine Stichwörter verfügbar",
+    "addNew": "Stichwort hinzufügen..."
   },
   "realtedToExercises": {
     "title": "Zugehörige Übungen:",
-    "none": "Keine zugehörigen Übungen verfügbar"
+    "none": "Keine zugehörigen Übungen verfügbar",
+    "add": "Zugehörige Übungen hinzufügen"
   },
   "block": {
     "title": "Block {{blockNumber}}",
@@ -37,7 +47,42 @@
     },
     "visitTacticboard": "Taktik Tafel ansehen",
     "description": "Beschreibung:",
-    "coachingPoints": "Coaching-Punkte:",
-    "favoriteExercise": "Favorisiere Übung"
+    "coachingPoints": "Coaching-Punkte:"
+  },
+  "addBlock": "Block hinzufügen",
+  "validation": {
+    "fixValidationErrors": "Bitte behebe die hervorgehobenen Validierungsfehler, bevor du speicherst.",
+    "genericError": "Es gibt irgendwo einen ungültigen Wert.",
+    "name": {
+      "required": "Übungsname ist erforderlich"
+    },
+      "persons": {
+        "required": "Personenzahl ist erforderlich",
+        "min": "Personen müssen 0 oder größer sein",
+        "lessThanRoles": "Personenzahl muss >= Summe Rollen sein (min {{requiredTotal}})"
+      },
+      "time_min": {
+        "required": "Zeit ist erforderlich",
+        "min": "Zeit muss 0 oder größer sein"
+      },
+      "beaters": {
+        "required": "Anzahl der Beater ist erforderlich",
+        "min": "Beater müssen 0 oder größer sein"
+      },
+      "chasers": {
+        "required": "Anzahl der Chaser ist erforderlich",
+        "min": "Chaser müssen 0 oder größer sein"
+      },
+      "block": {
+        "description": {
+          "missing": "Bitte gib eine Beschreibung ein."
+        },
+        "video_url": {
+          "notValid": "Bitte gib eine gültige URL ein."
+        },
+        "time_min": {
+          "min": "Blockzeit muss 0 oder größer sein"
+        }
+      }
   }
 }

@@ -29,7 +29,7 @@ const defaultHeaderBackgroundImage = ({
 
 export type ProfileLayoutProps = {
   children: (scrollTrigger: boolean) => ReactNode;
-  title?: string;
+  title?: string | ReactNode;
   headerBackgroundImage?: string;
   isDataLoading?: boolean;
   headerAction?: ReactNode;
@@ -121,6 +121,7 @@ const ProfileLayout = ({
             }}
           >
             <SoftTypography
+              component="div"
               sx={{
                 minWidth: 0,
                 flexGrow: 1,

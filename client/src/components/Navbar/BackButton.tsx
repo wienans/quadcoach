@@ -21,17 +21,6 @@ const getBackButtonHrefProps = (
   if (!lastRouteMatch) return;
 
   switch (lastRouteMatch.handle.type) {
-    case RouteHandleType.updateExercise: {
-      const exerciseRoute = routeMatches.find(
-        (route) => route.handle.type === RouteHandleType.exercise,
-      );
-      if (!exerciseRoute) return;
-      return {
-        href: exerciseRoute.pathname,
-        tooltip: "Zurück zur Übung",
-      };
-    }
-    case RouteHandleType.addExercise:
     case RouteHandleType.exercise: {
       const exercisesRoute = routeMatches.find(
         (route) => route.handle.type === RouteHandleType.exercises,

@@ -1,7 +1,7 @@
 import { Autocomplete, CircularProgress, TextField } from "@mui/material";
 import { useState } from "react";
-import { useGetExercisesQuery } from "../../../pages/exerciseApi";
-import { Exercise } from "../../../api/quadcoachApi/domain";
+import { useGetExercisesQuery } from "../../pages/exerciseApi";
+import { Exercise } from "../../api/quadcoachApi/domain";
 
 export type ExerciseAutocompleteProps = {
   selectedExercises: Exercise[];
