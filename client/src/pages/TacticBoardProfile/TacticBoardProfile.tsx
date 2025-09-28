@@ -132,8 +132,6 @@ const TacticBoardProfile = () => {
     tacticBoardId || "",
   );
 
-
-
   const [
     deleteTacticboardAccess,
     { isLoading: isDeleteTacticboardAccessLoading },
@@ -324,7 +322,23 @@ const TacticBoardProfile = () => {
   return (
     <FormikProvider value={formik}>
       <ProfileLayout
-        title={tacticBoard?.name}
+        title={
+          isEditMode ? (
+            <SoftInput
+              error={formik.touched.name && Boolean(formik.errors.name)}
+              name="name"
+              required
+              id="outlined-basic"
+              placeholder={t("TacticBoardProfile:info.name.placeholder")}
+              value={formik.values.name}
+              onChange={formik.handleChange}
+              fullWidth
+              onBlur={formik.handleBlur}
+            />
+          ) : (
+            tacticBoard?.name
+          )
+        }
         //headerBackgroundImage={headerBackgroundImage}
         isDataLoading={isTacticBoardLoading}
         showScrollToTopButton={(scrollTrigger) => scrollTrigger && isUpMd}
@@ -556,33 +570,6 @@ const TacticBoardProfile = () => {
                   <AccordionDetails>
                     <Grid item xs={12} p={1}>
                       <FormGroup>
-                        <SoftTypography variant="body2">
-                          {t("TacticBoardProfile:info.name.label")}
-                        </SoftTypography>
-                        <SoftInput
-                          error={
-                            formik.touched.name && Boolean(formik.errors.name)
-                          }
-                          name="name"
-                          required
-                          id="outlined-basic"
-                          placeholder={t(
-                            "TacticBoardProfile:info.name.placeholder",
-                          )}
-                          value={formik.values.name}
-                          onChange={formik.handleChange}
-                          fullWidth
-                          onBlur={formik.handleBlur}
-                        />
-                        {formik.touched.name && Boolean(formik.errors.name) && (
-                          <FormHelperText error>
-                            {translateError(formik.errors.name)}
-                          </FormHelperText>
-                        )}
-                      </FormGroup>
-                    </Grid>
-                    <Grid item xs={12} p={1}>
-                      <FormGroup>
                         <FormControlLabel
                           sx={{ p: 1 }}
                           control={
@@ -783,8 +770,7 @@ const TacticBoardProfile = () => {
                           variant="contained"
                           size="small"
                           disabled={
-                            isShareTacticBoardLoading ||
-                            !userEmail.trim()
+                            isShareTacticBoardLoading || !userEmail.trim()
                           }
                           onClick={handleAddAccess}
                         >

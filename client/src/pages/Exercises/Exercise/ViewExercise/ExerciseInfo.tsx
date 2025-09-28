@@ -111,6 +111,10 @@ const ExerciseInfo = ({
                     primary={
                       isEditMode ? (
                         <SoftInput
+                          error={
+                            formik.touched.persons &&
+                            Boolean(formik.errors.persons)
+                          }
                           type="number"
                           value={formik.values.persons}
                           onChange={formik.handleChange}
@@ -135,6 +139,10 @@ const ExerciseInfo = ({
                     primary={
                       isEditMode ? (
                         <SoftInput
+                          error={
+                            formik.touched.beaters &&
+                            Boolean(formik.errors.beaters)
+                          }
                           type="number"
                           value={formik.values.beaters}
                           onChange={(e) => {
@@ -164,6 +172,10 @@ const ExerciseInfo = ({
                     primary={
                       isEditMode ? (
                         <SoftInput
+                          error={
+                            formik.touched.chasers &&
+                            Boolean(formik.errors.chasers)
+                          }
                           type="number"
                           value={formik.values.chasers}
                           onChange={(e) => {
