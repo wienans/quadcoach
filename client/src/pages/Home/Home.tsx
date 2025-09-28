@@ -1,13 +1,27 @@
 import "./translations";
-import { Card } from "@mui/material";
+import { Card, Button } from "@mui/material";
 import { SoftBox, SoftTypography } from "../../components";
 // import { useTranslation } from "react-i18next";
 
 import Logo from "../../assets/images/logo.png";
 import { DashboardLayout } from "../../components/LayoutContainers";
+import { useCreatePracticePlanMutation } from "../../api/quadcoachApi/practicePlansApi";
+import { useNavigate } from "react-router-dom";
 import Footer from "../../components/Footer";
 
 const Home = () => {
+  const navigate = useNavigate();
+  const [createPlan, { isLoading: creatingPlan }] = useCreatePracticePlanMutation();
+  const handleCreateDebugPlan = async () => {
+    try {
+      const result = await createPlan({ name: `Debug Plan ${new Date().toISOString()}` }).unwrap();
+      navigate(`/practice-plans/${result._id}`);
+    } catch (e) {
+      // swallow for debug; could add toast
+      // eslint-disable-next-line no-console
+      console.error("Failed to create debug practice plan", e);
+    }
+  };
   // const { t } = useTranslation("Home");
 
   return (
@@ -191,6 +205,25 @@ const Home = () => {
               </SoftBox>
             </Card>
           </SoftBox>
+          {import.meta.env.DEV && (
+            <SoftBox mt={5}>
+              <Card sx={{ height: "100%" }}>
+                <SoftBox p={2} display="flex" flexDirection="column" gap={2}>
+                  <SoftTypography variant="h5" fontWeight="bold">
+                    Debug Utilities
+                  </SoftTypography>
+                  <Button
+                    variant="contained"
+                    color="secondary"
+                    onClick={handleCreateDebugPlan}
+                    disabled={creatingPlan}
+                  >
+                    {creatingPlan ? "Creating Practice Plan..." : "Create Practice Plan (Debug)"}
+                  </Button>
+                </SoftBox>
+              </Card>
+            </SoftBox>
+          )}
           <SoftBox mt={5} mb={3}>
             <Card sx={{ height: "100%" }}>
               <SoftBox p={2}>

@@ -93,23 +93,23 @@
 - [X] T041 Add validation helpers (non-negative durations) in `/home/explainingrobotics/quadcoach/server/controllers/practicePlanController.ts` or separate util `/home/explainingrobotics/quadcoach/server/controllers/helpers/practicePlanValidation.ts` (if new file create) — sequential with controller tasks (no [P]).
 
 ## Phase 3.4: Core Frontend Implementation (after backend endpoints functional)
-- [ ] T042 Create Redux slice `/home/explainingrobotics/quadcoach/client/src/store/practicePlan/practicePlanSlice.ts` (state: currentPlan, draft edits, selectors for totals).
-- [ ] T043 Extend API client add endpoints in `/home/explainingrobotics/quadcoach/client/src/api/quadcoachApi/practicePlansApi.ts` (RTK Query create/get/update/delete/grant/revoke).
-- [ ] T044 Add components directory `/home/explainingrobotics/quadcoach/client/src/components/PracticePlanner/SectionEditor/SectionEditor.tsx` skeleton.
-- [ ] T045 Add GroupEditor component `/home/explainingrobotics/quadcoach/client/src/components/PracticePlanner/GroupEditor/GroupEditor.tsx`.
-- [ ] T046 Add ItemList component `/home/explainingrobotics/quadcoach/client/src/components/PracticePlanner/ItemList/ItemList.tsx`.
-- [ ] T047 Add TimeSummary component `/home/explainingrobotics/quadcoach/client/src/components/PracticePlanner/TimeSummary/TimeSummary.tsx` (shows per-section vs target, highlight exceeded).
-- [ ] T048 Create page `/home/explainingrobotics/quadcoach/client/src/pages/PracticePlanner/index.tsx` integrating components & API hooks.
-- [ ] T049 Add navigation entry to existing menu (update `/home/explainingrobotics/quadcoach/client/src/pages/routes/` appropriate config file) for Practice Planner.
-- [ ] T050 Implement derived selectors (sectionCurrent, groupTotals) in slice file (update same file as T042 — sequential).
-- [ ] T051 Wire optimistic update logic on PATCH in slice (same slice file — sequential after T050).
+- [X] T042 Create Redux slice `/home/explainingrobotics/quadcoach/client/src/store/practicePlan/practicePlanSlice.ts` (state: currentPlan, draft edits, selectors for totals).
+- [X] T043 Extend API client add endpoints in `/home/explainingrobotics/quadcoach/client/src/api/quadcoachApi/practicePlansApi.ts` (RTK Query create/get/update/delete/grant/revoke).
+- [X] T044 Add components directory `/home/explainingrobotics/quadcoach/client/src/components/PracticePlanner/SectionEditor/SectionEditor.tsx` skeleton.
+- [X] T045 Add GroupEditor component `/home/explainingrobotics/quadcoach/client/src/components/PracticePlanner/GroupEditor/GroupEditor.tsx`.
+- [X] T046 Add ItemList component `/home/explainingrobotics/quadcoach/client/src/components/PracticePlanner/ItemList/ItemList.tsx`.
+- [X] T047 Add TimeSummary component `/home/explainingrobotics/quadcoach/client/src/components/PracticePlanner/TimeSummary/TimeSummary.tsx` (shows per-section vs target, highlight exceeded).
+- [X] T048 Create page `/home/explainingrobotics/quadcoach/client/src/pages/PracticePlanner/index.tsx` integrating components & API hooks.
+- [X] T049 Add navigation entry to existing menu (update `/home/explainingrobotics/quadcoach/client/src/pages/routes/` appropriate config file) for Practice Planner.
+- [X] T050 Implement derived selectors (sectionCurrent, groupTotals) in slice file (update same file as T042 — sequential).
+- [X] T051 Wire optimistic update logic on PATCH in slice (same slice file — sequential after T050).
 
 ## Phase 3.5: Integration & Middleware
-- [ ] T052 Apply rateLimiter middleware to practice plan routes (edit `/home/explainingrobotics/quadcoach/server/routes/practicePlanRoutes.ts`).
-- [ ] T053 Ensure logger middleware captures new endpoints (verify or adjust in `/home/explainingrobotics/quadcoach/server/server.ts`).
-- [ ] T054 Add access control check helper (owner or access record) in `/home/explainingrobotics/quadcoach/server/controllers/practicePlanController.ts` (refactor code) sequential.
-- [ ] T055 Implement error responses for validation failures (shared util) in `/home/explainingrobotics/quadcoach/server/controllers/practicePlanController.ts`.
-- [ ] T056 Update OpenAPI doc `/home/explainingrobotics/quadcoach/specs/001-i-want-to/contracts/practice-plans.openapi.yml` with any new error responses (400 examples).
+- [X] T052 Apply rateLimiter middleware to practice plan routes (edit `/home/explainingrobotics/quadcoach/server/routes/practicePlanRoutes.ts`).
+- [X] T053 Ensure logger middleware captures new endpoints (verify or adjust in `/home/explainingrobotics/quadcoach/server/server.ts`).
+- [X] T054 Add access control check helper (owner or access record) in `/home/explainingrobotics/quadcoach/server/controllers/practicePlanController.ts` (refactor code) sequential.
+- [X] T055 Implement error responses for validation failures (shared util) in `/home/explainingrobotics/quadcoach/server/controllers/practicePlanController.ts`.
+- [X] T056 Update OpenAPI doc `/home/explainingrobotics/quadcoach/specs/001-i-want-to/contracts/practice-plans.openapi.yml` with any new error responses (400 examples).
 
 ## Phase 3.6: Polish
 - [ ] T057 [P] Unit test derived time calculation (pure functions) in `/home/explainingrobotics/quadcoach/server/tests/unit/practicePlans.timeCalc.spec.ts` (feed mock plan JSON).

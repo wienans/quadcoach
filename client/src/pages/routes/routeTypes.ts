@@ -13,6 +13,7 @@ export enum RouteHandleType {
   draftingBoard = "draftingBoard",
   componentsTest = "componentsTest",
   userProfile = "userProfile",
+  practicePlanner = "practicePlanner",
 }
 
 export type RouteHandle = {

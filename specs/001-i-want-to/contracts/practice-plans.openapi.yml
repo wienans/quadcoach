@@ -76,7 +76,7 @@ paths:
               $ref: '#/components/schemas/PracticePlanPatch'
       responses:
         '200': { description: Updated, content: { application/json: { schema: { $ref: '#/components/schemas/PracticePlan' } } } }
-        '400': { description: Validation error, content: { application/json: { schema: { $ref: '#/components/schemas/ValidationError' } } } }
+        '400': { description: Validation error, content: { application/json: { schema: { $ref: '#/components/schemas/ValidationError' }, examples: { negative: { value: { message: 'Duration validation failed', errors: ['sections[0].targetDuration negative'] } }, exceeds: { value: { message: 'Duration validation failed', errors: ['sections[1].groups[0].items[2].duration exceedsMax'] } } } } } }
         '404': { description: Not found (missing or not accessible) }
     delete:
       summary: Delete practice plan

@@ -9,6 +9,7 @@ COPY ./models ./models
 COPY ./routes ./routes
 COPY ./templates ./templates
 COPY ./server.ts ./server.ts
+COPY ./app.ts ./app.ts
 COPY ./tsconfig.json ./tsconfig.json
 RUN npm install --loglevel verbose
 EXPOSE 3001
