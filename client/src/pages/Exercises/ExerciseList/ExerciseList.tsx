@@ -663,69 +663,67 @@ const ExerciseList = () => {
     >
       {(scrollTrigger) => (
         <>
-          {isUpMd && (
-            <SoftBox sx={{ mt: 2, display: "flex" }}>
-              {userStatus != null && (
-                <>
-                  <SoftButton
-                    startIcon={<AddIcon />}
-                    color="secondary"
-                    onClick={() => setOpenAddDialog(true)}
-                  >
-                    {t("ExerciseList:addExercise")}
-                  </SoftButton>
-                  <Dialog
-                    open={openAddDialog}
-                    onClose={() => setOpenAddDialog(false)}
+          <SoftBox sx={{ mt: 2, display: "flex" }}>
+            {isUpMd && userStatus != null && (
+              <SoftButton
+                startIcon={<AddIcon />}
+                color="secondary"
+                onClick={() => setOpenAddDialog(true)}
+              >
+                {t("ExerciseList:addExercise")}
+              </SoftButton>
+            )}
+            {userStatus != null && (
+              <Dialog
+                open={openAddDialog}
+                onClose={() => setOpenAddDialog(false)}
+                fullWidth
+                maxWidth="xs"
+              >
+                <DialogTitle>
+                  {t("ExerciseList:addExerciseDialog.title")}
+                </DialogTitle>
+                <DialogContent>
+                  <SoftInput
+                    autoFocus
+                    margin="dense"
+                    placeholder={t(
+                      "ExerciseList:addExerciseDialog.nameLabel",
+                    )}
+                    type="text"
+                    size="small"
                     fullWidth
-                    maxWidth="xs"
+                    value={newExerciseName}
+                    onChange={(e) => setNewExerciseName(e.target.value)}
+                    disabled={isCreatingExercise}
+                  />
+                </DialogContent>
+                <DialogActions>
+                  <SoftButton
+                    startIcon={<CloseIcon />}
+                    onClick={() => setOpenAddDialog(false)}
+                    color="secondary"
+                    disabled={isCreatingExercise}
                   >
-                    <DialogTitle>
-                      {t("ExerciseList:addExerciseDialog.title")}
-                    </DialogTitle>
-                    <DialogContent>
-                      <SoftInput
-                        autoFocus
-                        margin="dense"
-                        placeholder={t(
-                          "ExerciseList:addExerciseDialog.nameLabel",
-                        )}
-                        type="text"
-                        size="small"
-                        fullWidth
-                        value={newExerciseName}
-                        onChange={(e) => setNewExerciseName(e.target.value)}
-                        disabled={isCreatingExercise}
-                      />
-                    </DialogContent>
-                    <DialogActions>
-                      <SoftButton
-                        startIcon={<CloseIcon />}
-                        onClick={() => setOpenAddDialog(false)}
-                        color="secondary"
-                        disabled={isCreatingExercise}
-                      >
-                        {t("ExerciseList:addExerciseDialog.cancel")}
-                      </SoftButton>
-                      <SoftButton
-                        onClick={handleCreateExercise}
-                        disabled={
-                          isCreatingExercise || newExerciseName.trim() === ""
-                        }
-                        color="primary"
-                        variant="contained"
-                      >
-                        {isCreatingExercise && (
-                          <CircularProgress size={18} sx={{ mr: 1 }} />
-                        )}
-                        {t("ExerciseList:addExerciseDialog.add")}
-                      </SoftButton>
-                    </DialogActions>
-                  </Dialog>
-                </>
-              )}
-            </SoftBox>
-          )}
+                    {t("ExerciseList:addExerciseDialog.cancel")}
+                  </SoftButton>
+                  <SoftButton
+                    onClick={handleCreateExercise}
+                    disabled={
+                      isCreatingExercise || newExerciseName.trim() === ""
+                    }
+                    color="primary"
+                    variant="contained"
+                  >
+                    {isCreatingExercise && (
+                      <CircularProgress size={18} sx={{ mr: 1 }} />
+                    )}
+                    {t("ExerciseList:addExerciseDialog.add")}
+                  </SoftButton>
+                </DialogActions>
+              </Dialog>
+            )}
+          </SoftBox>
           {isExercisesError && (
             <Alert color="error" sx={{ mt: 2 }}>
               {t("ExerciseList:errorLoadingExercises")}
@@ -739,6 +737,9 @@ const ExerciseList = () => {
                   onOpenExerciseClick={onOpenExerciseClick}
                   exercises={loadedExercises}
                   scrollTrigger={scrollTrigger}
+                  onOpenAddExerciseClick={() => {
+                    setOpenAddDialog(true);
+                  }}
                 />
               </SoftBox>
               {exercisesData &&
