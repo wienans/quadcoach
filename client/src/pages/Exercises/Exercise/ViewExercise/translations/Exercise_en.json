@@ -18,6 +18,7 @@
     "beaterNumber": "Beaters",
     "chaserNumber": "Chasers",
     "time": "Time",
+    "timeInMinutes": "Time (minutes)",
     "minutesValue": "{{value}} Min"
   },
   "materials": {

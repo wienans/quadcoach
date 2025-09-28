@@ -121,6 +121,7 @@ const ProfileLayout = ({
             }}
           >
             <SoftTypography
+              component="div"
               sx={{
                 minWidth: 0,
                 flexGrow: 1,

@@ -58,8 +58,7 @@ const ExerciseBlock = ({
           isEditMode ? (
             <div>
               <SoftTypography variant="body2" color="secondary">
-                {t("Exercise:info.time")}
-                {"in minutes:"}{" "}
+                {t("Exercise:info.timeInMinutes")}
               </SoftTypography>
               <SoftInput
                 type="number"
@@ -209,16 +208,16 @@ const ExerciseBlock = ({
             Tacticboard
           </AccordionSummary>
           <AccordionDetails>
-              <TacticboardAutocomplete
-                value={currentBlock.tactics_board}
-                onChange={(_event, value) => {
-                  formik.setFieldValue(
-                    `description_blocks.${blockIndex}.tactics_board`,
-                    value?._id || undefined,
-                  );
-                }}
-                onBlur={() => {}}
-              />
+            <TacticboardAutocomplete
+              value={currentBlock.tactics_board}
+              onChange={(_event, value) => {
+                formik.setFieldValue(
+                  `description_blocks.${blockIndex}.tactics_board`,
+                  value?._id || undefined,
+                );
+              }}
+              onBlur={() => {}}
+            />
             {Boolean(currentBlock.tactics_board) && (
               <div style={{ marginTop: 16 }}>
                 <TacticBoardInBlockWrapper block={currentBlock} />
