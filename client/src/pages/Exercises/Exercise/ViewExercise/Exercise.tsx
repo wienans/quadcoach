@@ -11,12 +11,24 @@ import {
   Tooltip,
   Theme,
   BottomNavigationAction,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  TextField,
+  Box,
+  List,
+  ListItem,
+  ListItemText,
+  Button,
 } from "@mui/material";
 import {
   useDeleteExerciseMutation,
   useGetExerciseQuery,
   useGetRelatedExercisesQuery,
   useUpdateExerciseMutation,
+  useGetAllExerciseAccessUsersQuery,
+  useShareExerciseMutation,
+  useDeleteExerciseAccessMutation,
 } from "../../../exerciseApi";
 import { useTranslation } from "react-i18next";
 import {
@@ -31,6 +43,7 @@ import {
 import EditIcon from "@mui/icons-material/Edit";
 import SaveIcon from "@mui/icons-material/Save";
 import DeleteIcon from "@mui/icons-material/Delete";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import AddIcon from "@mui/icons-material/Add";
 import ExerciseBlock from "./ExerciseBlock";
@@ -61,6 +74,8 @@ const Exercise = () => {
   const [isPrivileged, setIsPrivileged] = useState<boolean>(false);
   const { id: userId, roles: userRoles } = useAuth();
   const [isFavorite, setIsFavorite] = useState<boolean>(false);
+  const [userEmail, setUserEmail] = useState<string>("");
+  const [emailError, setEmailError] = useState<string>("");
 
   const [isEditMode, setIsEditMode] = useState<boolean>(false);
   const autoEditAppliedRef = useRef(false);
@@ -100,6 +115,22 @@ const Exercise = () => {
 
   const [getFavoriteExercises, { data: favoriteExercises }] =
     useLazyGetFavoriteExercisesQuery();
+
+  const { data: accessUsers } = useGetAllExerciseAccessUsersQuery(
+    exerciseId || "",
+    { skip: !exerciseId },
+  );
+
+  const isCreator =
+    exercise?.user?.toString() === userId ||
+    userRoles.includes("Admin") ||
+    userRoles.includes("admin");
+
+  const [shareExercise, { isLoading: isShareExerciseLoading }] =
+    useShareExerciseMutation();
+
+  const [deleteExerciseAccess, { isLoading: isDeleteExerciseAccessLoading }] =
+    useDeleteExerciseAccessMutation();
 
   const [addFavoriteExercise, { isLoading: isAddFavoriteExerciseLoading }] =
     useAddFavoriteExerciseMutation();
@@ -142,14 +173,25 @@ const Exercise = () => {
   }, [exercise, exerciseType, theme]);
 
   useEffect(() => {
+    if (!userId) {
+      setIsPrivileged(false);
+      return;
+    }
+    if (isCreator) {
+      setIsPrivileged(true);
+      return;
+    }
     if (
-      userId == exercise?.user ||
-      userRoles.includes("Admin") ||
-      userRoles.includes("admin")
+      accessUsers &&
+      accessUsers.some(
+        (entry) => entry.user._id === userId && entry.access === "edit",
+      )
     ) {
       setIsPrivileged(true);
+    } else {
+      setIsPrivileged(false);
     }
-  }, [exercise, userId, userRoles]);
+  }, [userId, isCreator, accessUsers]);
 
   // Add update exercise mutation
   const [
@@ -362,6 +404,36 @@ const Exercise = () => {
 
   const handleOpenExerciseClick = (id: string) => {
     navigate(`/exercises/${id}`);
+  };
+
+  const handleAddAccess = async () => {
+    if (!exerciseId) return;
+    const trimmed = userEmail.trim();
+    if (!trimmed) {
+      setEmailError(t("Exercise:access.error.emailRequired"));
+      return;
+    }
+    // Simple email format check
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(trimmed)) {
+      setEmailError(t("Exercise:access.error.emailRequired"));
+      return;
+    }
+    setEmailError("");
+    try {
+      await shareExercise({
+        exerciseId,
+        email: trimmed,
+        access: "edit",
+      }).unwrap();
+      setUserEmail("");
+    } catch (error: unknown) {
+      if ((error as { status?: number })?.status === 404) {
+        setEmailError(t("Exercise:access.error.notFound"));
+      } else {
+        setEmailError(t("Exercise:access.error.addFailed"));
+      }
+    }
   };
 
   if (isExerciseLoading) {
@@ -673,6 +745,75 @@ const Exercise = () => {
                 </SoftBox>
               )}
             />
+          )}
+
+          {isEditMode && isCreator && (
+            <Accordion defaultExpanded>
+              <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                {t("Exercise:access.title")}
+              </AccordionSummary>
+              <AccordionDetails>
+                <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                  <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+                    <TextField
+                      size="small"
+                      label={t("Exercise:access.add_user", {
+                        defaultValue: "Add user",
+                      })}
+                      placeholder="Enter user email"
+                      fullWidth
+                      value={userEmail}
+                      onChange={(e) => {
+                        setUserEmail(e.target.value);
+                        if (emailError) setEmailError("");
+                      }}
+                      error={!!emailError}
+                      helperText={emailError}
+                      sx={{
+                        "& .MuiInputBase-root": { height: "40px" },
+                        "& .MuiInputBase-input": { padding: "8.5px 14px" },
+                      }}
+                    />
+                    <Button
+                      variant="contained"
+                      size="small"
+                      disabled={isShareExerciseLoading || !userEmail.trim()}
+                      onClick={handleAddAccess}
+                    >
+                      {t("Exercise:access.add", { defaultValue: "Add" })}
+                    </Button>
+                  </Box>
+                  <List>
+                    {accessUsers?.map((entry) => (
+                      <ListItem
+                        key={entry.user._id}
+                        secondaryAction={
+                          <Button
+                            size="small"
+                            color="error"
+                            disabled={isDeleteExerciseAccessLoading}
+                            onClick={() => {
+                              if (exerciseId) {
+                                deleteExerciseAccess({
+                                  exerciseId: exerciseId,
+                                  userId: entry.user._id,
+                                });
+                              }
+                            }}
+                          >
+                            {t("common:remove", { defaultValue: "Remove" })}
+                          </Button>
+                        }
+                      >
+                        <ListItemText
+                          primary={entry.user.name + " (" + entry.access + ")"}
+                        />
+                      </ListItem>
+                    ))}
+                  </List>
+                </Box>
+              </AccordionDetails>
+            </Accordion>
           )}
 
           <Footer />

@@ -84,5 +84,15 @@
           "min": "Blockzeit muss 0 oder größer sein"
         }
       }
+  },
+  "access": {
+    "title": "Zugriff",
+    "add_user": "Benutzer hinzufügen",
+    "add": "Hinzufügen",
+    "error": {
+      "emailRequired": "E-Mail ist erforderlich",
+      "notFound": "Benutzer mit dieser E-Mail nicht gefunden",
+      "addFailed": "Zugriff konnte nicht hinzugefügt werden"
+    }
   }
 }
