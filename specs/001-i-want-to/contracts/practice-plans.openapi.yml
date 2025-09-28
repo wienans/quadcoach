@@ -1,11 +1,17 @@
 openapi: 3.0.0
 info:
   title: Practice Plans API
-  version: 0.1.0
+  version: 0.2.0
+  description: |
+    Practice Plan management with duration constraints (0-1000 minutes) and access concealment.
+    Unauthorized users receive 404 for non-accessible plan IDs.
 paths:
   /api/practice-plans:
     post:
       summary: Create new practice plan with default sections
+      description: |
+        Creates a new plan with default sections (server-defined). Name must be non-empty.
+        All section target durations are initialized within allowed bounds (0-1000).
       requestBody:
         required: true
         content:
@@ -30,9 +36,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PracticePlan'
+        '400':
+          description: Validation error (e.g. negative or >1000 duration values)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
   /api/practice-plans/{id}:
     get:
       summary: Get practice plan by id
+      description: Returns 404 if plan does not exist OR requester lacks access (concealment).
       parameters:
         - in: path
           name: id
@@ -41,9 +54,14 @@ paths:
           required: true
       responses:
         '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/PracticePlan' } } } }
-        '404': { description: Not found }
+        '404': { description: Not found (missing or not accessible) }
     patch:
       summary: Update (partial) practice plan
+      description: |
+        Applies partial updates. Validation enforces each duration field (section.targetDuration,
+        break.duration, exercise.durationOverride) is between 0 and 1000 inclusive. Negative values
+        yield path-specific "negative" errors; values > 1000 yield "exceedsMax".
+        Returns 404 for non-existent or non-accessible plan IDs.
       parameters:
         - in: path
           name: id
@@ -58,9 +76,11 @@ paths:
               $ref: '#/components/schemas/PracticePlanPatch'
       responses:
         '200': { description: Updated, content: { application/json: { schema: { $ref: '#/components/schemas/PracticePlan' } } } }
-        '404': { description: Not found }
+        '400': { description: Validation error, content: { application/json: { schema: { $ref: '#/components/schemas/ValidationError' } } } }
+        '404': { description: Not found (missing or not accessible) }
     delete:
       summary: Delete practice plan
+      description: Returns 404 if plan missing or not accessible to requester.
       parameters:
         - in: path
           name: id
@@ -68,10 +88,11 @@ paths:
           required: true
       responses:
         '204': { description: Deleted }
-        '404': { description: Not found }
+        '404': { description: Not found (missing or not accessible) }
   /api/practice-plans/{id}/access:
     post:
       summary: Grant access to a coach
+      description: Owner or editor can grant view/edit. 404 concealment for unauthorized user.
       parameters:
         - in: path
           name: id
@@ -92,10 +113,11 @@ paths:
               required: [coachId, access]
       responses:
         '200': { description: Updated access list, content: { application/json: { schema: { $ref: '#/components/schemas/PracticePlanAccessList' } } } }
-        '404': { description: Not found }
+        '404': { description: Not found (missing or not accessible) }
   /api/practice-plans/{id}/access/{accessId}:
     delete:
       summary: Revoke access entry
+      description: Owner or editor only. 404 concealment for unauthorized user.
       parameters:
         - in: path
           name: id
@@ -107,9 +129,14 @@ paths:
           required: true
       responses:
         '200': { description: Updated access list, content: { application/json: { schema: { $ref: '#/components/schemas/PracticePlanAccessList' } } } }
-        '404': { description: Not found }
+        '404': { description: Not found (missing or not accessible) }
 components:
   schemas:
+    Duration:
+      type: integer
+      minimum: 0
+      maximum: 1000
+      description: Duration minutes (inclusive bounds 0-1000)
     PracticePlan:
       type: object
       properties:
@@ -136,7 +163,7 @@ components:
       properties:
         id: { type: string }
         name: { type: string }
-        targetDuration: { type: integer, minimum: 0 }
+        targetDuration: { $ref: '#/components/schemas/Duration' }
         groups:
           type: array
           items: { $ref: '#/components/schemas/Group' }
@@ -160,7 +187,10 @@ components:
         id: { type: string }
         kind: { type: string, enum: ['exercise'] }
         exerciseId: { type: string }
-        durationOverride: { type: integer, minimum: 0 }
+        durationOverride:
+          allOf:
+            - $ref: '#/components/schemas/Duration'
+          description: Optional override of canonical exercise duration
       required: [id, kind, exerciseId]
     BreakItem:
       type: object
@@ -168,7 +198,7 @@ components:
         id: { type: string }
         kind: { type: string, enum: ['break'] }
         name: { type: string }
-        duration: { type: integer, minimum: 0 }
+        duration: { $ref: '#/components/schemas/Duration' }
       required: [id, kind, name, duration]
     PracticePlanPatch:
       type: object
@@ -199,3 +229,16 @@ components:
           type: array
           items: { $ref: '#/components/schemas/PracticePlanAccess' }
       required: [practicePlanId, access]
+    ValidationError:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Validation failed
+        errors:
+          type: array
+          description: Array of field-specific error strings with path and code
+          items:
+            type: string
+            example: sections[0].targetDuration exceedsMax
+      required: [message, errors]

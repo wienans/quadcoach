@@ -23,5 +23,9 @@ Create and adjust a practice plan verifying timing calculations and access contr
 - Placeholder shown for missing exercises.
 - No version retrieval available.
 
+## Running Tests
+
+Run tests with `npm test` from the `server` directory once dependencies are installed.
+
 ## Cleanup
 - Delete test practice plan (DELETE /api/practice-plans/:id).
