@@ -43,11 +43,11 @@
 
 ## Clarifications
 ### Session 2025-09-28
-- Q: Which users can access and modify Practice Plans? → A: Owner coach plus explicitly shared coaches can edit; others no access
-- Q: Should shared coaches have equal rights to delete and duplicate sections/groups as the owner? → A: Yes, full equal edit rights
+- Q: Which users can access and modify Practice Plans? → A: Owner user plus explicitly granted users (PracticePlanAccess with edit) can edit; others no access
+- Q: Should users with 'edit' access have equal rights to delete and duplicate sections/groups as the owner? → A: Yes, full equal edit rights
 - Q: Should there be versioning or historical snapshots for Practice Plans (e.g., to review past revisions)? → A: No versioning; only latest state kept
 - Q: How should a Group be modeled relative to actual players? → A: Pure label container; no player membership now (player assignment explicitly out-of-scope)
-- Q: How should plan saving handle concurrent edits by two authorized coaches? → A: Last save wins silently (no conflict detection)
+- Q: How should plan saving handle concurrent edits by two authorized users? → A: Last save wins silently (no conflict detection)
 - Q: How should breaks be counted when calculating a section's max group total? → A: Break durations always included (current assumption)
 - Q: What performance expectation applies to recalculating totals after an edit? → A: Immediate (perceived <100ms) recalculation for any change (target)
 - Q: What is the maximum expected scale for a single Practice Plan? → A: Up to 10 sections; each ≤5 groups; ≤15 items/group
@@ -57,28 +57,28 @@
 ## User Scenarios & Testing *(mandatory)*
 
 ### Primary User Story
-A coach creates and manages a structured practice plan divided into sections. Inside each section the coach arranges abstract player groups and sequences exercise blocks and breaks, sets target durations, compares planned versus target time, and adjusts ordering and naming to finalize a coherent practice outline.
+A user creates and manages a structured practice plan divided into sections. Inside each section the user arranges abstract player groups and sequences exercise blocks and breaks, sets target durations, compares planned versus target time, and adjusts ordering and naming to finalize a coherent practice outline.
 
 ### Acceptance Scenarios
-1. **Given** the coach opens a new practice plan, **When** it loads, **Then** it contains three editable/deletable default sections: Warm Up, Main, Cooldown.
-2. **Given** the coach views the Side Navigation, **When** looking for planning tools, **Then** a Practice Planner entry is available and opens the planner when selected.
+1. **Given** the user opens a new practice plan, **When** it loads, **Then** it contains three editable/deletable default sections: Warm Up, Main, Cooldown.
+2. **Given** the user views the Side Navigation, **When** looking for planning tools, **Then** a Practice Planner entry is available and opens the planner when selected.
 3. **Given** a section has a target duration in minutes, **When** exercise blocks and breaks are added to any group, **Then** the section header shows current max group total / target and turns the time text red only if total exceeds target.
 4. **Given** a section target is set to 0 minutes, **When** the section is displayed, **Then** the section is visually grayed to denote zero planned time.
-5. **Given** a group contains exercise blocks, **When** the coach overrides a block's default duration with a custom minute value, **Then** the group's total recalculates immediately using the overridden value.
-6. **Given** a group list, **When** the coach adds a break with a name and duration, **Then** it appears with distinct styling and its duration counts toward the group's and section's totals.
-7. **Given** exercise blocks and breaks in a group, **When** the coach reorders them (move up or down), **Then** the list order updates and totals remain correct.
-8. **Given** a section, **When** the coach adds a new group, **Then** a new group with default name (e.g., "Group") and zero total appears ready for block selection.
-9. **Given** a group containing exercises, **When** the coach deletes the group and confirms, **Then** the group and its items are removed and section totals update.
-10. **Given** a section, **When** the coach duplicates it, **Then** a new section with the same groups (and their items and overridden durations) appears and can be independently edited.
-11. **Given** a group, **When** the coach duplicates it within the same section, **Then** a new group with identical items and durations appears.
-12. **Given** a plan with multiple sections, **When** the coach reorders sections, **Then** their order updates and persists for the plan.
-13. **Given** a plan, **When** the coach deletes all sections (including defaults), **Then** the plan becomes empty and offers an action to add a new section before saving.
+5. **Given** a group contains exercise blocks, **When** the user overrides a block's default duration with a custom minute value, **Then** the group's total recalculates immediately using the overridden value.
+6. **Given** a group list, **When** the user adds a break with a name and duration, **Then** it appears with distinct styling and its duration counts toward the group's and section's totals.
+7. **Given** exercise blocks and breaks in a group, **When** the user reorders them (move up or down), **Then** the list order updates and totals remain correct.
+8. **Given** a section, **When** the user adds a new group, **Then** a new group with default name (e.g., "Group") and zero total appears ready for block selection.
+9. **Given** a group containing exercises, **When** the user deletes the group and confirms, **Then** the group and its items are removed and section totals update.
+10. **Given** a section, **When** the user duplicates it, **Then** a new section with the same groups (and their items and overridden durations) appears and can be independently edited.
+11. **Given** a group, **When** the user duplicates it within the same section, **Then** a new group with identical items and durations appears.
+12. **Given** a plan with multiple sections, **When** the user reorders sections, **Then** their order updates and persists for the plan.
+13. **Given** a plan, **When** the user deletes all sections (including defaults), **Then** the plan becomes empty and offers an action to add a new section before saving.
 14. **Given** an exercise block previously added is later removed from the global exercise catalog, **When** the plan is opened, **Then** a placeholder item labeled (e.g., "Deleted Exercise") shows in its position with zero duration and can be removed.
-15. **Given** the coach saves a plan with name, description, and multiple tags, **When** saving succeeds, **Then** all metadata persists (no tag count limit).
+15. **Given** the user saves a plan with name, description, and multiple tags, **When** saving succeeds, **Then** all metadata persists (no tag count limit).
 16. **Given** the viewport width changes, **When** multiple groups exist in a section, **Then** groups display side-by-side where space allows (commonly 2, up to 3 in a row) and wrap into additional rows or single-column on narrow screens.
-17. **Given** a coach is not the owner of a plan and has not been explicitly shared edit rights, **When** attempting to access the plan URL, **Then** access is denied (no read / no edit UI provided).
-18. **Given** a shared coach (explicitly added) accesses a plan, **When** performing any edit (delete, duplicate, rename, reorder), **Then** the action succeeds identically to the owner.
-19. **Given** a coach edits a plan, **When** saving, **Then** only the latest state is retained (no historical versions accessible).
+17. **Given** a user is not the owner of a plan and has not been explicitly granted edit rights, **When** attempting to access the plan URL, **Then** access is denied (no read / no edit UI provided).
+18. **Given** a user with granted 'edit' access accesses a plan, **When** performing any edit (delete, duplicate, rename, reorder), **Then** the action succeeds identically to the owner.
+19. **Given** a user edits a plan, **When** saving, **Then** only the latest state is retained (no historical versions accessible).
 
 ### Edge Cases
 - All three default sections deleted immediately after plan creation (allowed; plan remains valid but empty until a new section is added).
@@ -88,13 +88,13 @@ A coach creates and manages a structured practice plan divided into sections. In
 - Exercise block with zero or unspecified (treated as zero) duration (allowed; counts as 0 until overridden).
 - Overriding duration to a higher or lower positive integer (minutes) including changing back to zero.
 - Negative duration input (rejected with validation message).
-- Extremely large duration (no upper bound; rely on practical coach input; still stored and calculated as minutes).
+- Extremely large duration (no upper bound; rely on practical user input; still stored and calculated as minutes).
 - Break with zero duration (allowed, counts 0) vs negative duration (rejected).
 - Deleting a group that has items requires confirmation; group without items may delete without confirmation.
 - Many tags applied (no limit) including duplicates (spec does not enforce uniqueness of tags—interpretation left to broader tagging policy).
 - Deleted (externally removed) exercise blocks render as placeholder until removed or replaced.
 - Attempted access by non-owner, non-shared user (denied without data leakage).
-- Shared coach performs destructive action (delete section/group) — treated identically to owner.
+- User with 'edit' access performs destructive action (delete section/group) — treated identically to owner.
 - User expects a previous version after changes (not available; only current state retained).
 
 ## Requirements *(mandatory)*
@@ -126,7 +126,7 @@ A coach creates and manages a structured practice plan divided into sections. In
 - **FR-023**: System MUST display section time comparison in the format current_total / target and color the time value red only when current_total > target.
 - **FR-024**: System MUST allow reordering of items (exercise blocks and breaks) within a group; group reordering across the section is NOT required.
 - **FR-025**: System MUST allow deleting an exercise block or break from a group.
-- **FR-026**: System MUST represent deleted/removed external exercise blocks with a placeholder label (e.g., "Deleted Exercise") and zero duration until removed by the coach.
+- **FR-026**: System MUST represent deleted/removed external exercise blocks with a placeholder label (e.g., "Deleted Exercise") and zero duration until removed by the user.
 - **FR-027**: System MUST update all affected totals and comparisons immediately after any add, delete, reorder, rename, override, or duplication action.
 - **FR-028**: System MUST allow plan metadata: required name, optional description, optional unlimited tags (no tag count limit enforced here).
 - **FR-029**: System MUST prevent saving a plan without a non-empty name.
@@ -138,7 +138,7 @@ A coach creates and manages a structured practice plan divided into sections. In
 - **FR-035**: System MUST adapt group layout responsively: show groups side-by-side where width permits (aiming for 2 common / up to 3 per row) and stack to a single column on narrow screens; additional groups wrap to new rows.
 - **FR-036**: System MUST allow sections and groups to share identical names without warning.
 - **FR-037**: System SHOULD provide clear labeling or context to differentiate identically named sections or groups (e.g., by order) without enforcing uniqueness.
-- **FR-038**: System MUST restrict Practice Plan access so only the owner coach and users with a PracticePlanAccess record (any access level) can view; all others have no access (no read exposure).
+- **FR-038**: System MUST restrict Practice Plan access so only the owner user and users with a PracticePlanAccess record (any access level) can view; all others have no access (no read exposure).
 - **FR-039**: System MUST grant users with 'edit' PracticePlanAccess (and the owner) identical edit capabilities including duplication and deletion of sections, groups, and items. (MVP: only 'edit' access entries are created; 'view' reserved for future.)
 - **FR-040**: System MUST retain only the latest saved state of a Practice Plan (no historical version storage or retrieval).
 - **FR-041**: System MUST treat simultaneous edits with last-save-wins semantics (no conflict detection or merge UI; later successful save overwrites prior changes).

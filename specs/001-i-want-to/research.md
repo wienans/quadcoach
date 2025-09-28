@@ -38,8 +38,8 @@ Decision: REST endpoints under /api/practice-plans
 - GET /:id (fetch one)
 - PATCH /:id (update full document or partial fields)
 - DELETE /:id
-- POST /:id/share (add shared coach)
-- DELETE /:id/share/:coachId (remove shared coach)
+- POST /:id/access (add user access)
+- DELETE /:id/access/:accessId (remove user access)
 Potential list endpoint (GET /) for owner + shared accessible plans (optional MVP include)
 
 Rationale: Mirrors existing REST patterns; minimal endpoints.

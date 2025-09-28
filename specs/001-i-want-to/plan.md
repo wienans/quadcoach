@@ -31,7 +31,7 @@
 - Phase 3-4: Implementation execution (manual or via tools)
 
 ## Summary
-Practice Planner enables coaches to create structured practice plans composed of ordered sections (with target durations) containing abstract groups that sequence exercise blocks and breaks while continuously calculating time totals versus section targets. Technical approach: introduce new backend Practice Plan domain (Mongoose models + REST endpoints) plus separate PracticePlanAccess model (mirrors tacticboardAccess) and frontend state slices/components leveraging existing React + Redux Toolkit patterns; ensure immediate client-side recomputation (<100ms) and simple last-save-wins persistence without versioning. MVP only issues 'edit' access entries; 'view' reserved for future.
+Practice Planner enables users to create structured practice plans composed of ordered sections (with target durations) containing abstract groups that sequence exercise blocks and breaks while continuously calculating time totals versus section targets. Technical approach: introduce new backend Practice Plan domain (Mongoose models + REST endpoints) plus separate PracticePlanAccess model (mirrors tacticboardAccess) and frontend state slices/components leveraging existing React + Redux Toolkit patterns; ensure immediate client-side recomputation (<100ms) and simple last-save-wins persistence without versioning. MVP only issues 'edit' access entries; 'view' reserved for future.
 
 ## Technical Context
 **Language/Version**: Frontend: TypeScript 5 + React 18; Backend: Node.js 18 + Express + TypeScript 5  

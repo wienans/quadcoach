@@ -4,7 +4,7 @@
 Create and adjust a practice plan verifying timing calculations and access control.
 
 ## Steps
-1. Authenticate as coach (obtain JWT via existing login).
+1. Authenticate as user (obtain JWT via existing login).
 2. Create new practice plan (POST /api/practice-plans) – expect 3 default sections (Warm Up, Main, Cooldown) each with one group "All Players".
 3. Rename a section and set targetDuration (e.g., 30 for Warm Up).
 4. Add second group to Warm Up; add exercise items and a break to each group; observe group totals and section max compare vs target.
@@ -13,7 +13,7 @@ Create and adjust a practice plan verifying timing calculations and access contr
 7. Delete a group containing items (confirm prompt) then undo by duplicating remaining group.
 8. Set targetDuration below current total and verify red styling when exceeded.
 9. Remove an exercise from catalog (simulate by using an ID that no longer resolves) and reload plan; verify placeholder item.
-10. Share plan with second coach (POST /:id/share) and perform edits as that coach; confirm identical capabilities.
+10. Grant plan access to a second user (POST /:id/access with access='edit') and perform edits as that user; confirm identical capabilities.
 11. Perform concurrent edits from two sessions; last save persists, earlier overwrite lost (accepted behavior).
 12. Delete all sections; save plan; confirm empty plan persists and can add section later.
 
