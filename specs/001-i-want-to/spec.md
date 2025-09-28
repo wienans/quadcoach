@@ -88,7 +88,7 @@ A user creates and manages a structured practice plan divided into sections. Ins
 - Exercise block with zero or unspecified (treated as zero) duration (allowed; counts as 0 until overridden).
 - Overriding duration to a higher or lower positive integer (minutes) including changing back to zero.
 - Negative duration input (rejected with validation message).
-- Extremely large duration (no upper bound; rely on practical user input; still stored and calculated as minutes).
+- Duration input >1000 minutes (rejected with validation message per FR-034).
 - Break with zero duration (allowed, counts 0) vs negative duration (rejected).
 - Deleting a group that has items requires confirmation; group without items may delete without confirmation.
 - Many tags applied (no limit) including duplicates (spec does not enforce uniqueness of tags—interpretation left to broader tagging policy).
@@ -134,7 +134,7 @@ A user creates and manages a structured practice plan divided into sections. Ins
 - **FR-031**: System MUST provide an explicit action to discard unsaved changes (no autosave assumed).
 - **FR-032**: System MUST reject negative duration inputs with a validation message and not apply them.
 - **FR-033**: System MUST persist and restore ordering of sections, ordering of items within groups, overridden durations, breaks, and duplicates.
-- **FR-034**: System MUST support large minute totals without imposed upper bound (practical limits only by numeric representation).
+- **FR-034**: System MUST enforce an upper bound of 1000 minutes for any single user-entered duration field (section target, exercise override, break); attempts to exceed 1000 MUST be rejected with a validation message and value not applied.
 - **FR-035**: System MUST adapt group layout responsively: show groups side-by-side where width permits (aiming for 2 common / up to 3 per row) and stack to a single column on narrow screens; additional groups wrap to new rows.
 - **FR-036**: System MUST allow sections and groups to share identical names without warning.
 - **FR-037**: System SHOULD provide clear labeling or context to differentiate identically named sections or groups (e.g., by order) without enforcing uniqueness.

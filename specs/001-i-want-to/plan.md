@@ -47,7 +47,18 @@ Practice Planner enables users to create structured practice plans composed of o
 ## Constitution Check
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-No constitution file found at `/memory/constitution.md` (directory missing). Treat as: minimalism, clarity, incrementalism, testability. Current plan adheres (single new backend model + endpoints; reuse existing patterns; defers test framework introduction).
+Using constitution at `.specify/memory/constitution.md` (v1.0.0).
+
+| Principle | Assessment | Action / Tasks |
+|-----------|------------|----------------|
+| I. User Value & Simplicity | Feature directly supports coaching planning; spec free of over‑abstraction after removal of tooling meta. | Ensure navigation entry added (Task T060) for discoverability (FR-001). |
+| II. Type Safety & Explicit Contracts | Models & endpoints planned; missing validation tests for negative/ >1000 durations & name required. | Add validation tests (T048, T049, T059 partial for labeling). |
+| III. Secure & Responsible Data Handling | Access control endpoints planned; missing unauthorized access negative test; rate limiting application to new routes not explicit. | Add unauthorized access test (T047); add rate limit/logging verification (T058). |
+| IV. Operational Clarity (Observability/Performance) | Performance script exists but lacks assertion; logging tasks absent. | Strengthen performance script (T055) and add logging task (T058). |
+| Architecture & Technical Constraints | Stack unchanged; additions align with repo structure. | None. |
+| Workflow & Quality Gates | Tests-first partially; many FR gaps now addressed via added tasks T046-T060. | Execute new tasks before implementation phases they gate. |
+
+No deviations requiring Complexity Tracking at this time. If future tasks introduce new patterns (e.g., shared validation helpers), document justification then.
 
 ## Project Structure
 
