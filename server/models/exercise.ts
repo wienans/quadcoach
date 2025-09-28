@@ -35,7 +35,7 @@ const blockSchema = new Schema<IBlock>({
   },
   tactics_board: {
     type: Types.ObjectId,
-    ref: "tacticBoards",
+    ref: "tacticboards",
   },
   time_min: {
     type: Number,

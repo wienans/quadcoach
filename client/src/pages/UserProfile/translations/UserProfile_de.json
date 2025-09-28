@@ -20,10 +20,9 @@
   "deleteAccount": "Account löschen",
   "adminInfo": "Admin Informationen",
   "onlineUsers": "Online Benutzer",
-  "onlineUsersDescription": "Benutzer, die in den letzten 15 Minuten aktiv waren"
+  "onlineUsersDescription": "Benutzer, die in den letzten 15 Minuten aktiv waren",
   "ownedExercisesList": "Meine Übungen",
-  "ownedTacticboardsList": "Meine Tacticboards",
+  "ownedTacticboardsList": "Meine Taktik Tafeln",
   "accessibleExercisesList": "Übungen (Bearbeitungsrechte)",
-  "accessibleTacticboardsList": "Tacticboards (Bearbeitungsrechte)",
-  "deleteAccount": "Account löschen"
+  "accessibleTacticboardsList": "Taktik Tafeln (Bearbeitungsrechte)"
 }
