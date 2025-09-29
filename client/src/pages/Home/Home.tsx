@@ -21,24 +21,34 @@ const Home = () => {
               alignItems: "center",
             }}
           >
-            <img
+            <SoftBox
+              component="img"
               src={Logo}
               alt="Logo"
-              style={{ width: "128px", margin: "50px 0" }}
+              sx={{
+                width: { xs: "80px", sm: "100px", md: "128px" },
+                margin: { xs: "30px 0", sm: "40px 0", md: "50px 0" },
+              }}
             />
           </SoftBox>
           <SoftBox>
             <Card sx={{ height: "100%" }}>
-              <SoftBox p={2}>
+              <SoftBox p={{ xs: 1.5, sm: 2 }}>
                 <SoftBox
                   display="flex"
-                  justifyContent="space-between"
+                  flexDirection={{ xs: "column", sm: "row" }}
+                  justifyContent={{ xs: "flex-start", sm: "space-between" }}
+                  alignItems={{ xs: "flex-start", sm: "center" }}
                   width="100%"
+                  gap={{ xs: 1, sm: 0 }}
                 >
                   <SoftTypography
                     variant="h3"
                     fontWeight="bold"
                     textTransform="uppercase"
+                    sx={{
+                      fontSize: { xs: "1.25rem", sm: "1.5rem", md: "2rem" },
+                    }}
                   >
                     Drafting Boards
                   </SoftTypography>
@@ -46,6 +56,11 @@ const Home = () => {
                     variant="h3"
                     fontWeight="bold"
                     textTransform="uppercase"
+                    color="text"
+                    sx={{
+                      fontSize: { xs: "1rem", sm: "1.25rem", md: "2rem" },
+                      color: { xs: "text.secondary", sm: "inherit" },
+                    }}
                   >
                     24.Aug.2025
                   </SoftTypography>
@@ -62,16 +77,22 @@ const Home = () => {
           </SoftBox>
           <SoftBox mt={5}>
             <Card sx={{ height: "100%" }}>
-              <SoftBox p={2}>
+              <SoftBox p={{ xs: 1.5, sm: 2 }}>
                 <SoftBox
                   display="flex"
-                  justifyContent="space-between"
+                  flexDirection={{ xs: "column", sm: "row" }}
+                  justifyContent={{ xs: "flex-start", sm: "space-between" }}
+                  alignItems={{ xs: "flex-start", sm: "center" }}
                   width="100%"
+                  gap={{ xs: 1, sm: 0 }}
                 >
                   <SoftTypography
                     variant="h3"
                     fontWeight="bold"
                     textTransform="uppercase"
+                    sx={{
+                      fontSize: { xs: "1.25rem", sm: "1.5rem", md: "2rem" },
+                    }}
                   >
                     Multi-User Access & System Improvements
                   </SoftTypography>
@@ -79,6 +100,11 @@ const Home = () => {
                     variant="h3"
                     fontWeight="bold"
                     textTransform="uppercase"
+                    color="text"
+                    sx={{
+                      fontSize: { xs: "1rem", sm: "1.25rem", md: "2rem" },
+                      color: { xs: "text.secondary", sm: "inherit" },
+                    }}
                   >
                     17.Jul.2025
                   </SoftTypography>
@@ -97,16 +123,22 @@ const Home = () => {
           </SoftBox>
           <SoftBox mt={5}>
             <Card sx={{ height: "100%" }}>
-              <SoftBox p={2}>
+              <SoftBox p={{ xs: 1.5, sm: 2 }}>
                 <SoftBox
                   display="flex"
-                  justifyContent="space-between"
+                  flexDirection={{ xs: "column", sm: "row" }}
+                  justifyContent={{ xs: "flex-start", sm: "space-between" }}
+                  alignItems={{ xs: "flex-start", sm: "center" }}
                   width="100%"
+                  gap={{ xs: 1, sm: 0 }}
                 >
                   <SoftTypography
                     variant="h3"
                     fontWeight="bold"
                     textTransform="uppercase"
+                    sx={{
+                      fontSize: { xs: "1.25rem", sm: "1.5rem", md: "2rem" },
+                    }}
                   >
                     Favorite Lists and User Profile
                   </SoftTypography>
@@ -114,6 +146,11 @@ const Home = () => {
                     variant="h3"
                     fontWeight="bold"
                     textTransform="uppercase"
+                    color="text"
+                    sx={{
+                      fontSize: { xs: "1rem", sm: "1.25rem", md: "2rem" },
+                      color: { xs: "text.secondary", sm: "inherit" },
+                    }}
                   >
                     01.Dec.2024
                   </SoftTypography>
@@ -133,16 +170,22 @@ const Home = () => {
           </SoftBox>
           <SoftBox mt={5}>
             <Card sx={{ height: "100%" }}>
-              <SoftBox p={2}>
+              <SoftBox p={{ xs: 1.5, sm: 2 }}>
                 <SoftBox
                   display="flex"
-                  justifyContent="space-between"
+                  flexDirection={{ xs: "column", sm: "row" }}
+                  justifyContent={{ xs: "flex-start", sm: "space-between" }}
+                  alignItems={{ xs: "flex-start", sm: "center" }}
                   width="100%"
+                  gap={{ xs: 1, sm: 0 }}
                 >
                   <SoftTypography
                     variant="h3"
                     fontWeight="bold"
                     textTransform="uppercase"
+                    sx={{
+                      fontSize: { xs: "1.25rem", sm: "1.5rem", md: "2rem" },
+                    }}
                   >
                     Open Beta Testing
                   </SoftTypography>
@@ -150,6 +193,11 @@ const Home = () => {
                     variant="h3"
                     fontWeight="bold"
                     textTransform="uppercase"
+                    color="text"
+                    sx={{
+                      fontSize: { xs: "1rem", sm: "1.25rem", md: "2rem" },
+                      color: { xs: "text.secondary", sm: "inherit" },
+                    }}
                   >
                     03.Nov.2024
                   </SoftTypography>
@@ -163,16 +211,22 @@ const Home = () => {
           </SoftBox>
           <SoftBox mt={5}>
             <Card sx={{ height: "100%" }}>
-              <SoftBox p={2}>
+              <SoftBox p={{ xs: 1.5, sm: 2 }}>
                 <SoftBox
                   display="flex"
-                  justifyContent="space-between"
+                  flexDirection={{ xs: "column", sm: "row" }}
+                  justifyContent={{ xs: "flex-start", sm: "space-between" }}
+                  alignItems={{ xs: "flex-start", sm: "center" }}
                   width="100%"
+                  gap={{ xs: 1, sm: 0 }}
                 >
                   <SoftTypography
                     variant="h3"
                     fontWeight="bold"
                     textTransform="uppercase"
+                    sx={{
+                      fontSize: { xs: "1.25rem", sm: "1.5rem", md: "2rem" },
+                    }}
                   >
                     Beta Testing
                   </SoftTypography>
@@ -180,6 +234,11 @@ const Home = () => {
                     variant="h3"
                     fontWeight="bold"
                     textTransform="uppercase"
+                    color="text"
+                    sx={{
+                      fontSize: { xs: "1rem", sm: "1.25rem", md: "2rem" },
+                      color: { xs: "text.secondary", sm: "inherit" },
+                    }}
                   >
                     12.Oct.2024
                   </SoftTypography>
@@ -193,16 +252,22 @@ const Home = () => {
           </SoftBox>
           <SoftBox mt={5} mb={3}>
             <Card sx={{ height: "100%" }}>
-              <SoftBox p={2}>
+              <SoftBox p={{ xs: 1.5, sm: 2 }}>
                 <SoftBox
                   display="flex"
-                  justifyContent="space-between"
+                  flexDirection={{ xs: "column", sm: "row" }}
+                  justifyContent={{ xs: "flex-start", sm: "space-between" }}
+                  alignItems={{ xs: "flex-start", sm: "center" }}
                   width="100%"
+                  gap={{ xs: 1, sm: 0 }}
                 >
                   <SoftTypography
                     variant="h3"
                     fontWeight="bold"
                     textTransform="uppercase"
+                    sx={{
+                      fontSize: { xs: "1.25rem", sm: "1.5rem", md: "2rem" },
+                    }}
                   >
                     Alpha Testing
                   </SoftTypography>
@@ -210,6 +275,11 @@ const Home = () => {
                     variant="h3"
                     fontWeight="bold"
                     textTransform="uppercase"
+                    color="text"
+                    sx={{
+                      fontSize: { xs: "1rem", sm: "1.25rem", md: "2rem" },
+                      color: { xs: "text.secondary", sm: "inherit" },
+                    }}
                   >
                     04.Feb.2024
                   </SoftTypography>
