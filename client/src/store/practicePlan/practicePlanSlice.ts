@@ -1,4 +1,9 @@
-import { createSlice, PayloadAction, nanoid, createSelector } from "@reduxjs/toolkit";
+import {
+  createSlice,
+  PayloadAction,
+  nanoid,
+  createSelector,
+} from "@reduxjs/toolkit";
 import { RootState } from "../store";
 
 // Domain Types (mirroring server model but adapted for client usage)
@@ -13,7 +18,8 @@ export interface PracticePlanItemExercise {
   _id: string;
   kind: "exercise";
   exerciseId: string;
-  duration?: number;
+  blockId: string;
+  duration: number;
 }
 
 export type PracticePlanItem = PracticePlanItemBreak | PracticePlanItemExercise;
@@ -66,6 +72,43 @@ function clonePlan(plan: PracticePlanEntity): PracticePlanEntity {
   return JSON.parse(JSON.stringify(plan));
 }
 
+function createTempId(): string {
+  return `temp_${nanoid()}`;
+}
+
+function isTemporaryId(id: string): boolean {
+  return id.startsWith("temp_");
+}
+
+function stripTempIds(sections: PracticePlanSection[]): PracticePlanSection[] {
+  return sections.map((section) => {
+    const cleanSection: any = {
+      name: section.name,
+      targetDuration: section.targetDuration,
+      groups: section.groups.map((group) => {
+        const cleanGroup: any = {
+          name: group.name,
+          items: group.items.map((item) => {
+            const cleanItem: any = { ...item };
+            if (isTemporaryId(item._id)) {
+              delete cleanItem._id;
+            }
+            return cleanItem;
+          }),
+        };
+        if (!isTemporaryId(group._id)) {
+          cleanGroup._id = group._id;
+        }
+        return cleanGroup;
+      }),
+    };
+    if (!isTemporaryId(section._id)) {
+      cleanSection._id = section._id;
+    }
+    return cleanSection;
+  });
+}
+
 const practicePlanSlice = createSlice({
   name: "practicePlan",
   initialState,
@@ -99,8 +142,9 @@ const practicePlanSlice = createSlice({
     addSection(state, action: PayloadAction<{ name?: string } | undefined>) {
       if (!state.draft) return;
       const newSection: PracticePlanSection = {
-        _id: nanoid(),
-        name: action.payload?.name || `Section ${state.draft.sections.length + 1}`,
+        _id: createTempId(),
+        name:
+          action.payload?.name || `Section ${state.draft.sections.length + 1}`,
         targetDuration: 0,
         groups: [],
       };
@@ -108,10 +152,16 @@ const practicePlanSlice = createSlice({
     },
     updateSectionMeta(
       state,
-      action: PayloadAction<{ sectionId: string; name?: string; targetDuration?: number }>
+      action: PayloadAction<{
+        sectionId: string;
+        name?: string;
+        targetDuration?: number;
+      }>,
     ) {
       if (!state.draft) return;
-      const s = state.draft.sections.find((x) => x._id === action.payload.sectionId);
+      const s = state.draft.sections.find(
+        (x) => x._id === action.payload.sectionId,
+      );
       if (!s) return;
       if (action.payload.name !== undefined) s.name = action.payload.name;
       if (action.payload.targetDuration !== undefined)
@@ -120,31 +170,38 @@ const practicePlanSlice = createSlice({
     deleteSection(state, action: PayloadAction<{ sectionId: string }>) {
       if (!state.draft) return;
       state.draft.sections = state.draft.sections.filter(
-        (s) => s._id !== action.payload.sectionId
+        (s) => s._id !== action.payload.sectionId,
       );
     },
     duplicateSection(state, action: PayloadAction<{ sectionId: string }>) {
       if (!state.draft) return;
-      const idx = state.draft.sections.findIndex((s) => s._id === action.payload.sectionId);
+      const idx = state.draft.sections.findIndex(
+        (s) => s._id === action.payload.sectionId,
+      );
       if (idx === -1) return;
-      const copy = clonePlan({ ...state.draft, sections: [state.draft.sections[idx]] }).sections[0];
-      copy._id = nanoid();
+      const copy = clonePlan({
+        ...state.draft,
+        sections: [state.draft.sections[idx]],
+      }).sections[0];
+      copy._id = createTempId();
       copy.groups = copy.groups.map((g) => ({
         ...g,
-        _id: nanoid(),
-        items: g.items.map((it) => ({ ...it, _id: nanoid() })),
+        _id: createTempId(),
+        items: g.items.map((it) => ({ ...it, _id: createTempId() })),
       }));
       state.draft.sections.splice(idx + 1, 0, copy);
     },
     addGroup(
       state,
-      action: PayloadAction<{ sectionId: string; name?: string }>
+      action: PayloadAction<{ sectionId: string; name?: string }>,
     ) {
       if (!state.draft) return;
-      const section = state.draft.sections.find((s) => s._id === action.payload.sectionId);
+      const section = state.draft.sections.find(
+        (s) => s._id === action.payload.sectionId,
+      );
       if (!section) return;
       const group: PracticePlanGroup = {
-        _id: nanoid(),
+        _id: createTempId(),
         name: action.payload.name || "Group",
         items: [],
       };
@@ -152,32 +209,53 @@ const practicePlanSlice = createSlice({
     },
     updateGroupName(
       state,
-      action: PayloadAction<{ sectionId: string; groupId: string; name: string }>
+      action: PayloadAction<{
+        sectionId: string;
+        groupId: string;
+        name: string;
+      }>,
     ) {
       if (!state.draft) return;
-      const section = state.draft.sections.find((s) => s._id === action.payload.sectionId);
-      const group = section?.groups.find((g) => g._id === action.payload.groupId);
+      const section = state.draft.sections.find(
+        (s) => s._id === action.payload.sectionId,
+      );
+      const group = section?.groups.find(
+        (g) => g._id === action.payload.groupId,
+      );
       if (group) group.name = action.payload.name;
     },
     deleteGroup(
       state,
-      action: PayloadAction<{ sectionId: string; groupId: string }>
+      action: PayloadAction<{ sectionId: string; groupId: string }>,
     ) {
       if (!state.draft) return;
-      const section = state.draft.sections.find((s) => s._id === action.payload.sectionId);
+      const section = state.draft.sections.find(
+        (s) => s._id === action.payload.sectionId,
+      );
       if (!section) return;
-      section.groups = section.groups.filter((g) => g._id !== action.payload.groupId);
+      section.groups = section.groups.filter(
+        (g) => g._id !== action.payload.groupId,
+      );
     },
     addBreakItem(
       state,
-      action: PayloadAction<{ sectionId: string; groupId: string; description: string; duration: number }>
+      action: PayloadAction<{
+        sectionId: string;
+        groupId: string;
+        description: string;
+        duration: number;
+      }>,
     ) {
       if (!state.draft) return;
-      const section = state.draft.sections.find((s) => s._id === action.payload.sectionId);
-      const group = section?.groups.find((g) => g._id === action.payload.groupId);
+      const section = state.draft.sections.find(
+        (s) => s._id === action.payload.sectionId,
+      );
+      const group = section?.groups.find(
+        (g) => g._id === action.payload.groupId,
+      );
       if (!group) return;
       const item: PracticePlanItemBreak = {
-        _id: nanoid(),
+        _id: createTempId(),
         kind: "break",
         description: action.payload.description,
         duration: action.payload.duration,
@@ -186,16 +264,27 @@ const practicePlanSlice = createSlice({
     },
     addExerciseItem(
       state,
-      action: PayloadAction<{ sectionId: string; groupId: string; exerciseId: string; duration?: number }>
+      action: PayloadAction<{
+        sectionId: string;
+        groupId: string;
+        exerciseId: string;
+        blockId: string;
+        duration: number;
+      }>,
     ) {
       if (!state.draft) return;
-      const section = state.draft.sections.find((s) => s._id === action.payload.sectionId);
-      const group = section?.groups.find((g) => g._id === action.payload.groupId);
+      const section = state.draft.sections.find(
+        (s) => s._id === action.payload.sectionId,
+      );
+      const group = section?.groups.find(
+        (g) => g._id === action.payload.groupId,
+      );
       if (!group) return;
       const item: PracticePlanItemExercise = {
-        _id: nanoid(),
+        _id: createTempId(),
         kind: "exercise",
         exerciseId: action.payload.exerciseId,
+        blockId: action.payload.blockId,
         duration: action.payload.duration,
       };
       group.items.push(item);
@@ -207,23 +296,37 @@ const practicePlanSlice = createSlice({
         groupId: string;
         itemId: string;
         changes: Partial<PracticePlanItemBreak & PracticePlanItemExercise>;
-      }>
+      }>,
     ) {
       if (!state.draft) return;
-      const section = state.draft.sections.find((s) => s._id === action.payload.sectionId);
-      const group = section?.groups.find((g) => g._id === action.payload.groupId);
+      const section = state.draft.sections.find(
+        (s) => s._id === action.payload.sectionId,
+      );
+      const group = section?.groups.find(
+        (g) => g._id === action.payload.groupId,
+      );
       const item = group?.items.find((it) => it._id === action.payload.itemId);
       if (item) Object.assign(item, action.payload.changes);
     },
     deleteItem(
       state,
-      action: PayloadAction<{ sectionId: string; groupId: string; itemId: string }>
+      action: PayloadAction<{
+        sectionId: string;
+        groupId: string;
+        itemId: string;
+      }>,
     ) {
       if (!state.draft) return;
-      const section = state.draft.sections.find((s) => s._id === action.payload.sectionId);
-      const group = section?.groups.find((g) => g._id === action.payload.groupId);
+      const section = state.draft.sections.find(
+        (s) => s._id === action.payload.sectionId,
+      );
+      const group = section?.groups.find(
+        (g) => g._id === action.payload.groupId,
+      );
       if (!group) return;
-      group.items = group.items.filter((it) => it._id !== action.payload.itemId);
+      group.items = group.items.filter(
+        (it) => it._id !== action.payload.itemId,
+      );
     },
     // Save success merges draft into current
     applySaveSuccess(state, action: PayloadAction<PracticePlanEntity>) {
@@ -267,21 +370,29 @@ export const {
   applySaveError,
 } = practicePlanSlice.actions;
 
+export { stripTempIds };
+
 export const PracticePlanReducer = practicePlanSlice.reducer;
 
 // Basic selectors
 const selectDomain = (state: RootState) => state.practicePlan;
 export const selectDraft = (state: RootState) => selectDomain(state).draft;
-export const selectCurrentPlan = (state: RootState) => selectDomain(state).currentPlan;
-export const selectPendingSave = (state: RootState) => selectDomain(state).pendingSave;
+export const selectCurrentPlan = (state: RootState) =>
+  selectDomain(state).currentPlan;
+export const selectPendingSave = (state: RootState) =>
+  selectDomain(state).pendingSave;
 
 // Derived (placeholder — T050 will expand with time calculations)
 export const selectSectionById = (sectionId: string) =>
-  createSelector(selectDraft, (draft) => draft?.sections.find((s) => s._id === sectionId));
+  createSelector(
+    selectDraft,
+    (draft) => draft?.sections.find((s) => s._id === sectionId),
+  );
 
 export const selectGroupById = (sectionId: string, groupId: string) =>
-  createSelector(selectSectionById(sectionId), (section) =>
-    section?.groups.find((g) => g._id === groupId)
+  createSelector(
+    selectSectionById(sectionId),
+    (section) => section?.groups.find((g) => g._id === groupId),
   );
 
 // Derived totals & per-group calculations (T050)
@@ -313,22 +424,29 @@ export const selectPlanTotals = createSelector(selectDraft, (draft) => {
   return { totalDuration: total, sectionDurations, groupDurations };
 });
 
-export const selectSectionOverTarget = createSelector(selectPlanTotals, selectDraft, (totals, draft) => {
-  if (!draft) return {} as Record<string, boolean>;
-  const over: Record<string, boolean> = {};
-  for (const s of draft.sections) {
-    over[s._id] = (totals.sectionDurations[s._id] || 0) > s.targetDuration;
-  }
-  return over;
-});
+export const selectSectionOverTarget = createSelector(
+  selectPlanTotals,
+  selectDraft,
+  (totals, draft) => {
+    if (!draft) return {} as Record<string, boolean>;
+    const over: Record<string, boolean> = {};
+    for (const s of draft.sections) {
+      over[s._id] = (totals.sectionDurations[s._id] || 0) > s.targetDuration;
+    }
+    return over;
+  },
+);
 
 // Optimistic update utilities (T051)
 export const selectHasUnsavedChanges = createSelector(
   [selectDraft, selectCurrentPlan],
   (draft, current) => {
     if (!draft || !current) return false;
-    return JSON.stringify({ ...draft, updatedAt: undefined }) !== JSON.stringify({ ...current, updatedAt: undefined });
-  }
+    return (
+      JSON.stringify({ ...draft, updatedAt: undefined }) !==
+      JSON.stringify({ ...current, updatedAt: undefined })
+    );
+  },
 );
 
 export default practicePlanSlice;

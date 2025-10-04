@@ -25,6 +25,10 @@ import {
   applySaveError,
   selectPendingSave,
   selectPlanTotals,
+  stripTempIds,
+  PracticePlanItem,
+  PracticePlanItemBreak,
+  PracticePlanItemExercise,
 } from "../../store/practicePlan/practicePlanSlice";
 import SectionEditor from "../../components/PracticePlanner/SectionEditor/SectionEditor";
 import GroupEditor from "../../components/PracticePlanner/GroupEditor/GroupEditor";
@@ -57,7 +61,7 @@ const PracticePlannerPage: React.FC = () => {
         name: draft.name,
         description: draft.description,
         tags: draft.tags,
-        sections: draft.sections,
+        sections: stripTempIds(draft.sections),
       }).unwrap();
       dispatch(applySaveSuccess(updated));
     } catch (e: any) {
@@ -67,6 +71,7 @@ const PracticePlannerPage: React.FC = () => {
 
   if (!planId) return <div>No plan id provided</div>;
   if (isLoading || (isSuccess && !draft)) return <div>Loading...</div>;
+  if (!draft) return <div>Loading...</div>;
 
   return (
     <div style={{ padding: 16 }}>
@@ -88,7 +93,14 @@ const PracticePlannerPage: React.FC = () => {
         </button>
       </div>
       <TimeSummary />
-      <div style={{ marginTop: 16, display: "flex", flexDirection: "column", gap: 24 }}>
+      <div
+        style={{
+          marginTop: 16,
+          display: "flex",
+          flexDirection: "column",
+          gap: 24,
+        }}
+      >
         {draft.sections.map((section: PracticePlanSection) => (
           <SectionEditor
             key={section._id}
@@ -98,7 +110,10 @@ const PracticePlannerPage: React.FC = () => {
             }
             onChangeTarget={(minutes) =>
               dispatch(
-                updateSectionMeta({ sectionId: section._id, targetDuration: minutes })
+                updateSectionMeta({
+                  sectionId: section._id,
+                  targetDuration: minutes,
+                }),
               )
             }
           >
@@ -107,25 +122,34 @@ const PracticePlannerPage: React.FC = () => {
                 key={g._id}
                 group={g}
                 onChangeName={(name) =>
-                  dispatch(
-                    { type: "practicePlan/updateGroupName", payload: { sectionId: section._id, groupId: g._id, name } }
-                  )
+                  dispatch({
+                    type: "practicePlan/updateGroupName",
+                    payload: { sectionId: section._id, groupId: g._id, name },
+                  })
                 }
               >
                 <ItemList
                   items={g.items}
-                  onUpdateItem={(itemId, changes) =>
+                  onUpdateItem={(itemId, changes: Partial<PracticePlanItem>) =>
                     dispatch(
                       updateItem({
                         sectionId: section._id,
                         groupId: g._id,
                         itemId,
-                        changes: changes as any,
-                      })
+                        changes: changes as Partial<
+                          PracticePlanItemBreak & PracticePlanItemExercise
+                        >,
+                      }),
                     )
                   }
                   onDeleteItem={(itemId) =>
-                    dispatch(deleteItem({ sectionId: section._id, groupId: g._id, itemId }))
+                    dispatch(
+                      deleteItem({
+                        sectionId: section._id,
+                        groupId: g._id,
+                        itemId,
+                      }),
+                    )
                   }
                 />
                 <div style={{ display: "flex", gap: 4, marginTop: 4 }}>
@@ -137,7 +161,7 @@ const PracticePlannerPage: React.FC = () => {
                           groupId: g._id,
                           description: "Break",
                           duration: 5,
-                        })
+                        }),
                       )
                     }
                   >
@@ -149,9 +173,10 @@ const PracticePlannerPage: React.FC = () => {
                         addExerciseItem({
                           sectionId: section._id,
                           groupId: g._id,
-                          exerciseId: "unknown-ex",
+                          exerciseId: "651ad4e54a9a17037c01f6cf",
+                          blockId: "65256232c4046e7919d23b2c",
                           duration: 10,
-                        })
+                        }),
                       )
                     }
                   >
@@ -160,14 +185,25 @@ const PracticePlannerPage: React.FC = () => {
                 </div>
               </GroupEditor>
             ))}
-            <button onClick={() => dispatch(addGroup({ sectionId: section._id }))}>
+            <button
+              onClick={() => dispatch(addGroup({ sectionId: section._id }))}
+            >
               + Group
             </button>
           </SectionEditor>
         ))}
-        <button onClick={() => dispatch(addSection(undefined))}>+ Section</button>
+        <button onClick={() => dispatch(addSection(undefined))}>
+          + Section
+        </button>
       </div>
-      <pre style={{ marginTop: 32, background: "#272822", color: "#f8f8f2", padding: 8 }}>
+      <pre
+        style={{
+          marginTop: 32,
+          background: "#272822",
+          color: "#f8f8f2",
+          padding: 8,
+        }}
+      >
         {JSON.stringify(totals, null, 2)}
       </pre>
     </div>
