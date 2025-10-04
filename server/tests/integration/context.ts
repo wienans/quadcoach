@@ -12,7 +12,9 @@ declare global {
 
 export function authHeader() {
   if (!global.__INT_ACCESS_TOKEN__) {
-    throw new Error('Access token not initialized. Ensure login test ran first.');
+    throw new Error(
+      "Access token not initialized. Ensure login test ran first."
+    );
   }
   return { Authorization: `Bearer ${global.__INT_ACCESS_TOKEN__}` };
 }
@@ -22,6 +24,26 @@ export function storePlanId(id: string) {
 }
 
 export function requirePlanId(): string {
-  if (!global.__INT_PLAN_ID__) throw new Error('Plan id not set yet');
+  if (!global.__INT_PLAN_ID__) throw new Error("Plan id not set yet");
   return global.__INT_PLAN_ID__;
+}
+
+export function getDefaultSections() {
+  return [
+    {
+      name: "Warm Up",
+      targetDuration: 0,
+      groups: [{ name: "All Players", items: [] }],
+    },
+    {
+      name: "Main",
+      targetDuration: 0,
+      groups: [{ name: "All Players", items: [] }],
+    },
+    {
+      name: "Cooldown",
+      targetDuration: 0,
+      groups: [{ name: "All Players", items: [] }],
+    },
+  ];
 }

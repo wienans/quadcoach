@@ -5,13 +5,16 @@
 import request from 'supertest';
 import mongoose from 'mongoose';
 import { app } from '../setup';
-import { authHeader } from '../utils/auth';
+import { authHeader, getDefaultSections } from '../utils/auth';
 
 function cloneGroup(group: any) {
+  const { _id, id, ...rest } = group;
   return {
-    ...group,
-    id: new mongoose.Types.ObjectId().toString(),
-    items: group.items.map((it: any) => ({ ...it, id: new mongoose.Types.ObjectId().toString() })),
+    ...rest,
+    items: group.items.map((it: any) => {
+      const { _id: itemId, id: itemIdVirtual, ...itemRest } = it;
+      return itemRest;
+    }),
   };
 }
 
@@ -19,25 +22,23 @@ describe('Practice Plans Integration 07: group delete & undo', () => {
   it('removes a group then restores equivalent with new ids', async () => {
     const { Authorization } = await authHeader();
 
+    const sections = getDefaultSections();
     const createRes = await request(app)
       .post('/api/practice-plans')
       .set('Authorization', Authorization)
-      .send({ name: 'Group Delete Undo Plan' });
+      .send({ name: 'Group Delete Undo Plan', sections });
     expect(createRes.status).toBe(201);
     const planId = createRes.body._id;
 
-    // Add two groups to first section
     const firstSection = createRes.body.sections[0];
     const g1 = {
-      id: new mongoose.Types.ObjectId().toString(),
       name: 'Group Keep',
       items: [],
     };
     const g2 = {
-      id: new mongoose.Types.ObjectId().toString(),
       name: 'Group Remove',
       items: [
-        { id: new mongoose.Types.ObjectId().toString(), kind: 'break', name: 'Pause', duration: 2 },
+        { kind: 'break', description: 'Pause', duration: 2 },
       ],
     };
     const enrichedFirst = { ...firstSection, groups: [...firstSection.groups, g1, g2] };
@@ -49,11 +50,12 @@ describe('Practice Plans Integration 07: group delete & undo', () => {
     expect(patch1.status).toBe(200);
     const updatedFirst = patch1.body.sections[0];
     expect(updatedFirst.groups.length).toBe(enrichedFirst.groups.length);
+    
+    const storedG2 = updatedFirst.groups.find((g: any) => g.name === 'Group Remove');
 
-    // Delete g2 by omitting it
     const withoutG2 = {
       ...updatedFirst,
-      groups: updatedFirst.groups.filter((g: any) => g.id !== g2.id),
+      groups: updatedFirst.groups.filter((g: any) => g._id !== storedG2._id),
     };
     const patch2Sections = [withoutG2, ...patch1.body.sections.slice(1)];
     const patch2 = await request(app)
@@ -62,10 +64,9 @@ describe('Practice Plans Integration 07: group delete & undo', () => {
       .send({ sections: patch2Sections });
     expect(patch2.status).toBe(200);
     const afterDeleteFirst = patch2.body.sections[0];
-    expect(afterDeleteFirst.groups.find((g: any) => g.id === g2.id)).toBeFalsy();
+    expect(afterDeleteFirst.groups.find((g: any) => g._id === storedG2._id)).toBeFalsy();
 
-    // Undo by adding cloned version of g2
-    const restored = cloneGroup(g2);
+    const restored = cloneGroup(storedG2);
     const patch3Sections = [
       { ...afterDeleteFirst, groups: [...afterDeleteFirst.groups, restored] },
       ...patch2.body.sections.slice(1),
@@ -78,6 +79,6 @@ describe('Practice Plans Integration 07: group delete & undo', () => {
     const finalFirst = patch3.body.sections[0];
     const restoredFound = finalFirst.groups.find((g: any) => g.name === 'Group Remove');
     expect(restoredFound).toBeTruthy();
-    expect(restoredFound.id).not.toBe(g2.id);
+    expect(restoredFound._id).not.toBe(storedG2._id);
   });
 });

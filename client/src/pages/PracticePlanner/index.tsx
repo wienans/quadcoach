@@ -91,27 +91,24 @@ const PracticePlannerPage: React.FC = () => {
       <div style={{ marginTop: 16, display: "flex", flexDirection: "column", gap: 24 }}>
         {draft.sections.map((section: PracticePlanSection) => (
           <SectionEditor
-            key={section.id}
+            key={section._id}
             section={section}
             onChangeName={(name) =>
-              dispatch(updateSectionMeta({ sectionId: section.id, name }))
+              dispatch(updateSectionMeta({ sectionId: section._id, name }))
             }
             onChangeTarget={(minutes) =>
               dispatch(
-                updateSectionMeta({ sectionId: section.id, targetDuration: minutes })
+                updateSectionMeta({ sectionId: section._id, targetDuration: minutes })
               )
             }
           >
             {section.groups.map((g: PracticePlanGroup) => (
               <GroupEditor
-                key={g.id}
+                key={g._id}
                 group={g}
                 onChangeName={(name) =>
                   dispatch(
-                    // reusing updateGroupName would be better; using updateItem style for brevity
-                    // but slice has updateGroupName. We'll import and use it.
-                    // @ts-ignore
-                    { type: "practicePlan/updateGroupName", payload: { sectionId: section.id, groupId: g.id, name } }
+                    { type: "practicePlan/updateGroupName", payload: { sectionId: section._id, groupId: g._id, name } }
                   )
                 }
               >
@@ -120,15 +117,15 @@ const PracticePlannerPage: React.FC = () => {
                   onUpdateItem={(itemId, changes) =>
                     dispatch(
                       updateItem({
-                        sectionId: section.id,
-                        groupId: g.id,
+                        sectionId: section._id,
+                        groupId: g._id,
                         itemId,
                         changes: changes as any,
                       })
                     )
                   }
                   onDeleteItem={(itemId) =>
-                    dispatch(deleteItem({ sectionId: section.id, groupId: g.id, itemId }))
+                    dispatch(deleteItem({ sectionId: section._id, groupId: g._id, itemId }))
                   }
                 />
                 <div style={{ display: "flex", gap: 4, marginTop: 4 }}>
@@ -136,9 +133,9 @@ const PracticePlannerPage: React.FC = () => {
                     onClick={() =>
                       dispatch(
                         addBreakItem({
-                          sectionId: section.id,
-                          groupId: g.id,
-                          name: "Break",
+                          sectionId: section._id,
+                          groupId: g._id,
+                          description: "Break",
                           duration: 5,
                         })
                       )
@@ -150,10 +147,10 @@ const PracticePlannerPage: React.FC = () => {
                     onClick={() =>
                       dispatch(
                         addExerciseItem({
-                          sectionId: section.id,
-                          groupId: g.id,
+                          sectionId: section._id,
+                          groupId: g._id,
                           exerciseId: "unknown-ex",
-                          durationOverride: 10,
+                          duration: 10,
                         })
                       )
                     }
@@ -163,7 +160,7 @@ const PracticePlannerPage: React.FC = () => {
                 </div>
               </GroupEditor>
             ))}
-            <button onClick={() => dispatch(addGroup({ sectionId: section.id }))}>
+            <button onClick={() => dispatch(addGroup({ sectionId: section._id }))}>
               + Group
             </button>
           </SectionEditor>

@@ -18,40 +18,40 @@ const ItemList: React.FC<ItemListProps> = ({ items, onUpdateItem, onDeleteItem }
         if (it.kind === "break") {
           const b = it as PracticePlanItemBreak;
           return (
-            <li key={it.id} style={{ display: "flex", gap: 8, alignItems: "center" }}>
+            <li key={it._id} style={{ display: "flex", gap: 8, alignItems: "center" }}>
               <span>Break</span>
               <input
-                value={b.name}
-                onChange={(e) => onUpdateItem?.(b.id, { name: e.target.value })}
+                value={b.description}
+                onChange={(e) => onUpdateItem?.(b._id, { description: e.target.value })}
               />
               <input
                 type="number"
                 value={b.duration}
                 onChange={(e) =>
-                  onUpdateItem?.(b.id, { duration: Number(e.target.value) || 0 })
+                  onUpdateItem?.(b._id, { duration: Number(e.target.value) || 0 })
                 }
                 style={{ width: 60 }}
               />
-              <button onClick={() => onDeleteItem?.(b.id)}>X</button>
+              <button onClick={() => onDeleteItem?.(b._id)}>X</button>
             </li>
           );
         }
         const ex = it as PracticePlanItemExercise;
         return (
-          <li key={it.id} style={{ display: "flex", gap: 8, alignItems: "center" }}>
+          <li key={it._id} style={{ display: "flex", gap: 8, alignItems: "center" }}>
             <span>Exercise</span>
             <code>{ex.exerciseId}</code>
             <input
               type="number"
-              value={ex.durationOverride || 0}
+              value={ex.duration || 0}
               onChange={(e) =>
-                onUpdateItem?.(ex.id, {
-                  durationOverride: Number(e.target.value) || 0,
+                onUpdateItem?.(ex._id, {
+                  duration: Number(e.target.value) || 0,
                 })
               }
               style={{ width: 60 }}
             />
-            <button onClick={() => onDeleteItem?.(ex.id)}>X</button>
+            <button onClick={() => onDeleteItem?.(ex._id)}>X</button>
           </li>
         );
       })}

@@ -3,15 +3,16 @@
 
 import request from 'supertest';
 import { app } from '../setup';
-import { authHeader } from '../utils/auth';
+import { authHeader, getDefaultSections } from '../utils/auth';
 
 describe('Practice Plans Integration 02: create defaults', () => {
   it('creates plan with default 3 sections and initial group', async () => {
     const { Authorization } = await authHeader();
+    const sections = getDefaultSections();
     const res = await request(app)
       .post('/api/practice-plans')
       .set('Authorization', Authorization)
-      .send({ name: 'Integration Plan', description: 'Initial defaults' });
+      .send({ name: 'Integration Plan', description: 'Initial defaults', sections });
 
     expect(res.status).toBe(201);
     expect(res.body).toHaveProperty('_id');

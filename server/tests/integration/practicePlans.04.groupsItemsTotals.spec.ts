@@ -6,14 +6,13 @@
 import request from 'supertest';
 import mongoose from 'mongoose';
 import { app } from '../setup';
-import { authHeader } from '../utils/auth';
+import { authHeader, getDefaultSections } from '../utils/auth';
 import Exercise from '../../models/exercise';
 
-// Helper to create an exercise to reference in exercise items
 async function createExercise(userId: string) {
   const ex = await Exercise.create({
     name: 'Layup Drill',
-    persons: 6, // required field in schema
+    persons: 6,
     time_min: 10,
     user: userId,
   });
@@ -24,42 +23,38 @@ describe('Practice Plans Integration 04: groups/items totals structural', () => 
   it('adds a new group with break and exercise items', async () => {
     const { Authorization, user } = await authHeader();
 
-    // Create base plan
+    const sections = getDefaultSections();
     const createRes = await request(app)
       .post('/api/practice-plans')
       .set('Authorization', Authorization)
-      .send({ name: 'Groups & Items Plan' });
+      .send({ name: 'Groups & Items Plan', sections });
     expect(createRes.status).toBe(201);
     const planId = createRes.body._id;
-    const sections = createRes.body.sections;
-    expect(sections.length).toBe(3);
+    const returnedSections = createRes.body.sections;
+    expect(returnedSections.length).toBe(3);
 
-    const targetSection = sections[1]; // Use the 'Main' section by index
+    const targetSection = returnedSections[1];
 
-    // Create exercise to reference
     const exercise = await createExercise(user.id);
 
     const newGroup = {
-      id: new mongoose.Types.ObjectId().toString(),
       name: 'Group A',
       items: [
         {
-          id: new mongoose.Types.ObjectId().toString(),
           kind: 'break',
-            name: 'Water Break',
+            description: 'Water Break',
             duration: 5,
         },
         {
-          id: new mongoose.Types.ObjectId().toString(),
           kind: 'exercise',
           exerciseId: exercise._id,
-          durationOverride: 12,
+          duration: 12,
         },
       ],
     };
 
-    const patchedSections = sections.map((s: any) =>
-      s.id === targetSection.id
+    const patchedSections = returnedSections.map((s: any) =>
+      s._id === targetSection._id
         ? { ...s, groups: [...s.groups, newGroup] }
         : s
     );
@@ -71,7 +66,7 @@ describe('Practice Plans Integration 04: groups/items totals structural', () => 
 
     expect(patchRes.status).toBe(200);
     const updated = patchRes.body;
-    const updatedSection = updated.sections.find((s: any) => s.id === targetSection.id);
+    const updatedSection = updated.sections.find((s: any) => s._id === targetSection._id);
     expect(updatedSection).toBeTruthy();
     expect(updatedSection.groups.length).toBe(targetSection.groups.length + 1);
     const appended = updatedSection.groups[updatedSection.groups.length - 1];
@@ -83,43 +78,41 @@ describe('Practice Plans Integration 04: groups/items totals structural', () => 
     expect(breakItem.duration).toBe(5);
     expect(exItem).toBeTruthy();
     expect(exItem.exerciseId).toBe(exercise._id.toString());
-    expect(exItem.durationOverride).toBe(12);
+    expect(exItem.duration).toBe(12);
   });
 
   it('rejects out-of-bounds break duration ( > 1000 )', async () => {
     const { Authorization, user } = await authHeader();
+    const sections = getDefaultSections();
     const createRes = await request(app)
       .post('/api/practice-plans')
       .set('Authorization', Authorization)
-      .send({ name: 'Groups & Items Plan Max Fail' });
+      .send({ name: 'Groups & Items Plan Max Fail', sections });
     expect(createRes.status).toBe(201);
     const planId = createRes.body._id;
-    const sections = createRes.body.sections;
+    const returnedSections = createRes.body.sections;
 
     const exercise = await createExercise(user.id);
 
-    const targetSection = sections[0];
+    const targetSection = returnedSections[0];
     const invalidGroup = {
-      id: new mongoose.Types.ObjectId().toString(),
       name: 'Invalid Group',
       items: [
         {
-          id: new mongoose.Types.ObjectId().toString(),
           kind: 'break',
-          name: 'Too Long',
+          description: 'Too Long',
           duration: 1005,
         },
         {
-          id: new mongoose.Types.ObjectId().toString(),
           kind: 'exercise',
           exerciseId: exercise._id,
-          durationOverride: 15,
+          duration: 15,
         },
       ],
     };
 
-    const patchedSections = sections.map((s: any) =>
-      s.id === targetSection.id ? { ...s, groups: [...s.groups, invalidGroup] } : s
+    const patchedSections = returnedSections.map((s: any) =>
+      s._id === targetSection._id ? { ...s, groups: [...s.groups, invalidGroup] } : s
     );
 
     const patchRes = await request(app)

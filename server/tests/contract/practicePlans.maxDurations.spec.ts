@@ -1,15 +1,16 @@
 // T017 Validation test: reject durations > 1000, allow exactly 1000
 import request from 'supertest';
 import { app } from '../setup';
-import { authHeader } from '../utils/auth';
+import { authHeader, getDefaultSections } from '../utils/auth';
 import mongoose from 'mongoose';
 
 async function createBasePlan(name = 'MaxDur Base') {
   const { Authorization } = await authHeader();
+  const sections = getDefaultSections();
   const res = await request(app)
     .post('/api/practice-plans')
     .set('Authorization', Authorization)
-    .send({ name });
+    .send({ name, sections });
   return { plan: res.body, Authorization };
 }
 
@@ -42,9 +43,9 @@ describe('Practice Plans max duration validation (>1000 rejected, 1000 allowed)'
     const { plan, Authorization } = await createBasePlan('Break over max');
     const sections = plan.sections;
     if (!sections[0].groups.length) {
-      sections[0].groups.push({ id: new mongoose.Types.ObjectId().toString(), name: 'G1', items: [] });
+      sections[0].groups.push({ _id: new mongoose.Types.ObjectId().toString(), name: 'G1', items: [] });
     }
-    sections[0].groups[0].items.push({ id: new mongoose.Types.ObjectId().toString(), kind: 'break', name: 'Water', duration: 1002 });
+    sections[0].groups[0].items.push({ _id: new mongoose.Types.ObjectId().toString(), kind: 'break', description: 'Water', duration: 1002 });
     const patchRes = await request(app)
       .patch(`/api/practice-plans/${plan._id}`)
       .set('Authorization', Authorization)
@@ -57,9 +58,9 @@ describe('Practice Plans max duration validation (>1000 rejected, 1000 allowed)'
     const { plan, Authorization } = await createBasePlan('Break at max');
     const sections = plan.sections;
     if (!sections[0].groups.length) {
-      sections[0].groups.push({ id: new mongoose.Types.ObjectId().toString(), name: 'G1', items: [] });
+      sections[0].groups.push({ _id: new mongoose.Types.ObjectId().toString(), name: 'G1', items: [] });
     }
-    sections[0].groups[0].items.push({ id: new mongoose.Types.ObjectId().toString(), kind: 'break', name: 'Water', duration: 1000 });
+    sections[0].groups[0].items.push({ _id: new mongoose.Types.ObjectId().toString(), kind: 'break', description: 'Water', duration: 1000 });
     const patchRes = await request(app)
       .patch(`/api/practice-plans/${plan._id}`)
       .set('Authorization', Authorization)
@@ -69,39 +70,39 @@ describe('Practice Plans max duration validation (>1000 rejected, 1000 allowed)'
     expect(breakItem.duration).toBe(1000);
   });
 
-  it('rejects exercise durationOverride > 1000', async () => {
+  it('rejects exercise duration > 1000', async () => {
     const { plan, Authorization } = await createBasePlan('Override over max');
     const sections = plan.sections;
     if (!sections[0].groups.length) {
-      sections[0].groups.push({ id: new mongoose.Types.ObjectId().toString(), name: 'G1', items: [] });
+      sections[0].groups.push({ _id: new mongoose.Types.ObjectId().toString(), name: 'G1', items: [] });
     }
     sections[0].groups[0].items.push({
-      id: new mongoose.Types.ObjectId().toString(),
+      _id: new mongoose.Types.ObjectId().toString(),
       kind: 'exercise',
       exerciseId: new mongoose.Types.ObjectId().toString(),
-      name: 'Drill',
-      durationOverride: 1500,
+      description: 'Drill',
+      duration: 1500,
     });
     const patchRes = await request(app)
       .patch(`/api/practice-plans/${plan._id}`)
       .set('Authorization', Authorization)
       .send({ sections });
     expect(patchRes.status).toBe(400);
-    expect(patchRes.body.errors.some((e: string) => e.includes('durationOverride') && e.includes('exceedsMax'))).toBe(true);
+    expect(patchRes.body.errors.some((e: string) => e.includes('duration') && e.includes('exceedsMax'))).toBe(true);
   });
 
-  it('allows exercise durationOverride == 1000', async () => {
+  it('allows exercise duration == 1000', async () => {
     const { plan, Authorization } = await createBasePlan('Override at max');
     const sections = plan.sections;
     if (!sections[0].groups.length) {
-      sections[0].groups.push({ id: new mongoose.Types.ObjectId().toString(), name: 'G1', items: [] });
+      sections[0].groups.push({ _id: new mongoose.Types.ObjectId().toString(), name: 'G1', items: [] });
     }
     sections[0].groups[0].items.push({
-      id: new mongoose.Types.ObjectId().toString(),
+      _id: new mongoose.Types.ObjectId().toString(),
       kind: 'exercise',
       exerciseId: new mongoose.Types.ObjectId().toString(),
-      name: 'Drill',
-      durationOverride: 1000,
+      description: 'Drill',
+      duration: 1000,
     });
     const patchRes = await request(app)
       .patch(`/api/practice-plans/${plan._id}`)
@@ -109,6 +110,6 @@ describe('Practice Plans max duration validation (>1000 rejected, 1000 allowed)'
       .send({ sections });
     expect(patchRes.status).toBe(200);
     const exItem = patchRes.body.sections[0].groups[0].items.find((i: any) => i.kind === 'exercise');
-    expect(exItem.durationOverride).toBe(1000);
+    expect(exItem.duration).toBe(1000);
   });
 });

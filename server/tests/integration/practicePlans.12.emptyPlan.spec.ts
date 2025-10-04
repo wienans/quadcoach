@@ -3,15 +3,16 @@
 
 import request from 'supertest';
 import { app } from '../setup';
-import { authHeader } from '../utils/auth';
+import { authHeader, getDefaultSections } from '../utils/auth';
 
 describe('Practice Plans Integration 12: empty plan', () => {
   it('persists empty sections array', async () => {
     const { Authorization } = await authHeader();
+    const sections = getDefaultSections();
     const createRes = await request(app)
       .post('/api/practice-plans')
       .set('Authorization', Authorization)
-      .send({ name: 'Empty Plan Test' });
+      .send({ name: 'Empty Plan Test', sections });
     expect(createRes.status).toBe(201);
     expect(createRes.body.sections.length).toBeGreaterThan(0);
 

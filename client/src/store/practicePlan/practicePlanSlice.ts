@@ -3,31 +3,31 @@ import { RootState } from "../store";
 
 // Domain Types (mirroring server model but adapted for client usage)
 export interface PracticePlanItemBreak {
-  id: string;
+  _id: string;
   kind: "break";
-  name: string;
-  duration: number; // minutes
+  description: string;
+  duration: number;
 }
 
 export interface PracticePlanItemExercise {
-  id: string;
+  _id: string;
   kind: "exercise";
-  exerciseId: string; // reference id (may be unknown -> show placeholder)
-  durationOverride?: number; // minutes override
+  exerciseId: string;
+  duration?: number;
 }
 
 export type PracticePlanItem = PracticePlanItemBreak | PracticePlanItemExercise;
 
 export interface PracticePlanGroup {
-  id: string;
+  _id: string;
   name: string;
   items: PracticePlanItem[];
 }
 
 export interface PracticePlanSection {
-  id: string;
+  _id: string;
   name: string;
-  targetDuration: number; // desired total minutes (not enforced)
+  targetDuration: number;
   groups: PracticePlanGroup[];
 }
 
@@ -99,7 +99,7 @@ const practicePlanSlice = createSlice({
     addSection(state, action: PayloadAction<{ name?: string } | undefined>) {
       if (!state.draft) return;
       const newSection: PracticePlanSection = {
-        id: nanoid(),
+        _id: nanoid(),
         name: action.payload?.name || `Section ${state.draft.sections.length + 1}`,
         targetDuration: 0,
         groups: [],
@@ -111,7 +111,7 @@ const practicePlanSlice = createSlice({
       action: PayloadAction<{ sectionId: string; name?: string; targetDuration?: number }>
     ) {
       if (!state.draft) return;
-      const s = state.draft.sections.find((x) => x.id === action.payload.sectionId);
+      const s = state.draft.sections.find((x) => x._id === action.payload.sectionId);
       if (!s) return;
       if (action.payload.name !== undefined) s.name = action.payload.name;
       if (action.payload.targetDuration !== undefined)
@@ -120,19 +120,19 @@ const practicePlanSlice = createSlice({
     deleteSection(state, action: PayloadAction<{ sectionId: string }>) {
       if (!state.draft) return;
       state.draft.sections = state.draft.sections.filter(
-        (s) => s.id !== action.payload.sectionId
+        (s) => s._id !== action.payload.sectionId
       );
     },
     duplicateSection(state, action: PayloadAction<{ sectionId: string }>) {
       if (!state.draft) return;
-      const idx = state.draft.sections.findIndex((s) => s.id === action.payload.sectionId);
+      const idx = state.draft.sections.findIndex((s) => s._id === action.payload.sectionId);
       if (idx === -1) return;
       const copy = clonePlan({ ...state.draft, sections: [state.draft.sections[idx]] }).sections[0];
-      copy.id = nanoid();
+      copy._id = nanoid();
       copy.groups = copy.groups.map((g) => ({
         ...g,
-        id: nanoid(),
-        items: g.items.map((it) => ({ ...it, id: nanoid() })),
+        _id: nanoid(),
+        items: g.items.map((it) => ({ ...it, _id: nanoid() })),
       }));
       state.draft.sections.splice(idx + 1, 0, copy);
     },
@@ -141,10 +141,10 @@ const practicePlanSlice = createSlice({
       action: PayloadAction<{ sectionId: string; name?: string }>
     ) {
       if (!state.draft) return;
-      const section = state.draft.sections.find((s) => s.id === action.payload.sectionId);
+      const section = state.draft.sections.find((s) => s._id === action.payload.sectionId);
       if (!section) return;
       const group: PracticePlanGroup = {
-        id: nanoid(),
+        _id: nanoid(),
         name: action.payload.name || "Group",
         items: [],
       };
@@ -155,8 +155,8 @@ const practicePlanSlice = createSlice({
       action: PayloadAction<{ sectionId: string; groupId: string; name: string }>
     ) {
       if (!state.draft) return;
-      const section = state.draft.sections.find((s) => s.id === action.payload.sectionId);
-      const group = section?.groups.find((g) => g.id === action.payload.groupId);
+      const section = state.draft.sections.find((s) => s._id === action.payload.sectionId);
+      const group = section?.groups.find((g) => g._id === action.payload.groupId);
       if (group) group.name = action.payload.name;
     },
     deleteGroup(
@@ -164,39 +164,39 @@ const practicePlanSlice = createSlice({
       action: PayloadAction<{ sectionId: string; groupId: string }>
     ) {
       if (!state.draft) return;
-      const section = state.draft.sections.find((s) => s.id === action.payload.sectionId);
+      const section = state.draft.sections.find((s) => s._id === action.payload.sectionId);
       if (!section) return;
-      section.groups = section.groups.filter((g) => g.id !== action.payload.groupId);
+      section.groups = section.groups.filter((g) => g._id !== action.payload.groupId);
     },
     addBreakItem(
       state,
-      action: PayloadAction<{ sectionId: string; groupId: string; name: string; duration: number }>
+      action: PayloadAction<{ sectionId: string; groupId: string; description: string; duration: number }>
     ) {
       if (!state.draft) return;
-      const section = state.draft.sections.find((s) => s.id === action.payload.sectionId);
-      const group = section?.groups.find((g) => g.id === action.payload.groupId);
+      const section = state.draft.sections.find((s) => s._id === action.payload.sectionId);
+      const group = section?.groups.find((g) => g._id === action.payload.groupId);
       if (!group) return;
       const item: PracticePlanItemBreak = {
-        id: nanoid(),
+        _id: nanoid(),
         kind: "break",
-        name: action.payload.name,
+        description: action.payload.description,
         duration: action.payload.duration,
       };
       group.items.push(item);
     },
     addExerciseItem(
       state,
-      action: PayloadAction<{ sectionId: string; groupId: string; exerciseId: string; durationOverride?: number }>
+      action: PayloadAction<{ sectionId: string; groupId: string; exerciseId: string; duration?: number }>
     ) {
       if (!state.draft) return;
-      const section = state.draft.sections.find((s) => s.id === action.payload.sectionId);
-      const group = section?.groups.find((g) => g.id === action.payload.groupId);
+      const section = state.draft.sections.find((s) => s._id === action.payload.sectionId);
+      const group = section?.groups.find((g) => g._id === action.payload.groupId);
       if (!group) return;
       const item: PracticePlanItemExercise = {
-        id: nanoid(),
+        _id: nanoid(),
         kind: "exercise",
         exerciseId: action.payload.exerciseId,
-        durationOverride: action.payload.durationOverride,
+        duration: action.payload.duration,
       };
       group.items.push(item);
     },
@@ -210,9 +210,9 @@ const practicePlanSlice = createSlice({
       }>
     ) {
       if (!state.draft) return;
-      const section = state.draft.sections.find((s) => s.id === action.payload.sectionId);
-      const group = section?.groups.find((g) => g.id === action.payload.groupId);
-      const item = group?.items.find((it) => it.id === action.payload.itemId);
+      const section = state.draft.sections.find((s) => s._id === action.payload.sectionId);
+      const group = section?.groups.find((g) => g._id === action.payload.groupId);
+      const item = group?.items.find((it) => it._id === action.payload.itemId);
       if (item) Object.assign(item, action.payload.changes);
     },
     deleteItem(
@@ -220,10 +220,10 @@ const practicePlanSlice = createSlice({
       action: PayloadAction<{ sectionId: string; groupId: string; itemId: string }>
     ) {
       if (!state.draft) return;
-      const section = state.draft.sections.find((s) => s.id === action.payload.sectionId);
-      const group = section?.groups.find((g) => g.id === action.payload.groupId);
+      const section = state.draft.sections.find((s) => s._id === action.payload.sectionId);
+      const group = section?.groups.find((g) => g._id === action.payload.groupId);
       if (!group) return;
-      group.items = group.items.filter((it) => it.id !== action.payload.itemId);
+      group.items = group.items.filter((it) => it._id !== action.payload.itemId);
     },
     // Save success merges draft into current
     applySaveSuccess(state, action: PayloadAction<PracticePlanEntity>) {
@@ -277,11 +277,11 @@ export const selectPendingSave = (state: RootState) => selectDomain(state).pendi
 
 // Derived (placeholder — T050 will expand with time calculations)
 export const selectSectionById = (sectionId: string) =>
-  createSelector(selectDraft, (draft) => draft?.sections.find((s) => s.id === sectionId));
+  createSelector(selectDraft, (draft) => draft?.sections.find((s) => s._id === sectionId));
 
 export const selectGroupById = (sectionId: string, groupId: string) =>
   createSelector(selectSectionById(sectionId), (section) =>
-    section?.groups.find((g) => g.id === groupId)
+    section?.groups.find((g) => g._id === groupId)
   );
 
 // Derived totals & per-group calculations (T050)
@@ -302,23 +302,22 @@ export const selectPlanTotals = createSelector(selectDraft, (draft) => {
       for (const item of g.items) {
         if (item.kind === "break") groupTotal += item.duration;
         else if (item.kind === "exercise")
-          groupTotal += (item as PracticePlanItemExercise).durationOverride || 0;
+          groupTotal += (item as PracticePlanItemExercise).duration || 0;
       }
-      groupDurations[g.id] = groupTotal;
+      groupDurations[g._id] = groupTotal;
       sectionTotal += groupTotal;
     }
-    sectionDurations[s.id] = sectionTotal;
+    sectionDurations[s._id] = sectionTotal;
     total += sectionTotal;
   }
   return { totalDuration: total, sectionDurations, groupDurations };
 });
 
-// Comparison helper selectors
 export const selectSectionOverTarget = createSelector(selectPlanTotals, selectDraft, (totals, draft) => {
   if (!draft) return {} as Record<string, boolean>;
   const over: Record<string, boolean> = {};
   for (const s of draft.sections) {
-    over[s.id] = (totals.sectionDurations[s.id] || 0) > s.targetDuration;
+    over[s._id] = (totals.sectionDurations[s._id] || 0) > s.targetDuration;
   }
   return over;
 });

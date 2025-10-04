@@ -5,29 +5,30 @@
 import request from 'supertest';
 import mongoose from 'mongoose';
 import { app } from '../setup';
-import { authHeader } from '../utils/auth';
+import { authHeader, getDefaultSections } from '../utils/auth';
 
 describe('Practice Plans Integration 09: missing exercise placeholder', () => {
   it('stores unknown exerciseId without rejection', async () => {
     const { Authorization } = await authHeader();
+    const sections = getDefaultSections();
     const createRes = await request(app)
       .post('/api/practice-plans')
       .set('Authorization', Authorization)
-      .send({ name: 'Missing Exercise Plan' });
+      .send({ name: 'Missing Exercise Plan', sections });
     expect(createRes.status).toBe(201);
     const planId = createRes.body._id;
     const firstSection = createRes.body.sections[0];
 
     const fakeExerciseId = new mongoose.Types.ObjectId().toString();
     const newGroup = {
-      id: new mongoose.Types.ObjectId().toString(),
+      _id: new mongoose.Types.ObjectId().toString(),
       name: 'Group Missing',
       items: [
         {
-          id: new mongoose.Types.ObjectId().toString(),
+          _id: new mongoose.Types.ObjectId().toString(),
           kind: 'exercise',
           exerciseId: fakeExerciseId,
-          durationOverride: 7,
+          duration: 7,
         },
       ],
     };

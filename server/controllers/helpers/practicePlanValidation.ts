@@ -23,9 +23,9 @@ export function validateNonNegativeDurations(plan: any): string[] {
           }
         }
         if (it.kind === 'exercise') {
-          if (typeof it.durationOverride === 'number') {
-            if (it.durationOverride < 0) errors.push(`sections[${si}].groups[${gi}].items[${ii}].durationOverride negative`);
-            if (overBound(it.durationOverride)) errors.push(`sections[${si}].groups[${gi}].items[${ii}].durationOverride exceedsMax`);
+          if (typeof it.duration === 'number') {
+            if (it.duration < 0) errors.push(`sections[${si}].groups[${gi}].items[${ii}].duration negative`);
+            if (overBound(it.duration)) errors.push(`sections[${si}].groups[${gi}].items[${ii}].duration exceedsMax`);
           }
         }
       });

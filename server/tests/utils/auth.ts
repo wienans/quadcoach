@@ -38,4 +38,25 @@ export async function authHeader() {
   return { Authorization: `Bearer ${token}`, user };
 }
 
+export function getDefaultSections() {
+  return [
+    { name: 'Warm Up', targetDuration: 0, groups: [{ name: 'All Players', items: [] }] },
+    { name: 'Main', targetDuration: 0, groups: [{ name: 'All Players', items: [] }] },
+    { name: 'Cooldown', targetDuration: 0, groups: [{ name: 'All Players', items: [] }] },
+  ];
+}
+
+export async function createPracticePlanWithDefaults(name: string, Authorization?: string) {
+  if (!Authorization) {
+    const { Authorization: auth } = await authHeader();
+    Authorization = auth;
+  }
+  const sections = getDefaultSections();
+  const res = await request(app)
+    .post('/api/practice-plans')
+    .set('Authorization', Authorization)
+    .send({ name, sections });
+  return { res, Authorization };
+}
+
 export { app };

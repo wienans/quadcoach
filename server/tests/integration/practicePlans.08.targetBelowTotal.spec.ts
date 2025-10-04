@@ -5,20 +5,21 @@
 import request from 'supertest';
 import mongoose from 'mongoose';
 import { app } from '../setup';
-import { authHeader } from '../utils/auth';
+import { authHeader, getDefaultSections } from '../utils/auth';
 
 function computeSectionItemSum(section: any): number {
   return section.groups.reduce((acc: number, g: any) =>
-    acc + g.items.reduce((a: number, it: any) => a + (it.kind === 'break' ? it.duration || 0 : (it.durationOverride || 0)), 0), 0);
+    acc + g.items.reduce((a: number, it: any) => a + (it.duration || 0), 0), 0);
 }
 
 describe('Practice Plans Integration 08: target below totals allowed', () => {
   it('accepts patch where targetDuration < sum of item durations', async () => {
     const { Authorization } = await authHeader();
+    const sections = getDefaultSections();
     const createRes = await request(app)
       .post('/api/practice-plans')
       .set('Authorization', Authorization)
-      .send({ name: 'Target Below Totals Plan' });
+      .send({ name: 'Target Below Totals Plan', sections });
     expect(createRes.status).toBe(201);
 
     const firstSection = createRes.body.sections[0];
@@ -26,8 +27,8 @@ describe('Practice Plans Integration 08: target below totals allowed', () => {
       ...firstSection,
       groups: [
         ...firstSection.groups,
-        { id: new mongoose.Types.ObjectId().toString(), name: 'G1', items: [ { id: new mongoose.Types.ObjectId().toString(), kind: 'break', name: 'B1', duration: 10 } ] },
-        { id: new mongoose.Types.ObjectId().toString(), name: 'G2', items: [ { id: new mongoose.Types.ObjectId().toString(), kind: 'break', name: 'B2', duration: 12 } ] },
+        { _id: new mongoose.Types.ObjectId().toString(), name: 'G1', items: [ { _id: new mongoose.Types.ObjectId().toString(), kind: 'break', description: 'B1', duration: 10 } ] },
+        { _id: new mongoose.Types.ObjectId().toString(), name: 'G2', items: [ { _id: new mongoose.Types.ObjectId().toString(), kind: 'break', description: 'B2', duration: 12 } ] },
       ],
     };
     const sections1 = [enriched, ...createRes.body.sections.slice(1)];
@@ -41,7 +42,6 @@ describe('Practice Plans Integration 08: target below totals allowed', () => {
     const total = computeSectionItemSum(updatedFirst);
     expect(total).toBe(22);
 
-    // Now set targetDuration below 22, e.g., 5
     const lowered = { ...updatedFirst, targetDuration: 5 };
     const sections2 = [lowered, ...patch1.body.sections.slice(1)];
     const patch2 = await request(app)

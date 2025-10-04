@@ -1,48 +1,76 @@
-// T030 PracticePlan schema (skeleton)
-import { Schema, model, Types } from 'mongoose';
+import { Schema, model, Types, Document } from "mongoose";
 
-// Embedded subdocuments (minimal now; will expand during implementation tasks T035+)
-const BreakItemSchema = new Schema({
-  id: { type: String, required: true },
-  kind: { type: String, enum: ['break'], required: true },
-  name: { type: String, required: true },
-  duration: { type: Number, min: 0, required: true },
-});
+// Interfaces for each schema
 
-const ExerciseItemSchema = new Schema({
-  id: { type: String, required: true },
-  kind: { type: String, enum: ['exercise'], required: true },
-  exerciseId: { type: Types.ObjectId, ref: 'Exercise', required: true },
-  durationOverride: { type: Number, min: 0 },
-});
+export interface IExerciseItem {
+  kind: "exercise" | "break";
+  description?: string;
+  exerciseId?: Types.ObjectId;
+  blockId?: Types.ObjectId;
+  duration?: number;
+}
 
-const ItemUnion = new Schema(
-  {},
-  { discriminatorKey: 'kind', _id: false, strict: false }
+export interface IGroup {
+  name: string;
+  items: Types.DocumentArray<IExerciseItem>;
+}
+
+export interface ISection {
+  name: string;
+  targetDuration: number;
+  groups: Types.DocumentArray<IGroup>;
+}
+
+export interface IPracticePlan {
+  name: string;
+  description?: string;
+  tags: Types.Array<string>;
+  sections: Types.DocumentArray<ISection>;
+  user: Types.ObjectId;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+const ExerciseItemSchema = new Schema<IExerciseItem>(
+  {
+    kind: { type: String, enum: ["exercise", "break"], required: true },
+    description: { type: String },
+    exerciseId: { type: Schema.Types.ObjectId, ref: "exercises" },
+    blockId: { type: Schema.Types.ObjectId, ref: "blocks" },
+    duration: { type: Number, min: 0 },
+  },
+  { _id: true }
 );
 
-const GroupSchema = new Schema({
-  id: { type: String, required: true },
-  name: { type: String, required: true },
-  items: { type: [ItemUnion], default: [] },
-});
+const GroupSchema = new Schema<IGroup>(
+  {
+    name: { type: String, required: true },
+    items: { type: [ExerciseItemSchema], default: [], required: true },
+  },
+  { _id: true }
+);
 
-const SectionSchema = new Schema({
-  id: { type: String, required: true },
-  name: { type: String, required: true },
-  targetDuration: { type: Number, min: 0, default: 0 },
-  groups: { type: [GroupSchema], default: [] },
-});
+export const SectionSchema = new Schema<ISection>(
+  {
+    name: { type: String, required: true },
+    targetDuration: { type: Number, min: 0, default: 0, required: true },
+    groups: { type: [GroupSchema], default: [], required: true },
+  },
+  { _id: true }
+);
 
-const PracticePlanSchema = new Schema(
+const PracticePlanSchema = new Schema<IPracticePlan>(
   {
     name: { type: String, required: true },
     description: { type: String },
     tags: { type: [String], default: [] },
     sections: { type: [SectionSchema], default: [] },
-    user: { type: Types.ObjectId, ref: 'User', required: true },
+    user: { type: Schema.Types.ObjectId, ref: "users", required: true },
   },
   { timestamps: true }
 );
 
-export const PracticePlan = model('PracticePlan', PracticePlanSchema);
+export const PracticePlan = model<IPracticePlan>(
+  "practiceplans",
+  PracticePlanSchema
+);
