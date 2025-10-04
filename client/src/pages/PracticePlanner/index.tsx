@@ -37,13 +37,15 @@ const PracticePlannerPage: React.FC = () => {
   const draft = useAppSelector(selectDraft);
   const pendingSave = useAppSelector(selectPendingSave);
   const totals = useAppSelector(selectPlanTotals);
-  const { data, isFetching } = useGetPracticePlanQuery(planId || "", {
+  const { data, isLoading, isSuccess } = useGetPracticePlanQuery(planId || "", {
     skip: !planId,
   });
   const [patchPlan] = usePatchPracticePlanMutation();
 
   useEffect(() => {
-    if (data) dispatch(loadPlan(data));
+    if (data) {
+      dispatch(loadPlan(data));
+    }
   }, [data, dispatch]);
 
   const handleSave = async () => {
@@ -64,8 +66,7 @@ const PracticePlannerPage: React.FC = () => {
   };
 
   if (!planId) return <div>No plan id provided</div>;
-  if (isFetching && !draft) return <div>Loading...</div>;
-  if (!draft) return <div>Plan not loaded</div>;
+  if (isLoading || (isSuccess && !draft)) return <div>Loading...</div>;
 
   return (
     <div style={{ padding: 16 }}>
