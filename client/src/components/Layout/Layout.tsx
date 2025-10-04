@@ -7,6 +7,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import LoginIcon from "@mui/icons-material/Login";
+import EventNoteIcon from "@mui/icons-material/EventNote";
 import { PresistLogin } from "..";
 import { useAuth } from "../../store/hooks";
 import { FooterProvider } from "../Footer/FooterContext";
@@ -44,6 +45,16 @@ const Layout = () => {
       noCollapse: true,
       protected: true,
       regExp: new RegExp("\\/tacticboards$"),
+    },
+    {
+      type: "collapse" as const,
+      nameResourceKey: "Layout:routes.practicePlans",
+      key: "practice-plans",
+      route: "/practice-plans",
+      icon: <EventNoteIcon />,
+      noCollapse: true,
+      protected: true,
+      regExp: new RegExp("\\/practice-plans$"),
     },
     {
       type: "collapse" as const,
