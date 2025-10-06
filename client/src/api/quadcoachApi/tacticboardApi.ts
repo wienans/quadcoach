@@ -1,4 +1,4 @@
-import { quadcoachApi } from "..";
+import quadcoachApi from "./quadcoachApi";
 import { TagType } from "../enum";
 import { TacticBoard, TacticPage } from "./domain";
 import { TacticBoardWithOutIds } from "./domain/TacticBoard";
