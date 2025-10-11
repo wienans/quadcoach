@@ -1,4 +1,4 @@
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 import {
   DashboardLayout,
   ProfileLayout,
@@ -13,6 +13,10 @@ import {
   Theme,
   Tooltip,
   useMediaQuery,
+  Grid,
+  Typography,
+  Chip,
+  Divider,
 } from "@mui/material";
 
 import {
@@ -26,18 +30,520 @@ import {
   useRemoveFavoritePracticePlanMutation,
   useLazyGetFavoritePracticePlansQuery,
 } from "../../api/quadcoachApi/favoriteApi";
-import { useAppDispatch, useAppSelector, useAuth } from "../../store/hooks";
+import { useAuth } from "../../store/hooks";
 import { useEffect, useRef, useState } from "react";
-import { SoftBox, SoftInput } from "../../components";
+import { SoftBox, SoftButton, SoftInput } from "../../components";
 import EditIcon from "@mui/icons-material/Edit";
 import SaveIcon from "@mui/icons-material/Save";
 import DeleteIcon from "@mui/icons-material/Delete";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import AddIcon from "@mui/icons-material/Add";
+import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
+import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
+import FitnessCenterIcon from "@mui/icons-material/FitnessCenter";
+import FreeBreakfastIcon from "@mui/icons-material/FreeBreakfast";
+import TimerIcon from "@mui/icons-material/Timer";
 import * as Yup from "yup";
 import { useFormik } from "formik";
-import { PracticePlanEntityPartialId } from "../../api/quadcoachApi/domain/PracticePlan";
+
+import {
+  FieldArray,
+  FieldArrayRenderProps,
+  FormikProps,
+  FormikProvider,
+} from "formik";
+
+// Define types for better type safety
+interface PracticePlanItem {
+  _id?: string;
+  kind: "break" | "exercise";
+  description?: string;
+  duration: number;
+  exerciseId?: string;
+  blockId?: string;
+}
+
+interface PracticePlanGroup {
+  _id?: string;
+  name: string;
+  items: PracticePlanItem[];
+}
+
+interface PracticePlanSection {
+  _id?: string;
+  name: string;
+  targetDuration: number;
+  groups: PracticePlanGroup[];
+}
+
+interface FormikValues {
+  name: string;
+  tags: string[];
+  description: string;
+  sections: PracticePlanSection[];
+  user: string;
+}
+
+// Section Component
+interface SectionComponentProps {
+  section: PracticePlanSection;
+  sectionIndex: number;
+  isEditMode: boolean;
+  formik: FormikProps<FormikValues>;
+  onMoveUp: () => void;
+  onMoveDown: () => void;
+  onDelete: () => void;
+  canMoveUp: boolean;
+  canMoveDown: boolean;
+}
+
+const SectionComponent: React.FC<SectionComponentProps> = ({
+  section,
+  sectionIndex,
+  isEditMode,
+  formik,
+  onMoveUp,
+  onMoveDown,
+  onDelete,
+  canMoveUp,
+  canMoveDown,
+}) => {
+  const { t } = useTranslation("Exercise");
+
+  // Calculate total duration for the section
+  const calculateSectionTotal = () => {
+    return (
+      section.groups?.reduce((total: number, group: PracticePlanGroup) => {
+        const groupTotal =
+          group.items?.reduce((groupSum: number, item: PracticePlanItem) => {
+            return groupSum + (item.duration || 0);
+          }, 0) || 0;
+        return total + groupTotal;
+      }, 0) || 0
+    );
+  };
+
+  const sectionTotal = calculateSectionTotal();
+  const isOverTarget = sectionTotal > section.targetDuration;
+
+  return (
+    <SoftBox mb={4}>
+      <Card>
+        <SoftBox p={3}>
+          {/* Section Header */}
+          <SoftBox
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center"
+            mb={2}
+          >
+            <SoftBox display="flex" alignItems="center" flex={1}>
+              {isEditMode ? (
+                <SoftInput
+                  placeholder={t("sectionName", {
+                    defaultValue: "Section Name",
+                  })}
+                  value={section.name}
+                  onChange={(e) => {
+                    const sections = [...formik.values.sections];
+                    sections[sectionIndex].name = e.target.value;
+                    formik.setFieldValue("sections", sections);
+                  }}
+                  sx={{ mr: 2, minWidth: 200 }}
+                />
+              ) : (
+                <Typography variant="h5" fontWeight="bold" mr={2}>
+                  {section.name}
+                </Typography>
+              )}
+
+              <SoftBox display="flex" alignItems="center">
+                <TimerIcon fontSize="small" sx={{ mr: 1 }} />
+                {isEditMode ? (
+                  <SoftInput
+                    type="number"
+                    value={section.targetDuration}
+                    onChange={(e) => {
+                      const sections = [...formik.values.sections];
+                      sections[sectionIndex].targetDuration =
+                        parseInt(e.target.value) || 0;
+                      formik.setFieldValue("sections", sections);
+                    }}
+                    sx={{ width: 80 }}
+                  />
+                ) : (
+                  <Typography variant="body2">
+                    {section.targetDuration}min
+                  </Typography>
+                )}
+                <Typography variant="body2" color="text.secondary" ml={1}>
+                  / {sectionTotal}min
+                </Typography>
+                {isOverTarget && (
+                  <Chip
+                    label="Over target"
+                    color="error"
+                    size="small"
+                    sx={{ ml: 1 }}
+                  />
+                )}
+              </SoftBox>
+            </SoftBox>
+
+            {/* Section Actions */}
+            {isEditMode && (
+              <SoftBox display="flex" gap={1}>
+                <Tooltip title="Move Up">
+                  <IconButton
+                    size="small"
+                    onClick={onMoveUp}
+                    disabled={!canMoveUp}
+                  >
+                    <ArrowUpwardIcon />
+                  </IconButton>
+                </Tooltip>
+                <Tooltip title="Move Down">
+                  <IconButton
+                    size="small"
+                    onClick={onMoveDown}
+                    disabled={!canMoveDown}
+                  >
+                    <ArrowDownwardIcon />
+                  </IconButton>
+                </Tooltip>
+                <Tooltip title="Delete Section">
+                  <IconButton size="small" color="error" onClick={onDelete}>
+                    <DeleteIcon />
+                  </IconButton>
+                </Tooltip>
+              </SoftBox>
+            )}
+          </SoftBox>
+
+          <Divider sx={{ mb: 2 }} />
+
+          {/* Groups */}
+          <FieldArray
+            name={`sections.${sectionIndex}.groups`}
+            render={(groupArrayHelpers: FieldArrayRenderProps) => (
+              <SoftBox>
+                {/* Determine grid columns based on screen size */}
+                <Grid container spacing={2}>
+                  {section.groups?.map(
+                    (group: PracticePlanGroup, groupIndex: number) => (
+                      <Grid
+                        item
+                        xs={12}
+                        sm={section.groups.length > 1 ? 6 : 12}
+                        md={
+                          section.groups.length > 2
+                            ? 4
+                            : section.groups.length > 1
+                            ? 6
+                            : 12
+                        }
+                        key={group._id || groupIndex}
+                      >
+                        <GroupComponent
+                          group={group}
+                          groupIndex={groupIndex}
+                          sectionIndex={sectionIndex}
+                          isEditMode={isEditMode}
+                          formik={formik}
+                          onDelete={() => groupArrayHelpers.remove(groupIndex)}
+                        />
+                      </Grid>
+                    ),
+                  )}
+                </Grid>
+
+                {/* Add Group Button - only in edit mode */}
+                {isEditMode && (
+                  <SoftBox display="flex" justifyContent="center" mt={2}>
+                    <SoftButton
+                      variant="outlined"
+                      size="small"
+                      color="secondary"
+                      startIcon={<AddIcon />}
+                      onClick={() => {
+                        groupArrayHelpers.push({
+                          _id: `temp_${Date.now()}_${Math.random()}`,
+                          name: "New Group",
+                          items: [],
+                        });
+                      }}
+                    >
+                      {t("addGroup", { defaultValue: "Add Group" })}
+                    </SoftButton>
+                  </SoftBox>
+                )}
+              </SoftBox>
+            )}
+          />
+        </SoftBox>
+      </Card>
+    </SoftBox>
+  );
+};
+
+// Group Component
+interface GroupComponentProps {
+  group: PracticePlanGroup;
+  groupIndex: number;
+  sectionIndex: number;
+  isEditMode: boolean;
+  formik: FormikProps<FormikValues>;
+  onDelete: () => void;
+}
+
+const GroupComponent: React.FC<GroupComponentProps> = ({
+  group,
+  groupIndex,
+  sectionIndex,
+  isEditMode,
+  formik,
+  onDelete,
+}) => {
+  const { t } = useTranslation("Exercise");
+
+  // Calculate total duration for the group
+  const calculateGroupTotal = () => {
+    return (
+      group.items?.reduce((total: number, item: PracticePlanItem) => {
+        return total + (item.duration || 0);
+      }, 0) || 0
+    );
+  };
+
+  const groupTotal = calculateGroupTotal();
+
+  return (
+    <Card variant="outlined" sx={{ height: "100%" }}>
+      <SoftBox p={2}>
+        {/* Group Header */}
+        <SoftBox
+          display="flex"
+          justifyContent="space-between"
+          alignItems="center"
+          mb={2}
+        >
+          {isEditMode ? (
+            <SoftInput
+              placeholder={t("groupName", { defaultValue: "Group Name" })}
+              value={group.name}
+              onChange={(e) => {
+                const sections = [...formik.values.sections];
+                sections[sectionIndex].groups[groupIndex].name = e.target.value;
+                formik.setFieldValue("sections", sections);
+              }}
+              size="small"
+            />
+          ) : (
+            <Typography variant="h6" fontWeight="medium">
+              {group.name}
+            </Typography>
+          )}
+
+          <SoftBox display="flex" alignItems="center">
+            <Typography variant="body2" color="text.secondary">
+              {groupTotal}min
+            </Typography>
+            {isEditMode && (
+              <IconButton size="small" color="error" onClick={onDelete}>
+                <DeleteIcon fontSize="small" />
+              </IconButton>
+            )}
+          </SoftBox>
+        </SoftBox>
+
+        <Divider sx={{ mb: 2 }} />
+
+        {/* Items */}
+        <FieldArray
+          name={`sections.${sectionIndex}.groups.${groupIndex}.items`}
+          render={(itemArrayHelpers: FieldArrayRenderProps) => (
+            <SoftBox>
+              {group.items?.map((item: PracticePlanItem, itemIndex: number) => (
+                <ItemComponent
+                  key={item._id || itemIndex}
+                  item={item}
+                  itemIndex={itemIndex}
+                  groupIndex={groupIndex}
+                  sectionIndex={sectionIndex}
+                  isEditMode={isEditMode}
+                  formik={formik}
+                  onDelete={() => itemArrayHelpers.remove(itemIndex)}
+                />
+              ))}
+
+              {/* Add Item Buttons - only in edit mode */}
+              {isEditMode && (
+                <SoftBox display="flex" gap={1} mt={2}>
+                  <SoftButton
+                    variant="outlined"
+                    size="small"
+                    color="primary"
+                    startIcon={<AddIcon />}
+                    onClick={() => {
+                      itemArrayHelpers.push({
+                        _id: `temp_${Date.now()}_${Math.random()}`,
+                        kind: "exercise",
+                        exerciseId: "",
+                        blockId: "",
+                        duration: 10,
+                      });
+                    }}
+                  >
+                    {t("addExercise", { defaultValue: "Add Exercise" })}
+                  </SoftButton>
+                  <SoftButton
+                    variant="outlined"
+                    size="small"
+                    color="secondary"
+                    startIcon={<AddIcon />}
+                    onClick={() => {
+                      itemArrayHelpers.push({
+                        _id: `temp_${Date.now()}_${Math.random()}`,
+                        kind: "break",
+                        description: "Break",
+                        duration: 5,
+                      });
+                    }}
+                  >
+                    {t("addBreak", { defaultValue: "Add Break" })}
+                  </SoftButton>
+                </SoftBox>
+              )}
+            </SoftBox>
+          )}
+        />
+      </SoftBox>
+    </Card>
+  );
+};
+
+// Item Component
+interface ItemComponentProps {
+  item: PracticePlanItem;
+  itemIndex: number;
+  groupIndex: number;
+  sectionIndex: number;
+  isEditMode: boolean;
+  formik: FormikProps<FormikValues>;
+  onDelete: () => void;
+}
+
+const ItemComponent: React.FC<ItemComponentProps> = ({
+  item,
+  itemIndex,
+  groupIndex,
+  sectionIndex,
+  isEditMode,
+  formik,
+  onDelete,
+}) => {
+  const { t } = useTranslation("Exercise");
+
+  const updateItem = (field: string, value: string | number) => {
+    const sections = [...formik.values.sections];
+    sections[sectionIndex].groups[groupIndex].items[itemIndex][field] = value;
+    formik.setFieldValue("sections", sections);
+  };
+
+  return (
+    <SoftBox
+      mb={2}
+      p={2}
+      borderRadius="lg"
+      bgColor={item.kind === "break" ? "light" : "white"}
+      border="1px solid"
+      borderColor={item.kind === "break" ? "secondary" : "primary"}
+    >
+      <SoftBox display="flex" alignItems="center" gap={1} mb={1}>
+        {item.kind === "exercise" ? (
+          <FitnessCenterIcon color="primary" fontSize="small" />
+        ) : (
+          <FreeBreakfastIcon color="secondary" fontSize="small" />
+        )}
+
+        <Typography variant="body2" fontWeight="medium" flex={1}>
+          {item.kind === "exercise" ? "Exercise" : "Break"}
+        </Typography>
+
+        <SoftBox display="flex" alignItems="center" gap={1}>
+          <TimerIcon fontSize="small" />
+          {isEditMode ? (
+            <SoftInput
+              type="number"
+              value={item.duration}
+              onChange={(e) =>
+                updateItem("duration", parseInt(e.target.value) || 0)
+              }
+              sx={{ width: 60 }}
+              size="small"
+            />
+          ) : (
+            <Typography variant="body2">{item.duration}min</Typography>
+          )}
+
+          {isEditMode && (
+            <IconButton size="small" color="error" onClick={onDelete}>
+              <DeleteIcon fontSize="small" />
+            </IconButton>
+          )}
+        </SoftBox>
+      </SoftBox>
+
+      {item.kind === "break" && (
+        <SoftBox>
+          {isEditMode ? (
+            <SoftInput
+              placeholder={t("breakDescription", {
+                defaultValue: "Break description",
+              })}
+              value={item.description}
+              onChange={(e) => updateItem("description", e.target.value)}
+              size="small"
+              fullWidth
+            />
+          ) : (
+            <Typography variant="body2" color="text.secondary">
+              {item.description}
+            </Typography>
+          )}
+        </SoftBox>
+      )}
+
+      {item.kind === "exercise" && (
+        <SoftBox>
+          {isEditMode ? (
+            <SoftBox display="flex" gap={1}>
+              <SoftInput
+                placeholder="Exercise ID"
+                value={item.exerciseId}
+                onChange={(e) => updateItem("exerciseId", e.target.value)}
+                size="small"
+                sx={{ flex: 1 }}
+              />
+              <SoftInput
+                placeholder="Block ID"
+                value={item.blockId}
+                onChange={(e) => updateItem("blockId", e.target.value)}
+                size="small"
+                sx={{ flex: 1 }}
+              />
+            </SoftBox>
+          ) : (
+            <Typography variant="body2" color="text.secondary">
+              Exercise ID: {item.exerciseId}
+            </Typography>
+          )}
+        </SoftBox>
+      )}
+    </SoftBox>
+  );
+};
 
 const PracticePlanner = (): JSX.Element => {
   const { t } = useTranslation("ExerciseList");
@@ -125,7 +631,7 @@ const PracticePlanner = (): JSX.Element => {
   }, [userId, isCreator, accessUsers]);
 
   // Setup formik form for editing
-  const formik = useFormik<PracticePlanEntityPartialId>({
+  const formik = useFormik<FormikValues>({
     enableReinitialize: false,
     validateOnChange: false,
     validateOnBlur: true,
@@ -420,7 +926,139 @@ const PracticePlanner = (): JSX.Element => {
         ]
       }
     >
-      {(scrollTrigger) => <p></p>}
+      {() => (
+        <FormikProvider value={formik}>
+          <>
+            {isUpdatePlanLoading && (
+              <Alert color="info" sx={{ mt: 2, mb: 2 }}>
+                {t("Exercise:saving", { defaultValue: "Saving..." })}
+              </Alert>
+            )}
+
+            {isEditMode &&
+              showValidationSummary &&
+              Object.keys(formik.errors).length > 0 && (
+                <Alert color="warning" sx={{ mt: 2, mb: 2 }}>
+                  {t("Exercise:validation.fixValidationErrors", {
+                    defaultValue:
+                      "Please fix the highlighted validation errors:",
+                  })}
+                  <ul style={{ marginTop: 8 }}>
+                    {Object.entries(formik.errors).map(([field, error]) => {
+                      if (typeof error === "string") {
+                        return (
+                          <li key={field} style={{ fontSize: 12 }}>
+                            <strong>{field}:</strong> {t(error, error)}
+                          </li>
+                        );
+                      }
+                      return null;
+                    })}
+                  </ul>
+                </Alert>
+              )}
+
+            {/* Description Field */}
+            <SoftBox mb={3}>
+              {isEditMode ? (
+                <SoftInput
+                  multiline
+                  rows={3}
+                  placeholder={t("Exercise:description", {
+                    defaultValue: "Description",
+                  })}
+                  value={formik.values.description}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  name="description"
+                />
+              ) : (
+                plan?.description && (
+                  <Typography variant="body1" color="text.secondary">
+                    {plan.description}
+                  </Typography>
+                )
+              )}
+            </SoftBox>
+
+            {/* Sections */}
+            <FieldArray
+              name="sections"
+              render={(arrayHelpers: FieldArrayRenderProps) => (
+                <SoftBox>
+                  {formik.values.sections?.map((section, sectionIndex) => (
+                    <SectionComponent
+                      key={section._id || sectionIndex}
+                      section={section}
+                      sectionIndex={sectionIndex}
+                      isEditMode={isEditMode}
+                      formik={formik}
+                      onMoveUp={() => {
+                        if (sectionIndex > 0) {
+                          const sections = [...formik.values.sections];
+                          [sections[sectionIndex], sections[sectionIndex - 1]] =
+                            [
+                              sections[sectionIndex - 1],
+                              sections[sectionIndex],
+                            ];
+                          formik.setFieldValue("sections", sections);
+                        }
+                      }}
+                      onMoveDown={() => {
+                        if (
+                          sectionIndex <
+                          (formik.values.sections?.length || 0) - 1
+                        ) {
+                          const sections = [...formik.values.sections];
+                          [sections[sectionIndex], sections[sectionIndex + 1]] =
+                            [
+                              sections[sectionIndex + 1],
+                              sections[sectionIndex],
+                            ];
+                          formik.setFieldValue("sections", sections);
+                        }
+                      }}
+                      onDelete={() => arrayHelpers.remove(sectionIndex)}
+                      canMoveUp={sectionIndex > 0}
+                      canMoveDown={
+                        sectionIndex < (formik.values.sections?.length || 0) - 1
+                      }
+                    />
+                  ))}
+
+                  {/* Add Section Button - only in edit mode */}
+                  {isEditMode && (
+                    <SoftBox
+                      display="flex"
+                      justifyContent="center"
+                      mt={3}
+                      mb={3}
+                    >
+                      <SoftButton
+                        variant="outlined"
+                        color="primary"
+                        startIcon={<AddIcon />}
+                        onClick={() => {
+                          arrayHelpers.push({
+                            _id: `temp_${Date.now()}_${Math.random()}`,
+                            name: "New Section",
+                            targetDuration: 30,
+                            groups: [],
+                          });
+                        }}
+                      >
+                        {t("Exercise:addSection", {
+                          defaultValue: "Add Section",
+                        })}
+                      </SoftButton>
+                    </SoftBox>
+                  )}
+                </SoftBox>
+              )}
+            />
+          </>
+        </FormikProvider>
+      )}
     </ProfileLayout>
   );
 };

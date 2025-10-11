@@ -18,7 +18,7 @@ const Home = () => {
       navigate(`/practice-plans/${result._id}`);
     } catch (e) {
       // swallow for debug; could add toast
-      // eslint-disable-next-line no-console
+       
       console.error("Failed to create debug practice plan", e);
     }
   };
