@@ -113,7 +113,21 @@ const routes = [
           type: RouteHandleType.practicePlanner,
         },
         async lazy() {
-          const PracticePlanner = (await import("../PracticePlanner")).default;
+          const PracticePlannerRoot = (
+            await import("../PracticePlanner/PracticePlannerRoot")
+          ).default;
+          return { element: <PracticePlannerRoot /> };
+        },
+      },
+      {
+        path: "/practice-plans2/:planId",
+        handle: {
+          type: RouteHandleType.practicePlanner,
+        },
+        async lazy() {
+          const PracticePlanner = (
+            await import("../PracticePlanner/Demo/PracticePlannerDemo")
+          ).default;
           return { element: <PracticePlanner /> };
         },
       },

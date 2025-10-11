@@ -1,11 +1,11 @@
 import React, { useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { useAppDispatch } from "../../store/hooks/useAppDispatch";
-import { useAppSelector } from "../../store/hooks/useAppSelector";
+import { useAppDispatch } from "../../../store/hooks/useAppDispatch";
+import { useAppSelector } from "../../../store/hooks/useAppSelector";
 import {
   useGetPracticePlanQuery,
   usePatchPracticePlanMutation,
-} from "../../api/quadcoachApi/practicePlansApi";
+} from "../../../api/quadcoachApi/practicePlansApi";
 import {
   loadPlan,
   selectDraft,
@@ -29,11 +29,11 @@ import {
   PracticePlanItem,
   PracticePlanItemBreak,
   PracticePlanItemExercise,
-} from "../../store/practicePlan/practicePlanSlice";
-import SectionEditor from "../../components/PracticePlanner/SectionEditor/SectionEditor";
-import GroupEditor from "../../components/PracticePlanner/GroupEditor/GroupEditor";
-import ItemList from "../../components/PracticePlanner/ItemList/ItemList";
-import TimeSummary from "../../components/PracticePlanner/TimeSummary/TimeSummary";
+} from "../../../store/practicePlan/practicePlanSlice";
+import SectionEditor from "../../../components/PracticePlanner/SectionEditor/SectionEditor";
+import GroupEditor from "../../../components/PracticePlanner/GroupEditor/GroupEditor";
+import ItemList from "../../../components/PracticePlanner/ItemList/ItemList";
+import TimeSummary from "../../../components/PracticePlanner/TimeSummary/TimeSummary";
 
 const PracticePlannerPage: React.FC = () => {
   const { planId } = useParams<{ planId: string }>();
