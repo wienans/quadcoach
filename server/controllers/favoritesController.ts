@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 import ExerciseFav from "../models/exerciseFav";
 import TacticboardFav from "../models/tacticboardFav";
-import ExerciseListFav from "../models/exerciseListFav";
+import PracticePlanFav from "../models/practicePlanFav";
 import mongoose from "mongoose";
 import Exercise, { IExercise } from "../models/exercise";
 import TacticBoard, { ITacticBoard } from "../models/tacticboard";
@@ -251,14 +251,14 @@ export const removeFavoriteTacticboard = asyncHandler(
   }
 );
 
-// Exercise List Favorites
-export const getFavoriteExerciseLists = asyncHandler(
+// Practice Plan Favorites
+export const getFavoritePracticePlans = asyncHandler(
   async (req: RequestWithUser, res: Response) => {
     if (!mongoose.isValidObjectId(req.UserInfo?.id)) {
       res.status(400).json({ message: "Invalid user ID" });
       return;
     }
-    const favorites = await ExerciseListFav.find({
+    const favorites = await PracticePlanFav.find({
       user: req.UserInfo?.id,
     }).sort({ createdAt: -1 });
 
@@ -266,9 +266,9 @@ export const getFavoriteExerciseLists = asyncHandler(
   }
 );
 
-export const addFavoriteExerciseList = asyncHandler(
+export const addFavoritePracticePlan = asyncHandler(
   async (req: RequestWithUser, res: Response) => {
-    const { userId, exerciseListId } = req.body;
+    const { userId, planId } = req.body;
 
     if (
       !req.UserInfo?.id ||
@@ -280,16 +280,16 @@ export const addFavoriteExerciseList = asyncHandler(
 
     if (
       !mongoose.isValidObjectId(userId) ||
-      !mongoose.isValidObjectId(exerciseListId)
+      !mongoose.isValidObjectId(planId)
     ) {
-      res.status(400).json({ message: "Invalid exercise list ID or User ID" });
+      res.status(400).json({ message: "Invalid practice plan ID or User ID" });
       return;
     }
 
     try {
-      const favorite = await ExerciseListFav.create({
+      const favorite = await PracticePlanFav.create({
         user: userId,
-        exerciseList: exerciseListId,
+        practicePlan: planId,
       });
 
       res.status(201).json(favorite);
@@ -303,9 +303,9 @@ export const addFavoriteExerciseList = asyncHandler(
   }
 );
 
-export const removeFavoriteExerciseList = asyncHandler(
+export const removeFavoritePracticePlan = asyncHandler(
   async (req: RequestWithUser, res: Response) => {
-    const { userId, exerciseListId } = req.body;
+    const { userId, planId } = req.body;
 
     if (
       !req.UserInfo?.id ||
@@ -317,15 +317,15 @@ export const removeFavoriteExerciseList = asyncHandler(
 
     if (
       !mongoose.isValidObjectId(userId) ||
-      !mongoose.isValidObjectId(exerciseListId)
+      !mongoose.isValidObjectId(planId)
     ) {
-      res.status(400).json({ message: "Invalid exercise list ID or User ID" });
+      res.status(400).json({ message: "Invalid practice plan ID or User ID" });
       return;
     }
 
-    const result = await ExerciseListFav.deleteOne({
+    const result = await PracticePlanFav.deleteOne({
       user: userId,
-      exerciseList: exerciseListId,
+      practicePlan: planId,
     });
 
     if (result.deletedCount === 0) {

@@ -3,7 +3,8 @@ import { TagType } from "../enum";
 import type {
   PracticePlanEntity,
   PracticePlanSection,
-} from "../../store/practicePlan/practicePlanSlice";
+} from "./domain/PracticePlan";
+import { AccessLevel } from "./tacticboardApi";
 
 export interface CreatePracticePlanRequest {
   name: string;
@@ -19,6 +20,16 @@ export interface PatchPracticePlanRequest {
   sections?: PracticePlanSection[];
 }
 
+export type PracticePlanAccessEntry = {
+  user: {
+    _id: string;
+    name: string;
+  };
+  practicePlan: string;
+  access: AccessLevel;
+  createdAt: string;
+};
+
 export interface AddAccessRequest {
   id: string; // practicePlan id
   userId: string;
@@ -30,7 +41,10 @@ export interface RemoveAccessRequest {
 
 export const practicePlansApiSlice = quadcoachApi.injectEndpoints({
   endpoints: (builder) => ({
-    createPracticePlan: builder.mutation<PracticePlanEntity, CreatePracticePlanRequest>({
+    createPracticePlan: builder.mutation<
+      PracticePlanEntity,
+      CreatePracticePlanRequest
+    >({
       query: (data) => ({
         url: "/api/practice-plans",
         method: "post",
@@ -71,6 +85,18 @@ export const practicePlansApiSlice = quadcoachApi.injectEndpoints({
       }),
       invalidatesTags: [TagType.practiceplan],
     }),
+    getAllPracticePlanAccessUsers: builder.query<
+      PracticePlanAccessEntry[],
+      string
+    >({
+      query: (practicePlanId) => ({
+        url: `/api/practice-plans/${practicePlanId}/access`,
+        method: "get",
+      }),
+      providesTags: (_result, _error, practicePlanId) => [
+        { type: TagType.practiceplan, id: `${practicePlanId}-access` },
+      ],
+    }),
     addPracticePlanAccess: builder.mutation<
       { access: any[] },
       AddAccessRequest
@@ -104,6 +130,7 @@ export const {
   useGetPracticePlanQuery,
   usePatchPracticePlanMutation,
   useDeletePracticePlanMutation,
+  useGetAllPracticePlanAccessUsersQuery,
   useAddPracticePlanAccessMutation,
   useRemovePracticePlanAccessMutation,
 } = practicePlansApiSlice;

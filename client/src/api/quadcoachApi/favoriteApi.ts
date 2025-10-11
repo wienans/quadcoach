@@ -3,10 +3,10 @@ import { TagType } from "../enum";
 import { ExerciseHeader } from "./domain/Exercise";
 import {
   ExerciseFavorite,
-  ExerciseListFavorite,
+  PracticePlanFavorite,
   TacticBoardFavorite,
   ExerciseFavoriteWithOutId,
-  ExerciseListFavoriteWithOutId,
+  PracticePlanFavoriteWithOutId,
   TacticBoardFavoriteWithOutId,
 } from "./domain/Favorits";
 import { TacticBoardHeader } from "./domain/TacticBoard";
@@ -23,8 +23,8 @@ type TacticboardFavoriteRequest = FavoriteRequest & {
   tacticboardId: string;
 };
 
-type ExerciseListFavoriteRequest = FavoriteRequest & {
-  exerciseListId: string;
+type PracticePlanFavoriteRequest = FavoriteRequest & {
+  practicePlanId: string;
 };
 
 export const favoriteApiSlice = quadcoachApi.injectEndpoints({
@@ -118,37 +118,37 @@ export const favoriteApiSlice = quadcoachApi.injectEndpoints({
       invalidatesTags: [TagType.favorite],
     }),
 
-    // Exercise List Favorites
-    getFavoriteExerciseLists: builder.query<
-      ExerciseListFavorite[],
+    // Practice Plan Favorites
+    getFavoritePracticePlans: builder.query<
+      PracticePlanFavorite[],
       FavoriteRequest
     >({
       query: (request) => ({
-        url: "/api/favorites/exerciseLists",
+        url: "/api/favorites/practicePlans",
         method: "get",
         data: request,
       }),
       providesTags: [TagType.favorite],
     }),
 
-    addFavoriteExerciseList: builder.mutation<
-      ExerciseListFavoriteWithOutId,
-      ExerciseListFavoriteRequest
+    addFavoritePracticePlan: builder.mutation<
+      PracticePlanFavoriteWithOutId,
+      PracticePlanFavoriteRequest
     >({
       query: (request) => ({
-        url: "/api/favorites/exerciseLists",
+        url: "/api/favorites/practicePlans",
         method: "post",
         data: request,
       }),
       invalidatesTags: [TagType.favorite],
     }),
 
-    removeFavoriteExerciseList: builder.mutation<
+    removeFavoritePracticePlan: builder.mutation<
       void,
-      ExerciseListFavoriteRequest
+      PracticePlanFavoriteRequest
     >({
       query: (request) => ({
-        url: "/api/favorites/exerciseLists",
+        url: "/api/favorites/practicePlans",
         method: "delete",
         data: request,
       }),
@@ -174,9 +174,9 @@ export const {
   useAddFavoriteTacticboardMutation,
   useRemoveFavoriteTacticboardMutation,
 
-  // Exercise List Favorites
-  useGetFavoriteExerciseListsQuery,
-  useLazyGetFavoriteExerciseListsQuery,
-  useAddFavoriteExerciseListMutation,
-  useRemoveFavoriteExerciseListMutation,
+  // Practice Plan Favorites
+  useGetFavoritePracticePlansQuery,
+  useLazyGetFavoritePracticePlansQuery,
+  useAddFavoritePracticePlanMutation,
+  useRemoveFavoritePracticePlanMutation,
 } = favoriteApiSlice;

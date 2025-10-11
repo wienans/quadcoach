@@ -7,10 +7,10 @@ export type ExerciseFavorite = {
   createdAt: Date;
 };
 
-export type ExerciseListFavorite = {
+export type PracticePlanFavorite = {
   _id: string;
   user: string;
-  exerciseList: string;
+  practicePlan: string;
   createdAt: Date;
 };
 
@@ -30,8 +30,8 @@ export type TacticBoardFavoritePartialId = PartialBy<
   "_id"
 >;
 
-export type ExerciseListFavoriteWithOutId = Omit<ExerciseListFavorite, "_id">;
-export type ExerciseListFavoritePartialId = PartialBy<
-  ExerciseListFavorite,
+export type PracticePlanFavoriteWithOutId = Omit<PracticePlanFavorite, "_id">;
+export type PracticePlanFavoritePartialId = PartialBy<
+  PracticePlanFavorite,
   "_id"
 >;

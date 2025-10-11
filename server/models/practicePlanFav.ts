@@ -1,21 +1,21 @@
 import mongoose, { Types } from "mongoose";
 const Schema = mongoose.Schema;
 
-interface IExerciseListFav {
+interface IPracticePlanFav {
   user: Types.ObjectId;
-  exerciseList: Types.ObjectId;
+  practicePlan: Types.ObjectId;
   createdAt: Date;
 }
 
-const exerciseListFavSchema = new Schema<IExerciseListFav>({
+const practicePlanFavSchema = new Schema<IPracticePlanFav>({
   user: {
     type: Schema.Types.ObjectId,
     ref: "users",
     required: true,
   },
-  exerciseList: {
+  practicePlan: {
     type: Schema.Types.ObjectId,
-    ref: "exerciseLists",
+    ref: "practicePlans",
     required: true,
   },
   createdAt: {
@@ -25,11 +25,11 @@ const exerciseListFavSchema = new Schema<IExerciseListFav>({
 });
 
 // Create compound index to prevent duplicate favorites
-exerciseListFavSchema.index({ user: 1, exerciseList: 1 }, { unique: true });
+practicePlanFavSchema.index({ user: 1, practicePlan: 1 }, { unique: true });
 
-const ExerciseListFav = mongoose.model<IExerciseListFav>(
-  "exerciseListFavs",
-  exerciseListFavSchema
+const PracticePlanFav = mongoose.model<IPracticePlanFav>(
+  "practicePlanFavs",
+  practicePlanFavSchema
 );
 
-export default ExerciseListFav;
+export default PracticePlanFav;

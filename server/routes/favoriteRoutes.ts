@@ -24,11 +24,11 @@ router
   .route("/tacticboardsHeaders")
   .get(favoritesController.getFavoriteTacticboardsHeaders);
 router
-  .route("/exerciseLists")
-  .get(favoritesController.getFavoriteExerciseLists)
-  .post(favoritesController.addFavoriteExerciseList)
-  .delete(favoritesController.removeFavoriteExerciseList);
+  .route("/practicePlans")
+  .get(favoritesController.getFavoritePracticePlans)
+  .post(favoritesController.addFavoritePracticePlan)
+  .delete(favoritesController.removeFavoritePracticePlan);
 // router
-//   .route("/exerciseListsHeaders")
-//   .get(favoritesController.getFavoriteExerciseListsHeaders);
+//   .route("/practicePlansHeaders")
+//   .get(favoritesController.getFavoritePracticePlansHeaders);
 export default router;
