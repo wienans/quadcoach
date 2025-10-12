@@ -11,14 +11,11 @@ import {
   sharePracticePlan,
 } from "../controllers/practicePlanController";
 import verifyJWT from "../middleware/verifyJWT";
-import rateLimiter from "../middleware/rateLimiter"; // default (login-focused)
+import { ddosLimiter } from "../middleware/rateLimiter";
 
 const router = Router();
-router.use(verifyJWT as any); // apply auth middleware
-// Apply relaxed rate limiter variant for editing (T052 adjustment) unless running tests
-if (process.env.NODE_ENV !== "test") {
-  router.use(rateLimiter as any);
-}
+router.use(verifyJWT); // apply auth middleware
+router.use(ddosLimiter);
 
 router.post("/", createPracticePlan);
 router.get("/:id", getPracticePlan);

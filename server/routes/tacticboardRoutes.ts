@@ -1,9 +1,11 @@
 import express from "express";
 import * as tacticboardController from "../controllers/tacticboardController";
 import verifyJWT from "../middleware/verifyJWT";
+import { ddosLimiter } from "../middleware/rateLimiter";
 const router = express.Router();
 
 router.use(verifyJWT);
+router.use(ddosLimiter);
 
 router.route("/header").get(tacticboardController.getAllTacticboardHeaders);
 

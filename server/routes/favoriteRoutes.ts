@@ -2,7 +2,10 @@ import express from "express";
 import * as usersController from "../controllers/usersController";
 import verifyJWT from "../middleware/verifyJWT";
 import * as favoritesController from "../controllers/favoritesController";
+import { ddosLimiter } from "../middleware/rateLimiter";
 const router = express.Router();
+
+router.use(ddosLimiter);
 
 router.use(verifyJWT);
 
