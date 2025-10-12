@@ -2,6 +2,7 @@ import { quadcoachApi } from "..";
 import { TagType } from "../enum";
 import type {
   PracticePlanEntity,
+  PracticePlanEntityPartialId,
   PracticePlanSection,
 } from "./domain/PracticePlan";
 import { AccessLevel } from "./tacticboardApi";
@@ -63,15 +64,15 @@ export const practicePlansApiSlice = quadcoachApi.injectEndpoints({
     }),
     patchPracticePlan: builder.mutation<
       PracticePlanEntity,
-      PatchPracticePlanRequest
+      PracticePlanEntityPartialId
     >({
-      query: ({ id, ...data }) => ({
-        url: `/api/practice-plans/${id}`,
+      query: (data) => ({
+        url: `/api/practice-plans/${data._id}`,
         method: "patch",
         data,
       }),
-      invalidatesTags: (result, error, { id }) => [
-        { type: TagType.practiceplan, id },
+      invalidatesTags: (result, error, data) => [
+        { type: TagType.practiceplan, id: data._id },
       ],
     }),
     deletePracticePlan: builder.mutation<{ message?: string }, string>({
@@ -119,6 +120,19 @@ export const practicePlansApiSlice = quadcoachApi.injectEndpoints({
         { type: TagType.practiceplan, id: `${practicePlan}-access` },
       ],
     }),
+    sharePracticePlan: builder.mutation<
+      { message: string },
+      { practicePlan: string; email: string; access: AccessLevel }
+    >({
+      query: ({ practicePlan, email, access }) => ({
+        url: `/api/practice-plans/${practicePlan}/share`,
+        method: "post",
+        data: { email, access },
+      }),
+      invalidatesTags: (_result, _error, { practicePlan }) => [
+        { type: TagType.practiceplan, id: `${practicePlan}-access` },
+      ],
+    }),
   }),
 });
 
@@ -130,4 +144,5 @@ export const {
   useGetAllPracticePlanAccessUsersQuery,
   useAddPracticePlanAccessMutation,
   useRemovePracticePlanAccessMutation,
+  useSharePracticePlanMutation,
 } = practicePlansApiSlice;

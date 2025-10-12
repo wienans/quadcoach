@@ -44,4 +44,31 @@ export type PracticePlanEntity = {
 
 export default PracticePlanEntity;
 export type PracticePlanEntityWithOutId = Omit<PracticePlanEntity, "_id">;
-export type PracticePlanEntityPartialId = PartialBy<PracticePlanEntity, "_id">;
+
+export type PracticePlanItemPartialId = PartialBy<
+  PracticePlanItemBreak | PracticePlanItemExercise,
+  "_id"
+>;
+
+export type PracticePlanGroupPartialId = {
+  _id?: string;
+  name: string;
+  items: PracticePlanItemPartialId[];
+};
+
+export type PracticePlanSectionPartialId = {
+  _id?: string;
+  name: string;
+  targetDuration: number;
+  groups: PracticePlanGroupPartialId[];
+};
+export type PracticePlanEntityPartialId = {
+  _id?: string;
+  name: string;
+  description?: string;
+  tags: string[];
+  sections: PracticePlanSectionPartialId[];
+  user: string; // owner id
+  createdAt?: string;
+  updatedAt?: string;
+};
