@@ -630,6 +630,20 @@ const PracticePlanner = (): JSX.Element => {
     }
   }, [userId, isCreator, accessUsers]);
 
+  // When plan data first loads (or changes) and not in edit mode, sync form values manually
+  useEffect(() => {
+    if (plan && !isEditMode) {
+      formik.setValues({
+        name: plan?.name ?? "",
+        tags: plan?.tags ?? [],
+        description: plan?.description ?? "",
+        sections: plan?.sections ?? [],
+        user: plan?.user ?? "",
+      });
+      formik.setTouched({});
+    }
+  }, [plan, isEditMode]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // Setup formik form for editing
   const formik = useFormik<FormikValues>({
     enableReinitialize: false,
@@ -976,6 +990,7 @@ const PracticePlanner = (): JSX.Element => {
                 plan?.description && (
                   <Typography variant="body1" color="text.secondary">
                     {plan.description}
+                    {formik.values.sections.length}
                   </Typography>
                 )
               )}
