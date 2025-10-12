@@ -71,7 +71,7 @@ export const practicePlansApiSlice = quadcoachApi.injectEndpoints({
         method: "patch",
         data,
       }),
-      invalidatesTags: (result, error, data) => [
+      invalidatesTags: (_result, _error, data) => [
         { type: TagType.practiceplan, id: data._id },
       ],
     }),
@@ -103,7 +103,7 @@ export const practicePlansApiSlice = quadcoachApi.injectEndpoints({
         method: "post",
         data: { email, access },
       }),
-      invalidatesTags: (result, error, { practicePlan }) => [
+      invalidatesTags: (_result, _error, { practicePlan }) => [
         { type: TagType.practiceplan, id: `${practicePlan}-access` },
       ],
     }),
@@ -116,7 +116,7 @@ export const practicePlansApiSlice = quadcoachApi.injectEndpoints({
         method: "delete",
         data: { userId },
       }),
-      invalidatesTags: (result, error, { practicePlan }) => [
+      invalidatesTags: (_result, _error, { practicePlan }) => [
         { type: TagType.practiceplan, id: `${practicePlan}-access` },
       ],
     }),

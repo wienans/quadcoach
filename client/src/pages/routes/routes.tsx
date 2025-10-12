@@ -120,18 +120,6 @@ const routes = [
         },
       },
       {
-        path: "/practice-plans2/:planId",
-        handle: {
-          type: RouteHandleType.practicePlanner,
-        },
-        async lazy() {
-          const PracticePlanner = (
-            await import("../PracticePlanner/Demo/PracticePlannerDemo")
-          ).default;
-          return { element: <PracticePlanner /> };
-        },
-      },
-      {
         path: "/users",
         // handle: {
         //   type: RouteHandleType.userProfile,
