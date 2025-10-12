@@ -8,6 +8,7 @@ import {
   addAccess,
   removeAccess,
   getAllAccessUsers,
+  sharePracticePlan,
 } from "../controllers/practicePlanController";
 import verifyJWT from "../middleware/verifyJWT";
 import rateLimiter from "../middleware/rateLimiter"; // default (login-focused)
@@ -25,6 +26,7 @@ router.patch("/:id", patchPracticePlan);
 router.delete("/:id", deletePracticePlan);
 router.post("/:id/access", addAccess);
 router.get("/:id/access", getAllAccessUsers);
-router.delete("/:id/access/:accessId", removeAccess);
+router.delete("/:id/access/", removeAccess);
+router.route("/:id/share").post(sharePracticePlan);
 
 export default router;

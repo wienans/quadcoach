@@ -13,7 +13,6 @@ export interface CreatePracticePlanRequest {
 }
 
 export interface PatchPracticePlanRequest {
-  id: string;
   name?: string;
   description?: string;
   tags?: string[];
@@ -30,14 +29,11 @@ export type PracticePlanAccessEntry = {
   createdAt: string;
 };
 
-export interface AddAccessRequest {
-  id: string; // practicePlan id
-  userId: string;
-}
-export interface RemoveAccessRequest {
-  id: string; // practicePlan id
-  accessId: string;
-}
+export type AccessResponse = {
+  hasAccess: boolean;
+  type: "owner" | "admin" | "granted" | null;
+  level: AccessLevel | null;
+};
 
 export const practicePlansApiSlice = quadcoachApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -98,28 +94,29 @@ export const practicePlansApiSlice = quadcoachApi.injectEndpoints({
       ],
     }),
     addPracticePlanAccess: builder.mutation<
-      { access: any[] },
-      AddAccessRequest
+      { message: string },
+      { practicePlan: string; email: string; access: AccessLevel }
     >({
-      query: ({ id, userId }) => ({
-        url: `/api/practice-plans/${id}/access`,
+      query: ({ practicePlan, email, access }) => ({
+        url: `/api/practice-plans/${practicePlan}/access`,
         method: "post",
-        data: { userId },
+        data: { email, access },
       }),
-      invalidatesTags: (result, error, { id }) => [
-        { type: TagType.practiceplan, id: `${id}-access` },
+      invalidatesTags: (result, error, { practicePlan }) => [
+        { type: TagType.practiceplan, id: `${practicePlan}-access` },
       ],
     }),
     removePracticePlanAccess: builder.mutation<
-      { access: any[] },
-      RemoveAccessRequest
+      { message: string },
+      { practicePlan: string; userId: string }
     >({
-      query: ({ id, accessId }) => ({
-        url: `/api/practice-plans/${id}/access/${accessId}`,
+      query: ({ practicePlan, userId }) => ({
+        url: `/api/practice-plans/${practicePlan}/access`,
         method: "delete",
+        data: { userId },
       }),
-      invalidatesTags: (result, error, { id }) => [
-        { type: TagType.practiceplan, id: `${id}-access` },
+      invalidatesTags: (result, error, { practicePlan }) => [
+        { type: TagType.practiceplan, id: `${practicePlan}-access` },
       ],
     }),
   }),

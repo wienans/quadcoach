@@ -676,30 +676,34 @@ const PracticePlanner = (): JSX.Element => {
               items: Yup.array().of(
                 Yup.object({
                   kind: Yup.string().oneOf(["break", "exercise"]).required(),
-                  description: Yup.string().when("kind", {
-                    is: "break",
-                    then: Yup.string().required(
-                      "Exercise:validation.item.description.required",
-                    ),
-                    otherwise: Yup.string().notRequired(),
-                  }),
+
+                  description: Yup.string().when(["kind"], ([kind], schema) =>
+                    kind === "break"
+                      ? schema.required(
+                          "Exercise:validation.item.description.required",
+                        )
+                      : schema.notRequired(),
+                  ),
+
                   duration: Yup.number()
                     .min(1, "Exercise:validation.item.duration.min")
                     .required("Exercise:validation.item.duration.required"),
-                  exerciseId: Yup.string().when("kind", {
-                    is: "exercise",
-                    then: Yup.string().required(
-                      "Exercise:validation.item.exerciseId.required",
-                    ),
-                    otherwise: Yup.string().notRequired(),
-                  }),
-                  blockId: Yup.string().when("kind", {
-                    is: "exercise",
-                    then: Yup.string().required(
-                      "Exercise:validation.item.blockId.required",
-                    ),
-                    otherwise: Yup.string().notRequired(),
-                  }),
+
+                  exerciseId: Yup.string().when(["kind"], ([kind], schema) =>
+                    kind === "exercise"
+                      ? schema.required(
+                          "Exercise:validation.item.exerciseId.required",
+                        )
+                      : schema.notRequired(),
+                  ),
+
+                  blockId: Yup.string().when(["kind"], ([kind], schema) =>
+                    kind === "exercise"
+                      ? schema.required(
+                          "Exercise:validation.item.blockId.required",
+                        )
+                      : schema.notRequired(),
+                  ),
                 }),
               ),
             }),
@@ -708,6 +712,7 @@ const PracticePlanner = (): JSX.Element => {
       ),
     }),
     onSubmit: async (values) => {
+      console.log("submitting", values);
       if (planId) {
         // const sanitizedBlocks: Block[] = values.description_blocks.map(
         //   (block) => {
@@ -727,6 +732,8 @@ const PracticePlanner = (): JSX.Element => {
           ...values,
           // description_blocks: sanitizedBlocks,
         };
+        console.log("update: ", planUpdate);
+        console.log(plan);
         try {
           await updatePlan(planUpdate).unwrap();
         } catch (e) {
@@ -761,7 +768,9 @@ const PracticePlanner = (): JSX.Element => {
   const onToggleEditMode = async () => {
     if (!isPrivileged) return;
     if (isEditMode) {
+      console.log("validating before save...");
       const errors = await formik.validateForm();
+      console.log("validation errors: ", errors);
       if (Object.keys(errors).length === 0) {
         setShowValidationSummary(false);
         formik.submitForm();

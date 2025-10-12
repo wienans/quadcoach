@@ -1,4 +1,5 @@
 // Practice Plan controller (implements T035–T040 + T054 access helper + T055 error util)
+import asyncHandler from "express-async-handler";
 import { Request, Response } from "express";
 import mongoose from "mongoose";
 import { ISection, PracticePlan } from "../models/practicePlan";
@@ -7,6 +8,7 @@ import {
   isNonEmptyName,
   validateNonNegativeDurations,
 } from "./helpers/practicePlanValidation";
+import User from "../models/user";
 
 interface RequestWithUser extends Request {
   UserInfo?: {
@@ -19,6 +21,10 @@ interface AccessContext {
   isOwner: boolean;
   hasEdit: boolean;
   hasAnyAccess: boolean;
+}
+
+function isMongoError(error: unknown): error is { code: number } {
+  return typeof error === "object" && error !== null && "code" in error;
 }
 
 async function loadAccessContext(
@@ -194,55 +200,183 @@ export const getAllAccessUsers = async (
   res.json(accessEntries);
 };
 
-export const addAccess = async (req: RequestWithUser, res: Response) => {
-  try {
-    const userId = req.UserInfo?.id;
-    if (!userId) return res.status(401).json({ message: "Unauthorized" });
-    const id = req.params.id;
-    const targetUser = req.body.userId;
-    if (!targetUser)
-      return res.status(400).json({ message: "userId required" });
-    const ctx = await loadAccessContext(id, userId);
-    if (!ctx.plan || !ctx.isOwner)
-      return res.status(404).json({ message: "Not found" });
+export const addAccess = asyncHandler(
+  async (req: RequestWithUser, res: Response) => {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      res.status(400).json({ message: "Invalid practice plan ID" });
+      return;
+    }
 
-    await PracticePlanAccess.updateOne(
-      { user: targetUser, practicePlan: ctx.plan._id },
-      { $set: { access: "edit" } },
-      { upsert: true }
-    );
-    const accessList = await PracticePlanAccess.find({
-      practicePlan: ctx.plan._id,
-    });
-    return res.json({ access: accessList });
-  } catch (e: any) {
-    return res
-      .status(500)
-      .json({ message: "Add access failed", error: e.message });
+    const practicePlan = await PracticePlan.findById(req.params.id);
+    if (!practicePlan) {
+      res.status(404).json({ message: "Practice Plan not found" });
+      return;
+    }
+
+    // Check if user is the creator/owner or admin (only they can grant access)
+    if (!req.UserInfo?.id) {
+      res.status(401).json({ message: "Unauthorized" });
+      return;
+    }
+
+    const isCreator =
+      practicePlan.user?.toString() === req.UserInfo.id ||
+      req.UserInfo.roles?.includes("Admin") ||
+      req.UserInfo.roles?.includes("admin");
+
+    if (!isCreator) {
+      res
+        .status(403)
+        .json({ message: "Only the creator can modify access settings" });
+      return;
+    }
+
+    const { userId, access } = req.body;
+    if (!userId || !mongoose.isValidObjectId(userId)) {
+      res.status(400).json({ message: "Invalid user ID provided" });
+      return;
+    }
+
+    if (!access || !["view", "edit"].includes(access)) {
+      res
+        .status(400)
+        .json({ message: "Invalid access level. Must be 'view' or 'edit'" });
+      return;
+    }
+
+    try {
+      const accessEntry = await PracticePlanAccess.findOneAndUpdate(
+        { user: userId, practicePlan: req.params.id },
+        { user: userId, practicePlan: req.params.id, access },
+        { upsert: true, new: true }
+      );
+      res.status(201).json(accessEntry);
+    } catch (error) {
+      if (isMongoError(error) && error.code === 11000) {
+        res
+          .status(400)
+          .json({ message: "Access already granted to this user" });
+        return;
+      }
+      throw error;
+    }
   }
-};
+);
 
 export const removeAccess = async (req: RequestWithUser, res: Response) => {
   try {
-    const userId = req.UserInfo?.id;
-    if (!userId) return res.status(401).json({ message: "Unauthorized" });
-    const id = req.params.id;
-    const accessId = req.params.accessId;
-    const ctx = await loadAccessContext(id, userId);
-    if (!ctx.plan || !ctx.isOwner)
-      return res.status(404).json({ message: "Not found" });
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      res.status(400).json({ message: "Invalid practice plan ID" });
+      return;
+    }
 
-    await PracticePlanAccess.deleteOne({
-      _id: accessId,
-      practicePlan: ctx.plan._id,
+    const practicePlan = await PracticePlan.findById(req.params.id);
+    if (!practicePlan) {
+      res.status(404).json({ message: "Practice Plan not found" });
+      return;
+    }
+
+    // Check if user is the creator/owner or admin (only they can remove access)
+    if (!req.UserInfo?.id) {
+      res.status(401).json({ message: "Unauthorized" });
+      return;
+    }
+
+    const isCreator =
+      practicePlan.user?.toString() === req.UserInfo.id ||
+      req.UserInfo.roles?.includes("Admin") ||
+      req.UserInfo.roles?.includes("admin");
+
+    if (!isCreator) {
+      res
+        .status(403)
+        .json({ message: "Only the creator can modify access settings" });
+      return;
+    }
+
+    const { userId } = req.body;
+    if (!userId || !mongoose.isValidObjectId(userId)) {
+      res.status(400).json({ message: "Invalid user ID provided" });
+      return;
+    }
+
+    const result = await PracticePlanAccess.deleteOne({
+      user: userId,
+      practicePlan: req.params.id,
     });
-    const accessList = await PracticePlanAccess.find({
-      practicePlan: ctx.plan._id,
-    });
-    return res.json({ access: accessList });
+
+    if (result.deletedCount === 0) {
+      res.status(404).json({ message: "Access entry not found" });
+      return;
+    }
+
+    res.json({ message: "Access removed successfully" });
   } catch (e: any) {
     return res
       .status(500)
       .json({ message: "Remove access failed", error: e.message });
   }
 };
+
+export const sharePracticePlan = asyncHandler(
+  async (req: RequestWithUser, res: Response) => {
+    if (!req.UserInfo?.id) {
+      res.status(401).json({ message: "Unauthorized" });
+      return;
+    }
+
+    const { email, access } = req.body;
+    if (!email || !access) {
+      res.status(400).json({ message: "Email and access level are required" });
+      return;
+    }
+
+    if (!["view", "edit"].includes(access)) {
+      res.status(400).json({ message: "Access must be 'view' or 'edit'" });
+      return;
+    }
+
+    const practicePlan = await PracticePlan.findById(req.params.id);
+    if (!practicePlan) {
+      res.status(404).json({ message: "Practice Plan not found" });
+      return;
+    }
+
+    const isOwner = practicePlan.user?.toString() === req.UserInfo.id;
+    const isAdmin = req.UserInfo.roles?.some(
+      (role) => role.toLowerCase() === "admin"
+    );
+
+    if (!isOwner && !isAdmin) {
+      res.status(403).json({ message: "Forbidden" });
+      return;
+    }
+
+    const targetUser = await User.findOne({
+      email: email.toLowerCase(),
+    }).select("_id");
+    if (!targetUser) {
+      res.status(404).json({ message: "User not found with this email" });
+      return;
+    }
+
+    const existingAccess = await PracticePlanAccess.findOne({
+      practicePlan: req.params.id,
+      user: targetUser._id,
+    });
+
+    if (existingAccess) {
+      existingAccess.access = access;
+      await existingAccess.save();
+      res.json({ message: "Access updated successfully" });
+    } else {
+      const newAccess = new PracticePlanAccess({
+        practicePlan: req.params.id,
+        user: targetUser._id,
+        access,
+      });
+      await newAccess.save();
+      res.status(201).json({ message: "Access granted successfully" });
+    }
+  }
+);
