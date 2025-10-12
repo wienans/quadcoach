@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { Card, IconButton, Typography, Divider } from "@mui/material";
+import "../PracticePlanner/translations";
 
 import { SoftBox, SoftButton, SoftInput } from "../../components";
 import ExerciseSearchDialog, {
@@ -36,7 +37,7 @@ const PracticeGroup: React.FC<PracticeGroupProps> = ({
   formik,
   onDelete,
 }) => {
-  const { t } = useTranslation("Exercise");
+  const { t } = useTranslation("PracticePlanner");
   const [isExerciseDialogOpen, setIsExerciseDialogOpen] = useState(false);
 
   // Calculate total duration for the group
@@ -87,7 +88,7 @@ const PracticeGroup: React.FC<PracticeGroupProps> = ({
         >
           {isEditMode ? (
             <SoftInput
-              placeholder={t("groupName", { defaultValue: "Group Name" })}
+              placeholder={t("groupName")}
               value={group.name}
               onChange={(e) => {
                 const sections = [...formik.values.sections];
@@ -104,7 +105,7 @@ const PracticeGroup: React.FC<PracticeGroupProps> = ({
 
           <SoftBox display="flex" alignItems="center">
             <Typography variant="body2" color="text.secondary">
-              {groupTotal}min
+              {groupTotal}{t("minutes")}
             </Typography>
             {isEditMode && (
               <IconButton size="small" color="error" onClick={onDelete}>
@@ -180,7 +181,7 @@ const PracticeGroup: React.FC<PracticeGroupProps> = ({
                     startIcon={<AddIcon />}
                     onClick={() => setIsExerciseDialogOpen(true)}
                   >
-                    {t("addExercise", { defaultValue: "Add Exercise" })}
+                    {t("addExercise")}
                   </SoftButton>
                   <SoftButton
                     variant="outlined"
@@ -196,7 +197,7 @@ const PracticeGroup: React.FC<PracticeGroupProps> = ({
                       });
                     }}
                   >
-                    {t("addBreak", { defaultValue: "Add Break" })}
+                    {t("addBreak")}
                   </SoftButton>
                 </SoftBox>
               )}

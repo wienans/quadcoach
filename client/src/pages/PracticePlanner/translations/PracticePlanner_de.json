@@ -1,0 +1,61 @@
+{
+  "practicePlanName": "Trainingsplan Name",
+  "errorLoadingPracticePlan": "Beim Laden des Trainingsplans ist ein Fehler aufgetreten.",
+  "favoritePracticePlan": "Trainingsplan favorisieren",
+  "updatePracticePlan": "Trainingsplan aktualisieren",
+  "updatePracticePlan_editMode": "Trainingsplan speichern",
+  "updatePracticePlan_viewMode": "Trainingsplan bearbeiten",
+  "deletePracticePlan": "Trainingsplan löschen",
+  "saving": "Speichern...",
+  "description": "Beschreibung",
+  "addSection": "Abschnitt hinzufügen",
+  "sectionName": "Abschnitt Name",
+  "targetDuration": "Zieldauer",
+  "minutes": "min",
+  "moveUp": "Nach oben verschieben",
+  "moveDown": "Nach unten verschieben",
+  "deleteSection": "Abschnitt löschen",
+  "addGroup": "Gruppe hinzufügen",
+  "groupName": "Gruppenname",
+  "addExercise": "Übung hinzufügen",
+  "addBreak": "Pause hinzufügen",
+  "break": "Pause",
+  "loading": "Laden...",
+  "block": "Block",
+  "breakDescription": "Pausenbeschreibung",
+  "validation": {
+    "fixValidationErrors": "Bitte beheben Sie die markierten Validierungsfehler:",
+    "name": {
+      "required": "Trainingsplan Name ist erforderlich"
+    },
+    "section": {
+      "name": {
+        "required": "Abschnitt Name ist erforderlich"
+      },
+      "targetDuration": {
+        "required": "Zieldauer ist erforderlich",
+        "min": "Zieldauer muss 0 oder größer sein"
+      }
+    },
+    "group": {
+      "name": {
+        "required": "Gruppenname ist erforderlich"
+      }
+    },
+    "item": {
+      "description": {
+        "required": "Pausenbeschreibung ist erforderlich"
+      },
+      "duration": {
+        "required": "Dauer ist erforderlich",
+        "min": "Dauer muss 1 oder größer sein"
+      },
+      "exerciseId": {
+        "required": "Übung ist erforderlich"
+      },
+      "blockId": {
+        "required": "Übungsblock ist erforderlich"
+      }
+    }
+  }
+}

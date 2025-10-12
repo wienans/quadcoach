@@ -1,0 +1,61 @@
+{
+  "practicePlanName": "Practice Plan Name",
+  "errorLoadingPracticePlan": "An error occurred while loading practice plan.",
+  "favoritePracticePlan": "Favorite practice plan",
+  "updatePracticePlan": "Update practice plan",
+  "updatePracticePlan_editMode": "Save practice plan",
+  "updatePracticePlan_viewMode": "Edit practice plan",
+  "deletePracticePlan": "Delete practice plan",
+  "saving": "Saving...",
+  "description": "Description",
+  "addSection": "Add Section",
+  "sectionName": "Section Name",
+  "targetDuration": "Target Duration",
+  "minutes": "min",
+  "moveUp": "Move Up",
+  "moveDown": "Move Down",
+  "deleteSection": "Delete Section",
+  "addGroup": "Add Group",
+  "groupName": "Group Name",
+  "addExercise": "Add Exercise",
+  "addBreak": "Add Break",
+  "break": "Break",
+  "loading": "Loading...",
+  "block": "Block",
+  "breakDescription": "Break description",
+  "validation": {
+    "fixValidationErrors": "Please fix the highlighted validation errors:",
+    "name": {
+      "required": "Practice plan name is required"
+    },
+    "section": {
+      "name": {
+        "required": "Section name is required"
+      },
+      "targetDuration": {
+        "required": "Target duration is required",
+        "min": "Target duration must be 0 or greater"
+      }
+    },
+    "group": {
+      "name": {
+        "required": "Group name is required"
+      }
+    },
+    "item": {
+      "description": {
+        "required": "Break description is required"
+      },
+      "duration": {
+        "required": "Duration is required",
+        "min": "Duration must be 1 or greater"
+      },
+      "exerciseId": {
+        "required": "Exercise is required"
+      },
+      "blockId": {
+        "required": "Exercise block is required"
+      }
+    }
+  }
+}

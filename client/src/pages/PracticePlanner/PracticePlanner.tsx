@@ -5,6 +5,7 @@ import {
   ProfileLayout,
 } from "../../components/LayoutContainers";
 import { useTranslation } from "react-i18next";
+import "./translations";
 import {
   Alert,
   BottomNavigationAction,
@@ -52,7 +53,7 @@ const MarkdownRenderer = lazy(
 );
 
 const PracticePlanner = (): JSX.Element => {
-  const { t } = useTranslation("ExerciseList");
+  const { t } = useTranslation("PracticePlanner");
   const navigate = useNavigate();
   const location = useLocation();
   const [isPrivileged, setIsPrivileged] = useState<boolean>(false);
@@ -167,21 +168,21 @@ const PracticePlanner = (): JSX.Element => {
       user: plan?.user ?? "",
     },
     validationSchema: Yup.object({
-      name: Yup.string().required("Exercise:validation.name.required"),
+      name: Yup.string().required("validation.name.required"),
       tags: Yup.array().of(Yup.string()),
       description: Yup.string(),
       sections: Yup.array().of(
         Yup.object({
           name: Yup.string().required(
-            "Exercise:validation.section.name.required",
+            "validation.section.name.required",
           ),
           targetDuration: Yup.number()
-            .min(0, "Exercise:validation.section.targetDuration.min")
-            .required("Exercise:validation.section.targetDuration.required"),
+            .min(0, "validation.section.targetDuration.min")
+            .required("validation.section.targetDuration.required"),
           groups: Yup.array().of(
             Yup.object({
               name: Yup.string().required(
-                "Exercise:validation.group.name.required",
+                "validation.group.name.required",
               ),
               items: Yup.array().of(
                 Yup.object({
@@ -190,19 +191,19 @@ const PracticePlanner = (): JSX.Element => {
                   description: Yup.string().when(["kind"], ([kind], schema) =>
                     kind === "break"
                       ? schema.required(
-                          "Exercise:validation.item.description.required",
+                          "validation.item.description.required",
                         )
                       : schema.notRequired(),
                   ),
 
                   duration: Yup.number()
-                    .min(1, "Exercise:validation.item.duration.min")
-                    .required("Exercise:validation.item.duration.required"),
+                    .min(1, "validation.item.duration.min")
+                    .required("validation.item.duration.required"),
 
                   exerciseId: Yup.string().when(["kind"], ([kind], schema) =>
                     kind === "exercise"
                       ? schema.required(
-                          "Exercise:validation.item.exerciseId.required",
+                          "validation.item.exerciseId.required",
                         )
                       : schema.notRequired(),
                   ),
@@ -210,7 +211,7 @@ const PracticePlanner = (): JSX.Element => {
                   blockId: Yup.string().when(["kind"], ([kind], schema) =>
                     kind === "exercise"
                       ? schema.required(
-                          "Exercise:validation.item.blockId.required",
+                          "validation.item.blockId.required",
                         )
                       : schema.notRequired(),
                   ),
@@ -357,7 +358,7 @@ const PracticePlanner = (): JSX.Element => {
       <DashboardLayout>
         {() => (
           <>
-            <Alert color="error">{t("Exercise:errorLoadingExercise")}</Alert>;
+            <Alert color="error">{t("errorLoadingPracticePlan")}</Alert>;
           </>
         )}
       </DashboardLayout>
@@ -373,7 +374,7 @@ const PracticePlanner = (): JSX.Element => {
             name="name"
             required
             id="outlined-basic"
-            placeholder={t("Exercise:exerciseName")}
+            placeholder={t("practicePlanName")}
             value={formik.values.name}
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
@@ -387,7 +388,7 @@ const PracticePlanner = (): JSX.Element => {
       headerAction={
         <SoftBox display="flex">
           {userId && userId !== "" && planId && (
-            <Tooltip title={t("Exercise:favoriteExercise")}>
+            <Tooltip title={t("favoritePracticePlan")}>
               <IconButton
                 disabled={
                   isAddFavoritePlanLoading || isRemoveFavoritePlanLoading
@@ -412,7 +413,7 @@ const PracticePlanner = (): JSX.Element => {
           )}
           {isPrivileged && (
             <Tooltip
-              title={t("Exercise:updateExercise", {
+              title={t("updatePracticePlan", {
                 context: isEditMode ? "editMode" : "viewMode",
               })}
             >
@@ -429,7 +430,7 @@ const PracticePlanner = (): JSX.Element => {
             </Tooltip>
           )}
           {isPrivileged && (
-            <Tooltip title={t("Exercise:deleteExercise")}>
+            <Tooltip title={t("deletePracticePlan")}>
               <IconButton
                 onClick={onDeletePlanClick}
                 color="error"
@@ -445,7 +446,7 @@ const PracticePlanner = (): JSX.Element => {
       bottomNavigation={
         !isUpMd && [
           userId && userId !== "" && planId && (
-            <Tooltip key="favorite" title={t("Exercise:favoriteExercise")}>
+            <Tooltip key="favorite" title={t("favoritePracticePlan")}>
               <BottomNavigationAction
                 icon={<FavoriteIcon color={isFavorite ? "error" : "inherit"} />}
                 disabled={
@@ -470,7 +471,7 @@ const PracticePlanner = (): JSX.Element => {
           isPrivileged && (
             <Tooltip
               key="edit"
-              title={t("Exercise:updateExercise", {
+              title={t("updatePracticePlan", {
                 context: isEditMode ? "editMode" : "viewMode",
               })}
             >
@@ -482,7 +483,7 @@ const PracticePlanner = (): JSX.Element => {
             </Tooltip>
           ),
           isPrivileged && (
-            <Tooltip key="delete" title={t("Exercise:deleteExercise")}>
+            <Tooltip key="delete" title={t("deletePracticePlan")}>
               <BottomNavigationAction
                 icon={<DeleteIcon />}
                 onClick={onDeletePlanClick}
@@ -498,7 +499,7 @@ const PracticePlanner = (): JSX.Element => {
           <>
             {isUpdatePlanLoading && (
               <Alert color="info" sx={{ mt: 2, mb: 2 }}>
-                {t("Exercise:saving", { defaultValue: "Saving..." })}
+                {t("saving")}
               </Alert>
             )}
 
@@ -506,10 +507,7 @@ const PracticePlanner = (): JSX.Element => {
               showValidationSummary &&
               Object.keys(formik.errors).length > 0 && (
                 <Alert color="warning" sx={{ mt: 2, mb: 2 }}>
-                  {t("Exercise:validation.fixValidationErrors", {
-                    defaultValue:
-                      "Please fix the highlighted validation errors:",
-                  })}
+                  {t("validation.fixValidationErrors")}
                   <ul style={{ marginTop: 8 }}>
                     {Object.entries(formik.errors).map(([field, error]) => {
                       if (typeof error === "string") {
@@ -639,9 +637,7 @@ const PracticePlanner = (): JSX.Element => {
                           });
                         }}
                       >
-                        {t("Exercise:addSection", {
-                          defaultValue: "Add Section",
-                        })}
+                        {t("addSection")}
                       </SoftButton>
                     </SoftBox>
                   )}

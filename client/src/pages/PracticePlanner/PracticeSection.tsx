@@ -7,6 +7,7 @@ import {
   Typography,
   Divider,
 } from "@mui/material";
+import "../PracticePlanner/translations";
 
 import { SoftBox, SoftButton, SoftInput } from "../../components";
 
@@ -50,7 +51,7 @@ const PracticeSection: React.FC<PracticeSectionProps> = ({
   canMoveUp,
   canMoveDown,
 }) => {
-  const { t } = useTranslation("Exercise");
+  const { t } = useTranslation("PracticePlanner");
 
   // Calculate total duration for the section
   const calculateSectionTotal = () => {
@@ -88,9 +89,7 @@ const PracticeSection: React.FC<PracticeSectionProps> = ({
             <SoftBox display="flex" alignItems="center" flex={1}>
               {isEditMode ? (
                 <SoftInput
-                  placeholder={t("sectionName", {
-                    defaultValue: "Section Name",
-                  })}
+                  placeholder={t("sectionName")}
                   value={section.name}
                   onChange={(e) => {
                     const sections = [...formik.values.sections];
@@ -112,7 +111,7 @@ const PracticeSection: React.FC<PracticeSectionProps> = ({
                   color={isOverTarget ? "error.main" : "text.secondary"}
                   ml={1}
                 >
-                  {sectionTotal} {"min"} /
+                  {sectionTotal} {t("minutes")} /
                 </Typography>
                 {isEditMode ? (
                   <div>
@@ -133,7 +132,7 @@ const PracticeSection: React.FC<PracticeSectionProps> = ({
                     variant="body2"
                     color={isOverTarget ? "error.main" : "text.secondary"}
                   >
-                    {section.targetDuration} {"min"}
+                    {section.targetDuration} {t("minutes")}
                   </Typography>
                 )}
               </SoftBox>
@@ -142,7 +141,7 @@ const PracticeSection: React.FC<PracticeSectionProps> = ({
             {/* Section Actions */}
             {isEditMode && (
               <SoftBox display="flex" gap={1}>
-                <Tooltip title="Move Up">
+                 <Tooltip title={t("moveUp")}>
                   <span>
                     <IconButton
                       size="small"
@@ -153,7 +152,7 @@ const PracticeSection: React.FC<PracticeSectionProps> = ({
                     </IconButton>
                   </span>
                 </Tooltip>
-                <Tooltip title="Move Down">
+                 <Tooltip title={t("moveDown")}>
                   <span>
                     <IconButton
                       size="small"
@@ -164,7 +163,7 @@ const PracticeSection: React.FC<PracticeSectionProps> = ({
                     </IconButton>
                   </span>
                 </Tooltip>
-                <Tooltip title="Delete Section">
+                 <Tooltip title={t("deleteSection")}>
                   <IconButton size="small" color="error" onClick={onDelete}>
                     <DeleteIcon />
                   </IconButton>
@@ -226,7 +225,7 @@ const PracticeSection: React.FC<PracticeSectionProps> = ({
                         });
                       }}
                     >
-                      {t("addGroup", { defaultValue: "Add Group" })}
+                      {t("addGroup")}
                     </SoftButton>
                   </SoftBox>
                 )}

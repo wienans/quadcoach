@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { IconButton, Typography } from "@mui/material";
+import "../PracticePlanner/translations";
 
 import { SoftBox, SoftInput } from "../../components";
 
@@ -47,7 +48,7 @@ const PracticeItem: React.FC<PracticeItemProps> = ({
   canMoveUp,
   canMoveDown,
 }) => {
-  const { t } = useTranslation("Exercise");
+  const { t } = useTranslation("PracticePlanner");
   const navigate = useNavigate();
 
   // Fetch exercise data if this is an exercise item
@@ -139,7 +140,7 @@ const PracticeItem: React.FC<PracticeItemProps> = ({
           }}
           onClick={item.kind === "exercise" ? handleExerciseClick : undefined}
         >
-          {item.kind === "exercise" ? exercise?.name || "Loading..." : "Break"}
+          {item.kind === "exercise" ? exercise?.name || t("loading") : t("break")}
         </Typography>
 
         <SoftBox display="flex" alignItems="center" gap={1}>
@@ -155,12 +156,12 @@ const PracticeItem: React.FC<PracticeItemProps> = ({
               size="small"
             />
           ) : (
-            <Typography variant="body2">{item.duration}min</Typography>
+            <Typography variant="body2">{item.duration}{t("minutes")}</Typography>
           )}
 
           {isEditMode && (
             <>
-              <Tooltip title="Move Up">
+              <Tooltip title={t("moveUp")}>
                 <span>
                   <IconButton
                     size="small"
@@ -171,7 +172,7 @@ const PracticeItem: React.FC<PracticeItemProps> = ({
                   </IconButton>
                 </span>
               </Tooltip>
-              <Tooltip title="Move Down">
+              <Tooltip title={t("moveDown")}>
                 <span>
                   <IconButton
                     size="small"
@@ -194,9 +195,7 @@ const PracticeItem: React.FC<PracticeItemProps> = ({
         <SoftBox>
           {isEditMode ? (
             <SoftInput
-              placeholder={t("breakDescription", {
-                defaultValue: "Break description",
-              })}
+              placeholder={t("breakDescription")}
               value={item.description}
               onChange={(e) => updateItem("description", e.target.value)}
               size="small"
@@ -213,7 +212,7 @@ const PracticeItem: React.FC<PracticeItemProps> = ({
       {item.kind === "exercise" && (
         <SoftBox>
           <Typography variant="body2" color="text.secondary">
-            Block {getBlockNumber()}
+            {t("block")} {getBlockNumber()}
           </Typography>
         </SoftBox>
       )}
