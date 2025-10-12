@@ -2,17 +2,18 @@
 import { Request, Response } from "express";
 import mongoose from "mongoose";
 import { ISection, PracticePlan } from "../models/practicePlan";
-import { PracticePlanAccess } from "../models/practicePlanAccess";
+import PracticePlanAccess from "../models/practicePlanAccess";
 import {
   isNonEmptyName,
   validateNonNegativeDurations,
 } from "./helpers/practicePlanValidation";
 
-// @ts-ignore augment Request for user info inserted by auth middleware
-interface AuthedRequest extends Request {
-  UserInfo?: { id?: string };
+interface RequestWithUser extends Request {
+  UserInfo?: {
+    id: string;
+    roles: string[];
+  };
 }
-
 interface AccessContext {
   plan: any | null;
   isOwner: boolean;
@@ -48,7 +49,10 @@ function sendValidation(res: Response, message: string, errors: string[]) {
   return res.status(400).json({ message, errors });
 }
 
-export const createPracticePlan = async (req: AuthedRequest, res: Response) => {
+export const createPracticePlan = async (
+  req: RequestWithUser,
+  res: Response
+) => {
   try {
     const userId = req.UserInfo?.id;
     if (!userId) return res.status(401).json({ message: "Unauthorized" });
@@ -69,7 +73,7 @@ export const createPracticePlan = async (req: AuthedRequest, res: Response) => {
   }
 };
 
-export const getPracticePlan = async (req: AuthedRequest, res: Response) => {
+export const getPracticePlan = async (req: RequestWithUser, res: Response) => {
   try {
     const userId = req.UserInfo?.id;
     if (!userId) return res.status(401).json({ message: "Unauthorized" });
@@ -83,7 +87,10 @@ export const getPracticePlan = async (req: AuthedRequest, res: Response) => {
   }
 };
 
-export const patchPracticePlan = async (req: AuthedRequest, res: Response) => {
+export const patchPracticePlan = async (
+  req: RequestWithUser,
+  res: Response
+) => {
   try {
     const userId = req.UserInfo?.id;
     if (!userId) return res.status(401).json({ message: "Unauthorized" });
@@ -123,7 +130,10 @@ export const patchPracticePlan = async (req: AuthedRequest, res: Response) => {
   }
 };
 
-export const deletePracticePlan = async (req: AuthedRequest, res: Response) => {
+export const deletePracticePlan = async (
+  req: RequestWithUser,
+  res: Response
+) => {
   try {
     const userId = req.UserInfo?.id;
     if (!userId) return res.status(401).json({ message: "Unauthorized" });
@@ -139,7 +149,52 @@ export const deletePracticePlan = async (req: AuthedRequest, res: Response) => {
   }
 };
 
-export const addAccess = async (req: AuthedRequest, res: Response) => {
+// @desc    Get all users who have access to a tacticboard
+// @route   GET /api/tacticboards/:id/access
+// @access  Private - Users with access
+export const getAllAccessUsers = async (
+  req: RequestWithUser,
+  res: Response
+) => {
+  if (!mongoose.isValidObjectId(req.params.id)) {
+    res.status(400).json({ message: "Invalid Practice Plan ID" });
+    return;
+  }
+
+  const practicePlan = await PracticePlan.findById(req.params.id);
+  if (!practicePlan) {
+    res.status(404).json({ message: "Practice Plan not found" });
+    return;
+  }
+
+  // Check if user has access to view access list
+  if (!req.UserInfo?.id) {
+    res.status(401).json({ message: "Unauthorized" });
+    return;
+  }
+
+  const hasAccess =
+    practicePlan.user?.toString() === req.UserInfo.id ||
+    req.UserInfo.roles?.includes("Admin") ||
+    req.UserInfo.roles?.includes("admin") ||
+    (await PracticePlanAccess.exists({
+      user: req.UserInfo.id,
+      practicePlan: req.params.id,
+    }));
+
+  if (!hasAccess) {
+    res.status(403).json({ message: "Forbidden" });
+    return;
+  }
+
+  const accessEntries = await PracticePlanAccess.find({
+    practicePlan: req.params.id,
+  }).populate("user", "name");
+
+  res.json(accessEntries);
+};
+
+export const addAccess = async (req: RequestWithUser, res: Response) => {
   try {
     const userId = req.UserInfo?.id;
     if (!userId) return res.status(401).json({ message: "Unauthorized" });
@@ -167,7 +222,7 @@ export const addAccess = async (req: AuthedRequest, res: Response) => {
   }
 };
 
-export const removeAccess = async (req: AuthedRequest, res: Response) => {
+export const removeAccess = async (req: RequestWithUser, res: Response) => {
   try {
     const userId = req.UserInfo?.id;
     if (!userId) return res.status(401).json({ message: "Unauthorized" });

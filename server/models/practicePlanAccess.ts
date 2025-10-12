@@ -1,11 +1,22 @@
 // T031 PracticePlanAccess schema (skeleton)
-import { Schema, model, Types } from 'mongoose';
+import { model, Schema, Types } from "mongoose";
 
-const PracticePlanAccessSchema = new Schema(
+interface IPracticePlanAccess {
+  user: Types.ObjectId;
+  practicePlan: Types.ObjectId;
+  access: "view" | "edit";
+  createdAt: Date;
+}
+
+const PracticePlanAccessSchema = new Schema<IPracticePlanAccess>(
   {
-    user: { type: Types.ObjectId, ref: 'User', required: true },
-    practicePlan: { type: Types.ObjectId, ref: 'PracticePlan', required: true },
-    access: { type: String, enum: ['view', 'edit'], required: true },
+    user: { type: Schema.Types.ObjectId, ref: "users", required: true },
+    practicePlan: {
+      type: Schema.Types.ObjectId,
+      ref: "practiceplans",
+      required: true,
+    },
+    access: { type: String, enum: ["view", "edit"], required: true },
   },
   { timestamps: { createdAt: true, updatedAt: false } }
 );
@@ -14,4 +25,9 @@ PracticePlanAccessSchema.index({ user: 1, practicePlan: 1 }, { unique: true });
 PracticePlanAccessSchema.index({ practicePlan: 1 });
 PracticePlanAccessSchema.index({ user: 1 });
 
-export const PracticePlanAccess = model('PracticePlanAccess', PracticePlanAccessSchema);
+const PracticePlanAccess = model<IPracticePlanAccess>(
+  "practiceplanAccesses",
+  PracticePlanAccessSchema
+);
+
+export default PracticePlanAccess;
