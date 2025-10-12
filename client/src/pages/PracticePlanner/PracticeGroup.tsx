@@ -2,10 +2,12 @@ import { useTranslation } from "react-i18next";
 import { Card, IconButton, Typography, Divider } from "@mui/material";
 
 import { SoftBox, SoftButton, SoftInput } from "../../components";
+import ExerciseSearchDialog, { ExerciseBlockSelection } from "../../components/ExerciseParts/ExerciseSearchDialog";
 
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
 
+import { useState } from "react";
 import { FieldArray, FieldArrayRenderProps, FormikProps } from "formik";
 import {
   PracticePlanEntityPartialId,
@@ -33,6 +35,7 @@ const PracticeGroup: React.FC<PracticeGroupProps> = ({
   onDelete,
 }) => {
   const { t } = useTranslation("Exercise");
+  const [isExerciseDialogOpen, setIsExerciseDialogOpen] = useState(false);
 
   // Calculate total duration for the group
   const calculateGroupTotal = () => {
@@ -44,6 +47,31 @@ const PracticeGroup: React.FC<PracticeGroupProps> = ({
   };
 
   const groupTotal = calculateGroupTotal();
+
+  const handleAddExercises = (selections: ExerciseBlockSelection[]) => {
+    // Create a deep copy to avoid immutability issues
+    const sections = JSON.parse(JSON.stringify(formik.values.sections));
+    
+    // Ensure the items array exists and is mutable
+    if (!sections[sectionIndex].groups[groupIndex].items) {
+      sections[sectionIndex].groups[groupIndex].items = [];
+    }
+    
+    selections.forEach(selection => {
+      selection.blockIds.forEach(blockId => {
+        const newItem: PracticePlanItemPartialId = {
+          _id: `temp_${Date.now()}_${Math.random()}`,
+          kind: "exercise",
+          exerciseId: selection.exerciseId,
+          blockId: blockId,
+          duration: 10, // Default duration, can be adjusted later
+        };
+        sections[sectionIndex].groups[groupIndex].items.push(newItem);
+      });
+    });
+    
+    formik.setFieldValue("sections", sections);
+  };
 
   return (
     <Card variant="outlined" sx={{ height: "100%" }}>
@@ -148,15 +176,7 @@ const PracticeGroup: React.FC<PracticeGroupProps> = ({
                     size="small"
                     color="primary"
                     startIcon={<AddIcon />}
-                    onClick={() => {
-                      itemArrayHelpers.push({
-                        _id: `temp_${Date.now()}_${Math.random()}`,
-                        kind: "exercise",
-                        exerciseId: "",
-                        blockId: "",
-                        duration: 10,
-                      });
-                    }}
+                    onClick={() => setIsExerciseDialogOpen(true)}
                   >
                     {t("addExercise", { defaultValue: "Add Exercise" })}
                   </SoftButton>
@@ -182,6 +202,13 @@ const PracticeGroup: React.FC<PracticeGroupProps> = ({
           )}
         />
       </SoftBox>
+      
+      {/* Exercise Search Dialog */}
+      <ExerciseSearchDialog
+        open={isExerciseDialogOpen}
+        onClose={() => setIsExerciseDialogOpen(false)}
+        onAddExercises={handleAddExercises}
+      />
     </Card>
   );
 };

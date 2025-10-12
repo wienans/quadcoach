@@ -49,20 +49,20 @@ const PracticeItem: React.FC<PracticeItemProps> = ({
 }) => {
   const { t } = useTranslation("Exercise");
   const navigate = useNavigate();
-  
+
   // Fetch exercise data if this is an exercise item
   const { data: exercise } = useGetExerciseQuery(
     item.kind === "exercise" ? item.exerciseId : "",
     {
       skip: item.kind !== "exercise" || !item.exerciseId,
-    }
+    },
   );
 
   // Get block number from exercise
   const getBlockNumber = () => {
     if (!exercise || item.kind !== "exercise" || !item.blockId) return "";
     const blockIndex = exercise.description_blocks.findIndex(
-      (block) => block._id === item.blockId
+      (block) => block._id === item.blockId,
     );
     return blockIndex !== -1 ? (blockIndex + 1).toString() : "";
   };
@@ -123,23 +123,23 @@ const PracticeItem: React.FC<PracticeItemProps> = ({
           <FreeBreakfastIcon color="secondary" fontSize="small" />
         )}
 
-        <Typography 
-          variant="body2" 
-          fontWeight="medium" 
+        <Typography
+          variant="body2"
+          fontWeight="medium"
           flex={1}
           sx={{
             cursor: item.kind === "exercise" ? "pointer" : "default",
-            "&:hover": item.kind === "exercise" ? {
-              textDecoration: "underline",
-              color: "primary.main"
-            } : {}
+            "&:hover":
+              item.kind === "exercise"
+                ? {
+                    textDecoration: "underline",
+                    color: "primary.main",
+                  }
+                : {},
           }}
           onClick={item.kind === "exercise" ? handleExerciseClick : undefined}
         >
-          {item.kind === "exercise" 
-            ? (exercise?.name || "Loading...") 
-            : "Break"
-          }
+          {item.kind === "exercise" ? exercise?.name || "Loading..." : "Break"}
         </Typography>
 
         <SoftBox display="flex" alignItems="center" gap={1}>
@@ -208,28 +208,9 @@ const PracticeItem: React.FC<PracticeItemProps> = ({
 
       {item.kind === "exercise" && (
         <SoftBox>
-          {isEditMode ? (
-            <SoftBox display="flex" gap={1}>
-              <SoftInput
-                placeholder="Exercise ID"
-                value={item.exerciseId}
-                onChange={(e) => updateItem("exerciseId", e.target.value)}
-                size="small"
-                sx={{ flex: 1 }}
-              />
-              <SoftInput
-                placeholder="Block ID"
-                value={item.blockId}
-                onChange={(e) => updateItem("blockId", e.target.value)}
-                size="small"
-                sx={{ flex: 1 }}
-              />
-            </SoftBox>
-          ) : (
-            <Typography variant="body2" color="text.secondary">
-              Block {getBlockNumber()}
-            </Typography>
-          )}
+          <Typography variant="body2" color="text.secondary">
+            Block {getBlockNumber()}
+          </Typography>
         </SoftBox>
       )}
     </SoftBox>
