@@ -42,6 +42,14 @@ import { useFormik } from "formik";
 import { FieldArray, FieldArrayRenderProps, FormikProvider } from "formik";
 import { PracticePlanEntityPartialId } from "../../api/quadcoachApi/domain/PracticePlan";
 import PracticeSection from "./PracticeSection";
+import { lazy, Suspense } from "react";
+import MDEditor from "@uiw/react-md-editor";
+import "@uiw/react-md-editor/markdown-editor.css";
+import "@uiw/react-markdown-preview/markdown.css";
+
+const MarkdownRenderer = lazy(
+  () => import("../../components/MarkdownRenderer"),
+);
 
 const PracticePlanner = (): JSX.Element => {
   const { t } = useTranslation("ExerciseList");
@@ -520,29 +528,53 @@ const PracticePlanner = (): JSX.Element => {
               )}
 
             {/* Description Field */}
-            <SoftBox mb={3}>
-              {isEditMode ? (
-                <SoftInput
-                  multiline
-                  rows={3}
-                  placeholder={t("Exercise:description", {
-                    defaultValue: "Description",
-                  })}
-                  value={formik.values.description}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  name="description"
-                />
-              ) : (
-                plan?.description && (
-                  <Typography variant="body1" color="text.secondary">
-                    {plan.description}
-                    {formik.values.sections.length}
-                  </Typography>
-                )
-              )}
-            </SoftBox>
+            <Card sx={{ mb: 3 }}>
+              <SoftBox>
+                {/* {isEditMode ? (
+                  <SoftInput
+                    multiline
+                    rows={3}
+                    placeholder={t("Exercise:description", {
+                      defaultValue: "Description",
+                    })}
+                    value={formik.values.description}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                    name="description"
+                  />
+                ) : (
+                  plan?.description && (
+                    <Typography variant="body1" color="text.secondary">
+                      {plan.description}
+                      {formik.values.sections.length}
+                    </Typography>
+                  )
+                )} */}
+                {/* Description Section */}
+                {formik.values.description &&
+                  formik.values.description !== "" &&
+                  !isEditMode && (
+                    <div style={{ margin: 16 }}>
+                      <Suspense fallback={<div>Loading...</div>}>
+                        <MarkdownRenderer>
+                          {formik.values.description}
+                        </MarkdownRenderer>
+                      </Suspense>
+                    </div>
+                  )}
 
+                {/* Description Edit Mode */}
+                {isEditMode && (
+                  <MDEditor
+                    height={300}
+                    value={formik.values.description || ""}
+                    onChange={(value) => {
+                      formik.setFieldValue(`description`, value || "");
+                    }}
+                  />
+                )}
+              </SoftBox>
+            </Card>
             {/* Sections */}
             <FieldArray
               name="sections"
