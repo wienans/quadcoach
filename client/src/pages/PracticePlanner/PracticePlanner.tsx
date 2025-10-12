@@ -13,7 +13,6 @@ import {
   Theme,
   Tooltip,
   useMediaQuery,
-  Typography,
 } from "@mui/material";
 
 import {
@@ -272,8 +271,6 @@ const PracticePlanner = (): JSX.Element => {
           ...values,
           sections: sanitizedSections,
         };
-        console.log("update: ", planUpdate);
-        console.log(plan);
         try {
           await updatePlan(planUpdate).unwrap();
         } catch (e) {
@@ -308,9 +305,7 @@ const PracticePlanner = (): JSX.Element => {
   const onToggleEditMode = async () => {
     if (!isPrivileged) return;
     if (isEditMode) {
-      console.log("validating before save...");
       const errors = await formik.validateForm();
-      console.log("validation errors: ", errors);
       if (Object.keys(errors).length === 0) {
         setShowValidationSummary(false);
         formik.submitForm();

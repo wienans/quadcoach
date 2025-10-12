@@ -161,22 +161,26 @@ const PracticeItem: React.FC<PracticeItemProps> = ({
           {isEditMode && (
             <>
               <Tooltip title="Move Up">
-                <IconButton
-                  size="small"
-                  onClick={onMoveUp}
-                  disabled={!canMoveUp}
-                >
-                  <ArrowUpwardIcon fontSize="small" />
-                </IconButton>
+                <span>
+                  <IconButton
+                    size="small"
+                    onClick={onMoveUp}
+                    disabled={!canMoveUp}
+                  >
+                    <ArrowUpwardIcon fontSize="small" />
+                  </IconButton>
+                </span>
               </Tooltip>
               <Tooltip title="Move Down">
-                <IconButton
-                  size="small"
-                  onClick={onMoveDown}
-                  disabled={!canMoveDown}
-                >
-                  <ArrowDownwardIcon fontSize="small" />
-                </IconButton>
+                <span>
+                  <IconButton
+                    size="small"
+                    onClick={onMoveDown}
+                    disabled={!canMoveDown}
+                  >
+                    <ArrowDownwardIcon fontSize="small" />
+                  </IconButton>
+                </span>
               </Tooltip>
               <IconButton size="small" color="error" onClick={onDelete}>
                 <DeleteIcon fontSize="small" />

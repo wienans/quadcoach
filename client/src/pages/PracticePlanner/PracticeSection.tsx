@@ -143,22 +143,26 @@ const PracticeSection: React.FC<PracticeSectionProps> = ({
             {isEditMode && (
               <SoftBox display="flex" gap={1}>
                 <Tooltip title="Move Up">
-                  <IconButton
-                    size="small"
-                    onClick={onMoveUp}
-                    disabled={!canMoveUp}
-                  >
-                    <ArrowUpwardIcon />
-                  </IconButton>
+                  <span>
+                    <IconButton
+                      size="small"
+                      onClick={onMoveUp}
+                      disabled={!canMoveUp}
+                    >
+                      <ArrowUpwardIcon />
+                    </IconButton>
+                  </span>
                 </Tooltip>
                 <Tooltip title="Move Down">
-                  <IconButton
-                    size="small"
-                    onClick={onMoveDown}
-                    disabled={!canMoveDown}
-                  >
-                    <ArrowDownwardIcon />
-                  </IconButton>
+                  <span>
+                    <IconButton
+                      size="small"
+                      onClick={onMoveDown}
+                      disabled={!canMoveDown}
+                    >
+                      <ArrowDownwardIcon />
+                    </IconButton>
+                  </span>
                 </Tooltip>
                 <Tooltip title="Delete Section">
                   <IconButton size="small" color="error" onClick={onDelete}>
