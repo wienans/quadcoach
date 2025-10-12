@@ -13,10 +13,12 @@ import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import Tooltip from "@mui/material/Tooltip";
 
 import { FormikProps } from "formik";
+import { useNavigate } from "react-router-dom";
 import {
   PracticePlanEntityPartialId,
   PracticePlanItemPartialId,
 } from "../../api/quadcoachApi/domain/PracticePlan";
+import { useGetExerciseQuery } from "../../pages/exerciseApi";
 
 interface PracticeItemProps {
   item: PracticePlanItemPartialId;
@@ -46,6 +48,30 @@ const PracticeItem: React.FC<PracticeItemProps> = ({
   canMoveDown,
 }) => {
   const { t } = useTranslation("Exercise");
+  const navigate = useNavigate();
+  
+  // Fetch exercise data if this is an exercise item
+  const { data: exercise } = useGetExerciseQuery(
+    item.kind === "exercise" ? item.exerciseId : "",
+    {
+      skip: item.kind !== "exercise" || !item.exerciseId,
+    }
+  );
+
+  // Get block number from exercise
+  const getBlockNumber = () => {
+    if (!exercise || item.kind !== "exercise" || !item.blockId) return "";
+    const blockIndex = exercise.description_blocks.findIndex(
+      (block) => block._id === item.blockId
+    );
+    return blockIndex !== -1 ? (blockIndex + 1).toString() : "";
+  };
+
+  const handleExerciseClick = () => {
+    if (item.kind === "exercise" && item.exerciseId) {
+      navigate(`/exercises/${item.exerciseId}`);
+    }
+  };
 
   const updateItem = (field: string, value: string | number) => {
     const sections = JSON.parse(JSON.stringify(formik.values.sections));
@@ -97,8 +123,23 @@ const PracticeItem: React.FC<PracticeItemProps> = ({
           <FreeBreakfastIcon color="secondary" fontSize="small" />
         )}
 
-        <Typography variant="body2" fontWeight="medium" flex={1}>
-          {item.kind === "exercise" ? "Exercise" : "Break"}
+        <Typography 
+          variant="body2" 
+          fontWeight="medium" 
+          flex={1}
+          sx={{
+            cursor: item.kind === "exercise" ? "pointer" : "default",
+            "&:hover": item.kind === "exercise" ? {
+              textDecoration: "underline",
+              color: "primary.main"
+            } : {}
+          }}
+          onClick={item.kind === "exercise" ? handleExerciseClick : undefined}
+        >
+          {item.kind === "exercise" 
+            ? (exercise?.name || "Loading...") 
+            : "Break"
+          }
         </Typography>
 
         <SoftBox display="flex" alignItems="center" gap={1}>
@@ -186,7 +227,7 @@ const PracticeItem: React.FC<PracticeItemProps> = ({
             </SoftBox>
           ) : (
             <Typography variant="body2" color="text.secondary">
-              Exercise ID: {item.exerciseId}
+              Block {getBlockNumber()}
             </Typography>
           )}
         </SoftBox>
