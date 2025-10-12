@@ -1,0 +1,27 @@
+{
+  "columns": {
+    "name": "Name",
+    "tags": "Tags"
+  },
+  "title": "Trainingsplanliste",
+  "filter": {
+    "title": "Filter",
+    "name": "Trainingsplan suchen",
+    "tags": {
+      "title": "Tags",
+      "placeholder": "Tag eingeben und Enter drücken..."
+    },
+    "apply": "Filter anwenden"
+  },
+  "errorLoadingPracticePlans": "Beim Laden der Trainingspläne ist ein Fehler aufgetreten.",
+  "noPracticePlansFound": "Kein Trainingsplan gefunden",
+  "cardView": {
+    "openPracticePlan": "Trainingsplan öffnen",
+    "tags": "Tags",
+    "description": "Beschreibung",
+    "sections": "Abschnitte",
+    "noSections": "Keine Abschnitte"
+  },
+  "addPracticePlan": "Trainingsplan hinzufügen",
+  "loadMore": "Mehr laden"
+}

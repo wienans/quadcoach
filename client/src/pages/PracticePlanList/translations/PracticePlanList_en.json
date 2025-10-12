@@ -1,0 +1,27 @@
+{
+  "columns": {
+    "name": "Name",
+    "tags": "Tags"
+  },
+  "title": "Practice Plan list",
+  "filter": {
+    "title": "Filter",
+    "name": "Search Practice Plan",
+    "tags": {
+      "title": "Tags",
+      "placeholder": "Enter tag and press Enter..."
+    },
+    "apply": "Apply filter"
+  },
+  "errorLoadingPracticePlans": "An error occurred while loading practice plans.",
+  "noPracticePlansFound": "No practice plan found",
+  "cardView": {
+    "openPracticePlan": "Open practice plan",
+    "tags": "Tags",
+    "description": "Description",
+    "sections": "sections",
+    "noSections": "No sections"
+  },
+  "addPracticePlan": "Add practice plan",
+  "loadMore": "Load More"
+}

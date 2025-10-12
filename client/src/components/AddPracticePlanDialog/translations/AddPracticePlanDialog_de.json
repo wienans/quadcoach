@@ -1,0 +1,11 @@
+{
+  "title": "Trainingsplan hinzufügen",
+  "name": {
+    "placeholder": "Trainingsplan Name"
+  },
+  "description": {
+    "placeholder": "Beschreibung (optional)"
+  },
+  "cancel": "Abbrechen",
+  "add": "Hinzufügen"
+}

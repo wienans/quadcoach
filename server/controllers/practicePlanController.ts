@@ -55,6 +55,83 @@ function sendValidation(res: Response, message: string, errors: string[]) {
   return res.status(400).json({ message, errors });
 }
 
+export const getPracticePlans = async (req: RequestWithUser, res: Response) => {
+  try {
+    const userId = req.UserInfo?.id;
+    if (!userId) return res.status(401).json({ message: "Unauthorized" });
+
+    const {
+      page = 1,
+      limit = 50,
+      "name[regex]": nameRegex,
+      "name[options]": nameOptions = "i",
+      "tags[in]": tagsIn,
+      "tags[regex]": tagsRegex,
+      "tags[options]": tagsOptions = "i",
+    } = req.query;
+
+    const pageNum = parseInt(page as string);
+    const limitNum = parseInt(limit as string);
+    const skip = (pageNum - 1) * limitNum;
+
+    // Build query
+    const query: any = {
+      $or: [
+        { user: userId },
+        {
+          _id: {
+            $in: await PracticePlanAccess.find({ user: userId }).distinct(
+              "practicePlan"
+            ),
+          },
+        },
+      ],
+    };
+
+    // Add name filter if provided
+    if (nameRegex) {
+      query.name = { $regex: nameRegex as string, $options: nameOptions };
+    }
+
+    // Add tags filter if provided
+    if (tagsIn || tagsRegex) {
+      query.tags = {};
+      if (tagsIn) {
+        query.tags.$in = (tagsIn as string).split(",");
+      }
+      if (tagsRegex) {
+        query.tags.$regex = tagsRegex as string;
+        query.tags.$options = tagsOptions;
+      }
+    }
+
+    // Get total count for pagination
+    const total = await PracticePlan.countDocuments(query);
+
+    // Get practice plans with pagination
+    const practicePlans = await PracticePlan.find(query)
+      .select("name description tags sections user createdAt updatedAt")
+      .sort({ updatedAt: -1 })
+      .skip(skip)
+      .limit(limitNum)
+      .lean();
+
+    const pages = Math.ceil(total / limitNum);
+
+    return res.json({
+      practiceplans: practicePlans,
+      pagination: {
+        page: pageNum,
+        limit: limitNum,
+        total,
+        pages,
+      },
+    });
+  } catch (e: any) {
+    return res.status(500).json({ message: "Get failed", error: e.message });
+  }
+};
+
 export const createPracticePlan = async (
   req: RequestWithUser,
   res: Response

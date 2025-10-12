@@ -11,4 +11,5 @@ export { default as FabricJsCanvas } from "./FabricJsCanvas";
 export { CanvasErrorBoundary } from "./CanvasErrorBoundary";
 export { default as TacticsBoardToolBar } from "./TacticsBoardToolBar";
 export { default as AddTacticBoardDialog } from "./AddTacticBoardDialog";
+export { default as AddPracticePlanDialog } from "./AddPracticePlanDialog";
 export { default as PresistLogin } from "./PresistLogin";

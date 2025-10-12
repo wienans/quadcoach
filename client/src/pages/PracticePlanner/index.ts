@@ -1,1 +1,2 @@
-export { default } from "./PracticePlanner";
+export { default } from "./PracticePlannerRoot";
+export { default as PracticePlanner } from "./PracticePlanner";

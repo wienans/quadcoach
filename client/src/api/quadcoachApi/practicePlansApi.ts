@@ -4,6 +4,7 @@ import type {
   PracticePlanEntity,
   PracticePlanEntityPartialId,
   PracticePlanSection,
+  PracticePlanHeader,
 } from "./domain/PracticePlan";
 import { AccessLevel } from "./tacticboardApi";
 
@@ -36,8 +37,74 @@ export type AccessResponse = {
   level: AccessLevel | null;
 };
 
+export type GetPracticePlanRequest = {
+  nameRegex?: string;
+  tagRegex?: string;
+  tagList?: string[];
+  page?: number;
+  limit?: number;
+};
+
+export type GetPracticePlanHeadersResponse = {
+  practiceplans: PracticePlanHeader[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    pages: number;
+  };
+};
+
 export const practicePlansApiSlice = quadcoachApi.injectEndpoints({
   endpoints: (builder) => ({
+    getPracticePlanHeaders: builder.query<
+      GetPracticePlanHeadersResponse,
+      GetPracticePlanRequest | undefined
+    >({
+      query: (request) => {
+        const {
+          nameRegex,
+          tagRegex,
+          tagList,
+          page = 1,
+          limit = 50,
+        } = request || {};
+        const urlParams = new URLSearchParams();
+
+        urlParams.append("page", page.toString());
+        urlParams.append("limit", limit.toString());
+
+        if (nameRegex != null && nameRegex !== "") {
+          urlParams.append("name[regex]", nameRegex);
+          urlParams.append("name[options]", "i");
+        }
+        if (tagList != null && tagList.length > 0) {
+          urlParams.append("tags[in]", tagList.join(","));
+        }
+        if (tagRegex != null && tagRegex !== "") {
+          urlParams.append("tags[regex]", tagRegex);
+          urlParams.append("tags[options]", "i");
+        }
+
+        const urlParamsString = urlParams.toString();
+        return {
+          url: `/api/practice-plans${
+            urlParamsString === "" ? "" : `?${urlParamsString}`
+          }`,
+          method: "get",
+        };
+      },
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.practiceplans.map(({ _id }) => ({
+                type: TagType.practiceplan as const,
+                id: _id,
+              })),
+              TagType.practiceplan,
+            ]
+          : [TagType.practiceplan],
+    }),
     createPracticePlan: builder.mutation<
       PracticePlanEntity,
       CreatePracticePlanRequest
@@ -137,6 +204,8 @@ export const practicePlansApiSlice = quadcoachApi.injectEndpoints({
 });
 
 export const {
+  useGetPracticePlanHeadersQuery,
+  useLazyGetPracticePlanHeadersQuery,
   useCreatePracticePlanMutation,
   useGetPracticePlanQuery,
   usePatchPracticePlanMutation,

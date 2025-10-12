@@ -71,3 +71,14 @@ export type PracticePlanEntityPartialId = {
   createdAt?: string;
   updatedAt?: string;
 };
+
+export type PracticePlanHeader = {
+  _id: string;
+  name: string;
+  description?: string;
+  tags: string[];
+  sections?: PracticePlanSection[];
+  user: string;
+  createdAt?: string;
+  updatedAt?: string;
+};

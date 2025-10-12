@@ -1,4 +1,5 @@
 import { useLocation, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {
   DashboardLayout,
   ProfileLayout,
@@ -52,6 +53,7 @@ const MarkdownRenderer = lazy(
 
 const PracticePlanner = (): JSX.Element => {
   const { t } = useTranslation("ExerciseList");
+  const navigate = useNavigate();
   const location = useLocation();
   const [isPrivileged, setIsPrivileged] = useState<boolean>(false);
   const [isFavorite, setIsFavorite] = useState<boolean>(false);
@@ -81,6 +83,7 @@ const PracticePlanner = (): JSX.Element => {
   const onDeletePlanClick = () => {
     if (!plan) return;
     deletePlan(plan._id);
+    navigate("/practice-plans");
   };
 
   const [getFavoritePlans, { data: favoritePlans }] =
