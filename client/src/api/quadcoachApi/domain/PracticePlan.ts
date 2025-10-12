@@ -45,10 +45,9 @@ export type PracticePlanEntity = {
 export default PracticePlanEntity;
 export type PracticePlanEntityWithOutId = Omit<PracticePlanEntity, "_id">;
 
-export type PracticePlanItemPartialId = PartialBy<
-  PracticePlanItemBreak | PracticePlanItemExercise,
-  "_id"
->;
+export type PracticePlanItemPartialId =
+  | PartialBy<PracticePlanItemBreak, "_id">
+  | PartialBy<PracticePlanItemExercise, "_id">;
 
 export type PracticePlanGroupPartialId = {
   _id?: string;

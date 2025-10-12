@@ -9,14 +9,14 @@ import AddIcon from "@mui/icons-material/Add";
 import { FieldArray, FieldArrayRenderProps, FormikProps } from "formik";
 import {
   PracticePlanEntityPartialId,
-  PracticePlanItem,
-  PracticePlanGroup,
+  PracticePlanGroupPartialId,
+  PracticePlanItemPartialId,
 } from "../../api/quadcoachApi/domain/PracticePlan";
 import PracticeItem from "./PracticeItem";
 
 // Group Component
 interface PracticeGroupProps {
-  group: PracticePlanGroup;
+  group: PracticePlanGroupPartialId;
   groupIndex: number;
   sectionIndex: number;
   isEditMode: boolean;
@@ -37,7 +37,7 @@ const PracticeGroup: React.FC<PracticeGroupProps> = ({
   // Calculate total duration for the group
   const calculateGroupTotal = () => {
     return (
-      group.items?.reduce((total: number, item: PracticePlanItem) => {
+      group.items?.reduce((total: number, item: PracticePlanItemPartialId) => {
         return total + (item.duration || 0);
       }, 0) || 0
     );
@@ -91,18 +91,54 @@ const PracticeGroup: React.FC<PracticeGroupProps> = ({
           name={`sections.${sectionIndex}.groups.${groupIndex}.items`}
           render={(itemArrayHelpers: FieldArrayRenderProps) => (
             <SoftBox>
-              {group.items?.map((item: PracticePlanItem, itemIndex: number) => (
-                <PracticeItem
-                  key={item._id || itemIndex}
-                  item={item}
-                  itemIndex={itemIndex}
-                  groupIndex={groupIndex}
-                  sectionIndex={sectionIndex}
-                  isEditMode={isEditMode}
-                  formik={formik}
-                  onDelete={() => itemArrayHelpers.remove(itemIndex)}
-                />
-              ))}
+              {group.items?.map(
+                (item: PracticePlanItemPartialId, itemIndex: number) => (
+                  <PracticeItem
+                    key={item._id || itemIndex}
+                    item={item}
+                    itemIndex={itemIndex}
+                    groupIndex={groupIndex}
+                    sectionIndex={sectionIndex}
+                    isEditMode={isEditMode}
+                    formik={formik}
+                    onDelete={() => itemArrayHelpers.remove(itemIndex)}
+                    onMoveUp={() => {
+                      if (itemIndex > 0) {
+                        const sections = JSON.parse(
+                          JSON.stringify(formik.values.sections),
+                        );
+                        const items = [
+                          ...sections[sectionIndex].groups[groupIndex].items,
+                        ];
+                        [items[itemIndex], items[itemIndex - 1]] = [
+                          items[itemIndex - 1],
+                          items[itemIndex],
+                        ];
+                        sections[sectionIndex].groups[groupIndex].items = items;
+                        formik.setFieldValue("sections", sections);
+                      }
+                    }}
+                    onMoveDown={() => {
+                      if (itemIndex < (group.items?.length || 0) - 1) {
+                        const sections = JSON.parse(
+                          JSON.stringify(formik.values.sections),
+                        );
+                        const items = [
+                          ...sections[sectionIndex].groups[groupIndex].items,
+                        ];
+                        [items[itemIndex], items[itemIndex + 1]] = [
+                          items[itemIndex + 1],
+                          items[itemIndex],
+                        ];
+                        sections[sectionIndex].groups[groupIndex].items = items;
+                        formik.setFieldValue("sections", sections);
+                      }
+                    }}
+                    canMoveUp={itemIndex > 0}
+                    canMoveDown={itemIndex < (group.items?.length || 0) - 1}
+                  />
+                ),
+              )}
 
               {/* Add Item Buttons - only in edit mode */}
               {isEditMode && (

@@ -22,14 +22,14 @@ import TimerIcon from "@mui/icons-material/Timer";
 import { FieldArray, FieldArrayRenderProps, FormikProps } from "formik";
 import {
   PracticePlanEntityPartialId,
-  PracticePlanItem,
-  PracticePlanGroup,
-  PracticePlanSection,
+  PracticePlanSectionPartialId,
+  PracticePlanGroupPartialId,
+  PracticePlanItemPartialId,
 } from "../../api/quadcoachApi/domain/PracticePlan";
 import PracticeGroup from "./PracticeGroup";
 
 interface PracticeSectionProps {
-  section: PracticePlanSection;
+  section: PracticePlanSectionPartialId;
   sectionIndex: number;
   isEditMode: boolean;
   formik: FormikProps<PracticePlanEntityPartialId>;
@@ -56,13 +56,19 @@ const PracticeSection: React.FC<PracticeSectionProps> = ({
   // Calculate total duration for the section
   const calculateSectionTotal = () => {
     return (
-      section.groups?.reduce((total: number, group: PracticePlanGroup) => {
-        const groupTotal =
-          group.items?.reduce((groupSum: number, item: PracticePlanItem) => {
-            return groupSum + (item.duration || 0);
-          }, 0) || 0;
-        return total + groupTotal;
-      }, 0) || 0
+      section.groups?.reduce(
+        (total: number, group: PracticePlanGroupPartialId) => {
+          const groupTotal =
+            group.items?.reduce(
+              (groupSum: number, item: PracticePlanItemPartialId) => {
+                return groupSum + (item.duration || 0);
+              },
+              0,
+            ) || 0;
+          return total + groupTotal;
+        },
+        0,
+      ) || 0
     );
   };
 
@@ -173,7 +179,7 @@ const PracticeSection: React.FC<PracticeSectionProps> = ({
                 {/* Determine grid columns based on screen size */}
                 <Grid container spacing={2}>
                   {section.groups?.map(
-                    (group: PracticePlanGroup, groupIndex: number) => (
+                    (group: PracticePlanGroupPartialId, groupIndex: number) => (
                       <Grid
                         item
                         xs={12}
