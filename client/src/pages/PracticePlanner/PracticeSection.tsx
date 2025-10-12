@@ -5,7 +5,6 @@ import {
   Tooltip,
   Grid,
   Typography,
-  Chip,
   Divider,
 } from "@mui/material";
 
@@ -57,7 +56,7 @@ const PracticeSection: React.FC<PracticeSectionProps> = ({
   const calculateSectionTotal = () => {
     return (
       section.groups?.reduce(
-        (total: number, group: PracticePlanGroupPartialId) => {
+        (max: number, group: PracticePlanGroupPartialId) => {
           const groupTotal =
             group.items?.reduce(
               (groupSum: number, item: PracticePlanItemPartialId) => {
@@ -65,7 +64,7 @@ const PracticeSection: React.FC<PracticeSectionProps> = ({
               },
               0,
             ) || 0;
-          return total + groupTotal;
+          return Math.max(max, groupTotal);
         },
         0,
       ) || 0
@@ -108,33 +107,34 @@ const PracticeSection: React.FC<PracticeSectionProps> = ({
 
               <SoftBox display="flex" alignItems="center">
                 <TimerIcon fontSize="small" sx={{ mr: 1 }} />
-                {isEditMode ? (
-                  <SoftInput
-                    type="number"
-                    value={section.targetDuration}
-                    onChange={(e) => {
-                      const sections = [...formik.values.sections];
-                      sections[sectionIndex].targetDuration =
-                        parseInt(e.target.value) || 0;
-                      formik.setFieldValue("sections", sections);
-                    }}
-                    sx={{ width: 80 }}
-                  />
-                ) : (
-                  <Typography variant="body2">
-                    {section.targetDuration}min
-                  </Typography>
-                )}
-                <Typography variant="body2" color="text.secondary" ml={1}>
-                  / {sectionTotal}min
+                <Typography
+                  variant="body2"
+                  color={isOverTarget ? "error.main" : "text.secondary"}
+                  ml={1}
+                >
+                  {sectionTotal} {"min"} /
                 </Typography>
-                {isOverTarget && (
-                  <Chip
-                    label="Over target"
-                    color="error"
-                    size="small"
-                    sx={{ ml: 1 }}
-                  />
+                {isEditMode ? (
+                  <div>
+                    <SoftInput
+                      type="number"
+                      value={section.targetDuration}
+                      onChange={(e) => {
+                        const sections = [...formik.values.sections];
+                        sections[sectionIndex].targetDuration =
+                          parseInt(e.target.value) || 0;
+                        formik.setFieldValue("sections", sections);
+                      }}
+                      sx={{ width: 80 }}
+                    />
+                  </div>
+                ) : (
+                  <Typography
+                    variant="body2"
+                    color={isOverTarget ? "error.main" : "text.secondary"}
+                  >
+                    {section.targetDuration} {"min"}
+                  </Typography>
                 )}
               </SoftBox>
             </SoftBox>

@@ -67,11 +67,7 @@ const PracticePlanner = (): JSX.Element => {
   });
   const [
     updatePlan,
-    {
-      isLoading: isUpdatePlanLoading,
-      isSuccess: isUpdatePlanSuccess,
-      isError: isUpdatePlanError,
-    },
+    { isLoading: isUpdatePlanLoading, isSuccess: isUpdatePlanSuccess },
   ] = usePatchPracticePlanMutation();
   const [deletePlan, { isLoading: isDeletePlanLoading }] =
     useDeletePracticePlanMutation();
