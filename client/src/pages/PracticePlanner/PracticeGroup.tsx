@@ -2,7 +2,9 @@ import { useTranslation } from "react-i18next";
 import { Card, IconButton, Typography, Divider } from "@mui/material";
 
 import { SoftBox, SoftButton, SoftInput } from "../../components";
-import ExerciseSearchDialog, { ExerciseBlockSelection } from "../../components/ExerciseParts/ExerciseSearchDialog";
+import ExerciseSearchDialog, {
+  ExerciseBlockSelection,
+} from "../../components/ExerciseParts/ExerciseSearchDialog";
 
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
@@ -51,25 +53,25 @@ const PracticeGroup: React.FC<PracticeGroupProps> = ({
   const handleAddExercises = (selections: ExerciseBlockSelection[]) => {
     // Create a deep copy to avoid immutability issues
     const sections = JSON.parse(JSON.stringify(formik.values.sections));
-    
+
     // Ensure the items array exists and is mutable
     if (!sections[sectionIndex].groups[groupIndex].items) {
       sections[sectionIndex].groups[groupIndex].items = [];
     }
-    
-    selections.forEach(selection => {
-      selection.blockIds.forEach(blockId => {
+
+    selections.forEach((selection) => {
+      selection.blockIds.forEach((blockId) => {
         const newItem: PracticePlanItemPartialId = {
           _id: `temp_${Date.now()}_${Math.random()}`,
           kind: "exercise",
           exerciseId: selection.exerciseId,
           blockId: blockId,
-          duration: 10, // Default duration, can be adjusted later
+          duration: selection.blockDurations[blockId] || 10,
         };
         sections[sectionIndex].groups[groupIndex].items.push(newItem);
       });
     });
-    
+
     formik.setFieldValue("sections", sections);
   };
 
@@ -202,7 +204,7 @@ const PracticeGroup: React.FC<PracticeGroupProps> = ({
           )}
         />
       </SoftBox>
-      
+
       {/* Exercise Search Dialog */}
       <ExerciseSearchDialog
         open={isExerciseDialogOpen}

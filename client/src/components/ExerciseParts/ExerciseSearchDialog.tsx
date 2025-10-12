@@ -26,6 +26,7 @@ export interface ExerciseBlockSelection {
   exerciseId: string;
   exerciseName: string;
   blockIds: string[];
+  blockDurations: Record<string, number>; // blockId -> duration mapping
 }
 
 interface ExerciseSearchDialogProps {
@@ -104,11 +105,25 @@ const ExerciseSearchDialog: React.FC<ExerciseSearchDialogProps> = ({
 
     const selections: ExerciseBlockSelection[] = selectedExercises
       .filter((exercise) => selectedBlocks[exercise._id]?.length > 0)
-      .map((exercise) => ({
-        exerciseId: exercise._id,
-        exerciseName: exercise.name,
-        blockIds: selectedBlocks[exercise._id] || [],
-      }));
+      .map((exercise) => {
+        const blockIds = selectedBlocks[exercise._id] || [];
+        const blockDurations: Record<string, number> = {};
+        
+        // Create mapping of blockId to duration
+        blockIds.forEach(blockId => {
+          const block = exercise.description_blocks.find(b => b._id === blockId);
+          if (block) {
+            blockDurations[blockId] = block.time_min;
+          }
+        });
+
+        return {
+          exerciseId: exercise._id,
+          exerciseName: exercise.name,
+          blockIds: blockIds,
+          blockDurations: blockDurations,
+        };
+      });
 
     onAddExercises(selections);
     setIsAdding(false);
