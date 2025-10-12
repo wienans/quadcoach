@@ -150,6 +150,7 @@ const PracticePlanner = (): JSX.Element => {
         description: plan?.description ?? "",
         sections: plan?.sections ?? [],
         user: plan?.user ?? "",
+        isPrivate: plan?.isPrivate ?? false,
       });
       formik.setTouched({});
     }
@@ -166,6 +167,7 @@ const PracticePlanner = (): JSX.Element => {
       description: plan?.description ?? "",
       sections: plan?.sections ?? [],
       user: plan?.user ?? "",
+      isPrivate: plan?.isPrivate ?? false,
     },
     validationSchema: Yup.object({
       name: Yup.string().required("validation.name.required"),
@@ -173,26 +175,20 @@ const PracticePlanner = (): JSX.Element => {
       description: Yup.string(),
       sections: Yup.array().of(
         Yup.object({
-          name: Yup.string().required(
-            "validation.section.name.required",
-          ),
+          name: Yup.string().required("validation.section.name.required"),
           targetDuration: Yup.number()
             .min(0, "validation.section.targetDuration.min")
             .required("validation.section.targetDuration.required"),
           groups: Yup.array().of(
             Yup.object({
-              name: Yup.string().required(
-                "validation.group.name.required",
-              ),
+              name: Yup.string().required("validation.group.name.required"),
               items: Yup.array().of(
                 Yup.object({
                   kind: Yup.string().oneOf(["break", "exercise"]).required(),
 
                   description: Yup.string().when(["kind"], ([kind], schema) =>
                     kind === "break"
-                      ? schema.required(
-                          "validation.item.description.required",
-                        )
+                      ? schema.required("validation.item.description.required")
                       : schema.notRequired(),
                   ),
 
@@ -202,17 +198,13 @@ const PracticePlanner = (): JSX.Element => {
 
                   exerciseId: Yup.string().when(["kind"], ([kind], schema) =>
                     kind === "exercise"
-                      ? schema.required(
-                          "validation.item.exerciseId.required",
-                        )
+                      ? schema.required("validation.item.exerciseId.required")
                       : schema.notRequired(),
                   ),
 
                   blockId: Yup.string().when(["kind"], ([kind], schema) =>
                     kind === "exercise"
-                      ? schema.required(
-                          "validation.item.blockId.required",
-                        )
+                      ? schema.required("validation.item.blockId.required")
                       : schema.notRequired(),
                   ),
                 }),

@@ -27,6 +27,7 @@ export interface IPracticePlan {
   tags: Types.Array<string>;
   sections: Types.DocumentArray<ISection>;
   user: Types.ObjectId;
+  isPrivate: boolean;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -66,6 +67,7 @@ const PracticePlanSchema = new Schema<IPracticePlan>(
     tags: { type: [String], default: [] },
     sections: { type: [SectionSchema], default: [] },
     user: { type: Schema.Types.ObjectId, ref: "users", required: true },
+    isPrivate: { type: Boolean, default: false, required: true },
   },
   { timestamps: true }
 );

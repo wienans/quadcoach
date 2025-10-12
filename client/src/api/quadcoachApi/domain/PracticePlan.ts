@@ -38,6 +38,7 @@ export type PracticePlanEntity = {
   tags: string[];
   sections: PracticePlanSection[];
   user: string; // owner id
+  isPrivate: boolean;
   createdAt?: string;
   updatedAt?: string;
 };
@@ -68,6 +69,7 @@ export type PracticePlanEntityPartialId = {
   tags: string[];
   sections: PracticePlanSectionPartialId[];
   user: string; // owner id
+  isPrivate: boolean;
   createdAt?: string;
   updatedAt?: string;
 };
