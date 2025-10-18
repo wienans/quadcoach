@@ -3,10 +3,16 @@
     "name": "Name",
     "tags": "Stichwörter"
   },
-  "title": "Taktik Tafel Liste",
+  "title": "Taktik Tafeln",
   "filter": {
     "title": "Filter",
     "name": "Suche Taktik Tafel",
+    "sort": {
+      "name": "Sortieren",
+      "by_name": "Name",
+      "by_createdAt": "Erstellt",
+      "by_updatedAt": "Aktualisiert"
+    },
     "tags": {
       "title": "Stichwörter",
       "placeholder": "Stichwort eingeben und Enter drücken..."
@@ -20,5 +26,6 @@
     "tags": "Stichwörter"
   },
   "addTacticBoard": "Taktik Tafel hinzufügen",
-  "loadMore": "Mehr laden"
+  "loadMore": "Mehr laden",
+  "pleaseLogin": "Dieses Feature ist nur für angemeldete Nutzer verfügbar"
 }

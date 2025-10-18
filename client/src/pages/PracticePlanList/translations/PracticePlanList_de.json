@@ -1,0 +1,34 @@
+{
+  "columns": {
+    "name": "Name",
+    "tags": "Tags"
+  },
+  "title": "Trainingspläne",
+  "filter": {
+    "title": "Filter",
+    "name": "Trainingsplan suchen",
+    "sort": {
+      "name": "Sortieren",
+      "by_name": "Name",
+      "by_createdAt": "Erstellt",
+      "by_updatedAt": "Aktualisiert"
+    },
+    "tags": {
+      "title": "Tags",
+      "placeholder": "Tag eingeben und Enter drücken..."
+    },
+    "apply": "Filter anwenden"
+  },
+  "errorLoadingPracticePlans": "Beim Laden der Trainingspläne ist ein Fehler aufgetreten.",
+  "noPracticePlansFound": "Kein Trainingsplan gefunden",
+  "cardView": {
+    "openPracticePlan": "Trainingsplan öffnen",
+    "tags": "Tags",
+    "description": "Beschreibung",
+    "sections": "Abschnitte",
+    "noSections": "Keine Abschnitte"
+  },
+  "addPracticePlan": "Trainingsplan hinzufügen",
+  "loadMore": "Mehr laden",
+  "pleaseLogin": "Dieses Feature ist nur für angemeldete Nutzer verfügbar"
+}

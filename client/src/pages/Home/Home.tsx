@@ -5,6 +5,7 @@ import { SoftBox, SoftTypography } from "../../components";
 
 import Logo from "../../assets/images/logo.png";
 import { DashboardLayout } from "../../components/LayoutContainers";
+
 import Footer from "../../components/Footer";
 
 const Home = () => {

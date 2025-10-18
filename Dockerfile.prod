@@ -27,6 +27,7 @@ RUN npm ci --omit=dev
 
 # Copy compiled server and sources
 COPY --from=server-build /server/server.js ./server.js
+COPY --from=server-build /server/app.js ./app.js
 COPY --from=server-build /server/config ./config
 COPY --from=server-build /server/controllers ./controllers
 COPY --from=server-build /server/middleware ./middleware

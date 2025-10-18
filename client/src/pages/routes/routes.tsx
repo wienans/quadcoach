@@ -108,6 +108,33 @@ const routes = [
         },
       },
       {
+        path: "/practice-plans",
+        handle: {
+          type: RouteHandleType.practicePlans,
+        },
+        async lazy() {
+          const PracticePlanListRoot = (await import("../PracticePlanList"))
+            .default;
+          return {
+            element: <PracticePlanListRoot />,
+          };
+        },
+        children: [
+          {
+            path: ":planId",
+            handle: {
+              type: RouteHandleType.practicePlanner,
+            },
+            async lazy() {
+              const PracticePlannerRoot = (
+                await import("../PracticePlanner/PracticePlannerRoot")
+              ).default;
+              return { element: <PracticePlannerRoot /> };
+            },
+          },
+        ],
+      },
+      {
         path: "/users",
         // handle: {
         //   type: RouteHandleType.userProfile,

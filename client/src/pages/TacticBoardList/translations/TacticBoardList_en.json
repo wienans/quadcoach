@@ -3,10 +3,16 @@
     "name": "Name",
     "tags": "Tags"
   },
-  "title": "Tactic Board list",
+  "title": "Tactic Boards",
   "filter": {
     "title": "Filter",
     "name": "Search Tactic Board",
+    "sort": {
+      "name": "Sort",
+      "by_name": "Name",
+      "by_createdAt": "Created",
+      "by_updatedAt": "Updated"
+    },
     "tags": {
       "title": "Tags",
       "placeholder": "Enter tag and press Enter..."
@@ -20,5 +26,6 @@
     "tags": "Tags"
   },
   "addTacticBoard": "Add tactic board",
-  "loadMore": "Load More"
+  "loadMore": "Load More",
+  "pleaseLogin": "Please Login to have access to this Page"
 }

@@ -59,5 +59,6 @@
     "accessoryItemsSection": {
       "title": "Accessories"
     }
-  }
+  },
+  "pleaseLogin": "You need to be logged in to view this Page"
 }

@@ -1,7 +1,10 @@
 import express from "express";
 import * as exerciseController from "../controllers/exerciseController";
 import verifyJWT from "../middleware/verifyJWT";
+import { ddosLimiter } from "../middleware/rateLimiter";
 const router = express.Router();
+
+router.use(ddosLimiter);
 
 router
   .route("/")
