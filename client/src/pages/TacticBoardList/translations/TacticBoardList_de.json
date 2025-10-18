@@ -26,5 +26,6 @@
     "tags": "Stichwörter"
   },
   "addTacticBoard": "Taktik Tafel hinzufügen",
-  "loadMore": "Mehr laden"
+  "loadMore": "Mehr laden",
+  "pleaseLogin": "Dieses Feature ist nur für angemeldete Nutzer verfügbar"
 }

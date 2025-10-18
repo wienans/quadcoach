@@ -70,5 +70,6 @@
         "required": "Exercise block is required"
       }
     }
-  }
+  },
+  "pleaseLogin": "You need to be logged in to view this Page"
 }

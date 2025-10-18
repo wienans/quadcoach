@@ -29,5 +29,6 @@
     "noSections": "Keine Abschnitte"
   },
   "addPracticePlan": "Trainingsplan hinzufügen",
-  "loadMore": "Mehr laden"
+  "loadMore": "Mehr laden",
+  "pleaseLogin": "Dieses Feature ist nur für angemeldete Nutzer verfügbar"
 }

@@ -43,7 +43,12 @@ import {
 } from "../../api/quadcoachApi/favoriteApi";
 import { useAuth } from "../../store/hooks";
 import { useEffect, useRef, useState } from "react";
-import { SoftBox, SoftButton, SoftInput, SoftTypography } from "../../components";
+import {
+  SoftBox,
+  SoftButton,
+  SoftInput,
+  SoftTypography,
+} from "../../components";
 import EditIcon from "@mui/icons-material/Edit";
 import SaveIcon from "@mui/icons-material/Save";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -78,7 +83,7 @@ const PracticePlanner = (): JSX.Element => {
   const [showValidationSummary, setShowValidationSummary] =
     useState<boolean>(false);
   const isUpMd = useMediaQuery((theme: Theme) => theme.breakpoints.up("md"));
-  
+
   // Access management state
   const [accessMode, setAccessMode] = useState<AccessLevel>("view");
   const [userEmail, setUserEmail] = useState<string>("");
@@ -395,13 +400,23 @@ const PracticePlanner = (): JSX.Element => {
       </DashboardLayout>
     );
   }
-
+  if (!userId) {
+    return (
+      <DashboardLayout>
+        {() => (
+          <>
+            <Alert color="error">{t("pleaseLogin")}</Alert>
+          </>
+        )}
+      </DashboardLayout>
+    );
+  }
   if (!plan || isPlanError || !planId) {
     return (
       <DashboardLayout>
         {() => (
           <>
-            <Alert color="error">{t("errorLoadingPracticePlan")}</Alert>;
+            <Alert color="error">{t("errorLoadingPracticePlan")}</Alert>
           </>
         )}
       </DashboardLayout>
@@ -573,7 +588,7 @@ const PracticePlanner = (): JSX.Element => {
                   <SoftTypography variant="h6" fontWeight="medium" mb={2}>
                     {t("access.title")}
                   </SoftTypography>
-                  
+
                   {/* Private Flag */}
                   <FormGroup>
                     <FormControlLabel
@@ -597,9 +612,14 @@ const PracticePlanner = (): JSX.Element => {
                     <SoftTypography variant="body2" fontWeight="medium" mb={2}>
                       {t("access.manageUsers")}
                     </SoftTypography>
-                    
+
                     <Box
-                      sx={{ display: "flex", gap: 1, alignItems: "flex-start", mb: 2 }}
+                      sx={{
+                        display: "flex",
+                        gap: 1,
+                        alignItems: "flex-start",
+                        mb: 2,
+                      }}
                     >
                       <TextField
                         size="small"
@@ -642,12 +662,8 @@ const PracticePlanner = (): JSX.Element => {
                           },
                         }}
                       >
-                        <MenuItem value="edit">
-                          {t("access.edit")}
-                        </MenuItem>
-                        <MenuItem value="view">
-                          {t("access.view")}
-                        </MenuItem>
+                        <MenuItem value="edit">{t("access.edit")}</MenuItem>
+                        <MenuItem value="view">{t("access.view")}</MenuItem>
                       </TextField>
                       <Button
                         variant="contained"

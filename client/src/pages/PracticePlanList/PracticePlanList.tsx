@@ -424,7 +424,11 @@ const PracticePlanList = () => {
               }
             />
           </SoftBox>
-          {isPracticePlansError && (
+          {(!userId || userId === "") ? (
+            <Alert color="error" sx={{ mt: 2 }}>
+              {t("pleaseLogin")}
+            </Alert>
+          ) : isPracticePlansError && (
             <Alert color="error" sx={{ mt: 2 }}>
               {t("PracticePlanList:errorLoadingPracticePlans")}
             </Alert>

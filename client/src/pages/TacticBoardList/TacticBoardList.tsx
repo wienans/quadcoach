@@ -435,7 +435,11 @@ const TacticBoardList = () => {
               }
             />
           </SoftBox>
-          {isTacticBoardsError && (
+          {(!userId || userId === "") ? (
+            <Alert color="error" sx={{ mt: 2 }}>
+              {t("pleaseLogin")}
+            </Alert>
+          ) : isTacticBoardsError && (
             <Alert color="error" sx={{ mt: 2 }}>
               {t("TacticBoardList:errorLoadingTacticBoards")}
             </Alert>
