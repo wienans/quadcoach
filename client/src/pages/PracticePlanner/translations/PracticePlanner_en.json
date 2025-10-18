@@ -23,6 +23,19 @@
   "loading": "Loading...",
   "block": "Block",
   "breakDescription": "Break description",
+  "access": {
+    "title": "Access Management",
+    "isPrivate": {
+      "label": "Private Practice Plan"
+    },
+    "manageUsers": "Manage User Access",
+    "view": "View",
+    "edit": "Edit",
+    "add_user": "Add User",
+    "mode": "Mode",
+    "add": "Add",
+    "remove": "Remove"
+  },
   "validation": {
     "fixValidationErrors": "Please fix the highlighted validation errors:",
     "name": {

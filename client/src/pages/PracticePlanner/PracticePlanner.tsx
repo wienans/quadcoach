@@ -10,11 +10,21 @@ import {
   Alert,
   BottomNavigationAction,
   Card,
+  Checkbox,
+  FormControlLabel,
+  FormGroup,
   IconButton,
+  List,
+  ListItem,
+  ListItemText,
   Skeleton,
   Theme,
   Tooltip,
   useMediaQuery,
+  TextField,
+  Box,
+  Button,
+  MenuItem,
 } from "@mui/material";
 
 import {
@@ -22,7 +32,10 @@ import {
   usePatchPracticePlanMutation,
   useGetAllPracticePlanAccessUsersQuery,
   useDeletePracticePlanMutation,
+  useSharePracticePlanMutation,
+  useRemovePracticePlanAccessMutation,
 } from "../../api/quadcoachApi/practicePlansApi";
+import { AccessLevel } from "../../api/quadcoachApi/tacticboardApi";
 import {
   useAddFavoritePracticePlanMutation,
   useRemoveFavoritePracticePlanMutation,
@@ -30,7 +43,7 @@ import {
 } from "../../api/quadcoachApi/favoriteApi";
 import { useAuth } from "../../store/hooks";
 import { useEffect, useRef, useState } from "react";
-import { SoftBox, SoftButton, SoftInput } from "../../components";
+import { SoftBox, SoftButton, SoftInput, SoftTypography } from "../../components";
 import EditIcon from "@mui/icons-material/Edit";
 import SaveIcon from "@mui/icons-material/Save";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -65,6 +78,11 @@ const PracticePlanner = (): JSX.Element => {
   const [showValidationSummary, setShowValidationSummary] =
     useState<boolean>(false);
   const isUpMd = useMediaQuery((theme: Theme) => theme.breakpoints.up("md"));
+  
+  // Access management state
+  const [accessMode, setAccessMode] = useState<AccessLevel>("view");
+  const [userEmail, setUserEmail] = useState<string>("");
+  const [emailError, setEmailError] = useState<string>("");
 
   const { planId } = useParams<{ planId: string }>();
 
@@ -99,6 +117,14 @@ const PracticePlanner = (): JSX.Element => {
     planId || "",
     { skip: !planId },
   );
+
+  const [sharePracticePlan, { isLoading: isSharePracticePlanLoading }] =
+    useSharePracticePlanMutation();
+
+  const [
+    removePracticePlanAccess,
+    { isLoading: isRemovePracticePlanAccessLoading },
+  ] = useRemovePracticePlanAccessMutation();
 
   const isCreator =
     plan?.user?.toString() === userId ||
@@ -328,6 +354,31 @@ const PracticePlanner = (): JSX.Element => {
     }
   }, [isUpdatePlanSuccess]);
 
+  const handleAddAccess = async () => {
+    if (!planId || !userEmail.trim()) {
+      setEmailError("Email is required");
+      return;
+    }
+
+    setEmailError("");
+
+    try {
+      await sharePracticePlan({
+        practicePlan: planId,
+        email: userEmail.trim(),
+        access: accessMode,
+      }).unwrap();
+
+      setUserEmail("");
+    } catch (error: unknown) {
+      if ((error as { status?: number })?.status === 404) {
+        setEmailError("User not found with this email");
+      } else {
+        setEmailError("Failed to add user access");
+      }
+    }
+  };
+
   if (isPlanLoading) {
     return (
       <DashboardLayout>
@@ -515,29 +566,140 @@ const PracticePlanner = (): JSX.Element => {
                 </Alert>
               )}
 
+            {/* Access Management Card - only shown in edit mode for creators */}
+            {isEditMode && isCreator && (
+              <Card sx={{ mb: 3 }}>
+                <SoftBox p={3}>
+                  <SoftTypography variant="h6" fontWeight="medium" mb={2}>
+                    {t("access.title")}
+                  </SoftTypography>
+                  
+                  {/* Private Flag */}
+                  <FormGroup>
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={formik.values.isPrivate}
+                          onChange={formik.handleChange}
+                          name="isPrivate"
+                        />
+                      }
+                      label={
+                        <SoftTypography variant="body2">
+                          {t("access.isPrivate.label")}
+                        </SoftTypography>
+                      }
+                    />
+                  </FormGroup>
+
+                  {/* User Access Management */}
+                  <Box sx={{ mt: 3 }}>
+                    <SoftTypography variant="body2" fontWeight="medium" mb={2}>
+                      {t("access.manageUsers")}
+                    </SoftTypography>
+                    
+                    <Box
+                      sx={{ display: "flex", gap: 1, alignItems: "flex-start", mb: 2 }}
+                    >
+                      <TextField
+                        size="small"
+                        label={t("access.add_user")}
+                        placeholder="Enter user email"
+                        value={userEmail}
+                        onChange={(e) => {
+                          setUserEmail(e.target.value);
+                          if (emailError) setEmailError("");
+                        }}
+                        error={!!emailError}
+                        helperText={emailError}
+                        sx={{
+                          flex: 1,
+                          minWidth: 250,
+                          "& .MuiInputBase-root": {
+                            height: "40px",
+                          },
+                          "& .MuiInputBase-input": {
+                            padding: "8.5px 14px",
+                          },
+                        }}
+                      />
+                      <TextField
+                        select
+                        size="small"
+                        label={t("access.mode")}
+                        value={accessMode}
+                        onChange={(event) =>
+                          setAccessMode(event.target.value as AccessLevel)
+                        }
+                        sx={{
+                          minWidth: 120,
+                          width: 120,
+                          "& .MuiInputBase-root": {
+                            height: "40px",
+                          },
+                          "& .MuiInputBase-input": {
+                            padding: "8.5px 14px",
+                          },
+                        }}
+                      >
+                        <MenuItem value="edit">
+                          {t("access.edit")}
+                        </MenuItem>
+                        <MenuItem value="view">
+                          {t("access.view")}
+                        </MenuItem>
+                      </TextField>
+                      <Button
+                        variant="contained"
+                        size="small"
+                        disabled={
+                          isSharePracticePlanLoading || !userEmail.trim()
+                        }
+                        onClick={handleAddAccess}
+                        sx={{ height: "40px", minWidth: "80px" }}
+                      >
+                        {t("access.add")}
+                      </Button>
+                    </Box>
+
+                    <List>
+                      {accessUsers?.map((entry) => (
+                        <ListItem
+                          key={entry.user._id}
+                          secondaryAction={
+                            <Button
+                              size="small"
+                              color="error"
+                              disabled={isRemovePracticePlanAccessLoading}
+                              onClick={() => {
+                                if (planId) {
+                                  removePracticePlanAccess({
+                                    practicePlan: planId,
+                                    userId: entry.user._id,
+                                  });
+                                }
+                              }}
+                            >
+                              {t("access.remove")}
+                            </Button>
+                          }
+                        >
+                          <ListItemText
+                            primary={
+                              entry.user.name + " (" + entry.access + ")"
+                            }
+                          />
+                        </ListItem>
+                      ))}
+                    </List>
+                  </Box>
+                </SoftBox>
+              </Card>
+            )}
+
             {/* Description Field */}
             <Card sx={{ mb: 3 }}>
               <SoftBox>
-                {/* {isEditMode ? (
-                  <SoftInput
-                    multiline
-                    rows={3}
-                    placeholder={t("Exercise:description", {
-                      defaultValue: "Description",
-                    })}
-                    value={formik.values.description}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    name="description"
-                  />
-                ) : (
-                  plan?.description && (
-                    <Typography variant="body1" color="text.secondary">
-                      {plan.description}
-                      {formik.values.sections.length}
-                    </Typography>
-                  )
-                )} */}
                 {/* Description Section */}
                 {formik.values.description &&
                   formik.values.description !== "" &&

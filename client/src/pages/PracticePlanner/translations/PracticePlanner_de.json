@@ -23,6 +23,19 @@
   "loading": "Laden...",
   "block": "Block",
   "breakDescription": "Pausenbeschreibung",
+  "access": {
+    "title": "Zugriffsverwaltung",
+    "isPrivate": {
+      "label": "Privater Trainingsplan"
+    },
+    "manageUsers": "Benutzerzugriff verwalten",
+    "view": "Ansehen",
+    "edit": "Bearbeiten",
+    "add_user": "Benutzer hinzufügen",
+    "mode": "Modus",
+    "add": "Hinzufügen",
+    "remove": "Entfernen"
+  },
   "validation": {
     "fixValidationErrors": "Bitte beheben Sie die markierten Validierungsfehler:",
     "name": {

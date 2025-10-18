@@ -19,6 +19,7 @@ export interface PatchPracticePlanRequest {
   description?: string;
   tags?: string[];
   sections?: PracticePlanSection[];
+  isPrivate?: boolean;
 }
 
 export type PracticePlanAccessEntry = {

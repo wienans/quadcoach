@@ -173,6 +173,7 @@ export const createPracticePlan = async (
       tags: tags || [],
       sections,
       user: userId,
+      isPrivate: false,
     });
     return res.status(201).json(plan);
   } catch (e: any) {
@@ -215,6 +216,8 @@ export const patchPracticePlan = async (
     if (req.body.description !== undefined)
       updates.description = req.body.description;
     if (req.body.tags !== undefined) updates.tags = req.body.tags;
+    if (req.body.isPrivate !== undefined)
+      updates.isPrivate = req.body.isPrivate;
     if (req.body.sections !== undefined) {
       const durationErrors = validateNonNegativeDurations(req.body);
       if (durationErrors.length)
