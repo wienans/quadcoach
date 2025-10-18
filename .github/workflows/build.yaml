@@ -34,6 +34,7 @@ jobs:
           ls
           npm install
           npm run build
+          npm run test
       - name: Build Client
         if: "!cancelled()"
         working-directory: ./client
