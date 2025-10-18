@@ -15,7 +15,7 @@ const practicePlanFavSchema = new Schema<IPracticePlanFav>({
   },
   practicePlan: {
     type: Schema.Types.ObjectId,
-    ref: "practicePlans",
+    ref: "practiceplans",
     required: true,
   },
   createdAt: {

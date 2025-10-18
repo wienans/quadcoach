@@ -268,7 +268,7 @@ export const getFavoritePracticePlans = asyncHandler(
 
 export const addFavoritePracticePlan = asyncHandler(
   async (req: RequestWithUser, res: Response) => {
-    const { userId, planId } = req.body;
+    const { userId, practicePlanId } = req.body;
 
     if (
       !req.UserInfo?.id ||
@@ -280,7 +280,7 @@ export const addFavoritePracticePlan = asyncHandler(
 
     if (
       !mongoose.isValidObjectId(userId) ||
-      !mongoose.isValidObjectId(planId)
+      !mongoose.isValidObjectId(practicePlanId)
     ) {
       res.status(400).json({ message: "Invalid practice plan ID or User ID" });
       return;
@@ -289,7 +289,7 @@ export const addFavoritePracticePlan = asyncHandler(
     try {
       const favorite = await PracticePlanFav.create({
         user: userId,
-        practicePlan: planId,
+        practicePlan: practicePlanId,
       });
 
       res.status(201).json(favorite);
@@ -305,7 +305,7 @@ export const addFavoritePracticePlan = asyncHandler(
 
 export const removeFavoritePracticePlan = asyncHandler(
   async (req: RequestWithUser, res: Response) => {
-    const { userId, planId } = req.body;
+    const { userId, practicePlanId } = req.body;
 
     if (
       !req.UserInfo?.id ||
@@ -317,7 +317,7 @@ export const removeFavoritePracticePlan = asyncHandler(
 
     if (
       !mongoose.isValidObjectId(userId) ||
-      !mongoose.isValidObjectId(planId)
+      !mongoose.isValidObjectId(practicePlanId)
     ) {
       res.status(400).json({ message: "Invalid practice plan ID or User ID" });
       return;
@@ -325,7 +325,7 @@ export const removeFavoritePracticePlan = asyncHandler(
 
     const result = await PracticePlanFav.deleteOne({
       user: userId,
-      practicePlan: planId,
+      practicePlan: practicePlanId,
     });
 
     if (result.deletedCount === 0) {
