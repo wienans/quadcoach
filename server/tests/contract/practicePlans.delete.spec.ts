@@ -13,12 +13,13 @@ async function createPlan() {
 }
 
 describe('DELETE /api/practice-plans/:id', () => {
-  it('deletes existing plan and returns 204', async () => {
+  it('deletes existing plan and returns 200 with message', async () => {
     const { plan, Authorization } = await createPlan();
     const res = await request(app)
       .delete(`/api/practice-plans/${plan._id}`)
       .set('Authorization', Authorization);
-    expect(res.status).toBe(204);
+    expect(res.status).toBe(200);
+    expect(res.body.message).toBe('Practice Plan deleted successfully');
     // confirm gone
     const getRes = await request(app)
       .get(`/api/practice-plans/${plan._id}`)

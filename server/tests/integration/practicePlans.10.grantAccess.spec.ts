@@ -25,20 +25,21 @@ describe('Practice Plans Integration 10: grant access', () => {
     expect(createRes.status).toBe(201);
     const planId = createRes.body._id;
 
-    // Collaborator cannot patch yet (should 404 conceal)
+    // Collaborator cannot patch yet (should 403 Forbidden)
     const deniedPatch = await request(app)
       .patch(`/api/practice-plans/${planId}`)
       .set('Authorization', collabAuth.Authorization)
       .send({ name: 'Hacker Rename' });
-    expect(deniedPatch.status).toBe(404);
+    expect(deniedPatch.status).toBe(403);
 
     // Owner grants access
     const grantRes = await request(app)
       .post(`/api/practice-plans/${planId}/access`)
       .set('Authorization', ownerAuth.Authorization)
-      .send({ userId: collaborator._id.toString() });
-    expect(grantRes.status).toBe(200);
-    expect(Array.isArray(grantRes.body.access)).toBe(true);
+      .send({ userId: collaborator._id.toString(), access: 'edit' });
+    expect(grantRes.status).toBe(201);
+    expect(grantRes.body.user).toBe(collaborator._id.toString());
+    expect(grantRes.body.access).toBe('edit');
 
     // Collaborator patches name
     const collabPatch = await request(app)

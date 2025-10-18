@@ -13,17 +13,16 @@ async function createPlan() {
 }
 
 describe('POST /api/practice-plans/:id/access', () => {
-  it('adds access entry and returns 200 with list', async () => {
+  it('adds access entry and returns 201 with entry', async () => {
     const { plan, Authorization } = await createPlan();
     const { user: collaborator } = await createVerifiedUser({ email: 'collab@example.com' });
     const res = await request(app)
       .post(`/api/practice-plans/${plan._id}/access`)
       .set('Authorization', Authorization)
-      .send({ userId: collaborator._id });
-    expect(res.status).toBe(200);
-    expect(Array.isArray(res.body.access)).toBe(true);
-    const entry = res.body.access.find((a: any) => a.user === collaborator._id.toString());
-    expect(entry).toBeTruthy();
+      .send({ userId: collaborator._id, access: 'edit' });
+    expect(res.status).toBe(201);
+    expect(res.body.user).toBe(collaborator._id.toString());
+    expect(res.body.access).toBe('edit');
   });
 
   it('returns 404 for unknown plan', async () => {

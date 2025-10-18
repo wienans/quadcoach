@@ -15,7 +15,7 @@ async function createPlanAndCollaborator() {
   await request(app)
     .post(`/api/practice-plans/${planRes.body._id}/access`)
     .set('Authorization', ownerAuth)
-    .send({ userId: collaborator._id });
+    .send({ userId: collaborator._id, access: 'edit' });
   // Build collaborator auth header
   const collabToken = await getAccessToken(collaborator);
   const collabAuth = `Bearer ${collabToken}`;
@@ -42,21 +42,21 @@ describe('Practice Plan collaboration access', () => {
     expect(res.body.description).toBe('Collaborator Edit');
   });
 
-  it('collaborator cannot DELETE plan (404 concealment)', async () => {
+  it('collaborator cannot DELETE plan (403 Forbidden)', async () => {
     const { plan, collabAuth } = await createPlanAndCollaborator();
     const res = await request(app)
       .delete(`/api/practice-plans/${plan._id}`)
       .set('Authorization', collabAuth);
-    expect(res.status).toBe(404);
+    expect(res.status).toBe(403);
   });
 
-  it('collaborator cannot add additional access (404 concealment)', async () => {
+  it('collaborator cannot add additional access (403 Forbidden)', async () => {
     const { plan, collabAuth } = await createPlanAndCollaborator();
     const { user: another } = await createVerifiedUser({ email: 'another@example.com' });
     const res = await request(app)
       .post(`/api/practice-plans/${plan._id}/access`)
       .set('Authorization', collabAuth)
-      .send({ userId: another._id });
-    expect(res.status).toBe(404);
+      .send({ userId: another._id, access: 'view' });
+    expect(res.status).toBe(403);
   });
 });
