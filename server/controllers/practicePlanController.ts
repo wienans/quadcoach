@@ -60,69 +60,68 @@ export const getPracticePlans = async (req: RequestWithUser, res: Response) => {
     const userId = req.UserInfo?.id;
     if (!userId) return res.status(401).json({ message: "Unauthorized" });
 
-    const {
-      page = 1,
-      limit = 50,
-      "name[regex]": nameRegex,
-      "name[options]": nameOptions = "i",
-      "tags[in]": tagsIn,
-      "tags[regex]": tagsRegex,
-      "tags[options]": tagsOptions = "i",
-    } = req.query;
+    let queryString: string = JSON.stringify(req.query);
 
-    const pageNum = parseInt(page as string);
-    const limitNum = parseInt(limit as string);
-    const skip = (pageNum - 1) * limitNum;
+    queryString = queryString.replace(
+      /\b(gte|gt|lte|lt|eq|ne|regex|options|in|nin)\b/g,
+      (match) => `$${match}`
+    );
+    let parseObject = JSON.parse(queryString);
 
-    // Build query
-    const query: any = {
-      $or: [
-        { user: userId },
-        {
-          _id: {
-            $in: await PracticePlanAccess.find({ user: userId }).distinct(
-              "practicePlan"
-            ),
-          },
-        },
-      ],
-    };
+    // Extract pagination parameters
+    const page = parseInt(parseObject.page as string) || 1;
+    const limit = parseInt(parseObject.limit as string) || 10;
+    const skip = (page - 1) * limit;
 
-    // Add name filter if provided
-    if (nameRegex) {
-      query.name = { $regex: nameRegex as string, $options: nameOptions };
+    // Remove pagination params from query object
+    delete parseObject.page;
+    delete parseObject.limit;
+
+    parseObject.$or = [{ isPrivate: false }];
+
+    if (req.UserInfo?.id) {
+      parseObject.$or.push({ isPrivate: true, user: req.UserInfo.id });
     }
 
-    // Add tags filter if provided
-    if (tagsIn || tagsRegex) {
-      query.tags = {};
-      if (tagsIn) {
-        query.tags.$in = (tagsIn as string).split(",");
-      }
-      if (tagsRegex) {
-        query.tags.$regex = tagsRegex as string;
-        query.tags.$options = tagsOptions;
-      }
+    const accessPracticePlans = await PracticePlanAccess.find({
+      user: req.UserInfo?.id,
+    });
+
+    if (accessPracticePlans.length > 0) {
+      parseObject.$or.push({
+        _id: {
+          $in: accessPracticePlans.map((practicePlan) =>
+            practicePlan.practicePlan.toString()
+          ),
+        },
+      });
+    }
+
+    if (
+      req.UserInfo?.roles?.includes("Admin") ||
+      req.UserInfo?.roles?.includes("admin")
+    ) {
+      parseObject.$or.push({ isPrivate: true });
     }
 
     // Get total count for pagination
-    const total = await PracticePlan.countDocuments(query);
+    const total = await PracticePlan.countDocuments(parseObject);
 
     // Get practice plans with pagination
-    const practicePlans = await PracticePlan.find(query)
-      .select("name description tags sections user createdAt updatedAt")
+    const practicePlans = await PracticePlan.find(parseObject)
+      .select("_id name description tags sections user createdAt updatedAt")
       .sort({ updatedAt: -1 })
       .skip(skip)
-      .limit(limitNum)
+      .limit(limit)
       .lean();
 
-    const pages = Math.ceil(total / limitNum);
+    const pages = Math.ceil(total / limit);
 
     return res.json({
       practiceplans: practicePlans,
       pagination: {
-        page: pageNum,
-        limit: limitNum,
+        page: page,
+        limit: limit,
         total,
         pages,
       },
