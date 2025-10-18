@@ -2,7 +2,7 @@ import { useTranslation } from "react-i18next";
 import { IconButton, Typography } from "@mui/material";
 import "../PracticePlanner/translations";
 
-import { SoftBox, SoftInput } from "../../components";
+import { SoftBox, SoftInput, ExerciseOverviewDialog } from "../../components";
 
 import DeleteIcon from "@mui/icons-material/Delete";
 
@@ -14,7 +14,7 @@ import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import Tooltip from "@mui/material/Tooltip";
 
 import { FormikProps } from "formik";
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 import {
   PracticePlanEntityPartialId,
   PracticePlanItemPartialId,
@@ -49,7 +49,7 @@ const PracticeItem: React.FC<PracticeItemProps> = ({
   canMoveDown,
 }) => {
   const { t } = useTranslation("PracticePlanner");
-  const navigate = useNavigate();
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   // Fetch exercise data if this is an exercise item
   const { data: exercise } = useGetExerciseQuery(
@@ -68,9 +68,17 @@ const PracticeItem: React.FC<PracticeItemProps> = ({
     return blockIndex !== -1 ? (blockIndex + 1).toString() : "";
   };
 
+  // Get the specific block for this exercise item
+  const getBlock = () => {
+    if (!exercise || item.kind !== "exercise" || !item.blockId) return undefined;
+    return exercise.description_blocks.find(
+      (block) => block._id === item.blockId,
+    );
+  };
+
   const handleExerciseClick = () => {
-    if (item.kind === "exercise" && item.exerciseId) {
-      navigate(`/exercises/${item.exerciseId}`);
+    if (item.kind === "exercise") {
+      setIsDialogOpen(true);
     }
   };
 
@@ -216,6 +224,13 @@ const PracticeItem: React.FC<PracticeItemProps> = ({
           </Typography>
         </SoftBox>
       )}
+
+      <ExerciseOverviewDialog
+        isOpen={isDialogOpen}
+        onClose={() => setIsDialogOpen(false)}
+        exercise={exercise}
+        block={getBlock()}
+      />
     </SoftBox>
   );
 };

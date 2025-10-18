@@ -51,13 +51,13 @@ const TacticBoardDataContextProvider: FC<{
         }
 
         // Load objects using factory pattern
-        console.log("Loading objects:", page.objects?.length || 0);
+        // console.log("Loading objects:", page.objects?.length || 0);
         page.objects?.forEach((objData, index) => {
           try {
-            console.log(`Creating object ${index}:`, objData.type, objData);
+            // console.log(`Creating object ${index}:`, objData.type, objData);
             const fabricObj = FabricObjectFactory.createObject(objData);
             if (fabricObj) {
-              console.log(`Successfully created object ${index}:`, fabricObj);
+              // console.log(`Successfully created object ${index}:`, fabricObj);
               canvasFabric.add(fabricObj);
             } else {
               console.warn(`Object ${index} creation returned null:`, objData);

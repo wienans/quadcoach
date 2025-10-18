@@ -82,7 +82,7 @@ export const useContainerResizeEvent = (
       containerResizeObserverRef.current.disconnect();
     }
 
-    console.log("ResizeObserver: Initializing observer");
+    // console.log("ResizeObserver: Initializing observer");
     containerResizeObserverRef.current = new ResizeObserver(
       (entries: ResizeObserverEntry[]) => {
         if (!canvas.current) {
@@ -90,7 +90,7 @@ export const useContainerResizeEvent = (
           return;
         }
         const { width = 0, height = 0 } = entries[0]?.contentRect || {};
-        console.log("ResizeObserver: Resizing to", width, "x", height);
+        // console.log("ResizeObserver: Resizing to", width, "x", height);
         resize(width, height);
       },
     );
