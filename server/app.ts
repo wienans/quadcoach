@@ -24,7 +24,6 @@ app.use(logger);
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors(corsOptions));
-app.use(errorHandler);
 
 // Existing APIs
 app.use('/api/user', userRoutes);
@@ -41,5 +40,8 @@ app.get('/api', (req, res) => {
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });
+
+// Keep error handler last so it catches route errors
+app.use(errorHandler);
 
 export default app;

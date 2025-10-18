@@ -1,7 +1,6 @@
 import mongoose from "mongoose";
 import { logEvents } from "./middleware/logger";
 import app from "./app";
-import practicePlanRoutes from "./routes/practicePlanRoutes";
 
 // Read out Port or use Default
 const PORT = process.env.PORT || 3001;
@@ -33,5 +32,3 @@ mongoose
     );
   });
 
-// Additional legacy endpoints remain defined in app.ts; only mounting new practice plan route here
-app.use("/api/practice-plans", practicePlanRoutes);
