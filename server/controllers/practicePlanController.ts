@@ -61,21 +61,25 @@ export const getPracticePlans = async (req: RequestWithUser, res: Response) => {
     if (!userId) return res.status(401).json({ message: "Unauthorized" });
 
     let queryString: string = JSON.stringify(req.query);
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const skip = (page - 1) * limit;
+    const sortBy = (req.query.sortBy as string) || "name";
+    const sortOrder = (req.query.sortOrder as string) || "asc";
+
+    // Remove pagination and sorting params from the query string
+    const queryObj = JSON.parse(queryString);
+    delete queryObj.page;
+    delete queryObj.limit;
+    delete queryObj.sortBy;
+    delete queryObj.sortOrder;
+    queryString = JSON.stringify(queryObj);
 
     queryString = queryString.replace(
       /\b(gte|gt|lte|lt|eq|ne|regex|options|in|nin)\b/g,
       (match) => `$${match}`
     );
     let parseObject = JSON.parse(queryString);
-
-    // Extract pagination parameters
-    const page = parseInt(parseObject.page as string) || 1;
-    const limit = parseInt(parseObject.limit as string) || 10;
-    const skip = (page - 1) * limit;
-
-    // Remove pagination params from query object
-    delete parseObject.page;
-    delete parseObject.limit;
 
     parseObject.$or = [{ isPrivate: false }];
 
@@ -104,13 +108,34 @@ export const getPracticePlans = async (req: RequestWithUser, res: Response) => {
       parseObject.$or.push({ isPrivate: true });
     }
 
+    // Create sort object
+    const sortObj: { [key: string]: 1 | -1 } = {};
+    const sortDirection = sortOrder === "desc" ? -1 : 1;
+
+    // Map frontend sort fields to database fields
+    switch (sortBy) {
+      case "name":
+        sortObj.name = sortDirection;
+        break;
+      case "created":
+        sortObj.createdAt = sortDirection;
+        break;
+      case "updated":
+        sortObj.updatedAt = sortDirection;
+        break;
+      default:
+        sortObj.name = 1; // Default sort by name ascending
+    }
+
+    sortObj._id = 1; // Always add _id as a secondary sort to ensure consistent ordering
+
     // Get total count for pagination
     const total = await PracticePlan.countDocuments(parseObject);
 
     // Get practice plans with pagination
     const practicePlans = await PracticePlan.find(parseObject)
       .select("_id name description tags sections user createdAt updatedAt")
-      .sort({ updatedAt: -1 })
+      .sort(sortObj)
       .skip(skip)
       .limit(limit)
       .lean();

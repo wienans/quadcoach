@@ -7,6 +7,12 @@
   "filter": {
     "title": "Filter",
     "name": "Search Tactic Board",
+    "sort": {
+      "name": "Sort",
+      "by_name": "Name",
+      "by_createdAt": "Created",
+      "by_updatedAt": "Updated"
+    },
     "tags": {
       "title": "Tags",
       "placeholder": "Enter tag and press Enter..."

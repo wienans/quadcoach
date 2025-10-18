@@ -8,6 +8,8 @@ export type GetTacticBoardRequest = {
   nameRegex?: string;
   tagRegex?: string;
   tagList?: string[];
+  sortBy?: "name" | "created" | "updated";
+  sortOrder?: "asc" | "desc";
   page?: number;
   limit?: number;
 };
@@ -126,6 +128,8 @@ export const tacticBoardApiSlice = quadcoachApi.injectEndpoints({
           nameRegex,
           tagRegex,
           tagList,
+          sortBy,
+          sortOrder,
           page = 1,
           limit = 50,
         } = request || {};
@@ -144,6 +148,12 @@ export const tacticBoardApiSlice = quadcoachApi.injectEndpoints({
         if (tagRegex != null && tagRegex !== "") {
           urlParams.append("tags[regex]", tagRegex);
           urlParams.append("tags[options]", "i");
+        }
+        if (sortBy != null) {
+          urlParams.append("sortBy", sortBy);
+        }
+        if (sortOrder != null) {
+          urlParams.append("sortOrder", sortOrder);
         }
 
         const urlParamsString = urlParams.toString();
@@ -265,6 +275,8 @@ export const tacticBoardApiSlice = quadcoachApi.injectEndpoints({
           nameRegex,
           tagRegex,
           tagList,
+          sortBy,
+          sortOrder,
           page = 1,
           limit = 50,
         } = request || {};
@@ -283,6 +295,12 @@ export const tacticBoardApiSlice = quadcoachApi.injectEndpoints({
         if (tagRegex != null && tagRegex !== "") {
           urlParams.append("tags[regex]", tagRegex);
           urlParams.append("tags[options]", "i");
+        }
+        if (sortBy != null) {
+          urlParams.append("sortBy", sortBy);
+        }
+        if (sortOrder != null) {
+          urlParams.append("sortOrder", sortOrder);
         }
 
         const urlParamsString = urlParams.toString();

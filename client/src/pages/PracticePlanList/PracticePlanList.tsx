@@ -17,6 +17,10 @@ import {
   ToggleButton,
   useMediaQuery,
   InputAdornment,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import {
@@ -45,6 +49,7 @@ import {
 import debounce from "lodash/debounce";
 import KeyboardReturnIcon from "@mui/icons-material/KeyboardReturn";
 import { Chip } from "@mui/material";
+import SortIcon from "@mui/icons-material/Sort";
 
 enum ViewType {
   List = "List",
@@ -55,6 +60,8 @@ type PracticePlanFilter = {
   searchValue: string;
   tagRegex: string;
   tagList: string[];
+  sortBy: "name" | "created" | "updated";
+  sortOrder: "asc" | "desc";
   page: number;
   limit: number;
 };
@@ -63,6 +70,8 @@ const defaultPracticePlanFilter: PracticePlanFilter = {
   searchValue: "",
   tagRegex: "",
   tagList: [],
+  sortBy: "name",
+  sortOrder: "asc",
   page: 1,
   limit: 50,
 };
@@ -108,6 +117,8 @@ const PracticePlanList = () => {
         nameRegex: filter.searchValue,
         tagRegex: filter.tagRegex,
         tagList: filter.tagList,
+        sortBy: filter.sortBy,
+        sortOrder: filter.sortOrder,
         page: filter.page,
         limit: filter.limit,
       });
@@ -271,6 +282,54 @@ const PracticePlanList = () => {
                     })}
                   />
                 )}
+                <FormControl size="small" sx={{ minWidth: 120, mr: 1 }}>
+                  <InputLabel id="sort-select-label">
+                    {t("PracticePlanList:filter.sort.name")}
+                  </InputLabel>
+                  <Select
+                    labelId="sort-select-label"
+                    value={practicePlanFilter.sortBy}
+                    label={t("PracticePlanList:filter.sort.name")}
+                    onChange={(event) => {
+                      setLoadedPracticePlans([]);
+                      setPracticePlanFilter({
+                        ...practicePlanFilter,
+                        sortBy: event.target.value as
+                          | "name"
+                          | "created"
+                          | "updated",
+                        page: 1,
+                      });
+                    }}
+                  >
+                    <MenuItem value="name">
+                      {t("PracticePlanList:filter.sort.by_name")}
+                    </MenuItem>
+                    <MenuItem value="created">
+                      {t("PracticePlanList:filter.sort.by_createdAt")}
+                    </MenuItem>
+                    <MenuItem value="updated">
+                      {t("PracticePlanList:filter.sort.by_updatedAt")}
+                    </MenuItem>
+                  </Select>
+                </FormControl>
+                <ToggleButton
+                  value={practicePlanFilter.sortOrder}
+                  selected={practicePlanFilter.sortOrder === "desc"}
+                  onChange={() => {
+                    setLoadedPracticePlans([]);
+                    setPracticePlanFilter({
+                      ...practicePlanFilter,
+                      sortOrder:
+                        practicePlanFilter.sortOrder === "asc" ? "desc" : "asc",
+                      page: 1,
+                    });
+                  }}
+                  size="small"
+                  sx={{ mr: 1 }}
+                >
+                  <SortIcon />
+                </ToggleButton>
                 <ToggleButton
                   value={showFilters ? "shown" : "hide"}
                   selected={showFilters}

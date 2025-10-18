@@ -41,6 +41,8 @@ export type GetPracticePlanRequest = {
   nameRegex?: string;
   tagRegex?: string;
   tagList?: string[];
+  sortBy?: "name" | "created" | "updated";
+  sortOrder?: "asc" | "desc";
   page?: number;
   limit?: number;
 };
@@ -66,6 +68,8 @@ export const practicePlansApiSlice = quadcoachApi.injectEndpoints({
           nameRegex,
           tagRegex,
           tagList,
+          sortBy,
+          sortOrder,
           page = 1,
           limit = 50,
         } = request || {};
@@ -84,6 +88,12 @@ export const practicePlansApiSlice = quadcoachApi.injectEndpoints({
         if (tagRegex != null && tagRegex !== "") {
           urlParams.append("tags[regex]", tagRegex);
           urlParams.append("tags[options]", "i");
+        }
+        if (sortBy != null) {
+          urlParams.append("sortBy", sortBy);
+        }
+        if (sortOrder != null) {
+          urlParams.append("sortOrder", sortOrder);
         }
 
         const urlParamsString = urlParams.toString();

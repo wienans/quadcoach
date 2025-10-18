@@ -7,6 +7,12 @@
   "filter": {
     "title": "Filter",
     "name": "Suche Taktik Tafel",
+    "sort": {
+      "name": "Sortieren",
+      "by_name": "Name",
+      "by_createdAt": "Erstellt",
+      "by_updatedAt": "Aktualisiert"
+    },
     "tags": {
       "title": "Stichwörter",
       "placeholder": "Stichwort eingeben und Enter drücken..."

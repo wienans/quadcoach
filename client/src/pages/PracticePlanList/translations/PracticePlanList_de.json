@@ -7,6 +7,12 @@
   "filter": {
     "title": "Filter",
     "name": "Trainingsplan suchen",
+    "sort": {
+      "name": "Sortieren",
+      "by_name": "Name",
+      "by_createdAt": "Erstellt",
+      "by_updatedAt": "Aktualisiert"
+    },
     "tags": {
       "title": "Tags",
       "placeholder": "Tag eingeben und Enter drücken..."
