@@ -301,7 +301,7 @@ export const deletePracticePlan = async (
 };
 
 // @desc    Get all users who have access to a practice plan
-// @route   GET /api/practiceplans/:id/access
+// @route   GET /api/practice-plans/:id/access
 // @access  Private - Users with access
 export const getAllAccessUsers = asyncHandler(
   async (req: RequestWithUser, res: Response) => {
@@ -345,7 +345,7 @@ export const getAllAccessUsers = asyncHandler(
 );
 
 // @desc    Grant access to a practice plan for a user
-// @route   POST /api/practiceplans/:id/access
+// @route   POST /api/practice-plans/:id/access
 // @access  Private - Users with access
 export const setAccess = asyncHandler(
   async (req: RequestWithUser, res: Response) => {
@@ -411,7 +411,7 @@ export const setAccess = asyncHandler(
 );
 
 // @desc    Remove access to a practice plan for a user
-// @route   DELETE /api/practiceplans/:id/access
+// @route   DELETE /api/practice-plans/:id/access
 // @access  Private - Users with access
 export const deleteAccess = asyncHandler(
   async (req: RequestWithUser, res: Response) => {
@@ -465,7 +465,7 @@ export const deleteAccess = asyncHandler(
 );
 
 // @desc    Share practice plan with user by email
-// @route   POST /api/practiceplans/:id/share
+// @route   POST /api/practice-plans/:id/share
 // @access  Private - Owner or Admin only
 export const sharePracticePlan = asyncHandler(
   async (req: RequestWithUser, res: Response) => {
