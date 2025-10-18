@@ -3,15 +3,13 @@ import { LayoutReducer } from "../components/Layout";
 import { quadcoachApi } from "../api";
 import { TacticBoardReducer } from "../pages/TacticBoard";
 import authReducer from "../api/auth/authSlice";
-import { PracticePlanReducer } from "./practicePlan/practicePlanSlice";
 
 const middleware = [quadcoachApi.middleware];
 
 export const store = configureStore({
   reducer: {
     layout: LayoutReducer,
-     tacticBoard: TacticBoardReducer,
-     practicePlan: PracticePlanReducer,
+    tacticBoard: TacticBoardReducer,
     [quadcoachApi.reducerPath]: quadcoachApi.reducer,
     auth: authReducer,
   },

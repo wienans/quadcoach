@@ -147,6 +147,7 @@ const PracticePlanList = () => {
         name: name,
         description: "",
         tags: [],
+        isPrivate: false,
         sections: [
           { name: "Warm Up", targetDuration: 15, groups: [] },
           { name: "Main", targetDuration: 90, groups: [] },

@@ -8,6 +8,7 @@
     "gitHubRepository": "GitHub Repository",
     "deleteAccount": "Delete Account",
     "login": "Login",
-    "userProfile": "User Profile"
+    "userProfile": "User Profile",
+    "practicePlans": "Practice Plans"
   }
 }
