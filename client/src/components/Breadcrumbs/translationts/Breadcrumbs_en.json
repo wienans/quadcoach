@@ -8,5 +8,7 @@
   "updateTacticBoard": "Edit Tactic Board",
   "addTacticBoard": "Add Tactic Board",
   "tacticBoard": "Tactic Board",
-  "componentsTest": "Test components"
+  "componentsTest": "Test components",
+  "practicePlans": "Practice Plans",
+  "practicePlanner": "Practice Planner"
 }
