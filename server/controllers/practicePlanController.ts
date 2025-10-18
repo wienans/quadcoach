@@ -16,39 +16,8 @@ interface RequestWithUser extends Request {
     roles: string[];
   };
 }
-interface AccessContext {
-  plan: any | null;
-  isOwner: boolean;
-  hasEdit: boolean;
-  hasAnyAccess: boolean;
-}
-
 function isMongoError(error: unknown): error is { code: number } {
   return typeof error === "object" && error !== null && "code" in error;
-}
-
-async function loadAccessContext(
-  planId: string,
-  userId: string
-): Promise<AccessContext> {
-  const plan = await PracticePlan.findById(planId);
-  if (!plan)
-    return { plan: null, isOwner: false, hasEdit: false, hasAnyAccess: false };
-  const isOwner = plan.user.toString() === userId;
-  if (isOwner)
-    return { plan, isOwner: true, hasEdit: true, hasAnyAccess: true };
-  const access = await PracticePlanAccess.findOne({
-    practicePlan: plan._id,
-    user: userId,
-  });
-  if (!access)
-    return { plan, isOwner: false, hasEdit: false, hasAnyAccess: false };
-  return {
-    plan,
-    isOwner: false,
-    hasEdit: access.access === "edit",
-    hasAnyAccess: true,
-  };
 }
 
 function sendValidation(res: Response, message: string, errors: string[]) {
@@ -183,13 +152,35 @@ export const createPracticePlan = async (
 
 export const getPracticePlan = async (req: RequestWithUser, res: Response) => {
   try {
-    const userId = req.UserInfo?.id;
-    if (!userId) return res.status(401).json({ message: "Unauthorized" });
-    const id = req.params.id;
-    const ctx = await loadAccessContext(id, userId);
-    if (!ctx.plan || !ctx.hasAnyAccess)
-      return res.status(404).json({ message: "Not found" });
-    return res.json(ctx.plan);
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      res.status(400).json({ message: "Invalid ID format" });
+      return;
+    }
+    if (!req.UserInfo?.id) {
+      res.status(401).json({ message: "Unauthorized" });
+      return;
+    }
+    const result = await PracticePlan.findOne({ _id: req.params.id });
+    if (result) {
+      if (
+        result.isPrivate &&
+        result.user &&
+        (!req.UserInfo?.id || req.UserInfo.id != result.user?.toString()) &&
+        !req.UserInfo?.roles?.includes("Admin") &&
+        !req.UserInfo?.roles?.includes("admin") &&
+        !(await PracticePlanAccess.exists({
+          user: req.UserInfo?.id,
+          practicePlan: req.params.id,
+        }))
+      ) {
+        res.status(403).json({ message: "Forbidden" });
+        return;
+      }
+
+      res.send(result);
+    } else {
+      res.status(404).json({ result: "No Record Found" });
+    }
   } catch (e: any) {
     return res.status(500).json({ message: "Get failed", error: e.message });
   }
@@ -200,41 +191,63 @@ export const patchPracticePlan = async (
   res: Response
 ) => {
   try {
-    const userId = req.UserInfo?.id;
-    if (!userId) return res.status(401).json({ message: "Unauthorized" });
-    const id = req.params.id;
-    const ctx = await loadAccessContext(id, userId);
-    if (!ctx.plan || !(ctx.isOwner || ctx.hasEdit))
-      return res.status(404).json({ message: "Not found" });
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      res.status(400).json({ message: "Invalid ID format" });
+      return;
+    }
 
-    const updates: any = {};
-    if (req.body.name !== undefined) {
-      if (!isNonEmptyName(req.body.name))
-        return res.status(400).json({ message: "Invalid name" });
-      updates.name = req.body.name.trim();
+    const findResult = await PracticePlan.findOne({ _id: req.params.id });
+    if (findResult) {
+      if (!req.UserInfo?.id) {
+        res.status(401).json({ message: "Unauthorized" });
+        return;
+      }
+      const accessUser = await PracticePlanAccess.findOne({
+        user: req.UserInfo.id,
+        practicePlan: req.params.id,
+      });
+      const hasAccess =
+        findResult.user?.toString() === req.UserInfo.id ||
+        req.UserInfo.roles?.includes("Admin") ||
+        req.UserInfo.roles?.includes("admin") ||
+        (accessUser && accessUser.access == "edit");
+
+      if (!hasAccess) {
+        res.status(403).json({ message: "Forbidden" });
+        return;
+      }
+
+      const updates: any = {};
+      if (req.body.name !== undefined) {
+        if (!isNonEmptyName(req.body.name))
+          return res.status(400).json({ message: "Invalid name" });
+        updates.name = req.body.name.trim();
+      }
+      if (req.body.description !== undefined)
+        updates.description = req.body.description;
+      if (req.body.tags !== undefined) updates.tags = req.body.tags;
+      if (req.body.isPrivate !== undefined)
+        updates.isPrivate = req.body.isPrivate;
+      if (req.body.sections !== undefined) {
+        const durationErrors = validateNonNegativeDurations(req.body);
+        if (durationErrors.length)
+          return sendValidation(
+            res,
+            "Duration validation failed",
+            durationErrors
+          );
+        updates.sections = req.body.sections;
+      }
+      updates.updatedAt = new Date();
+      const updated = await PracticePlan.findByIdAndUpdate(
+        req.params.id,
+        updates,
+        { new: true }
+      );
+      return res.json(updated);
+    } else {
+      res.status(404).json({ message: "Practice Plan not found" });
     }
-    if (req.body.description !== undefined)
-      updates.description = req.body.description;
-    if (req.body.tags !== undefined) updates.tags = req.body.tags;
-    if (req.body.isPrivate !== undefined)
-      updates.isPrivate = req.body.isPrivate;
-    if (req.body.sections !== undefined) {
-      const durationErrors = validateNonNegativeDurations(req.body);
-      if (durationErrors.length)
-        return sendValidation(
-          res,
-          "Duration validation failed",
-          durationErrors
-        );
-      updates.sections = req.body.sections;
-    }
-    updates.updatedAt = new Date();
-    const updated = await PracticePlan.findByIdAndUpdate(
-      ctx.plan._id,
-      updates,
-      { new: true }
-    );
-    return res.json(updated);
   } catch (e: any) {
     return res.status(500).json({ message: "Patch failed", error: e.message });
   }
@@ -245,66 +258,96 @@ export const deletePracticePlan = async (
   res: Response
 ) => {
   try {
-    const userId = req.UserInfo?.id;
-    if (!userId) return res.status(401).json({ message: "Unauthorized" });
-    const id = req.params.id;
-    const ctx = await loadAccessContext(id, userId);
-    if (!ctx.plan || !ctx.isOwner)
-      return res.status(404).json({ message: "Not found" });
-    await PracticePlan.deleteOne({ _id: ctx.plan._id });
-    await PracticePlanAccess.deleteMany({ practicePlan: ctx.plan._id });
-    return res.status(204).send();
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      res.status(400).json({ message: "Invalid ID format" });
+      return;
+    }
+
+    const findResult = await PracticePlan.findOne({ _id: req.params.id });
+
+    if (findResult) {
+      // Check permissions
+      if (!req.UserInfo?.id) {
+        res.status(401).json({ message: "Unauthorized" });
+        return;
+      }
+      const accessUser = await PracticePlanAccess.findOne({
+        user: req.UserInfo.id,
+        practicePlan: req.params.id,
+      });
+      const hasAccess =
+        findResult.user?.toString() === req.UserInfo.id ||
+        req.UserInfo.roles?.includes("Admin") ||
+        req.UserInfo.roles?.includes("admin");
+
+      if (!hasAccess) {
+        res.status(403).json({ message: "Forbidden" });
+        return;
+      }
+
+      await PracticePlanAccess.deleteMany({ practicePlan: req.params.id });
+      const result = await PracticePlan.deleteOne({ _id: req.params.id });
+      if (result.deletedCount > 0) {
+        res.json({ message: "Practice Plan deleted successfully" });
+      } else {
+        res.status(404).json({ message: "Practice Plan not found" });
+      }
+    } else {
+      res.status(404).json({ message: "No Record Found" });
+    }
   } catch (e: any) {
     return res.status(500).json({ message: "Delete failed", error: e.message });
   }
 };
 
-// @desc    Get all users who have access to a tacticboard
-// @route   GET /api/tacticboards/:id/access
+// @desc    Get all users who have access to a practice plan
+// @route   GET /api/practiceplans/:id/access
 // @access  Private - Users with access
-export const getAllAccessUsers = async (
-  req: RequestWithUser,
-  res: Response
-) => {
-  if (!mongoose.isValidObjectId(req.params.id)) {
-    res.status(400).json({ message: "Invalid Practice Plan ID" });
-    return;
-  }
+export const getAllAccessUsers = asyncHandler(
+  async (req: RequestWithUser, res: Response) => {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      res.status(400).json({ message: "Invalid practice plan ID" });
+      return;
+    }
 
-  const practicePlan = await PracticePlan.findById(req.params.id);
-  if (!practicePlan) {
-    res.status(404).json({ message: "Practice Plan not found" });
-    return;
-  }
+    const practicePlan = await PracticePlan.findById(req.params.id);
+    if (!practicePlan) {
+      res.status(404).json({ message: "Practice Plan not found" });
+      return;
+    }
 
-  // Check if user has access to view access list
-  if (!req.UserInfo?.id) {
-    res.status(401).json({ message: "Unauthorized" });
-    return;
-  }
+    // Check if user has access to view access list
+    if (!req.UserInfo?.id) {
+      res.status(401).json({ message: "Unauthorized" });
+      return;
+    }
 
-  const hasAccess =
-    practicePlan.user?.toString() === req.UserInfo.id ||
-    req.UserInfo.roles?.includes("Admin") ||
-    req.UserInfo.roles?.includes("admin") ||
-    (await PracticePlanAccess.exists({
-      user: req.UserInfo.id,
+    const hasAccess =
+      practicePlan.user?.toString() === req.UserInfo.id ||
+      req.UserInfo.roles?.includes("Admin") ||
+      req.UserInfo.roles?.includes("admin") ||
+      (await PracticePlanAccess.exists({
+        user: req.UserInfo.id,
+        practicePlan: req.params.id,
+      }));
+
+    if (!hasAccess) {
+      res.status(403).json({ message: "Forbidden" });
+      return;
+    }
+
+    const accessEntries = await PracticePlanAccess.find({
       practicePlan: req.params.id,
-    }));
+    }).populate("user", "name");
 
-  if (!hasAccess) {
-    res.status(403).json({ message: "Forbidden" });
-    return;
+    res.json(accessEntries);
   }
+);
 
-  const accessEntries = await PracticePlanAccess.find({
-    practicePlan: req.params.id,
-  }).populate("user", "name");
-
-  res.json(accessEntries);
-};
-
-export const addAccess = asyncHandler(
+// @desc    Grant access to a practice plan for a user
+// @route   POST /api/practiceplans/:id/access
+// @access  Private - Users with access
+export const setAccess = asyncHandler(
   async (req: RequestWithUser, res: Response) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       res.status(400).json({ message: "Invalid practice plan ID" });
@@ -367,8 +410,11 @@ export const addAccess = asyncHandler(
   }
 );
 
-export const removeAccess = async (req: RequestWithUser, res: Response) => {
-  try {
+// @desc    Remove access to a practice plan for a user
+// @route   DELETE /api/practiceplans/:id/access
+// @access  Private - Users with access
+export const deleteAccess = asyncHandler(
+  async (req: RequestWithUser, res: Response) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       res.status(400).json({ message: "Invalid practice plan ID" });
       return;
@@ -415,13 +461,12 @@ export const removeAccess = async (req: RequestWithUser, res: Response) => {
     }
 
     res.json({ message: "Access removed successfully" });
-  } catch (e: any) {
-    return res
-      .status(500)
-      .json({ message: "Remove access failed", error: e.message });
   }
-};
+);
 
+// @desc    Share practice plan with user by email
+// @route   POST /api/practiceplans/:id/share
+// @access  Private - Owner or Admin only
 export const sharePracticePlan = asyncHandler(
   async (req: RequestWithUser, res: Response) => {
     if (!req.UserInfo?.id) {

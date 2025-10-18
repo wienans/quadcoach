@@ -89,7 +89,7 @@ const PracticePlanCard = ({
           </Tooltip>
         }
       />
-      <CardContent sx={{ height: "194px", position: "relative" }}>
+      <CardContent sx={{ position: "relative" }}>
         <SoftBox sx={{ mt: "auto" }}>
           <SoftTypography variant="caption" color="text">
             <ScheduleIcon sx={{ fontSize: 14, mr: 0.5 }} />

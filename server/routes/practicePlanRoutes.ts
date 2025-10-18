@@ -6,8 +6,8 @@ import {
   getPracticePlan,
   patchPracticePlan,
   deletePracticePlan,
-  addAccess,
-  removeAccess,
+  setAccess,
+  deleteAccess,
   getAllAccessUsers,
   sharePracticePlan,
 } from "../controllers/practicePlanController";
@@ -23,9 +23,9 @@ router.post("/", createPracticePlan);
 router.get("/:id", getPracticePlan);
 router.patch("/:id", patchPracticePlan);
 router.delete("/:id", deletePracticePlan);
-router.post("/:id/access", addAccess);
+router.post("/:id/access", setAccess);
 router.get("/:id/access", getAllAccessUsers);
-router.delete("/:id/access/", removeAccess);
+router.delete("/:id/access/", deleteAccess);
 router.route("/:id/share").post(sharePracticePlan);
 
 export default router;
