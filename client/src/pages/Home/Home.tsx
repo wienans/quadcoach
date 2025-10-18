@@ -51,6 +51,49 @@ const Home = () => {
                       fontSize: { xs: "1.25rem", sm: "1.5rem", md: "2rem" },
                     }}
                   >
+                    Practice Plans
+                  </SoftTypography>
+                  <SoftTypography
+                    variant="h3"
+                    fontWeight="bold"
+                    textTransform="uppercase"
+                    color="text"
+                    sx={{
+                      fontSize: { xs: "1rem", sm: "1.25rem", md: "2rem" },
+                      color: { xs: "text.secondary", sm: "inherit" },
+                    }}
+                  >
+                    18.Oct.2025
+                  </SoftTypography>
+                </SoftBox>
+                <SoftTypography>
+                  Announcing the launch of Practice Plans! Coaches can now
+                  create , organize, and share structured training.
+                  <br />
+                  Perfect for long session (full day) planning.
+                </SoftTypography>
+              </SoftBox>
+            </Card>
+          </SoftBox>
+          <SoftBox mt={5}>
+            <Card sx={{ height: "100%" }}>
+              <SoftBox p={{ xs: 1.5, sm: 2 }}>
+                <SoftBox
+                  display="flex"
+                  flexDirection={{ xs: "column", sm: "row" }}
+                  justifyContent={{ xs: "flex-start", sm: "space-between" }}
+                  alignItems={{ xs: "flex-start", sm: "center" }}
+                  width="100%"
+                  gap={{ xs: 1, sm: 0 }}
+                >
+                  <SoftTypography
+                    variant="h3"
+                    fontWeight="bold"
+                    textTransform="uppercase"
+                    sx={{
+                      fontSize: { xs: "1.25rem", sm: "1.5rem", md: "2rem" },
+                    }}
+                  >
                     Drafting Boards
                   </SoftTypography>
                   <SoftTypography
