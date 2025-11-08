@@ -12,20 +12,27 @@ import {
   sharePracticePlan,
 } from "../controllers/practicePlanController";
 import verifyJWT from "../middleware/verifyJWT";
+import verifyJWTOptional from "../middleware/verifyJWTOptional";
 import { ddosLimiter } from "../middleware/rateLimiter";
 
 const router = Router();
-router.use(verifyJWT); // apply auth middleware
+// Apply optional JWT verification globally - allows public access to GET endpoints
+router.use(verifyJWTOptional);
 router.use(ddosLimiter);
 
+// Public GET endpoints - no additional auth required
 router.get("/", getPracticePlans);
-router.post("/", createPracticePlan);
 router.get("/:id", getPracticePlan);
-router.patch("/:id", patchPracticePlan);
-router.delete("/:id", deletePracticePlan);
-router.post("/:id/access", setAccess);
-router.get("/:id/access", getAllAccessUsers);
-router.delete("/:id/access/", deleteAccess);
-router.route("/:id/share").post(sharePracticePlan);
+
+// All mutation endpoints require authentication
+router.post("/", verifyJWT, createPracticePlan);
+router.patch("/:id", verifyJWT, patchPracticePlan);
+router.delete("/:id", verifyJWT, deletePracticePlan);
+
+// All access control endpoints require authentication
+router.post("/:id/access", verifyJWT, setAccess);
+router.get("/:id/access", verifyJWT, getAllAccessUsers);
+router.delete("/:id/access/", verifyJWT, deleteAccess);
+router.route("/:id/share").post(verifyJWT, sharePracticePlan);
 
 export default router;

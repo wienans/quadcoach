@@ -57,20 +57,21 @@ export const getAllTacticboards = asyncHandler(
 
     if (req.UserInfo?.id) {
       parseObject.$or.push({ isPrivate: true, user: req.UserInfo.id });
-    }
 
-    const accessTacticboards = await TacticboardAccess.find({
-      user: req.UserInfo?.id,
-    });
-
-    if (accessTacticboards.length > 0) {
-      parseObject.$or.push({
-        _id: {
-          $in: accessTacticboards.map((tacticboard) =>
-            tacticboard.tacticboard.toString()
-          ),
-        },
+      // Only query for access records if user is authenticated
+      const accessTacticboards = await TacticboardAccess.find({
+        user: req.UserInfo.id,
       });
+
+      if (accessTacticboards.length > 0) {
+        parseObject.$or.push({
+          _id: {
+            $in: accessTacticboards.map((tacticboard) =>
+              tacticboard.tacticboard.toString()
+            ),
+          },
+        });
+      }
     }
 
     if (
@@ -148,20 +149,21 @@ export const getAllTacticboardHeaders = asyncHandler(
 
     if (req.UserInfo?.id) {
       parseObject.$or.push({ isPrivate: true, user: req.UserInfo.id });
-    }
 
-    const accessTacticboards = await TacticboardAccess.find({
-      user: req.UserInfo?.id,
-    });
-
-    if (accessTacticboards.length > 0) {
-      parseObject.$or.push({
-        _id: {
-          $in: accessTacticboards.map((tacticboard) =>
-            tacticboard.tacticboard.toString()
-          ),
-        },
+      // Only query for access records if user is authenticated
+      const accessTacticboards = await TacticboardAccess.find({
+        user: req.UserInfo.id,
       });
+
+      if (accessTacticboards.length > 0) {
+        parseObject.$or.push({
+          _id: {
+            $in: accessTacticboards.map((tacticboard) =>
+              tacticboard.tacticboard.toString()
+            ),
+          },
+        });
+      }
     }
 
     if (
@@ -218,19 +220,24 @@ export const getById = asyncHandler(
     if (mongoose.isValidObjectId(req.params.id)) {
       const result = await TacticBoard.findOne({ _id: req.params.id });
       if (result) {
-        if (
-          result.isPrivate &&
-          result.user &&
-          (!req.UserInfo?.id || req.UserInfo.id != result.user?.toString()) &&
-          !req.UserInfo?.roles?.includes("Admin") &&
-          !req.UserInfo?.roles?.includes("admin") &&
-          !(await TacticboardAccess.exists({
-            user: req.UserInfo?.id,
-            tacticboard: req.params.id,
-          }))
-        ) {
-          res.status(403).json({ message: "Forbidden" });
-          return;
+        // Check if the tacticboard is private
+        if (result.isPrivate && result.user) {
+          const userId = req.UserInfo?.id;
+          const isOwner = userId && userId !== "" && userId === result.user.toString();
+          const isAdmin = req.UserInfo?.roles?.includes("Admin") || req.UserInfo?.roles?.includes("admin");
+          
+          // Check if user has shared access (only if user is authenticated)
+          const hasSharedAccess = userId && userId !== "" 
+            ? await TacticboardAccess.exists({
+                user: userId,
+                tacticboard: req.params.id,
+              })
+            : false;
+
+          if (!isOwner && !isAdmin && !hasSharedAccess) {
+            res.status(403).json({ message: "Forbidden" });
+            return;
+          }
         }
 
         res.send(result);

@@ -482,11 +482,7 @@ const TacticsBoard = (): JSX.Element => {
       }}
     >
       <Navbar light={false} />
-      {(!userId || userId === "") ? (
-        <SoftBox sx={{ px: 3 }}>
-          <Alert color="error">{t("pleaseLogin")}</Alert>
-        </SoftBox>
-      ) : (isTacticBoardError || (!isTacticBoardLoading && !tacticBoard)) && (
+      {(isTacticBoardError || (!isTacticBoardLoading && !tacticBoard)) && (
         <SoftBox sx={{ px: 3 }}>
           <Alert color="error">
             {t("TacticBoard:loadingTacticBoardError")}
