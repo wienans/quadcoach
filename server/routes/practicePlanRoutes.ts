@@ -32,7 +32,7 @@ router.delete("/:id", verifyJWT, deletePracticePlan);
 // All access control endpoints require authentication
 router.post("/:id/access", verifyJWT, setAccess);
 router.get("/:id/access", verifyJWT, getAllAccessUsers);
-router.delete("/:id/access/", verifyJWT, deleteAccess);
+router.delete("/:id/access", verifyJWT, deleteAccess);
 router.route("/:id/share").post(verifyJWT, sharePracticePlan);
 
 export default router;
