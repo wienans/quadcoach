@@ -20,6 +20,12 @@ services:
     build:
       context: ./
       dockerfile: Dockerfile.prod
+      args:
+        - VITE_NAME=${VITE_NAME}
+        - VITE_ADDRESS_L1=${VITE_ADDRESS_L1}
+        - VITE_ADDRESS_L2=${VITE_ADDRESS_L2}
+        - VITE_EMAIL=${VITE_EMAIL}
+        - VITE_TELEFON=${VITE_TELEFON}
     ports:
       - "3001:3001"
     networks:

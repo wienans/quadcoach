@@ -1,6 +1,21 @@
 # ---------- Client build stage ----------
 FROM node:22 AS client-build
 WORKDIR /client
+
+# Declare build arguments for VITE environment variables
+ARG VITE_NAME
+ARG VITE_ADDRESS_L1
+ARG VITE_ADDRESS_L2
+ARG VITE_EMAIL
+ARG VITE_TELEFON
+
+# Set environment variables from build args so Vite can access them
+ENV VITE_NAME=$VITE_NAME
+ENV VITE_ADDRESS_L1=$VITE_ADDRESS_L1
+ENV VITE_ADDRESS_L2=$VITE_ADDRESS_L2
+ENV VITE_EMAIL=$VITE_EMAIL
+ENV VITE_TELEFON=$VITE_TELEFON
+
 COPY client/package*.json ./
 RUN npm ci
 COPY client ./
