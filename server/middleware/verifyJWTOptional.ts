@@ -54,21 +54,6 @@ const verifyJWTOptional = (
       process.env.ACCESS_TOKEN_SECRET
     ) as JwtPayload;
 
-    // Check if token is expired
-    const currentTimestamp = Math.floor(Date.now() / 1000);
-    if (decoded.exp && decoded.exp < currentTimestamp) {
-      // Token expired, set empty UserInfo and continue
-      // @ts-ignore
-      req.UserInfo = {
-        email: "",
-        roles: [],
-        name: "",
-        id: "",
-      };
-      next();
-      return;
-    }
-
     // Valid token, set UserInfo
     // @ts-ignore
     req.UserInfo = {
@@ -78,18 +63,26 @@ const verifyJWTOptional = (
       id: decoded.UserInfo.id,
     };
 
-    // Update user's last activity timestamp
+    // Update user's last activity timestamp (throttled to once per 5 minutes)
     if (decoded.UserInfo.id) {
-      User.findByIdAndUpdate(decoded.UserInfo.id, {
-        lastActivity: new Date(),
-      }).catch(() => {
+      const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+      User.findOneAndUpdate(
+        { 
+          _id: decoded.UserInfo.id,
+          $or: [
+            { lastActivity: { $lt: fiveMinutesAgo } },
+            { lastActivity: { $exists: false } }
+          ]
+        },
+        { lastActivity: new Date() }
+      ).catch(() => {
         // Silently ignore errors to not break auth flow
       });
     }
 
     next();
   } catch (e) {
-    // Invalid token, set empty UserInfo and continue
+    // Invalid token (including expired), set empty UserInfo and continue
     // @ts-ignore
     req.UserInfo = {
       email: "",
