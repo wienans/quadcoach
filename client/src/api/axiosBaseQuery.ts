@@ -34,7 +34,7 @@ export const axiosBaseReauthQuery =
       return { data: deserializeDatesInObject(result.data) };
     } catch (axiosError) {
       const err = axiosError as AxiosError;
-      if (err.response?.status === 403) {
+      if (err.response?.status === 401 || err.response?.status === 403) {
         // Send the Refresh Token to get a new Access Token
         try {
           const refreshResult = await axios({

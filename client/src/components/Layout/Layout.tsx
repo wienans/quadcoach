@@ -11,9 +11,13 @@ import LoginIcon from "@mui/icons-material/Login";
 import { PresistLogin } from "..";
 import { useAuth } from "../../store/hooks";
 import { FooterProvider } from "../Footer/FooterContext";
+import { useAutoRefreshToken } from "../../hooks";
 
 const Layout = () => {
   const { id: userId } = useAuth();
+
+  // Automatically refresh token before expiry
+  useAutoRefreshToken();
 
   const sidebarNavRoutes: SidebarNavRoute[] = [
     {
