@@ -61,6 +61,7 @@ const TacticBoardInProfile = ({
 
   const { data: accessUsers } = useGetAllTacticboardAccessUsersQuery(
     tacticBoardId || "",
+    { skip: !tacticBoardId || !userId || userId === "" },
   );
 
   useEffect(() => {
@@ -84,7 +85,7 @@ const TacticBoardInProfile = ({
   }, [userId, tacticBoard, userRoles, accessUsers]);
 
   useEffect(() => {
-    if (!isTacticBoardLoading && !isTacticBoardError && tacticBoard) {
+    if (!isTacticBoardLoading && !isTacticBoardError && tacticBoard && tacticBoard.pages && tacticBoard.pages.length > 0) {
       loadFromJson(tacticBoard.pages[0]);
       setMaxPages(tacticBoard.pages.length);
       setSelection(false);

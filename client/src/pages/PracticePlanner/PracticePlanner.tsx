@@ -120,7 +120,7 @@ const PracticePlanner = (): JSX.Element => {
 
   const { data: accessUsers } = useGetAllPracticePlanAccessUsersQuery(
     planId || "",
-    { skip: !planId },
+    { skip: !planId || !userId || userId === "" },
   );
 
   const [sharePracticePlan, { isLoading: isSharePracticePlanLoading }] =
@@ -395,17 +395,6 @@ const PracticePlanner = (): JSX.Element => {
             <SoftBox mt={5} mb={3}>
               <Skeleton variant="rectangular" width={"100%"} height={"100%"} />
             </SoftBox>
-          </>
-        )}
-      </DashboardLayout>
-    );
-  }
-  if (!userId) {
-    return (
-      <DashboardLayout>
-        {() => (
-          <>
-            <Alert color="error">{t("pleaseLogin")}</Alert>
           </>
         )}
       </DashboardLayout>

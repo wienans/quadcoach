@@ -26,9 +26,6 @@ function sendValidation(res: Response, message: string, errors: string[]) {
 
 export const getPracticePlans = async (req: RequestWithUser, res: Response) => {
   try {
-    const userId = req.UserInfo?.id;
-    if (!userId) return res.status(401).json({ message: "Unauthorized" });
-
     let queryString: string = JSON.stringify(req.query);
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
@@ -54,20 +51,21 @@ export const getPracticePlans = async (req: RequestWithUser, res: Response) => {
 
     if (req.UserInfo?.id) {
       parseObject.$or.push({ isPrivate: true, user: req.UserInfo.id });
-    }
 
-    const accessPracticePlans = await PracticePlanAccess.find({
-      user: req.UserInfo?.id,
-    });
-
-    if (accessPracticePlans.length > 0) {
-      parseObject.$or.push({
-        _id: {
-          $in: accessPracticePlans.map((practicePlan) =>
-            practicePlan.practicePlan.toString()
-          ),
-        },
+      // Only query for access records if user is authenticated
+      const accessPracticePlans = await PracticePlanAccess.find({
+        user: req.UserInfo.id,
       });
+
+      if (accessPracticePlans.length > 0) {
+        parseObject.$or.push({
+          _id: {
+            $in: accessPracticePlans.map((practicePlan) =>
+              practicePlan.practicePlan.toString()
+            ),
+          },
+        });
+      }
     }
 
     if (
@@ -156,25 +154,26 @@ export const getPracticePlan = async (req: RequestWithUser, res: Response) => {
       res.status(400).json({ message: "Invalid ID format" });
       return;
     }
-    if (!req.UserInfo?.id) {
-      res.status(401).json({ message: "Unauthorized" });
-      return;
-    }
     const result = await PracticePlan.findOne({ _id: req.params.id });
     if (result) {
-      if (
-        result.isPrivate &&
-        result.user &&
-        (!req.UserInfo?.id || req.UserInfo.id != result.user?.toString()) &&
-        !req.UserInfo?.roles?.includes("Admin") &&
-        !req.UserInfo?.roles?.includes("admin") &&
-        !(await PracticePlanAccess.exists({
-          user: req.UserInfo?.id,
-          practicePlan: req.params.id,
-        }))
-      ) {
-        res.status(403).json({ message: "Forbidden" });
-        return;
+      // Check if the practice plan is private
+      if (result.isPrivate && result.user) {
+        const userId = req.UserInfo?.id;
+        const isOwner = userId && userId !== "" && userId === result.user.toString();
+        const isAdmin = req.UserInfo?.roles?.includes("Admin") || req.UserInfo?.roles?.includes("admin");
+        
+        // Check if user has shared access (only if user is authenticated)
+        const hasSharedAccess = userId && userId !== ""
+          ? await PracticePlanAccess.exists({
+              user: userId,
+              practicePlan: req.params.id,
+            })
+          : false;
+
+        if (!isOwner && !isAdmin && !hasSharedAccess) {
+          res.status(403).json({ message: "Forbidden" });
+          return;
+        }
       }
 
       res.send(result);
