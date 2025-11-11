@@ -54,7 +54,7 @@
     "nameLabel": "Name für duplizierte Taktik Tafel",
     "namePlaceholder": "Name eingeben...",
     "cancel": "Abbrechen",
-    "duplicate": "Duplizieren",
+    "duplicate": "Hinzufügen",
     "errorDuplicating": "Fehler beim Duplizieren der Taktik Tafel"
   },
   "moreActions": "Weitere Aktionen"

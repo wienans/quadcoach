@@ -54,7 +54,7 @@
     "nameLabel": "Name for duplicated tacticboard",
     "namePlaceholder": "Enter name...",
     "cancel": "Cancel",
-    "duplicate": "Duplicate",
+    "duplicate": "Add",
     "errorDuplicating": "Error duplicating tacticboard"
   },
   "moreActions": "More actions"
