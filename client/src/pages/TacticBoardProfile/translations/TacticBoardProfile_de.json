@@ -47,5 +47,15 @@
   "usedInExercises": "Wird in folgenden Übungen verwendet:",
   "editTacticBoardMeta": "Taktik Tafel Metadaten bearbeiten / speichern",
   "favoriteTacticBoard": "Favorisierte Taktik Tafel",
-  "errorUpdatingTacticBoard": "Fehler beim Aktualisieren der Taktik Tafel"
+  "errorUpdatingTacticBoard": "Fehler beim Aktualisieren der Taktik Tafel",
+  "duplicateTacticBoard": "Taktik Tafel duplizieren",
+  "duplicateDialog": {
+    "title": "Taktik Tafel duplizieren",
+    "nameLabel": "Name für duplizierte Taktik Tafel",
+    "namePlaceholder": "Name eingeben...",
+    "cancel": "Abbrechen",
+    "duplicate": "Duplizieren",
+    "errorDuplicating": "Fehler beim Duplizieren der Taktik Tafel"
+  },
+  "moreActions": "Weitere Aktionen"
 }

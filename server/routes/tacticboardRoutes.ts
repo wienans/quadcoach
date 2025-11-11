@@ -33,6 +33,7 @@ router
 router.route("/:id/checkAccess").get(verifyJWT, tacticboardController.checkAccess);
 
 router.route("/:id/share").post(verifyJWT, tacticboardController.shareTacticBoard);
+router.route("/:id/duplicate").post(verifyJWT, tacticboardController.duplicateTacticBoard);
 
 // All page mutation endpoints require authentication
 router

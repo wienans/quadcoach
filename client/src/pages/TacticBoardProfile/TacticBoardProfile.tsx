@@ -23,6 +23,11 @@ import {
   ListItemText,
   Button,
   MenuItem,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Menu,
 } from "@mui/material";
 import * as Yup from "yup";
 import { SoftBox, SoftInput, SoftTypography } from "../../components";
@@ -34,6 +39,7 @@ import {
   useGetTacticBoardQuery,
   useUpdateTacticBoardMetaMutation,
   useShareTacticBoardMutation,
+  useDuplicateTacticBoardMutation,
 } from "../../api/quadcoachApi/tacticboardApi";
 import { useParams, useNavigate } from "react-router-dom";
 import {
@@ -45,6 +51,8 @@ import SaveIcon from "@mui/icons-material/Save";
 import DeleteIcon from "@mui/icons-material/Delete";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { useTranslation } from "react-i18next";
 import { lazy, Suspense, useEffect, useState } from "react";
 import { useAuth } from "../../store/hooks";
@@ -85,6 +93,9 @@ const TacticBoardProfile = () => {
   const [accessMode, setAccessMode] = useState<AccessLevel>("view");
   const [userEmail, setUserEmail] = useState<string>("");
   const [emailError, setEmailError] = useState<string>("");
+  const [openDuplicateDialog, setOpenDuplicateDialog] = useState<boolean>(false);
+  const [duplicateName, setDuplicateName] = useState<string>("");
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const { id: userId, roles: userRoles } = useAuth();
 
   const {
@@ -135,6 +146,16 @@ const TacticBoardProfile = () => {
     deleteTacticboardAccess,
     { isLoading: isDeleteTacticboardAccessLoading },
   ] = useDeleteTacticboardAccessMutation();
+
+  const [
+    duplicateTacticBoard,
+    {
+      isLoading: isDuplicateTacticBoardLoading,
+      isError: isDuplicateTacticBoardError,
+      isSuccess: isDuplicateTacticBoardSuccess,
+      data: duplicateData,
+    },
+  ] = useDuplicateTacticBoardMutation();
 
   useEffect(() => {
     if (userId) {
@@ -277,6 +298,58 @@ const TacticBoardProfile = () => {
     }
   };
 
+  const handleDuplicateClick = () => {
+    setDuplicateName(tacticBoard?.name ? `${tacticBoard.name} (Copy)` : "");
+    setOpenDuplicateDialog(true);
+    setAnchorEl(null);
+  };
+
+  const handleDuplicateConfirm = async () => {
+    if (!tacticBoardId || !duplicateName.trim()) {
+      return;
+    }
+
+    try {
+      await duplicateTacticBoard({
+        tacticboardId: tacticBoardId,
+        name: duplicateName.trim(),
+      }).unwrap();
+      setOpenDuplicateDialog(false);
+      setDuplicateName("");
+    } catch (error) {
+      console.error("Error duplicating tacticboard:", error);
+    }
+  };
+
+  const handleDuplicateCancel = () => {
+    setOpenDuplicateDialog(false);
+    setDuplicateName("");
+  };
+
+  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  useEffect(() => {
+    if (isDuplicateTacticBoardSuccess && duplicateData?._id) {
+      navigate(`/tacticboards/${duplicateData._id}`);
+    }
+  }, [isDuplicateTacticBoardSuccess, duplicateData, navigate]);
+
+      setUserEmail("");
+    } catch (error: unknown) {
+      if ((error as { status?: number })?.status === 404) {
+        setEmailError("User not found with this email");
+      } else {
+        setEmailError("Failed to add user access");
+      }
+    }
+  };
+
   if (isTacticBoardLoading) {
     return (
       <DashboardLayout>
@@ -381,6 +454,17 @@ const TacticBoardProfile = () => {
                   </IconButton>
                 </Tooltip>
               )}
+              {userId && userId !== "" && tacticBoardId && (
+                <Tooltip title={t("TacticBoardProfile:duplicateTacticBoard")}>
+                  <IconButton
+                    onClick={handleDuplicateClick}
+                    disabled={isDuplicateTacticBoardLoading}
+                    color="primary"
+                  >
+                    <ContentCopyIcon />
+                  </IconButton>
+                </Tooltip>
+              )}
               {isPrivileged && (
                 <Tooltip title={t("TacticBoardProfile:deleteTacticBoard")}>
                   <IconButton
@@ -401,42 +485,13 @@ const TacticBoardProfile = () => {
         }
         bottomNavigation={
           !isUpMd && [
-            userId && userId !== "" && tacticBoardId && (
-              <Tooltip
-                key="favorite"
-                title={t("TacticBoardProfile:favoriteTacticBoard")}
-              >
-                <BottomNavigationAction
-                  icon={
-                    <FavoriteIcon color={isFavorite ? "error" : "inherit"} />
-                  }
-                  disabled={
-                    isAddFavoriteTacticboardLoading ||
-                    isRemoveFavoriteTacticboardLoading
-                  }
-                  onClick={() => {
-                    if (isFavorite) {
-                      removeFavoriteTacticboard({
-                        tacticboardId: tacticBoardId,
-                        userId: userId,
-                      });
-                    } else {
-                      addFavoriteTacticboard({
-                        tacticboardId: tacticBoardId,
-                        userId: userId,
-                      });
-                    }
-                  }}
-                />
-              </Tooltip>
-            ),
             isPrivileged && (
               <Tooltip
                 key="edit"
                 title={t("TacticBoardProfile:editTacticBoardMeta")}
               >
                 <BottomNavigationAction
-                  icon={<EditIcon />}
+                  icon={isEditMode ? <SaveIcon /> : <EditIcon />}
                   onClick={() => {
                     setIsEditMode(!isEditMode);
 
@@ -447,22 +502,14 @@ const TacticBoardProfile = () => {
                 />
               </Tooltip>
             ),
-            isPrivileged && (
-              <Tooltip
-                key="delete"
-                title={t("TacticBoardProfile:deleteTacticBoard")}
-              >
+            (userId && userId !== "" && tacticBoardId) || isPrivileged ? (
+              <Tooltip key="more" title={t("TacticBoardProfile:moreActions")}>
                 <BottomNavigationAction
-                  icon={<DeleteIcon />}
-                  onClick={onDeleteTacticBoardClick}
-                  disabled={
-                    !tacticBoard ||
-                    isDeleteTacticBoardLoading ||
-                    isUpdateTacticBoardMetaLoading
-                  }
+                  icon={<MoreVertIcon />}
+                  onClick={handleMenuOpen}
                 />
               </Tooltip>
-            ),
+            ) : null,
           ]
         }
       >
@@ -808,6 +855,118 @@ const TacticBoardProfile = () => {
               )}
             </Card>
             <Footer />
+
+            {/* Mobile Menu */}
+            <Menu
+              anchorEl={anchorEl}
+              open={Boolean(anchorEl)}
+              onClose={handleMenuClose}
+            >
+              {userId && userId !== "" && tacticBoardId && (
+                <MenuItem
+                  onClick={() => {
+                    if (isFavorite) {
+                      removeFavoriteTacticboard({
+                        tacticboardId: tacticBoardId,
+                        userId: userId,
+                      });
+                    } else {
+                      addFavoriteTacticboard({
+                        tacticboardId: tacticBoardId,
+                        userId: userId,
+                      });
+                    }
+                    handleMenuClose();
+                  }}
+                  disabled={
+                    isAddFavoriteTacticboardLoading ||
+                    isRemoveFavoriteTacticboardLoading
+                  }
+                >
+                  <FavoriteIcon
+                    color={isFavorite ? "error" : "inherit"}
+                    sx={{ mr: 1 }}
+                  />
+                  {t("TacticBoardProfile:favoriteTacticBoard")}
+                </MenuItem>
+              )}
+              {userId && userId !== "" && tacticBoardId && (
+                <MenuItem
+                  onClick={handleDuplicateClick}
+                  disabled={isDuplicateTacticBoardLoading}
+                >
+                  <ContentCopyIcon sx={{ mr: 1 }} />
+                  {t("TacticBoardProfile:duplicateTacticBoard")}
+                </MenuItem>
+              )}
+              {isPrivileged && (
+                <MenuItem
+                  onClick={() => {
+                    onDeleteTacticBoardClick();
+                    handleMenuClose();
+                  }}
+                  disabled={
+                    !tacticBoard ||
+                    isDeleteTacticBoardLoading ||
+                    isUpdateTacticBoardMetaLoading
+                  }
+                >
+                  <DeleteIcon color="error" sx={{ mr: 1 }} />
+                  {t("TacticBoardProfile:deleteTacticBoard")}
+                </MenuItem>
+              )}
+            </Menu>
+
+            {/* Duplicate Dialog */}
+            <Dialog
+              open={openDuplicateDialog}
+              onClose={handleDuplicateCancel}
+              maxWidth="sm"
+              fullWidth
+            >
+              <DialogTitle>
+                {t("TacticBoardProfile:duplicateDialog.title")}
+              </DialogTitle>
+              <DialogContent>
+                {isDuplicateTacticBoardError && (
+                  <Alert color="error" sx={{ mb: 2 }}>
+                    {t("TacticBoardProfile:duplicateDialog.errorDuplicating")}
+                  </Alert>
+                )}
+                <TextField
+                  autoFocus
+                  margin="dense"
+                  label={t("TacticBoardProfile:duplicateDialog.nameLabel")}
+                  placeholder={t(
+                    "TacticBoardProfile:duplicateDialog.namePlaceholder",
+                  )}
+                  type="text"
+                  fullWidth
+                  value={duplicateName}
+                  onChange={(e) => setDuplicateName(e.target.value)}
+                  onKeyPress={(e) => {
+                    if (e.key === "Enter" && duplicateName.trim()) {
+                      handleDuplicateConfirm();
+                    }
+                  }}
+                />
+              </DialogContent>
+              <DialogActions>
+                <Button onClick={handleDuplicateCancel} color="secondary">
+                  {t("TacticBoardProfile:duplicateDialog.cancel")}
+                </Button>
+                <Button
+                  onClick={handleDuplicateConfirm}
+                  color="primary"
+                  variant="contained"
+                  disabled={
+                    !duplicateName.trim() || isDuplicateTacticBoardLoading
+                  }
+                >
+                  {t("TacticBoardProfile:duplicateDialog.duplicate")}
+                </Button>
+              </DialogActions>
+            </Dialog>
           </>
         )}
       </ProfileLayout>

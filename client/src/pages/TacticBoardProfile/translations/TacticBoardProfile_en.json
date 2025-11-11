@@ -47,5 +47,15 @@
   "usedInExercises": "Used in exercises:",
   "editTacticBoardMeta": "Edit / Save tacticboard metadata",
   "favoriteTacticBoard": "Favorite tacticboard",
-  "errorUpdatingTacticBoard": "Error updating tacticboard"
+  "errorUpdatingTacticBoard": "Error updating tacticboard",
+  "duplicateTacticBoard": "Duplicate tacticboard",
+  "duplicateDialog": {
+    "title": "Duplicate Tacticboard",
+    "nameLabel": "Name for duplicated tacticboard",
+    "namePlaceholder": "Enter name...",
+    "cancel": "Cancel",
+    "duplicate": "Duplicate",
+    "errorDuplicating": "Error duplicating tacticboard"
+  },
+  "moreActions": "More actions"
 }
