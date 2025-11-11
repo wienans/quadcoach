@@ -340,16 +340,6 @@ const TacticBoardProfile = () => {
     }
   }, [isDuplicateTacticBoardSuccess, duplicateData, navigate]);
 
-      setUserEmail("");
-    } catch (error: unknown) {
-      if ((error as { status?: number })?.status === 404) {
-        setEmailError("User not found with this email");
-      } else {
-        setEmailError("Failed to add user access");
-      }
-    }
-  };
-
   if (isTacticBoardLoading) {
     return (
       <DashboardLayout>
