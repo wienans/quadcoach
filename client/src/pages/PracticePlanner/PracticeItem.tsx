@@ -60,10 +60,8 @@ const PracticeItem: React.FC<PracticeItemProps> = ({
     },
   );
 
-  // Exercise is considered missing if:
-  // - there's an error, OR
-  // - loading finished but no data, OR
-  // - the API returned a "No Record Found" response (has 'result' property instead of exercise data)
+  // Exercise is considered missing if there's an error (e.g., 404 from server) 
+  // or loading finished but no data was returned.
   const isExerciseMissing = item.kind === "exercise" && 
     (isError || (!isLoading && (!exercise || !exercise.name)));
 
