@@ -8,6 +8,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 
 import FitnessCenterIcon from "@mui/icons-material/FitnessCenter";
 import FreeBreakfastIcon from "@mui/icons-material/FreeBreakfast";
+import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import TimerIcon from "@mui/icons-material/Timer";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
@@ -52,16 +53,23 @@ const PracticeItem: React.FC<PracticeItemProps> = ({
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   // Fetch exercise data if this is an exercise item
-  const { data: exercise } = useGetExerciseQuery(
+  const { data: exercise, isError, isLoading } = useGetExerciseQuery(
     item.kind === "exercise" ? item.exerciseId : "",
     {
       skip: item.kind !== "exercise" || !item.exerciseId,
     },
   );
 
+  // Exercise is considered missing if:
+  // - there's an error, OR
+  // - loading finished but no data, OR
+  // - the API returned a "No Record Found" response (has 'result' property instead of exercise data)
+  const isExerciseMissing = item.kind === "exercise" && 
+    (isError || (!isLoading && (!exercise || !exercise.name)));
+
   // Get block number from exercise
   const getBlockNumber = () => {
-    if (!exercise || item.kind !== "exercise" || !item.blockId) return "";
+    if (!exercise?.description_blocks || item.kind !== "exercise" || !item.blockId) return "";
     const blockIndex = exercise.description_blocks.findIndex(
       (block) => block._id === item.blockId,
     );
@@ -70,7 +78,7 @@ const PracticeItem: React.FC<PracticeItemProps> = ({
 
   // Get the specific block for this exercise item
   const getBlock = () => {
-    if (!exercise || item.kind !== "exercise" || !item.blockId) return undefined;
+    if (!exercise?.description_blocks || item.kind !== "exercise" || !item.blockId) return undefined;
     return exercise.description_blocks.find(
       (block) => block._id === item.blockId,
     );
@@ -116,18 +124,35 @@ const PracticeItem: React.FC<PracticeItemProps> = ({
     formik.setFieldValue("sections", sections);
   };
 
+  // Determine the visual style based on item type and state
+  const getItemStyle = () => {
+    if (item.kind === "break") {
+      return { bgColor: "light", borderColor: "secondary" };
+    }
+    if (isExerciseMissing) {
+      return { bgColor: "light", borderColor: "warning" };
+    }
+    return { bgColor: "white", borderColor: "primary" };
+  };
+
+  const itemStyle = getItemStyle();
+
   return (
     <SoftBox
       mb={2}
       p={2}
       borderRadius="lg"
-      bgColor={item.kind === "break" ? "light" : "white"}
+      bgColor={itemStyle.bgColor}
       border="1px solid"
-      borderColor={item.kind === "break" ? "secondary" : "primary"}
+      borderColor={itemStyle.borderColor}
     >
       <SoftBox display="flex" alignItems="center" gap={1} mb={1}>
         {item.kind === "exercise" ? (
-          <FitnessCenterIcon color="primary" fontSize="small" />
+          isExerciseMissing ? (
+            <ErrorOutlineIcon color="warning" fontSize="small" />
+          ) : (
+            <FitnessCenterIcon color="primary" fontSize="small" />
+          )
         ) : (
           <FreeBreakfastIcon color="secondary" fontSize="small" />
         )}
@@ -137,18 +162,22 @@ const PracticeItem: React.FC<PracticeItemProps> = ({
           fontWeight="medium"
           flex={1}
           sx={{
-            cursor: item.kind === "exercise" ? "pointer" : "default",
+            cursor: item.kind === "exercise" && !isExerciseMissing ? "pointer" : "default",
             "&:hover":
-              item.kind === "exercise"
+              item.kind === "exercise" && !isExerciseMissing
                 ? {
                     textDecoration: "underline",
                     color: "primary.main",
                   }
                 : {},
           }}
-          onClick={item.kind === "exercise" ? handleExerciseClick : undefined}
+          onClick={item.kind === "exercise" && !isExerciseMissing ? handleExerciseClick : undefined}
         >
-          {item.kind === "exercise" ? exercise?.name || t("loading") : t("break")}
+          {item.kind === "exercise"
+            ? isExerciseMissing
+              ? t("exerciseNotFound")
+              : exercise?.name || t("loading")
+            : t("break")}
         </Typography>
 
         <SoftBox display="flex" alignItems="center" gap={1}>
@@ -219,8 +248,8 @@ const PracticeItem: React.FC<PracticeItemProps> = ({
 
       {item.kind === "exercise" && (
         <SoftBox>
-          <Typography variant="body2" color="text.secondary">
-            {t("block")} {getBlockNumber()}
+          <Typography variant="body2" color={isExerciseMissing ? "warning.main" : "text.secondary"}>
+            {isExerciseMissing ? t("exerciseNotFoundHint") : `${t("block")} ${getBlockNumber()}`}
           </Typography>
         </SoftBox>
       )}

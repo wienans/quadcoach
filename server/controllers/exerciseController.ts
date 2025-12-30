@@ -103,15 +103,16 @@ export const getAllExercises = asyncHandler(
 // @route   GET /api/exercises/:id
 // @access  Public
 export const getById = asyncHandler(async (req: Request, res: Response) => {
-  if (mongoose.isValidObjectId(req.params.id)) {
-    const result = await Exercise.findOne({ _id: req.params.id });
-    if (result) {
-      res.send(result);
-    } else {
-      res.send({ result: "No Record Found" });
-    }
+  if (!mongoose.isValidObjectId(req.params.id)) {
+    res.status(400).json({ message: "Invalid exercise ID" });
+    return;
+  }
+
+  const result = await Exercise.findOne({ _id: req.params.id });
+  if (result) {
+    res.send(result);
   } else {
-    res.send({ result: "No Record Found" });
+    res.status(404).json({ message: "Exercise not found" });
   }
 });
 
