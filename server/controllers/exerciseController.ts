@@ -5,6 +5,7 @@ import mongoose from "mongoose";
 import ExerciseFav from "../models/exerciseFav";
 import ExerciseAccess from "../models/exerciseAccess";
 import User from "../models/user";
+import { PracticePlan } from "../models/practicePlan";
 
 interface RequestWithUser extends Request {
   UserInfo?: {
@@ -103,15 +104,16 @@ export const getAllExercises = asyncHandler(
 // @route   GET /api/exercises/:id
 // @access  Public
 export const getById = asyncHandler(async (req: Request, res: Response) => {
-  if (mongoose.isValidObjectId(req.params.id)) {
-    const result = await Exercise.findOne({ _id: req.params.id });
-    if (result) {
-      res.send(result);
-    } else {
-      res.send({ result: "No Record Found" });
-    }
+  if (!mongoose.isValidObjectId(req.params.id)) {
+    res.status(400).json({ message: "Invalid exercise ID" });
+    return;
+  }
+
+  const result = await Exercise.findOne({ _id: req.params.id });
+  if (result) {
+    res.send(result);
   } else {
-    res.send({ result: "No Record Found" });
+    res.status(404).json({ message: "Exercise not found" });
   }
 });
 
@@ -198,6 +200,23 @@ export const deleteById = asyncHandler(
 
         if (!hasAccess) {
           res.status(403).json({ message: "Forbidden" });
+          return;
+        }
+
+        // Check if exercise is used in any practice plans
+        const practicePlansUsingExercise = await PracticePlan.find({
+          "sections.groups.items.exerciseId": req.params.id,
+        });
+
+        if (practicePlansUsingExercise.length > 0) {
+          res.status(400).json({
+            message:
+              "Cannot delete exercise - it is being used in practice plans",
+            practicePlans: practicePlansUsingExercise.map((pp) => ({
+              id: pp._id,
+              name: pp.name,
+            })),
+          });
           return;
         }
 

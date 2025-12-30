@@ -21,6 +21,8 @@
   "addBreak": "Pause hinzufügen",
   "break": "Pause",
   "loading": "Laden...",
+  "exerciseNotFound": "Übung nicht gefunden",
+  "exerciseNotFoundHint": "Diese Übung wurde möglicherweise gelöscht",
   "block": "Block",
   "breakDescription": "Pausenbeschreibung",
   "access": {

@@ -92,7 +92,9 @@ const PracticeSection: React.FC<PracticeSectionProps> = ({
                   placeholder={t("sectionName")}
                   value={section.name}
                   onChange={(e) => {
-                    const sections = [...formik.values.sections];
+                    const sections = JSON.parse(
+                      JSON.stringify(formik.values.sections),
+                    );
                     sections[sectionIndex].name = e.target.value;
                     formik.setFieldValue("sections", sections);
                   }}
@@ -119,7 +121,10 @@ const PracticeSection: React.FC<PracticeSectionProps> = ({
                       type="number"
                       value={section.targetDuration}
                       onChange={(e) => {
-                        const sections = [...formik.values.sections];
+                        // Deep copy to avoid mutating frozen Redux state
+                        const sections = JSON.parse(
+                          JSON.stringify(formik.values.sections),
+                        );
                         sections[sectionIndex].targetDuration =
                           parseInt(e.target.value) || 0;
                         formik.setFieldValue("sections", sections);
@@ -141,7 +146,7 @@ const PracticeSection: React.FC<PracticeSectionProps> = ({
             {/* Section Actions */}
             {isEditMode && (
               <SoftBox display="flex" gap={1}>
-                 <Tooltip title={t("moveUp")}>
+                <Tooltip title={t("moveUp")}>
                   <span>
                     <IconButton
                       size="small"
@@ -152,7 +157,7 @@ const PracticeSection: React.FC<PracticeSectionProps> = ({
                     </IconButton>
                   </span>
                 </Tooltip>
-                 <Tooltip title={t("moveDown")}>
+                <Tooltip title={t("moveDown")}>
                   <span>
                     <IconButton
                       size="small"
@@ -163,7 +168,7 @@ const PracticeSection: React.FC<PracticeSectionProps> = ({
                     </IconButton>
                   </span>
                 </Tooltip>
-                 <Tooltip title={t("deleteSection")}>
+                <Tooltip title={t("deleteSection")}>
                   <IconButton size="small" color="error" onClick={onDelete}>
                     <DeleteIcon />
                   </IconButton>

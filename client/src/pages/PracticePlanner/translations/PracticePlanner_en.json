@@ -21,6 +21,8 @@
   "addBreak": "Add Break",
   "break": "Break",
   "loading": "Loading...",
+  "exerciseNotFound": "Exercise Not Found",
+  "exerciseNotFoundHint": "This exercise may have been deleted",
   "block": "Block",
   "breakDescription": "Break description",
   "access": {
