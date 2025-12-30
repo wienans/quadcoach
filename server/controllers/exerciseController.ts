@@ -5,6 +5,7 @@ import mongoose from "mongoose";
 import ExerciseFav from "../models/exerciseFav";
 import ExerciseAccess from "../models/exerciseAccess";
 import User from "../models/user";
+import { PracticePlan } from "../models/practicePlan";
 
 interface RequestWithUser extends Request {
   UserInfo?: {
@@ -199,6 +200,23 @@ export const deleteById = asyncHandler(
 
         if (!hasAccess) {
           res.status(403).json({ message: "Forbidden" });
+          return;
+        }
+
+        // Check if exercise is used in any practice plans
+        const practicePlansUsingExercise = await PracticePlan.find({
+          "sections.groups.items.exerciseId": req.params.id,
+        });
+
+        if (practicePlansUsingExercise.length > 0) {
+          res.status(400).json({
+            message:
+              "Cannot delete exercise - it is being used in practice plans",
+            practicePlans: practicePlansUsingExercise.map((pp) => ({
+              id: pp._id,
+              name: pp.name,
+            })),
+          });
           return;
         }
 
