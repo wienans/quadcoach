@@ -91,7 +91,9 @@ const PracticeGroup: React.FC<PracticeGroupProps> = ({
               placeholder={t("groupName")}
               value={group.name}
               onChange={(e) => {
-                const sections = [...formik.values.sections];
+                const sections = JSON.parse(
+                  JSON.stringify(formik.values.sections),
+                );
                 sections[sectionIndex].groups[groupIndex].name = e.target.value;
                 formik.setFieldValue("sections", sections);
               }}
@@ -105,7 +107,8 @@ const PracticeGroup: React.FC<PracticeGroupProps> = ({
 
           <SoftBox display="flex" alignItems="center">
             <Typography variant="body2" color="text.secondary">
-              {groupTotal}{t("minutes")}
+              {groupTotal}
+              {t("minutes")}
             </Typography>
             {isEditMode && (
               <IconButton size="small" color="error" onClick={onDelete}>

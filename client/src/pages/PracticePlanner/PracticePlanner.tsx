@@ -744,7 +744,9 @@ const PracticePlanner = (): JSX.Element => {
                       formik={formik}
                       onMoveUp={() => {
                         if (sectionIndex > 0) {
-                          const sections = [...formik.values.sections];
+                          const sections = JSON.parse(
+                            JSON.stringify(formik.values.sections),
+                          );
                           [sections[sectionIndex], sections[sectionIndex - 1]] =
                             [
                               sections[sectionIndex - 1],
@@ -758,7 +760,9 @@ const PracticePlanner = (): JSX.Element => {
                           sectionIndex <
                           (formik.values.sections?.length || 0) - 1
                         ) {
-                          const sections = [...formik.values.sections];
+                          const sections = JSON.parse(
+                            JSON.stringify(formik.values.sections),
+                          );
                           [sections[sectionIndex], sections[sectionIndex + 1]] =
                             [
                               sections[sectionIndex + 1],
