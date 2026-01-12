@@ -345,86 +345,185 @@ const TacticsBoard = (): JSX.Element => {
   ]);
   useEffect(() => {
     let interval: NodeJS.Timeout;
+
     if (isAnimating && tacticBoard) {
-      // Start the animation only if isAnimating is true
       interval = setInterval(() => {
         setPage((prevPage) => {
           const newPage = (prevPage % tacticBoard.pages.length) + 1;
+          const nextPageObjects = tacticBoard.pages[newPage - 1].objects ?? [];
+
+          const targetByUuid = new Map<string, (typeof nextPageObjects)[number]>();
+          nextPageObjects.forEach((o) => {
+            if (typeof (o as { uuid?: unknown }).uuid === "string") {
+              targetByUuid.set((o as { uuid: string }).uuid, o);
+            }
+          });
+
+          const canvas = canvasRef.current;
+          const renderAll = canvas?.renderAll.bind(canvas);
+
+          let pendingAnimations = 0;
+          let didTriggerLoad = false;
+
+          const triggerLoadOnce = () => {
+            if (didTriggerLoad) return;
+            didTriggerLoad = true;
+            onLoadPage(newPage);
+          };
+
+          const onOneAnimationComplete = () => {
+            pendingAnimations -= 1;
+            if (pendingAnimations <= 0) {
+              triggerLoadOnce();
+            }
+          };
+
           getAllObjects().forEach((obj) => {
-            const targetObject = tacticBoard.pages[newPage - 1].objects?.find(
-              (nextObject) =>
-                (nextObject as { uuid?: string }).uuid ===
-                (obj as fabric.Object & { uuid?: string }).uuid,
-            );
-            if (targetObject && canvasRef.current) {
-              obj.animate("left", targetObject.left || 0, {
-                onChange: canvasRef.current.renderAll.bind(canvasRef.current),
+            const objUuid = (obj as fabric.Object & { uuid?: unknown }).uuid;
+            if (typeof objUuid !== "string") return;
+
+            const targetObject = targetByUuid.get(objUuid);
+            if (!targetObject || !canvas) return;
+
+            const targetLeft = targetObject.left;
+            const targetTop = targetObject.top;
+
+            if (typeof targetLeft !== "number" || typeof targetTop !== "number") {
+              return;
+            }
+
+            const currentLeft = obj.left ?? 0;
+            const currentTop = obj.top ?? 0;
+
+            const shouldAnimateLeft = targetLeft !== currentLeft;
+            const shouldAnimateTop = targetTop !== currentTop;
+
+            if (!shouldAnimateLeft && !shouldAnimateTop) return;
+
+            if (shouldAnimateLeft) {
+              pendingAnimations += 1;
+              obj.animate("left", targetLeft, {
+                onChange: renderAll,
                 duration: 1000,
-                onComplete: () => {
-                  onLoadPage(newPage);
-                },
+                onComplete: onOneAnimationComplete,
               });
-              obj.animate("top", targetObject.top || 0, {
-                onChange: canvasRef.current.renderAll.bind(canvasRef.current),
+            }
+
+            if (shouldAnimateTop) {
+              pendingAnimations += 1;
+              obj.animate("top", targetTop, {
+                onChange: renderAll,
                 duration: 1000,
-                onComplete: () => {
-                  onLoadPage(newPage);
-                },
+                onComplete: onOneAnimationComplete,
               });
             }
           });
+
+          if (pendingAnimations === 0) {
+            triggerLoadOnce();
+          }
+
           return newPage;
         });
       }, 2000);
     }
 
-    // Clean up the interval on component unmount or when the last page is reached
     return () => clearInterval(interval);
   }, [isAnimating, onLoadPage, tacticBoard, getAllObjects, canvasRef]);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
+
     if (isRecording && tacticBoard) {
-      // Start the animation only if isAnimating is true
       interval = setInterval(() => {
         setPage((prevPage) => {
           const newPage = (prevPage % tacticBoard.pages.length) + 1;
+
           if (prevPage === tacticBoard.pages.length && newPage === 1) {
             stopRecording();
             downloadVideo(
               tacticBoard.name ? `${tacticBoard.name}.mp4` : "tacticboard.mp4",
             );
           }
+
+          const nextPageObjects = tacticBoard.pages[newPage - 1].objects ?? [];
+
+          const targetByUuid = new Map<string, (typeof nextPageObjects)[number]>();
+          nextPageObjects.forEach((o) => {
+            if (typeof (o as { uuid?: unknown }).uuid === "string") {
+              targetByUuid.set((o as { uuid: string }).uuid, o);
+            }
+          });
+
+          const canvas = canvasRef.current;
+          const renderAll = canvas?.renderAll.bind(canvas);
+
+          let pendingAnimations = 0;
+          let didTriggerLoad = false;
+
+          const triggerLoadOnce = () => {
+            if (didTriggerLoad) return;
+            didTriggerLoad = true;
+            onLoadPage(newPage);
+          };
+
+          const onOneAnimationComplete = () => {
+            pendingAnimations -= 1;
+            if (pendingAnimations <= 0) {
+              triggerLoadOnce();
+            }
+          };
+
           getAllObjects().forEach((obj) => {
-            const targetObject = tacticBoard.pages[newPage - 1].objects?.find(
-              (nextObject) =>
-                (nextObject as { uuid?: string }).uuid ===
-                (obj as fabric.Object & { uuid?: string }).uuid,
-            );
-            if (targetObject && canvasRef.current) {
-              obj.animate("left", targetObject.left || 0, {
-                onChange: canvasRef.current.renderAll.bind(canvasRef.current),
+            const objUuid = (obj as fabric.Object & { uuid?: unknown }).uuid;
+            if (typeof objUuid !== "string") return;
+
+            const targetObject = targetByUuid.get(objUuid);
+            if (!targetObject || !canvas) return;
+
+            const targetLeft = targetObject.left;
+            const targetTop = targetObject.top;
+
+            if (typeof targetLeft !== "number" || typeof targetTop !== "number") {
+              return;
+            }
+
+            const currentLeft = obj.left ?? 0;
+            const currentTop = obj.top ?? 0;
+
+            const shouldAnimateLeft = targetLeft !== currentLeft;
+            const shouldAnimateTop = targetTop !== currentTop;
+
+            if (!shouldAnimateLeft && !shouldAnimateTop) return;
+
+            if (shouldAnimateLeft) {
+              pendingAnimations += 1;
+              obj.animate("left", targetLeft, {
+                onChange: renderAll,
                 duration: 1000,
-                onComplete: () => {
-                  onLoadPage(newPage);
-                },
+                onComplete: onOneAnimationComplete,
               });
-              obj.animate("top", targetObject.top || 0, {
-                onChange: canvasRef.current.renderAll.bind(canvasRef.current),
+            }
+
+            if (shouldAnimateTop) {
+              pendingAnimations += 1;
+              obj.animate("top", targetTop, {
+                onChange: renderAll,
                 duration: 1000,
-                onComplete: () => {
-                  onLoadPage(newPage);
-                },
+                onComplete: onOneAnimationComplete,
               });
             }
           });
+
+          if (pendingAnimations === 0) {
+            triggerLoadOnce();
+          }
 
           return newPage;
         });
       }, 2000);
     }
 
-    // Clean up the interval on component unmount or when the last page is reached
     return () => {
       clearInterval(interval);
     };
