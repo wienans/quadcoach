@@ -195,7 +195,17 @@ const TacticBoardCanvasContextProvider: FC<{
   const setSelection = useCallback((selection: boolean) => {
     canvasFabricRef.current?.getObjects().forEach((obj) => {
       obj.evented = selection;
+      obj.selectable = selection;
+
+      if (obj.type === "textbox") {
+        (obj as fabric.Textbox).editable = selection;
+      }
     });
+
+    if (!selection) {
+      canvasFabricRef.current?.discardActiveObject();
+      canvasFabricRef.current?.renderAll();
+    }
   }, []);
 
   const clearCanvas = useCallback(() => {

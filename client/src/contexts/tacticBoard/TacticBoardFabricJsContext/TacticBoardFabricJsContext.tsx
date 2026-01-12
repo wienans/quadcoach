@@ -247,6 +247,18 @@ const TacticBoardFabricJsContextProvider: FC<{
               const addObj = new fabric.Text(obj.text, obj as object);
               canvasFabric.add(addObj);
             }
+          } else if (obj.type === "line") {
+            const lineObj = obj as unknown as {
+              x1: number;
+              y1: number;
+              x2: number;
+              y2: number;
+            };
+            const addObj = new fabric.Line(
+              [lineObj.x1, lineObj.y1, lineObj.x2, lineObj.y2],
+              obj as object,
+            );
+            canvasFabric.add(addObj);
           } else if (obj.type === "group") {
             const objects: fabric.Object[] = [];
             obj.objects?.forEach((groupObj) => {
@@ -269,6 +281,21 @@ const TacticBoardFabricJsContextProvider: FC<{
                 objects.push(addObj);
               } else if (groupObj.type === "rect") {
                 const addObj = new fabric.Rect(groupObj as object);
+                objects.push(addObj);
+              } else if (groupObj.type === "line") {
+                const lineObj = groupObj as unknown as {
+                  x1: number;
+                  y1: number;
+                  x2: number;
+                  y2: number;
+                };
+                const addObj = new fabric.Line(
+                  [lineObj.x1, lineObj.y1, lineObj.x2, lineObj.y2],
+                  groupObj as object,
+                );
+                objects.push(addObj);
+              } else if (groupObj.type === "triangle") {
+                const addObj = new fabric.Triangle(groupObj as object);
                 objects.push(addObj);
               }
             });

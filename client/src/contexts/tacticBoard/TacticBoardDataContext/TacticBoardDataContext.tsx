@@ -86,6 +86,12 @@ const TacticBoardDataContextProvider: FC<{
                   );
                   canvasFabric.add(addObj);
                 }
+              } else if (objData.type === "textbox") {
+                const addObj = new fabric.Textbox(
+                  objData.text ?? "",
+                  objData as object,
+                );
+                canvasFabric.add(addObj);
               }
             } catch (fallbackError) {
               console.error(

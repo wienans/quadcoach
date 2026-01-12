@@ -22,6 +22,10 @@
       "tooltip_enable": "Aktiviert den Zeichenmodus",
       "tooltip_disable": "Deaktiviert den Zeichenmodus"
     },
+    "arrowTip": {
+      "tooltip": "Pfeilspitze für gerade Linien umschalten (Shift halten).",
+      "label": "Pfeilspitze"
+    },
     "objectDeleteButton": {
       "tooltip": "Löscht das aktuelle ausgewählte Objekt"
     },
