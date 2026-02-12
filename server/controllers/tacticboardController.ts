@@ -965,3 +965,63 @@ export const shareTacticBoard = asyncHandler(
     }
   }
 );
+
+// @desc    Duplicate a tacticboard
+// @route   POST /api/tacticboards/:id/duplicate
+// @access  Private - Authenticated users only
+export const duplicateTacticBoard = asyncHandler(
+  async (req: RequestWithUser, res: Response) => {
+    if (!req.UserInfo?.id) {
+      res.status(401).json({ message: "Unauthorized" });
+      return;
+    }
+
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      res.status(400).json({ message: "Invalid tacticboard ID" });
+      return;
+    }
+
+    const originalTacticboard = await TacticBoard.findById(req.params.id);
+    if (!originalTacticboard) {
+      res.status(404).json({ message: "Tacticboard not found" });
+      return;
+    }
+
+    // Check if user has access to view the tacticboard
+    const isOwner = originalTacticboard.user?.toString() === req.UserInfo.id;
+    const isAdmin = req.UserInfo.roles?.includes("Admin") || req.UserInfo.roles?.includes("admin");
+    const hasSharedAccess = await TacticboardAccess.exists({
+      user: req.UserInfo.id,
+      tacticboard: req.params.id,
+    });
+
+    if (originalTacticboard.isPrivate && !isOwner && !isAdmin && !hasSharedAccess) {
+      res.status(403).json({ message: "Forbidden" });
+      return;
+    }
+
+    const { name } = req.body;
+    if (!name || typeof name !== "string" || name.trim() === "") {
+      res.status(400).json({ message: "Name is required" });
+      return;
+    }
+
+    // Create a duplicate with new name and current user as owner
+    const duplicatedTacticboard = new TacticBoard({
+      name: name.trim(),
+      pages: originalTacticboard.pages,
+      isPrivate: originalTacticboard.isPrivate,
+      tags: originalTacticboard.tags,
+      description: originalTacticboard.description,
+      coaching_points: originalTacticboard.coaching_points,
+      creator: originalTacticboard.creator,
+      user: req.UserInfo.id, // Set current user as owner
+    });
+
+    const result = await duplicatedTacticboard.save();
+    res.status(201).json({
+      message: "Tacticboard duplicated successfully",
+      _id: result._id,
+    });
+  }
+);
