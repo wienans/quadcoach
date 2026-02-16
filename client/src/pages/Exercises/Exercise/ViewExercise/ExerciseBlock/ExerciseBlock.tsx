@@ -210,6 +210,7 @@ const ExerciseBlock = ({
           <AccordionDetails>
             <TacticboardAutocomplete
               value={currentBlock.tactics_board}
+              publicOnly
               onChange={(_event, value) => {
                 formik.setFieldValue(
                   `description_blocks.${blockIndex}.tactics_board`,

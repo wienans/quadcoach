@@ -6,6 +6,7 @@ import ExerciseFav from "../models/exerciseFav";
 import ExerciseAccess from "../models/exerciseAccess";
 import User from "../models/user";
 import { PracticePlan } from "../models/practicePlan";
+import TacticBoard from "../models/tacticboard";
 
 interface RequestWithUser extends Request {
   UserInfo?: {
@@ -17,6 +18,70 @@ interface RequestWithUser extends Request {
 // Add this type guard function at the top of the file, after the imports
 function isMongoError(error: unknown): error is { code: number } {
   return typeof error === "object" && error !== null && "code" in error;
+}
+
+function extractTacticboardIdsFromBlocks(
+  descriptionBlocks: unknown
+): string[] {
+  if (!Array.isArray(descriptionBlocks)) {
+    return [];
+  }
+
+  return descriptionBlocks
+    .map((block) => {
+      if (!block || typeof block !== "object") {
+        return null;
+      }
+
+      const candidate = (block as { tactics_board?: unknown }).tactics_board;
+
+      if (typeof candidate === "string" && mongoose.isValidObjectId(candidate)) {
+        return candidate;
+      }
+
+      if (
+        candidate &&
+        typeof candidate === "object" &&
+        "_id" in (candidate as Record<string, unknown>)
+      ) {
+        const nestedId = (candidate as { _id?: unknown })._id;
+        if (typeof nestedId === "string" && mongoose.isValidObjectId(nestedId)) {
+          return nestedId;
+        }
+      }
+
+      return null;
+    })
+    .filter((id): id is string => id !== null);
+}
+
+async function rejectIfAnyPrivateTacticboard(
+  tacticboardIds: string[],
+  res: Response
+): Promise<boolean> {
+  if (tacticboardIds.length === 0) {
+    return false;
+  }
+
+  const privateTacticboards = await TacticBoard.find({
+    _id: { $in: tacticboardIds },
+    isPrivate: true,
+  }).select("_id name");
+
+  if (privateTacticboards.length === 0) {
+    return false;
+  }
+
+  res.status(400).json({
+    message:
+      "Private tacticboards cannot be linked to exercises. Please make them public first.",
+    tacticboards: privateTacticboards.map((board) => ({
+      id: board._id,
+      name: board.name,
+    })),
+  });
+
+  return true;
 }
 
 // @desc    Get all exercises
@@ -123,6 +188,14 @@ export const getById = asyncHandler(async (req: Request, res: Response) => {
 export const createNewExercise = asyncHandler(
   async (req: RequestWithUser, res: Response) => {
     if (req.UserInfo?.id) {
+      const tacticboardIds = Array.from(
+        new Set(extractTacticboardIdsFromBlocks(req.body?.description_blocks))
+      );
+
+      if (await rejectIfAnyPrivateTacticboard(tacticboardIds, res)) {
+        return;
+      }
+
       let exercise = new Exercise(req.body);
       const result = await exercise.save();
       if (!result) {
@@ -159,6 +232,23 @@ export const updateById = asyncHandler(
           (accessUser && accessUser.access == "edit");
         if (!hasAccess) {
           res.status(403).json({ message: "Forbidden" });
+          return;
+        }
+
+        const requestedTacticboardIds = Array.from(
+          new Set(extractTacticboardIdsFromBlocks(req.body?.description_blocks))
+        );
+        const existingTacticboardIds = Array.from(
+          new Set(
+            extractTacticboardIdsFromBlocks(findResult.description_blocks ?? [])
+          )
+        );
+
+        const addedTacticboardIds = requestedTacticboardIds.filter(
+          (id) => !existingTacticboardIds.includes(id)
+        );
+
+        if (await rejectIfAnyPrivateTacticboard(addedTacticboardIds, res)) {
           return;
         }
 

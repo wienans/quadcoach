@@ -11,6 +11,7 @@ export type TacticboardAutocompleteProps = {
   ) => void;
   onBlur: (event: FocusEvent<HTMLDivElement> | undefined) => void;
   autoFocus?: boolean;
+  publicOnly?: boolean;
 };
 
 const TacticboardAutocomplete = ({
@@ -18,6 +19,7 @@ const TacticboardAutocomplete = ({
   onChange,
   onBlur,
   autoFocus,
+  publicOnly = false,
 }: TacticboardAutocompleteProps): JSX.Element => {
   const [searchValue, setSearchValue] = useState<string>("");
   const [
@@ -26,14 +28,15 @@ const TacticboardAutocomplete = ({
   ] = useLazyGetTacticBoardHeadersQuery();
 
   useEffect(() => {
-    // Load initial data
-    getTacticboards({});
-  }, [getTacticboards]);
+    getTacticboards(publicOnly ? { isPrivate: false } : {});
+  }, [getTacticboards, publicOnly]);
 
   return (
     <Autocomplete
       id="related-text"
-      options={tacticboards?.tacticboards ?? []}
+      options={(tacticboards?.tacticboards ?? []).filter(
+        (option) => !publicOnly || !option.isPrivate,
+      )}
       getOptionLabel={(option) => option.name ?? ""}
       isOptionEqualToValue={(option, value) => {
         if (value != null && value != undefined) {
