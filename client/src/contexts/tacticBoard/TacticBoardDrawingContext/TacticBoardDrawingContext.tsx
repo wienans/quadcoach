@@ -20,6 +20,7 @@ export type LineStyle = "solid" | "dashed" | "dotted";
 
 export interface TacticBoardDrawingContextProps {
   setDrawMode: (drawMode: boolean, dashArray?: number[]) => void;
+  setStraightLineMode: (enabled: boolean) => void;
   setDrawColor: (color: string) => void;
   setDrawThickness: (thickness: number) => void;
   getDrawColor: () => string;
@@ -37,7 +38,7 @@ export const TacticBoardDrawingContext = createContext<
 const TacticBoardDrawingContextProvider: FC<{
   children: ReactNode;
 }> = ({ children }) => {
-  const { canvasFabricRef, setControls } = useContext(
+  const { canvasFabricRef, setControls, setSelection } = useContext(
     TacticBoardCanvasContext,
   )!;
 
@@ -47,6 +48,7 @@ const TacticBoardDrawingContextProvider: FC<{
   const arrowTipEnabledRef = useRef<boolean>(false);
 
   const drawModeRef = useRef<boolean>(false);
+  const straightLineModeRef = useRef<boolean>(false);
   const dashArrayRef = useRef<number[]>([]);
 
   const shiftPressedRef = useRef<boolean>(false);
@@ -55,6 +57,7 @@ const TacticBoardDrawingContextProvider: FC<{
   const previewLineRef = useRef<fabric.Line | null>(null);
 
   const detachLineToolHandlersRef = useRef<(() => void) | null>(null);
+  const updateLineToolModeRef = useRef<(() => void) | null>(null);
 
   const setDrawMode = useCallback(
     (drawMode: boolean, dashArray?: number[]) => {
@@ -65,8 +68,11 @@ const TacticBoardDrawingContextProvider: FC<{
         drawModeRef.current = drawMode;
         dashArrayRef.current = dashArray ?? [];
 
-        // If Shift-line mode is active, we don't use free drawing.
-        if (drawMode && shiftPressedRef.current) {
+        // If line-tool mode is active, we don't use free drawing.
+        if (
+          drawMode &&
+          (shiftPressedRef.current || straightLineModeRef.current)
+        ) {
           canvasFabric.isDrawingMode = false;
         } else {
           canvasFabric.isDrawingMode = drawMode;
@@ -80,12 +86,18 @@ const TacticBoardDrawingContextProvider: FC<{
         }
 
         setControls(false);
+        updateLineToolModeRef.current?.();
       } catch (error) {
         console.error("Failed to set draw mode:", error);
       }
     },
     [canvasFabricRef, setControls],
   );
+
+  const setStraightLineMode = useCallback((enabled: boolean) => {
+    straightLineModeRef.current = enabled;
+    updateLineToolModeRef.current?.();
+  }, []);
 
   const setLineStyle = useCallback(
     (style: LineStyle) => {
@@ -164,95 +176,123 @@ const TacticBoardDrawingContextProvider: FC<{
   }, []);
 
   useEffect(() => {
-    const canvas = canvasFabricRef.current;
-    if (!canvas) return;
+    const getCanvas = () => canvasFabricRef.current;
 
+    // --- Arrow-tip handler for freehand paths ---
+    // We define it here (not in a separate useEffect) because the canvas
+    // ref may still be null when the component first mounts.  By attaching
+    // the listener lazily inside updateMode we guarantee the canvas exists.
     const handlePathCreated = (e: fabric.IEvent) => {
+      const canvas = getCanvas();
+      if (!canvas) return;
+
       const path = (e as unknown as { path?: fabric.Path }).path;
       if (!path) return;
 
-      if (arrowTipEnabledRef.current) {
-        // Get the last point and angle from the path
-        const pathData = path.path;
-        if (pathData && pathData.length > 0) {
-          // Find the last point with coordinates
-          let lastX = 0;
-          let lastY = 0;
-          let secondLastX = 0;
-          let secondLastY = 0;
-
-          for (let i = pathData.length - 1; i >= 0; i--) {
-            const cmd = pathData[i];
-            if (cmd && cmd.length >= 3) {
-              if (lastX === 0 && lastY === 0) {
-                // Last command - get end point
-                lastX = cmd[cmd.length - 2] as number;
-                lastY = cmd[cmd.length - 1] as number;
-              } else {
-                // Second last command - get its end point for angle calculation
-                secondLastX = cmd[cmd.length - 2] as number;
-                secondLastY = cmd[cmd.length - 1] as number;
-                break;
-              }
-            }
-          }
-
-          // Remove the original path and replace with path + arrow group
-          canvas.remove(path);
-
-          const strokeWidth = drawThicknessRef.current;
-          const headHeight = Math.max(10, strokeWidth * 6);
-          const headWidth = Math.max(8, strokeWidth * 5);
-
-          // Calculate angle from second-to-last point to last point
-          let angleDeg = 0;
-          if (secondLastX !== 0 || secondLastY !== 0) {
-            const angleRad = Math.atan2(
-              lastY - secondLastY,
-              lastX - secondLastX,
-            );
-            angleDeg = (angleRad * 180) / Math.PI;
-          }
-
-          // Create arrow head triangle
-          const head = new fabric.Triangle({
-            width: headWidth,
-            height: headHeight,
-            fill: drawColorRef.current,
-            left: lastX,
-            top: lastY,
-            originX: "center",
-            originY: "center",
-            angle: angleDeg + 90,
-            selectable: false,
-            evented: false,
-          });
-
-          // Create group with path and arrow head
-          const arrowGroup = new fabric.Group([path, head], {
-            selectable: true,
-            evented: true,
-          });
-
-          setUuid(arrowGroup, uuidv4());
-          canvas.add(arrowGroup);
-        } else {
-          setUuid(path, uuidv4());
-        }
-      } else {
+      if (!arrowTipEnabledRef.current) {
         setUuid(path, uuidv4());
+        return;
       }
+
+      const pathData = path.path;
+      if (!pathData || pathData.length === 0) {
+        setUuid(path, uuidv4());
+        return;
+      }
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const rawData = pathData as any[];
+
+      let lastX: number | null = null;
+      let lastY: number | null = null;
+      let previousX: number | null = null;
+      let previousY: number | null = null;
+
+      for (let i = rawData.length - 1; i >= 0; i -= 1) {
+        const cmd = rawData[i];
+        if (!cmd || typeof cmd.length !== "number" || cmd.length < 3) {
+          continue;
+        }
+
+        const x = Number(cmd[cmd.length - 2]);
+        const y = Number(cmd[cmd.length - 1]);
+
+        if (!Number.isFinite(x) || !Number.isFinite(y)) {
+          continue;
+        }
+
+        if (lastX === null || lastY === null) {
+          lastX = x;
+          lastY = y;
+          continue;
+        }
+
+        if (Math.hypot(lastX - x, lastY - y) > 0.5) {
+          previousX = x;
+          previousY = y;
+          break;
+        }
+      }
+
+      if (lastX === null || lastY === null) {
+        setUuid(path, uuidv4());
+        return;
+      }
+
+      canvas.remove(path);
+
+      const strokeWidth =
+        typeof path.strokeWidth === "number"
+          ? path.strokeWidth
+          : drawThicknessRef.current;
+      const strokeColor =
+        typeof path.stroke === "string" ? path.stroke : drawColorRef.current;
+      const headHeight = Math.max(10, strokeWidth * 6);
+      const headWidth = Math.max(8, strokeWidth * 5);
+
+      let angleDeg = 0;
+      if (previousX !== null && previousY !== null) {
+        const angleRad = Math.atan2(lastY - previousY, lastX - previousX);
+        angleDeg = (angleRad * 180) / Math.PI;
+      }
+
+      const head = new fabric.Triangle({
+        width: headWidth,
+        height: headHeight,
+        fill: strokeColor,
+        left: lastX,
+        top: lastY,
+        originX: "center",
+        originY: "center",
+        angle: angleDeg + 90,
+        selectable: false,
+        evented: false,
+      });
+
+      const arrowGroup = new fabric.Group([path, head], {
+        selectable: true,
+        evented: true,
+      });
+
+      setUuid(arrowGroup, uuidv4());
+      canvas.add(arrowGroup);
     };
 
-    canvas.on("path:created", handlePathCreated);
+    let pathCreatedAttached = false;
 
-    return () => {
+    const attachPathCreatedHandler = () => {
+      const canvas = getCanvas();
+      if (!canvas || pathCreatedAttached) return;
+      canvas.on("path:created", handlePathCreated);
+      pathCreatedAttached = true;
+    };
+
+    const detachPathCreatedHandler = () => {
+      const canvas = getCanvas();
+      if (!canvas || !pathCreatedAttached) return;
       canvas.off("path:created", handlePathCreated);
+      pathCreatedAttached = false;
     };
-  }, [canvasFabricRef]);
-
-  useEffect(() => {
-    const getCanvas = () => canvasFabricRef.current;
 
     const cleanupLineTool = () => {
       const canvas = getCanvas();
@@ -274,7 +314,12 @@ const TacticBoardDrawingContextProvider: FC<{
       if (detachLineToolHandlersRef.current) return;
 
       const onMouseDown = (opt: fabric.IEvent) => {
-        if (!drawModeRef.current || !shiftPressedRef.current) return;
+        if (
+          !drawModeRef.current ||
+          (!shiftPressedRef.current && !straightLineModeRef.current)
+        ) {
+          return;
+        }
 
         const pointer = canvas.getPointer(opt.e);
         lineStartRef.current = new fabric.Point(pointer.x, pointer.y);
@@ -301,7 +346,12 @@ const TacticBoardDrawingContextProvider: FC<{
 
       const onMouseMove = (opt: fabric.IEvent) => {
         const line = previewLineRef.current;
-        if (!drawModeRef.current || !shiftPressedRef.current) return;
+        if (
+          !drawModeRef.current ||
+          (!shiftPressedRef.current && !straightLineModeRef.current)
+        ) {
+          return;
+        }
         if (!isLineDrawingRef.current || !lineStartRef.current || !line) return;
 
         const pointer = canvas.getPointer(opt.e);
@@ -311,7 +361,12 @@ const TacticBoardDrawingContextProvider: FC<{
 
       const onMouseUp = (opt: fabric.IEvent) => {
         const line = previewLineRef.current;
-        if (!drawModeRef.current || !shiftPressedRef.current) return;
+        if (
+          !drawModeRef.current ||
+          (!shiftPressedRef.current && !straightLineModeRef.current)
+        ) {
+          return;
+        }
         if (!isLineDrawingRef.current || !lineStartRef.current || !line) return;
 
         const pointer = canvas.getPointer(opt.e);
@@ -389,6 +444,10 @@ const TacticBoardDrawingContextProvider: FC<{
           canvas.add(finalLine);
         }
 
+        if (straightLineModeRef.current || shiftPressedRef.current) {
+          setSelection(false);
+        }
+
         canvas.requestRenderAll();
 
         isLineDrawingRef.current = false;
@@ -416,15 +475,24 @@ const TacticBoardDrawingContextProvider: FC<{
       const canvas = getCanvas();
       if (!canvas) return;
 
+      // Ensure path:created handler is attached whenever canvas is available
+      attachPathCreatedHandler();
+
       const shouldLineToolBeActive =
-        drawModeRef.current && shiftPressedRef.current;
+        drawModeRef.current &&
+        (shiftPressedRef.current || straightLineModeRef.current);
 
       if (shouldLineToolBeActive) {
+        setSelection(false);
         canvas.isDrawingMode = false;
         attachLineToolHandlers();
       } else {
         detachLineToolHandlers();
         canvas.isDrawingMode = drawModeRef.current;
+
+        if (!drawModeRef.current) {
+          setSelection(true);
+        }
       }
     };
 
@@ -453,20 +521,26 @@ const TacticBoardDrawingContextProvider: FC<{
       }
     };
 
+    updateLineToolModeRef.current = updateMode;
+    updateMode();
+
     window.addEventListener("keydown", handleKeyDown);
     window.addEventListener("keyup", handleKeyUp);
 
     return () => {
+      updateLineToolModeRef.current = null;
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("keyup", handleKeyUp);
       detachLineToolHandlers();
+      detachPathCreatedHandler();
     };
-  }, [canvasFabricRef]);
+  }, [canvasFabricRef, setSelection]);
 
   // Memoize context value to prevent unnecessary re-renders
   const contextValue = useMemo(
     () => ({
       setDrawMode,
+      setStraightLineMode,
       setDrawColor,
       setDrawThickness,
       getDrawColor,
@@ -478,6 +552,7 @@ const TacticBoardDrawingContextProvider: FC<{
     }),
     [
       setDrawMode,
+      setStraightLineMode,
       setDrawColor,
       setDrawThickness,
       getDrawColor,

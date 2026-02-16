@@ -8,7 +8,7 @@ import {
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import PlayCircleIcon from "@mui/icons-material/PlayCircle";
 import PauseCircleIcon from "@mui/icons-material/PauseCircle";
 import EditIcon from "@mui/icons-material/Edit";
@@ -181,6 +181,20 @@ const TacticBoardInProfile = ({
     };
   }, []);
 
+  const targetByUuidMaps = useMemo(() => {
+    if (!tacticBoard) return null;
+    return tacticBoard.pages.map((page) => {
+      const objects = page.objects ?? [];
+      const map = new Map<string, (typeof objects)[number]>();
+      objects.forEach((o) => {
+        if (typeof (o as { uuid?: unknown }).uuid === "string") {
+          map.set((o as { uuid: string }).uuid, o);
+        }
+      });
+      return map;
+    });
+  }, [tacticBoard]);
+
   useEffect(() => {
     let interval: NodeJS.Timeout;
 
@@ -188,17 +202,12 @@ const TacticBoardInProfile = ({
       interval = setInterval(() => {
         setPage((prevPage) => {
           const newPage = (prevPage % tacticBoard.pages.length) + 1;
-          const nextPageObjects = tacticBoard.pages[newPage - 1].objects ?? [];
 
-          const targetByUuid = new Map<
-            string,
-            (typeof nextPageObjects)[number]
-          >();
-          nextPageObjects.forEach((o) => {
-            if (typeof (o as { uuid?: unknown }).uuid === "string") {
-              targetByUuid.set((o as { uuid: string }).uuid, o);
-            }
-          });
+          const targetByUuid = targetByUuidMaps?.[newPage - 1];
+          if (!targetByUuid) {
+            onLoadPage(newPage);
+            return newPage;
+          }
 
           const canvas = canvasRef.current;
           const requestRenderAll = () => {
@@ -275,12 +284,11 @@ const TacticBoardInProfile = ({
     }
 
     return () => clearInterval(interval);
-  }, [isAnimating, onLoadPage, tacticBoard, getAllObjects, canvasRef]);
+  }, [isAnimating, onLoadPage, tacticBoard, getAllObjects, canvasRef, targetByUuidMaps]);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
     if (isRecording && tacticBoard) {
-      // Start the animation only if isAnimating is true
       interval = setInterval(() => {
         setPage((prevPage) => {
           const newPage = (prevPage % tacticBoard.pages.length) + 1;
@@ -290,42 +298,87 @@ const TacticBoardInProfile = ({
               tacticBoard.name ? `${tacticBoard.name}.mp4` : "tacticboard.mp4",
             );
           }
+
+          const targetByUuid = targetByUuidMaps?.[newPage - 1];
+          if (!targetByUuid) {
+            onLoadPage(newPage);
+            return newPage;
+          }
+
+          const canvas = canvasRef.current;
           const requestRenderAll = () => {
-            canvasRef.current?.requestRenderAll();
+            canvas?.requestRenderAll();
           };
+
+          let pendingAnimations = 0;
+          let didTriggerLoad = false;
+
+          const triggerLoadOnce = () => {
+            if (didTriggerLoad) return;
+            didTriggerLoad = true;
+            onLoadPage(newPage);
+          };
+
+          const onOneAnimationComplete = () => {
+            pendingAnimations -= 1;
+            if (pendingAnimations <= 0) {
+              triggerLoadOnce();
+            }
+          };
+
           getAllObjects().forEach((obj) => {
-            const targetObject = tacticBoard.pages[newPage - 1].objects?.find(
-              (nextObject) => nextObject.uuid == getUuid(obj),
-            );
+            const objUuid = getUuid(obj);
+            if (typeof objUuid !== "string") return;
+
+            const targetObject = targetByUuid.get(objUuid);
+            if (!targetObject || !canvas) return;
+
+            const targetLeft = targetObject.left;
+            const targetTop = targetObject.top;
+
             if (
-              targetObject &&
-              canvasRef.current &&
-              targetObject.left !== undefined &&
-              targetObject.top !== undefined
+              typeof targetLeft !== "number" ||
+              typeof targetTop !== "number"
             ) {
-              obj.animate("left", targetObject.left || 0, {
+              return;
+            }
+
+            const currentLeft = obj.left ?? 0;
+            const currentTop = obj.top ?? 0;
+
+            const shouldAnimateLeft = targetLeft !== currentLeft;
+            const shouldAnimateTop = targetTop !== currentTop;
+
+            if (!shouldAnimateLeft && !shouldAnimateTop) return;
+
+            if (shouldAnimateLeft) {
+              pendingAnimations += 1;
+              obj.animate("left", targetLeft, {
                 onChange: requestRenderAll,
                 duration: 1000,
-                onComplete: () => {
-                  onLoadPage(newPage);
-                },
+                onComplete: onOneAnimationComplete,
               });
-              obj.animate("top", targetObject.top || 0, {
+            }
+
+            if (shouldAnimateTop) {
+              pendingAnimations += 1;
+              obj.animate("top", targetTop, {
                 onChange: requestRenderAll,
                 duration: 1000,
-                onComplete: () => {
-                  onLoadPage(newPage);
-                },
+                onComplete: onOneAnimationComplete,
               });
             }
           });
+
+          if (pendingAnimations === 0) {
+            triggerLoadOnce();
+          }
 
           return newPage;
         });
       }, 2000);
     }
 
-    // Clean up the interval on component unmount or when the last page is reached
     return () => {
       clearInterval(interval);
     };
@@ -337,6 +390,7 @@ const TacticBoardInProfile = ({
     getAllObjects,
     canvasRef,
     onLoadPage,
+    targetByUuidMaps,
   ]);
 
   const handleChange = (_: React.ChangeEvent<unknown>, value: number) => {
