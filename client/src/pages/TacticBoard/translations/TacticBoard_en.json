@@ -50,6 +50,15 @@
     },
     "backButton": {
       "tooltip": "Go back to tactic board profile"
+    },
+    "addTextButton": {
+      "tooltip": "Add text"
+    },
+    "textColorButton": {
+      "tooltip": "Text color"
+    },
+    "fontSizeSlider": {
+      "tooltip": "Font size"
     }
   },
   "itemsDrawer": {

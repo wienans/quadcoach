@@ -50,6 +50,15 @@
     },
     "backButton": {
       "tooltip": "Zurück zur Taktik Tafel Profile"
+    },
+    "addTextButton": {
+      "tooltip": "Text hinzufügen"
+    },
+    "textColorButton": {
+      "tooltip": "Textfarbe"
+    },
+    "fontSizeSlider": {
+      "tooltip": "Schriftgröße"
     }
   },
   "itemsDrawer": {

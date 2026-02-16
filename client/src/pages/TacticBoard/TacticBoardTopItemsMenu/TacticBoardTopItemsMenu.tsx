@@ -17,7 +17,7 @@ import TextFieldsIcon from "@mui/icons-material/TextFields";
 import { toggleTacticBoardItemsDrawerOpen } from "../tacticBoardSlice";
 import { useAppDispatch, useAppSelector } from "../../../store/hooks";
 import { useTranslation } from "react-i18next";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   useTacticBoardCanvas,
   useTacticBoardDrawing,
@@ -107,23 +107,21 @@ const TacticBoardTopItemsMenu = ({
     };
   }, [isPrivileged, isEditMode, onDelete]);
 
-  const syncSelectedTextbox = useMemo(() => {
-    return () => {
-      const canvas = canvasFabricRef.current;
-      if (!canvas) return;
+  const syncSelectedTextbox = useCallback(() => {
+    const canvas = canvasFabricRef.current;
+    if (!canvas) return;
 
-      const active = canvas.getActiveObject();
-      if (active?.type === "textbox") {
-        const textbox = active as fabric.Textbox;
-        setSelectedTextbox(textbox);
-        setCurrentTextColor(
-          typeof textbox.fill === "string" ? textbox.fill : "#000000",
-        );
-        setCurrentFontSize(textbox.fontSize ?? 24);
-      } else {
-        setSelectedTextbox(null);
-      }
-    };
+    const active = canvas.getActiveObject();
+    if (active?.type === "textbox") {
+      const textbox = active as fabric.Textbox;
+      setSelectedTextbox(textbox);
+      setCurrentTextColor(
+        typeof textbox.fill === "string" ? textbox.fill : "#000000",
+      );
+      setCurrentFontSize(textbox.fontSize ?? 24);
+    } else {
+      setSelectedTextbox(null);
+    }
   }, [canvasFabricRef]);
 
   useEffect(() => {
@@ -391,7 +389,7 @@ const TacticBoardTopItemsMenu = ({
 
         {/* TEXT BUTTON START */}
         {isPrivileged && isEditMode && (
-          <Tooltip title="Add text">
+          <Tooltip title={t("TacticBoard:topMenu.addTextButton.tooltip")}>
             <span>
               <ToggleButton
                 value={false}
@@ -411,7 +409,7 @@ const TacticBoardTopItemsMenu = ({
 
         {isPrivileged && isEditMode && selectedTextbox && (
           <>
-            <Tooltip title="Text color">
+            <Tooltip title={t("TacticBoard:topMenu.textColorButton.tooltip")}>
               <span>
                 <IconButton
                   size="small"
@@ -446,7 +444,7 @@ const TacticBoardTopItemsMenu = ({
               />
             </Popover>
 
-            <Tooltip title="Font size">
+            <Tooltip title={t("TacticBoard:topMenu.fontSizeSlider.tooltip")}>
               <Slider
                 value={currentFontSize}
                 onChange={handleFontSizeChange}
