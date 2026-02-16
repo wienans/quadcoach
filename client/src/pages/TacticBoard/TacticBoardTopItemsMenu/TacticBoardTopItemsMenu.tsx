@@ -14,6 +14,8 @@ import LayersIcon from "@mui/icons-material/Layers";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ArrowRightAltIcon from "@mui/icons-material/ArrowRightAlt";
 import TextFieldsIcon from "@mui/icons-material/TextFields";
+import NorthWestIcon from "@mui/icons-material/NorthWest";
+import HorizontalRuleIcon from "@mui/icons-material/HorizontalRule";
 import { toggleTacticBoardItemsDrawerOpen } from "../tacticBoardSlice";
 import { useAppDispatch, useAppSelector } from "../../../store/hooks";
 import { useTranslation } from "react-i18next";
@@ -36,6 +38,8 @@ type TacticBoardTopItemMenuProps = {
   onDelete: () => void;
 };
 
+type ToolType = "cursor" | "pencil" | "line" | "text";
+
 const TacticBoardTopItemsMenu = ({
   isPrivileged,
   isEditMode,
@@ -48,6 +52,7 @@ const TacticBoardTopItemsMenu = ({
 
   const {
     setDrawMode,
+    setStraightLineMode,
     setDrawColor,
     setDrawThickness,
     getDrawColor,
@@ -60,7 +65,7 @@ const TacticBoardTopItemsMenu = ({
   const tacticBoardItemsDrawerOpen = useAppSelector(
     (state) => state.tacticBoard.tacticBoardItemsDrawerOpen,
   );
-  const [drawingEnabled, enableDrawing] = useState<boolean>(false);
+  const [selectedTool, setSelectedTool] = useState<ToolType>("cursor");
   const [backgroundImageId, setBackgorundImageId] = useState<string>("");
 
   const [colorPickerAnchor, setColorPickerAnchor] =
@@ -207,7 +212,7 @@ const TacticBoardTopItemsMenu = ({
     canvas.requestRenderAll();
   };
 
-  const onAddText = () => {
+  const onAddText = useCallback(() => {
     const canvas = canvasFabricRef.current;
     if (!canvas) return;
 
@@ -227,7 +232,56 @@ const TacticBoardTopItemsMenu = ({
     canvas.setActiveObject(textbox);
     canvas.requestRenderAll();
     syncSelectedTextbox();
+  }, [addObject, canvasFabricRef, syncSelectedTextbox]);
+
+  const handleToolSelect = useCallback(
+    (tool: ToolType) => {
+      if (tool === "cursor") {
+        setStraightLineMode(false);
+        setDrawMode(false);
+        setSelectedTool("cursor");
+        return;
+      }
+
+      if (tool === "pencil") {
+        setStraightLineMode(false);
+        setLineStyle(currentLineStyle);
+        setSelectedTool("pencil");
+        return;
+      }
+
+      if (tool === "line") {
+        setStraightLineMode(true);
+        setLineStyle(currentLineStyle);
+        setSelectedTool("line");
+        return;
+      }
+
+      onAddText();
+      setStraightLineMode(false);
+      setDrawMode(false);
+      setSelectedTool("cursor");
+    },
+    [
+      currentLineStyle,
+      onAddText,
+      setDrawMode,
+      setLineStyle,
+      setStraightLineMode,
+    ],
+  );
+
+  const handleToolChange = (event: SelectChangeEvent) => {
+    handleToolSelect(event.target.value as ToolType);
   };
+
+  const drawingToolSelected =
+    selectedTool === "pencil" || selectedTool === "line";
+
+  useEffect(() => {
+    setStraightLineMode(false);
+    setDrawMode(false);
+  }, [setDrawMode, setStraightLineMode]);
 
   const handleThicknessChange = (_event: Event, value: number | number[]) => {
     const thickness = value as number;
@@ -243,6 +297,13 @@ const TacticBoardTopItemsMenu = ({
       setCurrentLineStyle(newStyle);
       setLineStyle(newStyle);
     }
+  };
+
+  const toolLabelByValue: Record<ToolType, string> = {
+    cursor: "Cursor",
+    pencil: "Pencil",
+    line: "Line",
+    text: "Text",
   };
 
   return (
@@ -290,30 +351,63 @@ const TacticBoardTopItemsMenu = ({
         {/* DRAW BUTTON START */}
         {isPrivileged && isEditMode && (
           <>
-            <Tooltip
-              title={t("TacticBoard:topMenu.drawingButton.tooltip", {
-                context: drawingEnabled ? "disable" : "enable",
-              })}
-            >
-              <span>
-                <ToggleButton
-                  value={drawingEnabled}
-                  selected={drawingEnabled}
-                  disabled={!isEditMode}
-                  onChange={() => {
-                    setDrawMode(!drawingEnabled);
-                    enableDrawing(!drawingEnabled);
-                  }}
-                  size="small"
+            <Select
+              id="tool-select"
+              value={selectedTool}
+              onChange={handleToolChange}
+              sx={{
+                height: "30px",
+                minWidth: 145,
+                mr: 1,
+                "& .MuiSelect-select": {
+                  display: "flex",
+                  flexDirection: "row",
+                  flexWrap: "nowrap",
+                  alignItems: "center",
+                  gap: 1,
+                  whiteSpace: "nowrap",
+                },
+              }}
+              renderValue={(value) => (
+                <SoftBox
+                  component="span"
                   sx={{
-                    mr: 1,
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 1,
+                    whiteSpace: "nowrap",
                   }}
                 >
-                  <DrawIcon />
-                </ToggleButton>
-              </span>
-            </Tooltip>
-            {drawingEnabled && (
+                  {value === "cursor" && <NorthWestIcon fontSize="small" />}
+                  {value === "pencil" && <DrawIcon fontSize="small" />}
+                  {value === "line" && <HorizontalRuleIcon fontSize="small" />}
+                  {value === "text" && <TextFieldsIcon fontSize="small" />}
+                  {toolLabelByValue[value as ToolType]}
+                </SoftBox>
+              )}
+            >
+              <MenuItem value="cursor">
+                <SoftBox sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <NorthWestIcon fontSize="small" /> Cursor
+                </SoftBox>
+              </MenuItem>
+              <MenuItem value="pencil">
+                <SoftBox sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <DrawIcon fontSize="small" /> Pencil
+                </SoftBox>
+              </MenuItem>
+              <MenuItem value="line">
+                <SoftBox sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <HorizontalRuleIcon fontSize="small" /> Line
+                </SoftBox>
+              </MenuItem>
+              <MenuItem value="text">
+                <SoftBox sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <TextFieldsIcon fontSize="small" /> Text
+                </SoftBox>
+              </MenuItem>
+            </Select>
+            {drawingToolSelected && (
               <>
                 <ToggleButtonGroup
                   value={currentLineStyle}
@@ -386,26 +480,6 @@ const TacticBoardTopItemsMenu = ({
           </>
         )}
         {/* DRAW BUTTON END */}
-
-        {/* TEXT BUTTON START */}
-        {isPrivileged && isEditMode && (
-          <Tooltip title={t("TacticBoard:topMenu.addTextButton.tooltip")}>
-            <span>
-              <ToggleButton
-                value={false}
-                selected={false}
-                disabled={!isEditMode}
-                onChange={onAddText}
-                size="small"
-                sx={{
-                  mr: 1,
-                }}
-              >
-                <TextFieldsIcon />
-              </ToggleButton>
-            </span>
-          </Tooltip>
-        )}
 
         {isPrivileged && isEditMode && selectedTextbox && (
           <>
