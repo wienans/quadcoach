@@ -80,7 +80,10 @@ const TacticBoardInBlock = ({
           const newPage = (prevPage % tacticBoard.pages.length) + 1;
           const nextPageObjects = tacticBoard.pages[newPage - 1].objects ?? [];
 
-          const targetByUuid = new Map<string, (typeof nextPageObjects)[number]>();
+          const targetByUuid = new Map<
+            string,
+            (typeof nextPageObjects)[number]
+          >();
           nextPageObjects.forEach((o) => {
             if (typeof (o as { uuid?: unknown }).uuid === "string") {
               targetByUuid.set((o as { uuid: string }).uuid, o);
@@ -88,7 +91,9 @@ const TacticBoardInBlock = ({
           });
 
           const canvas = canvasRef.current;
-          const renderAll = canvas?.renderAll.bind(canvas);
+          const requestRenderAll = () => {
+            canvas?.requestRenderAll();
+          };
 
           let pendingAnimations = 0;
           let didTriggerLoad = false;
@@ -116,7 +121,10 @@ const TacticBoardInBlock = ({
             const targetLeft = targetObject.left;
             const targetTop = targetObject.top;
 
-            if (typeof targetLeft !== "number" || typeof targetTop !== "number") {
+            if (
+              typeof targetLeft !== "number" ||
+              typeof targetTop !== "number"
+            ) {
               return;
             }
 
@@ -131,7 +139,7 @@ const TacticBoardInBlock = ({
             if (shouldAnimateLeft) {
               pendingAnimations += 1;
               obj.animate("left", targetLeft, {
-                onChange: renderAll,
+                onChange: requestRenderAll,
                 duration: 1000,
                 onComplete: onOneAnimationComplete,
               });
@@ -140,7 +148,7 @@ const TacticBoardInBlock = ({
             if (shouldAnimateTop) {
               pendingAnimations += 1;
               obj.animate("top", targetTop, {
-                onChange: renderAll,
+                onChange: requestRenderAll,
                 duration: 1000,
                 onComplete: onOneAnimationComplete,
               });

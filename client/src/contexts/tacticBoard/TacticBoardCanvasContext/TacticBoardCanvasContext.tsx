@@ -105,7 +105,7 @@ const TacticBoardCanvasContextProvider: FC<{
       if (!canvas) return;
 
       canvas.remove(object);
-      canvas.renderAll();
+      canvas.requestRenderAll();
     } catch (error) {
       throw new CanvasOperationError("Removing object", error as Error);
     }
@@ -204,7 +204,7 @@ const TacticBoardCanvasContextProvider: FC<{
 
     if (!selection) {
       canvasFabricRef.current?.discardActiveObject();
-      canvasFabricRef.current?.renderAll();
+      canvasFabricRef.current?.requestRenderAll();
     }
   }, []);
 

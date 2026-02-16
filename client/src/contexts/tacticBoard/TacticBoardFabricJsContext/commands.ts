@@ -76,12 +76,12 @@ export class AddObjectCommand implements Command {
 
   execute(): void {
     this.canvas.add(this.object);
-    this.canvas.renderAll();
+    this.canvas.requestRenderAll();
   }
 
   undo(): void {
     this.canvas.remove(this.object);
-    this.canvas.renderAll();
+    this.canvas.requestRenderAll();
   }
 
   getDescription(): string {
@@ -97,12 +97,12 @@ export class RemoveObjectCommand implements Command {
 
   execute(): void {
     this.canvas.remove(this.object);
-    this.canvas.renderAll();
+    this.canvas.requestRenderAll();
   }
 
   undo(): void {
     this.canvas.add(this.object);
-    this.canvas.renderAll();
+    this.canvas.requestRenderAll();
   }
 
   getDescription(): string {
@@ -122,7 +122,7 @@ export class MoveObjectCommand implements Command {
       left: this.newPosition.left,
       top: this.newPosition.top,
     });
-    this.object.canvas?.renderAll();
+    this.object.canvas?.requestRenderAll();
   }
 
   undo(): void {
@@ -130,7 +130,7 @@ export class MoveObjectCommand implements Command {
       left: this.oldPosition.left,
       top: this.oldPosition.top,
     });
-    this.object.canvas?.renderAll();
+    this.object.canvas?.requestRenderAll();
   }
 
   getDescription(): string {
@@ -147,12 +147,12 @@ export class ModifyObjectCommand implements Command {
 
   execute(): void {
     this.object.set(this.newProperties);
-    this.object.canvas?.renderAll();
+    this.object.canvas?.requestRenderAll();
   }
 
   undo(): void {
     this.object.set(this.oldProperties);
-    this.object.canvas?.renderAll();
+    this.object.canvas?.requestRenderAll();
   }
 
   getDescription(): string {
@@ -168,12 +168,12 @@ export class RemoveMultipleObjectsCommand implements Command {
 
   execute(): void {
     this.objects.forEach((obj) => this.canvas.remove(obj));
-    this.canvas.renderAll();
+    this.canvas.requestRenderAll();
   }
 
   undo(): void {
     this.objects.forEach((obj) => this.canvas.add(obj));
-    this.canvas.renderAll();
+    this.canvas.requestRenderAll();
   }
 
   getDescription(): string {
@@ -189,23 +189,18 @@ export class SetBackgroundCommand implements Command {
   ) {}
 
   execute(): void {
-    this.canvas.setBackgroundImage(
-      this.newBackground,
-      this.canvas.renderAll.bind(this.canvas),
+    this.canvas.setBackgroundImage(this.newBackground, () =>
+      this.canvas.requestRenderAll(),
     );
   }
 
   undo(): void {
     if (this.oldBackground) {
-      this.canvas.setBackgroundImage(
-        this.oldBackground,
-        this.canvas.renderAll.bind(this.canvas),
+      this.canvas.setBackgroundImage(this.oldBackground, () =>
+        this.canvas.requestRenderAll(),
       );
     } else {
-      this.canvas.setBackgroundImage(
-        "",
-        this.canvas.renderAll.bind(this.canvas),
-      );
+      this.canvas.setBackgroundImage("", () => this.canvas.requestRenderAll());
     }
   }
 

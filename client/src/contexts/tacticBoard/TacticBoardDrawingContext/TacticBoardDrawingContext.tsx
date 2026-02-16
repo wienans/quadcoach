@@ -207,7 +207,10 @@ const TacticBoardDrawingContextProvider: FC<{
           // Calculate angle from second-to-last point to last point
           let angleDeg = 0;
           if (secondLastX !== 0 || secondLastY !== 0) {
-            const angleRad = Math.atan2(lastY - secondLastY, lastX - secondLastX);
+            const angleRad = Math.atan2(
+              lastY - secondLastY,
+              lastX - secondLastX,
+            );
             angleDeg = (angleRad * 180) / Math.PI;
           }
 
@@ -261,7 +264,7 @@ const TacticBoardDrawingContextProvider: FC<{
       if (previewLineRef.current) {
         canvas.remove(previewLineRef.current);
         previewLineRef.current = null;
-        canvas.renderAll();
+        canvas.requestRenderAll();
       }
     };
 
@@ -283,7 +286,9 @@ const TacticBoardDrawingContextProvider: FC<{
             stroke: drawColorRef.current,
             strokeWidth: drawThicknessRef.current,
             strokeDashArray:
-              dashArrayRef.current.length > 0 ? dashArrayRef.current : undefined,
+              dashArrayRef.current.length > 0
+                ? dashArrayRef.current
+                : undefined,
             strokeLineCap: "round",
             selectable: false,
             evented: false,
@@ -301,7 +306,7 @@ const TacticBoardDrawingContextProvider: FC<{
 
         const pointer = canvas.getPointer(opt.e);
         line.set({ x2: pointer.x, y2: pointer.y });
-        canvas.renderAll();
+        canvas.requestRenderAll();
       };
 
       const onMouseUp = (opt: fabric.IEvent) => {
@@ -317,7 +322,8 @@ const TacticBoardDrawingContextProvider: FC<{
         const endX = line.x2 ?? pointer.x;
         const endY = line.y2 ?? pointer.y;
 
-        const isZeroLength = Math.abs(endX - startX) < 1 && Math.abs(endY - startY) < 1;
+        const isZeroLength =
+          Math.abs(endX - startX) < 1 && Math.abs(endY - startY) < 1;
         if (isZeroLength) {
           cleanupLineTool();
           return;
@@ -339,7 +345,9 @@ const TacticBoardDrawingContextProvider: FC<{
             stroke: drawColorRef.current,
             strokeWidth,
             strokeDashArray:
-              dashArrayRef.current.length > 0 ? dashArrayRef.current : undefined,
+              dashArrayRef.current.length > 0
+                ? dashArrayRef.current
+                : undefined,
             strokeLineCap: "round",
             selectable: false,
             evented: false,
@@ -371,7 +379,9 @@ const TacticBoardDrawingContextProvider: FC<{
             stroke: drawColorRef.current,
             strokeWidth: drawThicknessRef.current,
             strokeDashArray:
-              dashArrayRef.current.length > 0 ? dashArrayRef.current : undefined,
+              dashArrayRef.current.length > 0
+                ? dashArrayRef.current
+                : undefined,
             strokeLineCap: "round",
           });
 
@@ -379,7 +389,7 @@ const TacticBoardDrawingContextProvider: FC<{
           canvas.add(finalLine);
         }
 
-        canvas.renderAll();
+        canvas.requestRenderAll();
 
         isLineDrawingRef.current = false;
         lineStartRef.current = null;
@@ -406,7 +416,8 @@ const TacticBoardDrawingContextProvider: FC<{
       const canvas = getCanvas();
       if (!canvas) return;
 
-      const shouldLineToolBeActive = drawModeRef.current && shiftPressedRef.current;
+      const shouldLineToolBeActive =
+        drawModeRef.current && shiftPressedRef.current;
 
       if (shouldLineToolBeActive) {
         canvas.isDrawingMode = false;

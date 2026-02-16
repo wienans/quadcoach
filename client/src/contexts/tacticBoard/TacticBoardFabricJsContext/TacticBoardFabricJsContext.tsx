@@ -185,10 +185,7 @@ const TacticBoardFabricJsContextProvider: FC<{
   const setBackgroundImage = useCallback((src: string) => {
     const canvasFabric = canvasFabricRef.current;
     if (!canvasFabric) return;
-    canvasFabric.setBackgroundImage(
-      src,
-      canvasFabric.renderAll.bind(canvasFabric),
-    );
+    canvasFabric.setBackgroundImage(src, () => canvasFabric.requestRenderAll());
   }, []);
 
   const getBackgroundImage = useCallback(() => {
@@ -223,9 +220,8 @@ const TacticBoardFabricJsContextProvider: FC<{
 
       // Set background image
       if (page.backgroundImage?.src) {
-        canvasFabric.setBackgroundImage(
-          page.backgroundImage.src,
-          canvasFabric.renderAll.bind(canvasFabric),
+        canvasFabric.setBackgroundImage(page.backgroundImage.src, () =>
+          canvasFabric.requestRenderAll(),
         );
       }
 
@@ -307,7 +303,7 @@ const TacticBoardFabricJsContextProvider: FC<{
         }
       });
 
-      canvasFabric.renderAll();
+      canvasFabric.requestRenderAll();
     } catch (error) {
       throw new CanvasOperationError("Loading tactic page", error as Error);
     }
