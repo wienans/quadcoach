@@ -328,6 +328,7 @@ const TacticBoardInProfile = ({
               const shouldAnimateLeft = targetLeft !== currentLeft;
               const shouldAnimateTop = targetTop !== currentTop;
 
+              // Skip objects that don't need animation (already at target position)
               if (!shouldAnimateLeft && !shouldAnimateTop) return;
 
               if (shouldAnimateLeft) {
