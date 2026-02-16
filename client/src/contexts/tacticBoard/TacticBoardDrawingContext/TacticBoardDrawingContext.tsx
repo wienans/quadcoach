@@ -169,7 +169,74 @@ const TacticBoardDrawingContextProvider: FC<{
 
     const handlePathCreated = (e: fabric.IEvent) => {
       const path = (e as unknown as { path?: fabric.Path }).path;
-      if (path) {
+      if (!path) return;
+
+      if (arrowTipEnabledRef.current) {
+        // Get the last point and angle from the path
+        const pathData = path.path;
+        if (pathData && pathData.length > 0) {
+          // Find the last point with coordinates
+          let lastX = 0;
+          let lastY = 0;
+          let secondLastX = 0;
+          let secondLastY = 0;
+
+          for (let i = pathData.length - 1; i >= 0; i--) {
+            const cmd = pathData[i];
+            if (cmd && cmd.length >= 3) {
+              if (lastX === 0 && lastY === 0) {
+                // Last command - get end point
+                lastX = cmd[cmd.length - 2] as number;
+                lastY = cmd[cmd.length - 1] as number;
+              } else {
+                // Second last command - get its end point for angle calculation
+                secondLastX = cmd[cmd.length - 2] as number;
+                secondLastY = cmd[cmd.length - 1] as number;
+                break;
+              }
+            }
+          }
+
+          // Remove the original path and replace with path + arrow group
+          canvas.remove(path);
+
+          const strokeWidth = drawThicknessRef.current;
+          const headHeight = Math.max(10, strokeWidth * 6);
+          const headWidth = Math.max(8, strokeWidth * 5);
+
+          // Calculate angle from second-to-last point to last point
+          let angleDeg = 0;
+          if (secondLastX !== 0 || secondLastY !== 0) {
+            const angleRad = Math.atan2(lastY - secondLastY, lastX - secondLastX);
+            angleDeg = (angleRad * 180) / Math.PI;
+          }
+
+          // Create arrow head triangle
+          const head = new fabric.Triangle({
+            width: headWidth,
+            height: headHeight,
+            fill: drawColorRef.current,
+            left: lastX,
+            top: lastY,
+            originX: "center",
+            originY: "center",
+            angle: angleDeg + 90,
+            selectable: false,
+            evented: false,
+          });
+
+          // Create group with path and arrow head
+          const arrowGroup = new fabric.Group([path, head], {
+            selectable: true,
+            evented: true,
+          });
+
+          setUuid(arrowGroup, uuidv4());
+          canvas.add(arrowGroup);
+        } else {
+          setUuid(path, uuidv4());
+        }
+      } else {
         setUuid(path, uuidv4());
       }
     };
