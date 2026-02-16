@@ -39,6 +39,7 @@ const TacticBoardItemsDrawerNav = (): JSX.Element | null => {
             ? tacticBoardItemsDrawerWidth
             : undefined,
         flexShrink: { sm: 0 },
+        minHeight: 0,
         transition: theme.transitions.create("width", {
           easing: theme.transitions.easing.easeInOut,
           duration: theme.transitions.duration.standard,
@@ -51,13 +52,14 @@ const TacticBoardItemsDrawerNav = (): JSX.Element | null => {
         <Collapse
           orientation="horizontal"
           in={tacticBoardItemsDrawerOpen}
-          sx={{ height: "100%", backgroundColor: "background.paper" }}
+          sx={{ height: "100%", backgroundColor: "background.paper", overflow: "hidden" }}
         >
           <SoftBox
             sx={{
               bgcolor: "background.paper",
               width: tacticBoardItemsDrawerWidth,
               height: "100%",
+              overflow: "hidden",
             }}
           >
             <TacticBoardItemsDrawer />

@@ -105,7 +105,7 @@ const TacticBoardCanvasContextProvider: FC<{
       if (!canvas) return;
 
       canvas.remove(object);
-      canvas.renderAll();
+      canvas.requestRenderAll();
     } catch (error) {
       throw new CanvasOperationError("Removing object", error as Error);
     }
@@ -195,7 +195,17 @@ const TacticBoardCanvasContextProvider: FC<{
   const setSelection = useCallback((selection: boolean) => {
     canvasFabricRef.current?.getObjects().forEach((obj) => {
       obj.evented = selection;
+      obj.selectable = selection;
+
+      if (obj.type === "textbox") {
+        (obj as fabric.Textbox).editable = selection;
+      }
     });
+
+    if (!selection) {
+      canvasFabricRef.current?.discardActiveObject();
+      canvasFabricRef.current?.requestRenderAll();
+    }
   }, []);
 
   const clearCanvas = useCallback(() => {

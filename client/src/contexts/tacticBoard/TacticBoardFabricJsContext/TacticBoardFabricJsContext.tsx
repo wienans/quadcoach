@@ -185,10 +185,7 @@ const TacticBoardFabricJsContextProvider: FC<{
   const setBackgroundImage = useCallback((src: string) => {
     const canvasFabric = canvasFabricRef.current;
     if (!canvasFabric) return;
-    canvasFabric.setBackgroundImage(
-      src,
-      canvasFabric.renderAll.bind(canvasFabric),
-    );
+    canvasFabric.setBackgroundImage(src, () => canvasFabric.requestRenderAll());
   }, []);
 
   const getBackgroundImage = useCallback(() => {
@@ -223,9 +220,8 @@ const TacticBoardFabricJsContextProvider: FC<{
 
       // Set background image
       if (page.backgroundImage?.src) {
-        canvasFabric.setBackgroundImage(
-          page.backgroundImage.src,
-          canvasFabric.renderAll.bind(canvasFabric),
+        canvasFabric.setBackgroundImage(page.backgroundImage.src, () =>
+          canvasFabric.requestRenderAll(),
         );
       }
 
@@ -247,6 +243,18 @@ const TacticBoardFabricJsContextProvider: FC<{
               const addObj = new fabric.Text(obj.text, obj as object);
               canvasFabric.add(addObj);
             }
+          } else if (obj.type === "line") {
+            const lineObj = obj as unknown as {
+              x1: number;
+              y1: number;
+              x2: number;
+              y2: number;
+            };
+            const addObj = new fabric.Line(
+              [lineObj.x1, lineObj.y1, lineObj.x2, lineObj.y2],
+              obj as object,
+            );
+            canvasFabric.add(addObj);
           } else if (obj.type === "group") {
             const objects: fabric.Object[] = [];
             obj.objects?.forEach((groupObj) => {
@@ -270,6 +278,21 @@ const TacticBoardFabricJsContextProvider: FC<{
               } else if (groupObj.type === "rect") {
                 const addObj = new fabric.Rect(groupObj as object);
                 objects.push(addObj);
+              } else if (groupObj.type === "line") {
+                const lineObj = groupObj as unknown as {
+                  x1: number;
+                  y1: number;
+                  x2: number;
+                  y2: number;
+                };
+                const addObj = new fabric.Line(
+                  [lineObj.x1, lineObj.y1, lineObj.x2, lineObj.y2],
+                  groupObj as object,
+                );
+                objects.push(addObj);
+              } else if (groupObj.type === "triangle") {
+                const addObj = new fabric.Triangle(groupObj as object);
+                objects.push(addObj);
               }
             });
             const addObj = new fabric.Group(objects, obj as object);
@@ -280,7 +303,7 @@ const TacticBoardFabricJsContextProvider: FC<{
         }
       });
 
-      canvasFabric.renderAll();
+      canvasFabric.requestRenderAll();
     } catch (error) {
       throw new CanvasOperationError("Loading tactic page", error as Error);
     }

@@ -78,7 +78,7 @@ export const useKeyboardShortcuts = (config: KeyboardShortcutsConfig = {}) => {
             canvas: canvas,
           });
           canvas.setActiveObject(selection);
-          canvas.renderAll();
+          canvas.requestRenderAll();
         }
         return;
       }
@@ -87,7 +87,7 @@ export const useKeyboardShortcuts = (config: KeyboardShortcutsConfig = {}) => {
       if (event.key === "Escape") {
         event.preventDefault();
         canvas.discardActiveObject();
-        canvas.renderAll();
+        canvas.requestRenderAll();
         return;
       }
 
@@ -135,7 +135,7 @@ export const useKeyboardShortcuts = (config: KeyboardShortcutsConfig = {}) => {
           });
         }
 
-        canvas.renderAll();
+        canvas.requestRenderAll();
         return;
       }
 

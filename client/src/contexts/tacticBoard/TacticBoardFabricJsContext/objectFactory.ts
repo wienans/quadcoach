@@ -49,6 +49,32 @@ export class FabricObjectFactory {
       return new fabric.Text(text, options);
     });
 
+    this.creators.set("textbox", (data) => {
+      const options = { ...data } as fabric.ITextboxOptions;
+      delete (options as fabric.ITextboxOptions & { type?: string }).type;
+      const text = (options as fabric.ITextboxOptions & { text?: string }).text;
+      delete (options as fabric.ITextboxOptions & { text?: string }).text;
+      return new fabric.Textbox(text ?? "", options);
+    });
+
+    this.creators.set("line", (data) => {
+      const lineData = data as unknown as {
+        x1: number;
+        y1: number;
+        x2: number;
+        y2: number;
+      };
+      const options = { ...data } as fabric.ILineOptions;
+      delete (options as fabric.ILineOptions & { type?: string }).type;
+      return new fabric.Line([lineData.x1, lineData.y1, lineData.x2, lineData.y2], options);
+    });
+
+    this.creators.set("triangle", (data) => {
+      const options = { ...data } as fabric.ITriangleOptions;
+      delete (options as fabric.ITriangleOptions & { type?: string }).type;
+      return new fabric.Triangle(options);
+    });
+
     this.creators.set("group", (data) => this.createGroupObject(data));
   }
 

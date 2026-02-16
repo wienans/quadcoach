@@ -22,6 +22,10 @@
       "tooltip_enable": "Enables the drawing mode",
       "tooltip_disable": "Disables the drawing mode"
     },
+    "arrowTip": {
+      "tooltip": "Toggle arrow tip for straight lines (hold Shift).",
+      "label": "Arrow tip"
+    },
     "objectDeleteButton": {
       "tooltip": "Deletes the current selected Object"
     },
@@ -46,6 +50,15 @@
     },
     "backButton": {
       "tooltip": "Go back to tactic board profile"
+    },
+    "addTextButton": {
+      "tooltip": "Add text"
+    },
+    "textColorButton": {
+      "tooltip": "Text color"
+    },
+    "fontSizeSlider": {
+      "tooltip": "Font size"
     }
   },
   "itemsDrawer": {

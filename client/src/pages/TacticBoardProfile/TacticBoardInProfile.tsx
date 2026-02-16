@@ -85,7 +85,13 @@ const TacticBoardInProfile = ({
   }, [userId, tacticBoard, userRoles, accessUsers]);
 
   useEffect(() => {
-    if (!isTacticBoardLoading && !isTacticBoardError && tacticBoard && tacticBoard.pages && tacticBoard.pages.length > 0) {
+    if (
+      !isTacticBoardLoading &&
+      !isTacticBoardError &&
+      tacticBoard &&
+      tacticBoard.pages &&
+      tacticBoard.pages.length > 0
+    ) {
       loadFromJson(tacticBoard.pages[0]);
       setMaxPages(tacticBoard.pages.length);
       setSelection(false);
@@ -177,38 +183,97 @@ const TacticBoardInProfile = ({
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
+
     if (isAnimating && tacticBoard) {
-      // Start the animation only if isAnimating is true
       interval = setInterval(() => {
         setPage((prevPage) => {
           const newPage = (prevPage % tacticBoard.pages.length) + 1;
+          const nextPageObjects = tacticBoard.pages[newPage - 1].objects ?? [];
+
+          const targetByUuid = new Map<
+            string,
+            (typeof nextPageObjects)[number]
+          >();
+          nextPageObjects.forEach((o) => {
+            if (typeof (o as { uuid?: unknown }).uuid === "string") {
+              targetByUuid.set((o as { uuid: string }).uuid, o);
+            }
+          });
+
+          const canvas = canvasRef.current;
+          const requestRenderAll = () => {
+            canvas?.requestRenderAll();
+          };
+
+          let pendingAnimations = 0;
+          let didTriggerLoad = false;
+
+          const triggerLoadOnce = () => {
+            if (didTriggerLoad) return;
+            didTriggerLoad = true;
+            onLoadPage(newPage);
+          };
+
+          const onOneAnimationComplete = () => {
+            pendingAnimations -= 1;
+            if (pendingAnimations <= 0) {
+              triggerLoadOnce();
+            }
+          };
+
           getAllObjects().forEach((obj) => {
-            const targetObject = tacticBoard.pages[newPage - 1].objects?.find(
-              (nextObject) => nextObject.uuid == getUuid(obj),
-            );
-            if (targetObject && canvasRef.current && targetObject.left !== undefined && targetObject.top !== undefined) {
-              obj.animate("left", targetObject.left || 0, {
-                onChange: canvasRef.current.renderAll.bind(canvasRef.current),
+            const objUuid = getUuid(obj);
+            if (typeof objUuid !== "string") return;
+
+            const targetObject = targetByUuid.get(objUuid);
+            if (!targetObject || !canvas) return;
+
+            const targetLeft = targetObject.left;
+            const targetTop = targetObject.top;
+
+            if (
+              typeof targetLeft !== "number" ||
+              typeof targetTop !== "number"
+            ) {
+              return;
+            }
+
+            const currentLeft = obj.left ?? 0;
+            const currentTop = obj.top ?? 0;
+
+            const shouldAnimateLeft = targetLeft !== currentLeft;
+            const shouldAnimateTop = targetTop !== currentTop;
+
+            if (!shouldAnimateLeft && !shouldAnimateTop) return;
+
+            if (shouldAnimateLeft) {
+              pendingAnimations += 1;
+              obj.animate("left", targetLeft, {
+                onChange: requestRenderAll,
                 duration: 1000,
-                onComplete: () => {
-                  onLoadPage(newPage);
-                },
+                onComplete: onOneAnimationComplete,
               });
-              obj.animate("top", targetObject.top || 0, {
-                onChange: canvasRef.current.renderAll.bind(canvasRef.current),
+            }
+
+            if (shouldAnimateTop) {
+              pendingAnimations += 1;
+              obj.animate("top", targetTop, {
+                onChange: requestRenderAll,
                 duration: 1000,
-                onComplete: () => {
-                  onLoadPage(newPage);
-                },
+                onComplete: onOneAnimationComplete,
               });
             }
           });
+
+          if (pendingAnimations === 0) {
+            triggerLoadOnce();
+          }
+
           return newPage;
         });
       }, 2000);
     }
 
-    // Clean up the interval on component unmount or when the last page is reached
     return () => clearInterval(interval);
   }, [isAnimating, onLoadPage, tacticBoard, getAllObjects, canvasRef]);
 
@@ -225,20 +290,28 @@ const TacticBoardInProfile = ({
               tacticBoard.name ? `${tacticBoard.name}.mp4` : "tacticboard.mp4",
             );
           }
+          const requestRenderAll = () => {
+            canvasRef.current?.requestRenderAll();
+          };
           getAllObjects().forEach((obj) => {
             const targetObject = tacticBoard.pages[newPage - 1].objects?.find(
               (nextObject) => nextObject.uuid == getUuid(obj),
             );
-            if (targetObject && canvasRef.current && targetObject.left !== undefined && targetObject.top !== undefined) {
+            if (
+              targetObject &&
+              canvasRef.current &&
+              targetObject.left !== undefined &&
+              targetObject.top !== undefined
+            ) {
               obj.animate("left", targetObject.left || 0, {
-                onChange: canvasRef.current.renderAll.bind(canvasRef.current),
+                onChange: requestRenderAll,
                 duration: 1000,
                 onComplete: () => {
                   onLoadPage(newPage);
                 },
               });
               obj.animate("top", targetObject.top || 0, {
-                onChange: canvasRef.current.renderAll.bind(canvasRef.current),
+                onChange: requestRenderAll,
                 duration: 1000,
                 onComplete: () => {
                   onLoadPage(newPage);

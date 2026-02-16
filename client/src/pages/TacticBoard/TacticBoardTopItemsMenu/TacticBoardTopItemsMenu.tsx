@@ -12,10 +12,12 @@ import { SoftBox } from "../../../components";
 import DrawIcon from "@mui/icons-material/Draw";
 import LayersIcon from "@mui/icons-material/Layers";
 import DeleteIcon from "@mui/icons-material/Delete";
+import ArrowRightAltIcon from "@mui/icons-material/ArrowRightAlt";
+import TextFieldsIcon from "@mui/icons-material/TextFields";
 import { toggleTacticBoardItemsDrawerOpen } from "../tacticBoardSlice";
 import { useAppDispatch, useAppSelector } from "../../../store/hooks";
 import { useTranslation } from "react-i18next";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   useTacticBoardCanvas,
   useTacticBoardDrawing,
@@ -24,6 +26,9 @@ import { ChromePicker, ColorResult } from "react-color";
 import Popover from "@mui/material/Popover";
 import ColorLensIcon from "@mui/icons-material/ColorLens";
 import { LineStyle } from "../../../contexts/tacticBoard/TacticBoardDrawingContext/TacticBoardDrawingContext";
+import { fabric } from "fabric";
+import { v4 as uuidv4 } from "uuid";
+import { setUuid } from "../../../contexts/tacticBoard/TacticBoardFabricJsContext/fabricTypes";
 
 type TacticBoardTopItemMenuProps = {
   isPrivileged: boolean;
@@ -38,7 +43,8 @@ const TacticBoardTopItemsMenu = ({
 }: TacticBoardTopItemMenuProps): JSX.Element => {
   const { t } = useTranslation("TacticBoard");
   const dispatch = useAppDispatch();
-  const { setBackgroundImage, getBackgroundImage } = useTacticBoardCanvas();
+  const { setBackgroundImage, getBackgroundImage, canvasFabricRef, addObject } =
+    useTacticBoardCanvas();
 
   const {
     setDrawMode,
@@ -48,18 +54,33 @@ const TacticBoardTopItemsMenu = ({
     getDrawThickness,
     setLineStyle,
     getLineStyle,
+    setArrowTipEnabled,
+    getArrowTipEnabled,
   } = useTacticBoardDrawing();
   const tacticBoardItemsDrawerOpen = useAppSelector(
     (state) => state.tacticBoard.tacticBoardItemsDrawerOpen,
   );
   const [drawingEnabled, enableDrawing] = useState<boolean>(false);
   const [backgroundImageId, setBackgorundImageId] = useState<string>("");
+
   const [colorPickerAnchor, setColorPickerAnchor] =
     useState<HTMLElement | null>(null);
   const [currentColor, setCurrentColor] = useState("#000000");
+
+  const [textColorPickerAnchor, setTextColorPickerAnchor] =
+    useState<HTMLElement | null>(null);
+  const [selectedTextbox, setSelectedTextbox] = useState<fabric.Textbox | null>(
+    null,
+  );
+  const [currentTextColor, setCurrentTextColor] = useState("#000000");
+  const [currentFontSize, setCurrentFontSize] = useState<number>(24);
+
   const [currentThickness, setCurrentThickness] = useState(1);
   const [currentLineStyle, setCurrentLineStyle] = useState<LineStyle>(
     getLineStyle(),
+  );
+  const [arrowTipEnabled, setArrowTipEnabledState] = useState<boolean>(
+    getArrowTipEnabled(),
   );
 
   const toggleItems = () => {
@@ -86,10 +107,61 @@ const TacticBoardTopItemsMenu = ({
     };
   }, [isPrivileged, isEditMode, onDelete]);
 
+  const syncSelectedTextbox = useCallback(() => {
+    const canvas = canvasFabricRef.current;
+    if (!canvas) return;
+
+    const active = canvas.getActiveObject();
+    if (active?.type === "textbox") {
+      const textbox = active as fabric.Textbox;
+      setSelectedTextbox(textbox);
+      setCurrentTextColor(
+        typeof textbox.fill === "string" ? textbox.fill : "#000000",
+      );
+      setCurrentFontSize(textbox.fontSize ?? 24);
+    } else {
+      setSelectedTextbox(null);
+    }
+  }, [canvasFabricRef]);
+
   useEffect(() => {
     setCurrentColor(getDrawColor());
     setCurrentThickness(getDrawThickness());
-  }, [getDrawColor, getDrawThickness]);
+    setArrowTipEnabledState(getArrowTipEnabled());
+  }, [getDrawColor, getDrawThickness, getArrowTipEnabled]);
+
+  useEffect(() => {
+    const canvas = canvasFabricRef.current;
+    if (!canvas) return;
+
+    const onSelectionCreated = () => {
+      syncSelectedTextbox();
+    };
+
+    const onSelectionUpdated = () => {
+      syncSelectedTextbox();
+    };
+
+    const onSelectionCleared = () => {
+      setSelectedTextbox(null);
+    };
+
+    const onObjectModified = () => {
+      syncSelectedTextbox();
+    };
+
+    canvas.on("selection:created", onSelectionCreated);
+    canvas.on("selection:updated", onSelectionUpdated);
+    canvas.on("selection:cleared", onSelectionCleared);
+    canvas.on("object:modified", onObjectModified);
+
+    return () => {
+      canvas.off("selection:created", onSelectionCreated);
+      canvas.off("selection:updated", onSelectionUpdated);
+      canvas.off("selection:cleared", onSelectionCleared);
+      canvas.off("object:modified", onObjectModified);
+    };
+  }, [canvasFabricRef, syncSelectedTextbox]);
 
   const handleColorPickerOpen = (event: React.MouseEvent<HTMLElement>) => {
     setColorPickerAnchor(event.currentTarget);
@@ -104,6 +176,57 @@ const TacticBoardTopItemsMenu = ({
   const handleColorChange = (color: ColorResult) => {
     setCurrentColor(color.hex);
     setDrawColor(color.hex);
+  };
+
+  const handleTextColorPickerOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setTextColorPickerAnchor(event.currentTarget);
+  };
+
+  const handleTextColorPickerClose = () => {
+    setTextColorPickerAnchor(null);
+  };
+
+  const textColorPickerOpen = Boolean(textColorPickerAnchor);
+
+  const handleTextColorChange = (color: ColorResult) => {
+    const canvas = canvasFabricRef.current;
+    if (!canvas || !selectedTextbox) return;
+
+    setCurrentTextColor(color.hex);
+    selectedTextbox.set("fill", color.hex);
+    canvas.requestRenderAll();
+  };
+
+  const handleFontSizeChange = (_event: Event, value: number | number[]) => {
+    const canvas = canvasFabricRef.current;
+    if (!canvas || !selectedTextbox) return;
+
+    const nextSize = value as number;
+    setCurrentFontSize(nextSize);
+    selectedTextbox.set("fontSize", nextSize);
+    canvas.requestRenderAll();
+  };
+
+  const onAddText = () => {
+    const canvas = canvasFabricRef.current;
+    if (!canvas) return;
+
+    const textbox = new fabric.Textbox("Double-click to edit", {
+      left: 100,
+      top: 100,
+      width: 300,
+      fontSize: 24,
+      fill: "#000000",
+      editable: true,
+    });
+
+    setUuid(textbox, uuidv4());
+    (textbox as fabric.Object & { objectType?: string }).objectType = "textbox";
+
+    addObject(textbox);
+    canvas.setActiveObject(textbox);
+    canvas.requestRenderAll();
+    syncSelectedTextbox();
   };
 
   const handleThicknessChange = (_event: Event, value: number | number[]) => {
@@ -233,6 +356,23 @@ const TacticBoardTopItemsMenu = ({
                     onChangeComplete={handleColorChange}
                   />
                 </Popover>
+                <Tooltip title={t("TacticBoard:topMenu.arrowTip.tooltip")}>
+                  <span>
+                    <ToggleButton
+                      value={arrowTipEnabled}
+                      selected={arrowTipEnabled}
+                      size="small"
+                      onChange={() => {
+                        const next = !arrowTipEnabled;
+                        setArrowTipEnabledState(next);
+                        setArrowTipEnabled(next);
+                      }}
+                      sx={{ mr: 1 }}
+                    >
+                      <ArrowRightAltIcon />
+                    </ToggleButton>
+                  </span>
+                </Tooltip>
                 <Slider
                   value={currentThickness}
                   onChange={handleThicknessChange}
@@ -246,6 +386,78 @@ const TacticBoardTopItemsMenu = ({
           </>
         )}
         {/* DRAW BUTTON END */}
+
+        {/* TEXT BUTTON START */}
+        {isPrivileged && isEditMode && (
+          <Tooltip title={t("TacticBoard:topMenu.addTextButton.tooltip")}>
+            <span>
+              <ToggleButton
+                value={false}
+                selected={false}
+                disabled={!isEditMode}
+                onChange={onAddText}
+                size="small"
+                sx={{
+                  mr: 1,
+                }}
+              >
+                <TextFieldsIcon />
+              </ToggleButton>
+            </span>
+          </Tooltip>
+        )}
+
+        {isPrivileged && isEditMode && selectedTextbox && (
+          <>
+            <Tooltip title={t("TacticBoard:topMenu.textColorButton.tooltip")}>
+              <span>
+                <IconButton
+                  size="small"
+                  onClick={handleTextColorPickerOpen}
+                  sx={{
+                    mr: 1,
+                    backgroundColor: currentTextColor,
+                    width: 30,
+                    height: 30,
+                    "&:hover": {
+                      backgroundColor: currentTextColor,
+                    },
+                  }}
+                >
+                  <ColorLensIcon sx={{ color: "#ffffff" }} />
+                </IconButton>
+              </span>
+            </Tooltip>
+            <Popover
+              open={textColorPickerOpen}
+              anchorEl={textColorPickerAnchor}
+              onClose={handleTextColorPickerClose}
+              anchorOrigin={{
+                vertical: "bottom",
+                horizontal: "left",
+              }}
+            >
+              <ChromePicker
+                color={currentTextColor}
+                onChange={handleTextColorChange}
+                onChangeComplete={handleTextColorChange}
+              />
+            </Popover>
+
+            <Tooltip title={t("TacticBoard:topMenu.fontSizeSlider.tooltip")}>
+              <Slider
+                value={currentFontSize}
+                onChange={handleFontSizeChange}
+                min={8}
+                max={96}
+                valueLabelDisplay="auto"
+                sx={{ width: 120, ml: 1, mr: 2 }}
+              />
+            </Tooltip>
+          </>
+        )}
+        {/* TEXT BUTTON END */}
+
         {/* DELETE BUTTON START */}
         {isPrivileged && isEditMode && (
           <Tooltip title={t("TacticBoard:topMenu.objectDeleteButton.tooltip")}>
