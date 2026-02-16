@@ -9,16 +9,20 @@ const TacticBoardItemsDrawer = (): JSX.Element => {
   const { t } = useTranslation("TacticBoard");
 
   return (
-    <SoftBox sx={{ height: "100%", bgcolor: "background.paper" }}>
+    <SoftBox sx={{ height: "100%", display: "flex", flexDirection: "column", bgcolor: "background.paper" }}>
+      <ListSubheader component="div" sx={{ bgcolor: "background.paper" }}>
+        {t("TacticBoard:itemsDrawer.title")}
+      </ListSubheader>
       <List
-        sx={{ width: "100%", bgcolor: "background.paper" }}
+        sx={{ 
+          flex: 1, 
+          overflow: "auto",
+          width: "100%", 
+          bgcolor: "background.paper" 
+        }}
         component="nav"
         aria-labelledby={t("TacticBoard:itemsDrawer.title")}
-        subheader={
-          <ListSubheader component="div">
-            {t("TacticBoard:itemsDrawer.title")}
-          </ListSubheader>
-        }
+        disablePadding
       >
         <PersonItemsSection teamA={true} />
         <PersonItemsSection teamA={false} />

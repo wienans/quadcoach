@@ -611,6 +611,7 @@ const TacticsBoard = (): JSX.Element => {
             display: "flex",
             flexGrow: 1,
             maxHeight: "100%",
+            minHeight: 0,
             flexDirection: "column",
           }}
         >
@@ -642,6 +643,8 @@ const TacticsBoard = (): JSX.Element => {
               display: "flex",
               flexGrow: 1,
               px: 3,
+              minHeight: 0,
+              overflow: "hidden",
             }}
           >
             <TacticBoardItemsDrawerNav />
