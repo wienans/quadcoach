@@ -15,7 +15,7 @@ import {
 } from "../../../../../hooks/taticBoard";
 import { TacticBoardProvider } from "../../../../../contexts/tacticBoard";
 import { FabricJsCanvas, SoftBox } from "../../../../../components";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import PlayCircleIcon from "@mui/icons-material/PlayCircle";
 import PauseCircleIcon from "@mui/icons-material/PauseCircle";
 import ContentPasteIcon from "@mui/icons-material/ContentPaste";
@@ -71,6 +71,20 @@ const TacticBoardInBlock = ({
     setIsAnimating(!isAnimating);
   }, [isAnimating]);
 
+  const targetByUuidMaps = useMemo(() => {
+    if (!tacticBoard) return null;
+    return tacticBoard.pages.map((page) => {
+      const objects = page.objects ?? [];
+      const map = new Map<string, (typeof objects)[number]>();
+      objects.forEach((o) => {
+        if (typeof (o as { uuid?: unknown }).uuid === "string") {
+          map.set((o as { uuid: string }).uuid, o);
+        }
+      });
+      return map;
+    });
+  }, [tacticBoard]);
+
   useEffect(() => {
     let interval: NodeJS.Timeout;
 
@@ -78,17 +92,12 @@ const TacticBoardInBlock = ({
       interval = setInterval(() => {
         setPage((prevPage) => {
           const newPage = (prevPage % tacticBoard.pages.length) + 1;
-          const nextPageObjects = tacticBoard.pages[newPage - 1].objects ?? [];
 
-          const targetByUuid = new Map<
-            string,
-            (typeof nextPageObjects)[number]
-          >();
-          nextPageObjects.forEach((o) => {
-            if (typeof (o as { uuid?: unknown }).uuid === "string") {
-              targetByUuid.set((o as { uuid: string }).uuid, o);
-            }
-          });
+          const targetByUuid = targetByUuidMaps?.[newPage - 1];
+          if (!targetByUuid) {
+            onLoadPage(newPage);
+            return newPage;
+          }
 
           const canvas = canvasRef.current;
           const requestRenderAll = () => {
@@ -165,7 +174,7 @@ const TacticBoardInBlock = ({
     }
 
     return () => clearInterval(interval);
-  }, [isAnimating, onLoadPage, tacticBoard, getAllObjects, canvasRef]);
+  }, [isAnimating, onLoadPage, tacticBoard, getAllObjects, canvasRef, targetByUuidMaps]);
 
   const handleChange = (_: React.ChangeEvent<unknown>, value: number) => {
     setPage(value);

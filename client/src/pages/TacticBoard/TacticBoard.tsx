@@ -1,7 +1,7 @@
 import "./translations";
 import { useNavigate } from "react-router-dom";
 import { useParams } from "react-router-dom";
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { Alert, Skeleton } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { FabricJsCanvas, SoftBox } from "../../components";
@@ -343,6 +343,21 @@ const TacticsBoard = (): JSX.Element => {
     setSelection,
     setControls,
   ]);
+
+  const targetByUuidMaps = useMemo(() => {
+    if (!tacticBoard) return null;
+    return tacticBoard.pages.map((page) => {
+      const objects = page.objects ?? [];
+      const map = new Map<string, (typeof objects)[number]>();
+      objects.forEach((o) => {
+        if (typeof (o as { uuid?: unknown }).uuid === "string") {
+          map.set((o as { uuid: string }).uuid, o);
+        }
+      });
+      return map;
+    });
+  }, [tacticBoard]);
+
   useEffect(() => {
     let interval: NodeJS.Timeout;
 
@@ -350,17 +365,12 @@ const TacticsBoard = (): JSX.Element => {
       interval = setInterval(() => {
         setPage((prevPage) => {
           const newPage = (prevPage % tacticBoard.pages.length) + 1;
-          const nextPageObjects = tacticBoard.pages[newPage - 1].objects ?? [];
 
-          const targetByUuid = new Map<
-            string,
-            (typeof nextPageObjects)[number]
-          >();
-          nextPageObjects.forEach((o) => {
-            if (typeof (o as { uuid?: unknown }).uuid === "string") {
-              targetByUuid.set((o as { uuid: string }).uuid, o);
-            }
-          });
+          const targetByUuid = targetByUuidMaps?.[newPage - 1];
+          if (!targetByUuid) {
+            onLoadPage(newPage);
+            return newPage;
+          }
 
           const canvas = canvasRef.current;
           const requestRenderAll = () => {
@@ -437,7 +447,7 @@ const TacticsBoard = (): JSX.Element => {
     }
 
     return () => clearInterval(interval);
-  }, [isAnimating, onLoadPage, tacticBoard, getAllObjects, canvasRef]);
+  }, [isAnimating, onLoadPage, tacticBoard, getAllObjects, canvasRef, targetByUuidMaps]);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -454,17 +464,11 @@ const TacticsBoard = (): JSX.Element => {
             );
           }
 
-          const nextPageObjects = tacticBoard.pages[newPage - 1].objects ?? [];
-
-          const targetByUuid = new Map<
-            string,
-            (typeof nextPageObjects)[number]
-          >();
-          nextPageObjects.forEach((o) => {
-            if (typeof (o as { uuid?: unknown }).uuid === "string") {
-              targetByUuid.set((o as { uuid: string }).uuid, o);
-            }
-          });
+          const targetByUuid = targetByUuidMaps?.[newPage - 1];
+          if (!targetByUuid) {
+            onLoadPage(newPage);
+            return newPage;
+          }
 
           const canvas = canvasRef.current;
           const requestRenderAll = () => {
@@ -551,6 +555,7 @@ const TacticsBoard = (): JSX.Element => {
     getAllObjects,
     canvasRef,
     onLoadPage,
+    targetByUuidMaps,
   ]);
 
   useEffect(() => {
