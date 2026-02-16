@@ -293,6 +293,23 @@ const TacticBoardInProfile = ({
           const requestRenderAll = () => {
             canvasRef.current?.requestRenderAll();
           };
+
+          let pendingAnimations = 0;
+          let didTriggerLoad = false;
+
+          const triggerLoadOnce = () => {
+            if (didTriggerLoad) return;
+            didTriggerLoad = true;
+            onLoadPage(newPage);
+          };
+
+          const onOneAnimationComplete = () => {
+            pendingAnimations -= 1;
+            if (pendingAnimations <= 0) {
+              triggerLoadOnce();
+            }
+          };
+
           getAllObjects().forEach((obj) => {
             const targetObject = tacticBoard.pages[newPage - 1].objects?.find(
               (nextObject) => nextObject.uuid == getUuid(obj),
@@ -303,22 +320,39 @@ const TacticBoardInProfile = ({
               targetObject.left !== undefined &&
               targetObject.top !== undefined
             ) {
-              obj.animate("left", targetObject.left || 0, {
-                onChange: requestRenderAll,
-                duration: 1000,
-                onComplete: () => {
-                  onLoadPage(newPage);
-                },
-              });
-              obj.animate("top", targetObject.top || 0, {
-                onChange: requestRenderAll,
-                duration: 1000,
-                onComplete: () => {
-                  onLoadPage(newPage);
-                },
-              });
+              const currentLeft = obj.left ?? 0;
+              const currentTop = obj.top ?? 0;
+              const targetLeft = targetObject.left || 0;
+              const targetTop = targetObject.top || 0;
+
+              const shouldAnimateLeft = targetLeft !== currentLeft;
+              const shouldAnimateTop = targetTop !== currentTop;
+
+              if (!shouldAnimateLeft && !shouldAnimateTop) return;
+
+              if (shouldAnimateLeft) {
+                pendingAnimations += 1;
+                obj.animate("left", targetLeft, {
+                  onChange: requestRenderAll,
+                  duration: 1000,
+                  onComplete: onOneAnimationComplete,
+                });
+              }
+
+              if (shouldAnimateTop) {
+                pendingAnimations += 1;
+                obj.animate("top", targetTop, {
+                  onChange: requestRenderAll,
+                  duration: 1000,
+                  onComplete: onOneAnimationComplete,
+                });
+              }
             }
           });
+
+          if (pendingAnimations === 0) {
+            triggerLoadOnce();
+          }
 
           return newPage;
         });
