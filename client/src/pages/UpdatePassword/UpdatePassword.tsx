@@ -41,7 +41,7 @@ const UpdatePassword = (): JSX.Element => {
     validationSchema: Yup.object({
       password: Yup.string()
         .matches(
-          /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])(?=.{8,})/,
+          /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^a-zA-Z0-9])(?=.{8,})/,
           "UpdatePassword:info.password.valid",
         )
         .required("UpdatePassword:info.password.missing"),
