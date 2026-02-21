@@ -20,11 +20,11 @@ import { setMiniSideNav } from "../../Layout/layoutSlice";
 
 const defaultHeaderBackgroundImage = ({
   functions: { rgba, linearGradient },
-  palette: { gradients },
+  palette: { black },
 }: Theme): string =>
   `${linearGradient(
-    rgba(gradients.info.main, 0.6),
-    rgba(gradients.info.state, 0.6),
+    rgba(black.main, 0.6),
+    rgba(black.light, 0.6),
   )}, url(${curved0})`;
 
 export type ProfileLayoutProps = {

@@ -5,7 +5,6 @@ import {
   Alert,
   Card,
   Skeleton,
-  useTheme,
   useMediaQuery,
   IconButton,
   Tooltip,
@@ -35,11 +34,6 @@ import {
   DashboardLayout,
   ProfileLayout,
 } from "../../../../components/LayoutContainers";
-import { getExerciseTypeHeaderBackgroundImage } from "../../../../components/LayoutContainers/ProfileLayout";
-import {
-  ExerciseType,
-  getExerciseType,
-} from "../../../../helpers/exerciseHelpers";
 import EditIcon from "@mui/icons-material/Edit";
 import SaveIcon from "@mui/icons-material/Save";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -82,8 +76,6 @@ const Exercise = () => {
   // Track whether to show validation summary (only after failed save attempt)
   const [showValidationSummary, setShowValidationSummary] =
     useState<boolean>(false);
-
-  const theme = useTheme();
 
   const isUpMd = useMediaQuery((theme: Theme) => theme.breakpoints.up("md"));
 
@@ -145,15 +137,6 @@ const Exercise = () => {
     }
   }, [userId, getFavoriteExercises]);
 
-  const [exerciseType, setExerciseType] = useState<ExerciseType | undefined>();
-  const [headerBackgroundImage, setHeaderBackgroundImage] = useState<
-    string | undefined
-  >();
-
-  useEffect(() => {
-    setExerciseType(exercise ? getExerciseType(exercise) : undefined);
-  }, [exercise]);
-
   useEffect(() => {
     if (favoriteExercises) {
       setIsFavorite(
@@ -163,14 +146,6 @@ const Exercise = () => {
       );
     }
   }, [favoriteExercises, setIsFavorite, exerciseId]);
-
-  useEffect(() => {
-    setHeaderBackgroundImage(
-      exerciseType && exercise
-        ? getExerciseTypeHeaderBackgroundImage(exerciseType, theme)
-        : undefined,
-    );
-  }, [exercise, exerciseType, theme]);
 
   useEffect(() => {
     if (!userId) {
@@ -489,7 +464,6 @@ const Exercise = () => {
           exercise?.name
         )
       }
-      headerBackgroundImage={headerBackgroundImage}
       isDataLoading={isExerciseLoading}
       headerAction={
         <SoftBox display="flex">

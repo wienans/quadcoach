@@ -430,7 +430,6 @@ const PracticePlanner = (): JSX.Element => {
           plan?.name
         )
       }
-      //   headerBackgroundImage={headerBackgroundImage}
       isDataLoading={isPlanLoading}
       headerAction={
         <SoftBox display="flex">

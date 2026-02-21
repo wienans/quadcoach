@@ -77,7 +77,15 @@ const NavbarMainControls = ({
     >
       {status != null && (
         <>
-          <SoftTypography sx={{ mr: 1 }} variant="body2">
+          <SoftTypography
+            sx={(theme) => ({
+              mr: 1,
+              color: light
+                ? theme.palette.white.main
+                : theme.palette.black.main,
+            })}
+            variant="body2"
+          >
             {t("NavbarMainControls:welcome", { name: name })}
           </SoftTypography>
           <IconButton

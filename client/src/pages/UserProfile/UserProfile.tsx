@@ -204,7 +204,6 @@ const UserProfile = () => {
     <FormikProvider value={formik}>
       <ProfileLayout
         title={user?.name}
-        //headerBackgroundImage={headerBackgroundImage}
         isDataLoading={isUserLoading}
         showScrollToTopButton={(scrollTrigger) => scrollTrigger && isUpMd}
         headerAction={

@@ -334,7 +334,6 @@ const TacticBoardProfile = () => {
             tacticBoard?.name
           )
         }
-        //headerBackgroundImage={headerBackgroundImage}
         isDataLoading={isTacticBoardLoading}
         showScrollToTopButton={(scrollTrigger) => scrollTrigger && isUpMd}
         headerAction={
