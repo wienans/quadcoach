@@ -518,6 +518,15 @@ const TacticBoardProfile = () => {
               <TacticBoardInProfileWrapper
                 tacticBoardId={tacticBoardId}
                 isEditMode={isEditMode}
+                onEditClick={() => {
+                  if (formik.isValid) {
+                    formik.submitForm().then(() => {
+                      navigate(`/tacticboards/${tacticBoardId}/update`);
+                    });
+                  } else {
+                    navigate(`/tacticboards/${tacticBoardId}/update`);
+                  }
+                }}
               />
               {(Boolean(tacticBoard?.tags) || Boolean(tacticBoard?.creator)) &&
                 !isEditMode && (

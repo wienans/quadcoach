@@ -29,11 +29,13 @@ import { getUuid } from "../../contexts/tacticBoard/TacticBoardFabricJsContext/f
 export type TacticBoardInProfileProps = {
   tacticBoardId: string | undefined;
   isEditMode?: boolean;
+  onEditClick?: () => void;
 };
 
 const TacticBoardInProfile = ({
   tacticBoardId,
   isEditMode,
+  onEditClick,
 }: TacticBoardInProfileProps): JSX.Element | undefined => {
   const { t } = useTranslation("TacticBoardProfile");
   const navigate = useNavigate();
@@ -501,8 +503,12 @@ const TacticBoardInProfile = ({
               value={false}
               size="small"
               selected={false}
-              onChange={() => {
-                navigate(`/tacticboards/${tacticBoardId}/update`);
+              onClick={() => {
+                if (onEditClick) {
+                  onEditClick();
+                } else {
+                  navigate(`/tacticboards/${tacticBoardId}/update`);
+                }
               }}
               sx={{
                 mr: 1,
@@ -541,11 +547,13 @@ const TacticBoardInProfile = ({
 export type TacticBoardInProfileWrapperProps = {
   tacticBoardId: string | undefined;
   isEditMode?: boolean;
+  onEditClick?: () => void;
 };
 
 const TacticBoardInProfileWrapper = ({
   tacticBoardId,
   isEditMode,
+  onEditClick,
 }: TacticBoardInProfileWrapperProps): JSX.Element => {
   return (
     <div>
@@ -553,6 +561,7 @@ const TacticBoardInProfileWrapper = ({
         <TacticBoardInProfile
           tacticBoardId={tacticBoardId}
           isEditMode={isEditMode}
+          onEditClick={onEditClick}
         />
       </TacticBoardProvider>
     </div>
