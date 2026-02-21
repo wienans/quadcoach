@@ -17,6 +17,7 @@
       "title": "Tags",
       "placeholder": "Enter tag and press Enter..."
     },
+    "isPrivate": "Show only private boards",
     "apply": "Apply filter"
   },
   "errorLoadingTacticBoards": "An error occurred while loading tactic boards.",

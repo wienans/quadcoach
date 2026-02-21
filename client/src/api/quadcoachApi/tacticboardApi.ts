@@ -280,6 +280,7 @@ export const tacticBoardApiSlice = quadcoachApi.injectEndpoints({
           nameRegex,
           tagRegex,
           tagList,
+          isPrivate,
           sortBy,
           sortOrder,
           page = 1,
@@ -300,6 +301,9 @@ export const tacticBoardApiSlice = quadcoachApi.injectEndpoints({
         if (tagRegex != null && tagRegex !== "") {
           urlParams.append("tags[regex]", tagRegex);
           urlParams.append("tags[options]", "i");
+        }
+        if (isPrivate !== undefined) {
+          urlParams.append("isPrivate[eq]", String(isPrivate));
         }
         if (sortBy != null) {
           urlParams.append("sortBy", sortBy);

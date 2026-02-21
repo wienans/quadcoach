@@ -17,6 +17,7 @@
       "title": "Stichwörter",
       "placeholder": "Stichwort eingeben und Enter drücken..."
     },
+    "isPrivate": "Nur Private Boards anzeigen",
     "apply": "Filter anwenden"
   },
   "errorLoadingTacticBoards": "Es ist ein Fehler beim Laden der Taktik Tafeln aufgetreten.",
