@@ -9,9 +9,7 @@ import {
 import {
   Alert,
   Card,
-  CardContent,
   CardHeader,
-  Collapse,
   Grid,
   Slider,
   Theme,
@@ -29,6 +27,7 @@ import {
   DialogContent,
   DialogActions,
   CircularProgress,
+  Popover,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import {
@@ -106,7 +105,7 @@ const ExerciseList = () => {
 
   const isUpMd = useMediaQuery((theme: Theme) => theme.breakpoints.up("md"));
 
-  const [showFilters, setShowFilters] = useState<boolean>(false);
+  const [filterAnchorEl, setFilterAnchorEl] = useState<HTMLElement | null>(null);
   const { id: userId, name: userName, status: userStatus } = useAuth();
   const [loadedExercises, setLoadedExercises] = useState<Exercise[]>([]);
   const [openAddDialog, setOpenAddDialog] = useState(false);
@@ -401,10 +400,10 @@ const ExerciseList = () => {
                   <SortIcon />
                 </ToggleButton>
                 <ToggleButton
-                  value={showFilters ? "shown" : "hide"}
-                  selected={showFilters}
-                  onChange={() => {
-                    setShowFilters(!showFilters);
+                  value={filterAnchorEl ? "shown" : "hide"}
+                  selected={Boolean(filterAnchorEl)}
+                  onClick={(e) => {
+                    setFilterAnchorEl(filterAnchorEl ? null : e.currentTarget);
                   }}
                 >
                   <FilterAltIcon />
@@ -422,8 +421,28 @@ const ExerciseList = () => {
               />
             </SoftBox>
           )}
-          <Collapse in={showFilters} timeout="auto" unmountOnExit>
-            <CardContent sx={{ p: 2 }}>
+          <Popover
+            open={Boolean(filterAnchorEl)}
+            anchorEl={filterAnchorEl}
+            onClose={() => setFilterAnchorEl(null)}
+            anchorOrigin={{
+              vertical: "bottom",
+              horizontal: "right",
+            }}
+            transformOrigin={{
+              vertical: "top",
+              horizontal: "right",
+            }}
+            slotProps={{
+              paper: {
+                sx: {
+                  backgroundColor: "background.paper",
+                  boxShadow: 3,
+                },
+              },
+            }}
+          >
+            <SoftBox sx={{ p: 2, minWidth: 320, maxWidth: 400 }}>
               <SoftBox display="flex" justifyContent="flex-end" sx={{ mb: 2 }}>
                 <Button
                   startIcon={<ClearIcon />}
@@ -434,9 +453,8 @@ const ExerciseList = () => {
                   {t("ExerciseList:filter.clear")}
                 </Button>
               </SoftBox>
-              <Grid container spacing={3} sx={{ pl: 2, width: "100%" }}>
-                {/* Persons Filter */}
-                <Grid item xs={12} md={6}>
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
                   <SoftTypography variant="body2">
                     {t("ExerciseList:filter.persons.titleWithNumbers", {
                       minValue: exerciseFilter.minPersons,
@@ -469,8 +487,7 @@ const ExerciseList = () => {
                   />
                 </Grid>
 
-                {/* Time Duration Filter */}
-                <Grid item xs={12} md={6}>
+                <Grid item xs={12}>
                   <SoftTypography variant="body2">
                     {t("ExerciseList:filter.timeInMinutes.titleWithNumbers", {
                       minValue: exerciseFilter.minTime,
@@ -500,8 +517,7 @@ const ExerciseList = () => {
                   />
                 </Grid>
 
-                {/* Beaters Filter */}
-                <Grid item xs={12} md={6}>
+                <Grid item xs={12}>
                   <SoftTypography variant="body2">
                     {t("ExerciseList:filter.beaters.titleWithNumbers", {
                       minValue: exerciseFilter.minBeaters,
@@ -534,8 +550,7 @@ const ExerciseList = () => {
                   />
                 </Grid>
 
-                {/* Chasers Filter */}
-                <Grid item xs={12} md={6}>
+                <Grid item xs={12}>
                   <SoftTypography variant="body2">
                     {t("ExerciseList:filter.chasers.titleWithNumbers", {
                       minValue: exerciseFilter.minChasers,
@@ -568,14 +583,8 @@ const ExerciseList = () => {
                   />
                 </Grid>
 
-                {/* Tags Filter */}
-                <Grid
-                  item
-                  xs={12}
-                  md={6}
-                  sx={{ display: "flex", flexDirection: "column" }}
-                >
-                  <SoftTypography variant="body2">
+                <Grid item xs={12}>
+                  <SoftTypography variant="body2" sx={{ mb: 1 }}>
                     {t("ExerciseList:filter.tags.title")}
                   </SoftTypography>
                   <SoftInput
@@ -611,14 +620,8 @@ const ExerciseList = () => {
                   </SoftBox>
                 </Grid>
 
-                {/* Materials Filter */}
-                <Grid
-                  item
-                  xs={12}
-                  md={6}
-                  sx={{ display: "flex", flexDirection: "column" }}
-                >
-                  <SoftTypography variant="body2">
+                <Grid item xs={12}>
+                  <SoftTypography variant="body2" sx={{ mb: 1 }}>
                     {t("ExerciseList:filter.materials.title")}
                   </SoftTypography>
                   <SoftInput
@@ -655,8 +658,8 @@ const ExerciseList = () => {
                   </SoftBox>
                 </Grid>
               </Grid>
-            </CardContent>
-          </Collapse>
+            </SoftBox>
+          </Popover>
         </Card>
       )}
       showScrollToTopButton={(scrollTrigger) => scrollTrigger && isUpMd}
