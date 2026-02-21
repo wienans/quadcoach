@@ -515,7 +515,10 @@ const TacticBoardProfile = () => {
             )}
             <Card sx={{ height: "100%" }}>
               {/* <CardHeader title={t("TacticBoardProfile:info.title")} /> */}
-              <TacticBoardInProfileWrapper tacticBoardId={tacticBoardId} />
+              <TacticBoardInProfileWrapper
+                tacticBoardId={tacticBoardId}
+                isEditMode={isEditMode}
+              />
               {(Boolean(tacticBoard?.tags) || Boolean(tacticBoard?.creator)) &&
                 !isEditMode && (
                   <Accordion defaultExpanded>

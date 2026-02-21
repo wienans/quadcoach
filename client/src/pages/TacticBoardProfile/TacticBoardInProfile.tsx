@@ -28,10 +28,12 @@ import { useGetAllTacticboardAccessUsersQuery } from "../../api/quadcoachApi/tac
 import { getUuid } from "../../contexts/tacticBoard/TacticBoardFabricJsContext/fabricTypes";
 export type TacticBoardInProfileProps = {
   tacticBoardId: string | undefined;
+  isEditMode?: boolean;
 };
 
 const TacticBoardInProfile = ({
   tacticBoardId,
+  isEditMode,
 }: TacticBoardInProfileProps): JSX.Element | undefined => {
   const { t } = useTranslation("TacticBoardProfile");
   const navigate = useNavigate();
@@ -284,7 +286,14 @@ const TacticBoardInProfile = ({
     }
 
     return () => clearInterval(interval);
-  }, [isAnimating, onLoadPage, tacticBoard, getAllObjects, canvasRef, targetByUuidMaps]);
+  }, [
+    isAnimating,
+    onLoadPage,
+    tacticBoard,
+    getAllObjects,
+    canvasRef,
+    targetByUuidMaps,
+  ]);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -483,7 +492,7 @@ const TacticBoardInProfile = ({
           </Tooltip>
         </SoftBox>
 
-        {isPrivileged && (
+        {isPrivileged && isEditMode && (
           <Tooltip
             title={t("TacticBoardProfile:topMenu.isEditModeButton.tooltip")}
           >
@@ -531,15 +540,20 @@ const TacticBoardInProfile = ({
 
 export type TacticBoardInProfileWrapperProps = {
   tacticBoardId: string | undefined;
+  isEditMode?: boolean;
 };
 
 const TacticBoardInProfileWrapper = ({
   tacticBoardId,
+  isEditMode,
 }: TacticBoardInProfileWrapperProps): JSX.Element => {
   return (
     <div>
       <TacticBoardProvider heightFirstResizing={false}>
-        <TacticBoardInProfile tacticBoardId={tacticBoardId} />
+        <TacticBoardInProfile
+          tacticBoardId={tacticBoardId}
+          isEditMode={isEditMode}
+        />
       </TacticBoardProvider>
     </div>
   );
