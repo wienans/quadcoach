@@ -22,6 +22,7 @@ import OpenInBrowserIcon from "@mui/icons-material/OpenInBrowser";
 import { SoftButton, SoftTypography } from "../../../components";
 import TagIcon from "@mui/icons-material/Tag";
 import DeveloperBoardIcon from "@mui/icons-material/DeveloperBoard";
+import LockIcon from "@mui/icons-material/Lock";
 
 interface ExpandMoreProps extends IconButtonProps {
   expand: boolean;
@@ -56,7 +57,14 @@ const TacticBoardCard = ({
     <Card>
       <CardHeader
         avatar={<DeveloperBoardIcon />}
-        title={tacticBoard.name}
+        title={
+          <>
+            {tacticBoard.isPrivate && (
+              <LockIcon sx={{ mr: 0.5, mb: 0.5, verticalAlign: "middle" }} />
+            )}
+            {tacticBoard.name}
+          </>
+        }
         action={
           <Tooltip title={t("TacticBoardList:cardView.openTacticBoard")}>
             <IconButton onClick={onOpenTacticBoardClick}>
