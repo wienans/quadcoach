@@ -64,7 +64,7 @@ const Register = (): JSX.Element => {
         .required("Register:info.email.missing"),
       password: Yup.string()
         .matches(
-          /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])(?=.{8,})/,
+          /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.{8,})/,
           "Register:info.password.valid",
         )
         .required("Register:info.password.missing"),
