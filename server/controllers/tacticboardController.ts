@@ -978,17 +978,28 @@ export const shareTacticBoard = asyncHandler(
   },
 );
 
-const generateUniqueShareToken = async (): Promise<string> => {
-  let token = "";
-  let exists = true;
+const isDuplicateShareTokenError = (error: unknown): boolean => {
+  return isMongoError(error) && error.code === 11000;
+};
 
-  while (exists) {
-    token = crypto.randomBytes(24).toString("base64url");
-    const existingTacticboard = await TacticBoard.exists({ shareToken: token });
-    exists = !!existingTacticboard;
+const ensureShareTokenWithRetry = async (
+  tacticboard: InstanceType<typeof TacticBoard>,
+  maxAttempts: number = 5,
+): Promise<void> => {
+  for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+    tacticboard.shareToken = crypto.randomUUID();
+
+    try {
+      await tacticboard.save();
+      return;
+    } catch (error) {
+      if (!isDuplicateShareTokenError(error)) {
+        throw error;
+      }
+    }
   }
 
-  return token;
+  throw new Error("Unable to generate unique share token");
 };
 
 // @desc    Create (or return existing) share link for a tacticboard
@@ -1027,20 +1038,22 @@ export const createShareLink = asyncHandler(
       res.status(403).json({ message: "Forbidden" });
       return;
     }
-
-    if (!tacticboard.shareToken) {
-      tacticboard.shareToken = await generateUniqueShareToken();
-      tacticboard.shareTokenCreatedAt = new Date();
-      await tacticboard.save();
+    try {
+      if (!tacticboard.shareToken) {
+        await ensureShareTokenWithRetry(tacticboard);
+      }
+      const publicBaseUrl =
+        process.env.PUBLIC_BASE_URL || "https://quadcoach.app";
+      res.status(201).json({
+        message: "Share link available",
+        token: tacticboard.shareToken,
+        shareLink: `${publicBaseUrl}/tacticboards/share/${tacticboard.shareToken}`,
+      });
+    } catch (e: any) {
+      res
+        .status(500)
+        .json({ message: "Failed to create share link", error: e.message });
     }
-
-    const baseUrl = `${req.protocol}://${req.get("host")}`;
-
-    res.status(201).json({
-      message: "Share link available",
-      token: tacticboard.shareToken,
-      shareLink: `https://quadcoach.app/share/${tacticboard.shareToken}`,
-    });
   },
 );
 
@@ -1082,7 +1095,6 @@ export const deleteShareLink = asyncHandler(
     }
 
     tacticboard.shareToken = null;
-    tacticboard.shareTokenCreatedAt = null;
     await tacticboard.save();
 
     res.json({ message: "Share link removed" });

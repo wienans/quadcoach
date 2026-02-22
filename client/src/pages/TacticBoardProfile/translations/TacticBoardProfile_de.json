@@ -13,7 +13,8 @@
       "label": "Private Taktik Tafel"
     },
     "tags": {
-      "label": "Tags"
+      "label": "Tags",
+      "none": "Keine Tags"
     }
   },
   "topMenu": {

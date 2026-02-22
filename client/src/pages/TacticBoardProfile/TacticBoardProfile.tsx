@@ -248,7 +248,11 @@ const TacticBoardProfile = () => {
 
   useEffect(() => {
     if (tacticBoard?.shareToken) {
-      setShareLink(`https://quadcoach.app/share/${tacticBoard.shareToken}`);
+      setShareLink(
+        `${import.meta.env.VITE_PUBLIC_BASE_URL}/tacticboards/share/${
+          tacticBoard.shareToken
+        }`,
+      );
     } else {
       setShareLink("");
     }
@@ -637,7 +641,8 @@ const TacticBoardProfile = () => {
                                       );
                                     }
                                   })}
-                                {formik.values.tags?.length == 0 && "No Tags"}
+                                {formik.values.tags?.length == 0 &&
+                                  t("info.tags.none")}
                               </div>
                             );
                           }}
@@ -912,6 +917,7 @@ const TacticBoardProfile = () => {
                 >
                   <SoftInput
                     fullWidth
+                    readOnly
                     value={shareLink}
                     sx={{
                       flex: 1,

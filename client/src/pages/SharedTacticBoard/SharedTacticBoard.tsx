@@ -92,7 +92,8 @@ const SharedTacticBoard = (): JSX.Element => {
                               );
                             }
                           })}
-                        {tacticBoard.tags?.length == 0 && "No Tags"}
+                        {tacticBoard.tags?.length == 0 &&
+                          tProfile("info.tags.none")}
                       </div>
                     </AccordionDetails>
                   </Accordion>

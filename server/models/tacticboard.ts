@@ -56,7 +56,6 @@ export interface ITacticBoard {
   description?: string;
   coaching_points?: string;
   shareToken?: string | null;
-  shareTokenCreatedAt?: Date | null;
 }
 
 const objectSchema = new Schema<IObject>({
@@ -218,10 +217,6 @@ const tacticBoardSchema = new Schema<ITacticBoard>(
     },
     shareToken: {
       type: String,
-      default: null,
-    },
-    shareTokenCreatedAt: {
-      type: Date,
       default: null,
     },
   },

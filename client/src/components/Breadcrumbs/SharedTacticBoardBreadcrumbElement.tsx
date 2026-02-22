@@ -23,15 +23,11 @@ const SharedTacticBoardBreadcrumbElement = ({
       skip: token == null,
     });
 
-  const sharedPrefix = t("sharedTacticBoard");
-  const boardName = tacticBoard?.name;
-  const title = boardName ? `${sharedPrefix} / ${boardName}` : sharedPrefix;
-
   return (
     <BreadcrumbElement
       isLastElement={isLastElement}
       isLoading={isTacticBoardLoading}
-      title={title}
+      title={tacticBoard?.name ?? t("Breadcrumbs:sharedTacticBoard")}
       path={route.pathname}
       light={light}
     />
