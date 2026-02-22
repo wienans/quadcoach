@@ -6,6 +6,7 @@ import BreadcrumbElement from "./BreadcrumbElement";
 import TacticBoardBreadcrumbElement from "./TacticBoardBreadcrumbElement";
 import SharedTacticBoardBreadcrumbElement from "./SharedTacticBoardBreadcrumbElement";
 import PracticePlannerBreadcrumbElement from "./PracticePlannerBreadcrumbElement";
+import SharedPracticePlanBreadcrumbElement from "./SharedPracticePlanBreadcrumbElement";
 
 export type BreadcrumbElementProps = {
   route: UIMatch<unknown, RouteHandle>;
@@ -40,6 +41,14 @@ const BreadcrumbElementWrapper = ({
     case RouteHandleType.sharedTacticBoard:
       return (
         <SharedTacticBoardBreadcrumbElement
+          route={route}
+          isLastElement={isLastElement}
+          light={light}
+        />
+      );
+    case RouteHandleType.sharedPracticePlan:
+      return (
+        <SharedPracticePlanBreadcrumbElement
           route={route}
           isLastElement={isLastElement}
           light={light}

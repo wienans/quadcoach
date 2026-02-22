@@ -2,6 +2,7 @@
 import asyncHandler from "express-async-handler";
 import { Request, Response } from "express";
 import mongoose from "mongoose";
+import crypto from "crypto";
 import { ISection, PracticePlan } from "../models/practicePlan";
 import PracticePlanAccess from "../models/practicePlanAccess";
 import {
@@ -9,6 +10,7 @@ import {
   validateNonNegativeDurations,
 } from "./helpers/practicePlanValidation";
 import User from "../models/user";
+import { logEvents } from "../middleware/logger";
 
 interface RequestWithUser extends Request {
   UserInfo?: {
@@ -43,7 +45,7 @@ export const getPracticePlans = async (req: RequestWithUser, res: Response) => {
 
     queryString = queryString.replace(
       /\b(gte|gt|lte|lt|eq|ne|regex|options|in|nin)\b/g,
-      (match) => `$${match}`
+      (match) => `$${match}`,
     );
     let parseObject = JSON.parse(queryString);
 
@@ -61,7 +63,7 @@ export const getPracticePlans = async (req: RequestWithUser, res: Response) => {
         parseObject.$or.push({
           _id: {
             $in: accessPracticePlans.map((practicePlan) =>
-              practicePlan.practicePlan.toString()
+              practicePlan.practicePlan.toString(),
             ),
           },
         });
@@ -101,7 +103,9 @@ export const getPracticePlans = async (req: RequestWithUser, res: Response) => {
 
     // Get practice plans with pagination
     const practicePlans = await PracticePlan.find(parseObject)
-      .select("_id name description tags sections user createdAt updatedAt")
+      .select(
+        "_id name description tags sections user isPrivate createdAt updatedAt",
+      )
       .sort(sortObj)
       .skip(skip)
       .limit(limit)
@@ -125,7 +129,7 @@ export const getPracticePlans = async (req: RequestWithUser, res: Response) => {
 
 export const createPracticePlan = async (
   req: RequestWithUser,
-  res: Response
+  res: Response,
 ) => {
   try {
     const userId = req.UserInfo?.id;
@@ -159,16 +163,20 @@ export const getPracticePlan = async (req: RequestWithUser, res: Response) => {
       // Check if the practice plan is private
       if (result.isPrivate && result.user) {
         const userId = req.UserInfo?.id;
-        const isOwner = userId && userId !== "" && userId === result.user.toString();
-        const isAdmin = req.UserInfo?.roles?.includes("Admin") || req.UserInfo?.roles?.includes("admin");
-        
+        const isOwner =
+          userId && userId !== "" && userId === result.user.toString();
+        const isAdmin =
+          req.UserInfo?.roles?.includes("Admin") ||
+          req.UserInfo?.roles?.includes("admin");
+
         // Check if user has shared access (only if user is authenticated)
-        const hasSharedAccess = userId && userId !== ""
-          ? await PracticePlanAccess.exists({
-              user: userId,
-              practicePlan: req.params.id,
-            })
-          : false;
+        const hasSharedAccess =
+          userId && userId !== ""
+            ? await PracticePlanAccess.exists({
+                user: userId,
+                practicePlan: req.params.id,
+              })
+            : false;
 
         if (!isOwner && !isAdmin && !hasSharedAccess) {
           res.status(403).json({ message: "Forbidden" });
@@ -187,7 +195,7 @@ export const getPracticePlan = async (req: RequestWithUser, res: Response) => {
 
 export const patchPracticePlan = async (
   req: RequestWithUser,
-  res: Response
+  res: Response,
 ) => {
   try {
     if (!mongoose.isValidObjectId(req.params.id)) {
@@ -233,7 +241,7 @@ export const patchPracticePlan = async (
           return sendValidation(
             res,
             "Duration validation failed",
-            durationErrors
+            durationErrors,
           );
         updates.sections = req.body.sections;
       }
@@ -241,7 +249,7 @@ export const patchPracticePlan = async (
       const updated = await PracticePlan.findByIdAndUpdate(
         req.params.id,
         updates,
-        { new: true }
+        { new: true },
       );
       return res.json(updated);
     } else {
@@ -254,7 +262,7 @@ export const patchPracticePlan = async (
 
 export const deletePracticePlan = async (
   req: RequestWithUser,
-  res: Response
+  res: Response,
 ) => {
   try {
     if (!mongoose.isValidObjectId(req.params.id)) {
@@ -340,7 +348,7 @@ export const getAllAccessUsers = asyncHandler(
     }).populate("user", "name");
 
     res.json(accessEntries);
-  }
+  },
 );
 
 // @desc    Grant access to a practice plan for a user
@@ -394,7 +402,7 @@ export const setAccess = asyncHandler(
       const accessEntry = await PracticePlanAccess.findOneAndUpdate(
         { user: userId, practicePlan: req.params.id },
         { user: userId, practicePlan: req.params.id, access },
-        { upsert: true, new: true }
+        { upsert: true, new: true },
       );
       res.status(201).json(accessEntry);
     } catch (error) {
@@ -406,7 +414,7 @@ export const setAccess = asyncHandler(
       }
       throw error;
     }
-  }
+  },
 );
 
 // @desc    Remove access to a practice plan for a user
@@ -460,7 +468,7 @@ export const deleteAccess = asyncHandler(
     }
 
     res.json({ message: "Access removed successfully" });
-  }
+  },
 );
 
 // @desc    Share practice plan with user by email
@@ -492,7 +500,7 @@ export const sharePracticePlan = asyncHandler(
 
     const isOwner = practicePlan.user?.toString() === req.UserInfo.id;
     const isAdmin = req.UserInfo.roles?.some(
-      (role) => role.toLowerCase() === "admin"
+      (role) => role.toLowerCase() === "admin",
     );
 
     if (!isOwner && !isAdmin) {
@@ -526,5 +534,152 @@ export const sharePracticePlan = asyncHandler(
       await newAccess.save();
       res.status(201).json({ message: "Access granted successfully" });
     }
+  },
+);
+
+const isDuplicateShareTokenError = (error: unknown): boolean => {
+  return isMongoError(error) && error.code === 11000;
+};
+
+const ensureShareTokenWithRetry = async (
+  practicePlan: InstanceType<typeof PracticePlan>,
+  maxAttempts: number = 5,
+): Promise<void> => {
+  for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+    practicePlan.shareToken = crypto.randomUUID();
+
+    try {
+      await practicePlan.save();
+      return;
+    } catch (error) {
+      if (!isDuplicateShareTokenError(error)) {
+        throw error;
+      }
+    }
   }
+
+  throw new Error("Unable to generate unique share token");
+};
+
+// @desc    Create (or return existing) share link for a practice plan
+// @route   POST /api/practice-plans/:id/share-link
+// @access  Private - users with edit permission
+export const createShareLink = asyncHandler(
+  async (req: RequestWithUser, res: Response) => {
+    if (!req.UserInfo?.id) {
+      res.status(401).json({ message: "Unauthorized" });
+      return;
+    }
+
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      res.status(400).json({ message: "Invalid practice plan ID" });
+      return;
+    }
+
+    const practicePlan = await PracticePlan.findById(req.params.id);
+    if (!practicePlan) {
+      res.status(404).json({ message: "Practice Plan not found" });
+      return;
+    }
+
+    const accessUser = await PracticePlanAccess.findOne({
+      user: req.UserInfo.id,
+      practicePlan: req.params.id,
+    });
+
+    const hasEditAccess =
+      practicePlan.user?.toString() === req.UserInfo.id ||
+      req.UserInfo.roles?.includes("Admin") ||
+      req.UserInfo.roles?.includes("admin") ||
+      (accessUser && accessUser.access === "edit");
+
+    if (!hasEditAccess) {
+      res.status(403).json({ message: "Forbidden" });
+      return;
+    }
+    try {
+      if (!practicePlan.shareToken) {
+        await ensureShareTokenWithRetry(practicePlan);
+      }
+      const publicBaseUrl =
+        process.env.PUBLIC_BASE_URL || "https://quadcoach.app";
+      res.status(201).json({
+        message: "Share link available",
+        token: practicePlan.shareToken,
+        shareLink: `${publicBaseUrl}/practice-plans/share/${practicePlan.shareToken}`,
+      });
+    } catch (e: any) {
+      logEvents(
+        `Failed to create share link for practice plan ${req.params.id}: ${e.message}`,
+        "error.log",
+      );
+      res.status(500).json({ message: "Failed to create share link" });
+    }
+  },
+);
+
+// @desc    Delete share link from a practice plan
+// @route   DELETE /api/practice-plans/:id/share-link
+// @access  Private - users with edit permission
+export const deleteShareLink = asyncHandler(
+  async (req: RequestWithUser, res: Response) => {
+    if (!req.UserInfo?.id) {
+      res.status(401).json({ message: "Unauthorized" });
+      return;
+    }
+
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      res.status(400).json({ message: "Invalid practice plan ID" });
+      return;
+    }
+
+    const practicePlan = await PracticePlan.findById(req.params.id);
+    if (!practicePlan) {
+      res.status(404).json({ message: "Practice Plan not found" });
+      return;
+    }
+
+    const accessUser = await PracticePlanAccess.findOne({
+      user: req.UserInfo.id,
+      practicePlan: req.params.id,
+    });
+
+    const hasEditAccess =
+      practicePlan.user?.toString() === req.UserInfo.id ||
+      req.UserInfo.roles?.includes("Admin") ||
+      req.UserInfo.roles?.includes("admin") ||
+      (accessUser && accessUser.access === "edit");
+
+    if (!hasEditAccess) {
+      res.status(403).json({ message: "Forbidden" });
+      return;
+    }
+
+    practicePlan.shareToken = null;
+    await practicePlan.save();
+
+    res.json({ message: "Share link removed" });
+  },
+);
+
+// @desc    Get practice plan by share token (public)
+// @route   GET /api/practice-plans/share/:token
+// @access  Public
+export const getByShareToken = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { token } = req.params;
+
+    if (!token || token.trim() === "") {
+      res.status(400).json({ message: "Invalid share token" });
+      return;
+    }
+
+    const practicePlan = await PracticePlan.findOne({ shareToken: token });
+    if (!practicePlan) {
+      res.status(404).json({ message: "Share link not found" });
+      return;
+    }
+
+    res.json(practicePlan);
+  },
 );

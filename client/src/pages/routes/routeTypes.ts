@@ -16,6 +16,7 @@ export enum RouteHandleType {
   practicePlans = "practicePlans",
   practicePlanner = "practicePlanner",
   sharedTacticBoard = "sharedTacticBoard",
+  sharedPracticePlan = "sharedPracticePlan",
 }
 
 export type RouteHandle = {

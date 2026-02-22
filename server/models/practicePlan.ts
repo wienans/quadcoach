@@ -28,6 +28,7 @@ export interface IPracticePlan {
   sections: Types.DocumentArray<ISection>;
   user: Types.ObjectId;
   isPrivate: boolean;
+  shareToken?: string | null;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -40,7 +41,7 @@ const ExerciseItemSchema = new Schema<IExerciseItem>(
     blockId: { type: Schema.Types.ObjectId, ref: "blocks" },
     duration: { type: Number, min: 0 },
   },
-  { _id: true }
+  { _id: true },
 );
 
 const GroupSchema = new Schema<IGroup>(
@@ -48,7 +49,7 @@ const GroupSchema = new Schema<IGroup>(
     name: { type: String, required: true },
     items: { type: [ExerciseItemSchema], default: [], required: true },
   },
-  { _id: true }
+  { _id: true },
 );
 
 export const SectionSchema = new Schema<ISection>(
@@ -57,7 +58,7 @@ export const SectionSchema = new Schema<ISection>(
     targetDuration: { type: Number, min: 0, default: 0, required: true },
     groups: { type: [GroupSchema], default: [], required: true },
   },
-  { _id: true }
+  { _id: true },
 );
 
 const PracticePlanSchema = new Schema<IPracticePlan>(
@@ -68,11 +69,14 @@ const PracticePlanSchema = new Schema<IPracticePlan>(
     sections: { type: [SectionSchema], default: [] },
     user: { type: Schema.Types.ObjectId, ref: "users", required: true },
     isPrivate: { type: Boolean, default: false, required: true },
+    shareToken: { type: String, default: null },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
+
+PracticePlanSchema.index({ shareToken: 1 }, { unique: true, sparse: true });
 
 export const PracticePlan = model<IPracticePlan>(
   "practiceplans",
-  PracticePlanSchema
+  PracticePlanSchema,
 );

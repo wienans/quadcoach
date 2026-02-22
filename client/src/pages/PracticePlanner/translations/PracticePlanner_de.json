@@ -38,6 +38,15 @@
     "add": "Hinzufügen",
     "remove": "Entfernen"
   },
+  "share": {
+    "tooltip": "Freigabelink erstellen oder verwalten",
+    "dialog": {
+      "title": "Trainingsplan teilen",
+      "copy": "Link kopieren",
+      "delete": "Freigabe löschen",
+      "close": "Schließen"
+    }
+  },
   "validation": {
     "fixValidationErrors": "Bitte beheben Sie die markierten Validierungsfehler:",
     "name": {

@@ -17,6 +17,7 @@
       "title": "Tags",
       "placeholder": "Tag eingeben und Enter drücken..."
     },
+    "isPrivate": "Nur private Pläne anzeigen",
     "apply": "Filter anwenden"
   },
   "errorLoadingPracticePlans": "Beim Laden der Trainingspläne ist ein Fehler aufgetreten.",

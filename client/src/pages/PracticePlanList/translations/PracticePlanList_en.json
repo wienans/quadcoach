@@ -17,6 +17,7 @@
       "title": "Tags",
       "placeholder": "Enter tag and press Enter..."
     },
+    "isPrivate": "Show only private plans",
     "apply": "Apply filter"
   },
   "errorLoadingPracticePlans": "An error occurred while loading practice plans.",

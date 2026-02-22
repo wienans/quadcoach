@@ -23,6 +23,7 @@ import { SoftButton, SoftBox, SoftTypography } from "../../../components";
 import TagIcon from "@mui/icons-material/Tag";
 import DescriptionIcon from "@mui/icons-material/Description";
 import ScheduleIcon from "@mui/icons-material/Schedule";
+import LockIcon from "@mui/icons-material/Lock";
 
 interface ExpandMoreProps extends IconButtonProps {
   expand: boolean;
@@ -73,7 +74,14 @@ const PracticePlanCard = ({
     <Card>
       <CardHeader
         avatar={<DescriptionIcon />}
-        title={practicePlan.name}
+        title={
+          <>
+            {practicePlan.isPrivate && (
+              <LockIcon sx={{ mr: 0.5, mb: 0.5, verticalAlign: "middle" }} />
+            )}
+            {practicePlan.name}
+          </>
+        }
         subheader={
           practicePlan.sections && practicePlan.sections.length > 0
             ? `${practicePlan.sections.length} ${t(

@@ -39,6 +39,7 @@ export type PracticePlanEntity = {
   sections: PracticePlanSection[];
   user: string; // owner id
   isPrivate: boolean;
+  shareToken?: string | null;
   createdAt?: string;
   updatedAt?: string;
 };
@@ -81,6 +82,7 @@ export type PracticePlanHeader = {
   tags: string[];
   sections?: PracticePlanSection[];
   user: string;
+  isPrivate?: boolean;
   createdAt?: string;
   updatedAt?: string;
 };

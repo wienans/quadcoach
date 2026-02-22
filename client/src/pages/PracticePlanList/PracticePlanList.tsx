@@ -9,10 +9,9 @@ import {
 import {
   Alert,
   Card,
-  CardContent,
   CardHeader,
-  Collapse,
-  Grid,
+  Checkbox,
+  FormControlLabel,
   Theme,
   ToggleButton,
   useMediaQuery,
@@ -21,6 +20,7 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
+  Popover,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import {
@@ -60,6 +60,7 @@ type PracticePlanFilter = {
   searchValue: string;
   tagRegex: string;
   tagList: string[];
+  isPrivate: boolean | undefined;
   sortBy: "name" | "created" | "updated";
   sortOrder: "asc" | "desc";
   page: number;
@@ -70,6 +71,7 @@ const defaultPracticePlanFilter: PracticePlanFilter = {
   searchValue: "",
   tagRegex: "",
   tagList: [],
+  isPrivate: undefined,
   sortBy: "name",
   sortOrder: "asc",
   page: 1,
@@ -83,7 +85,9 @@ const PracticePlanList = () => {
 
   const { id: userId, status: userStatus } = useAuth();
 
-  const [showFilters, setShowFilters] = useState<boolean>(false);
+  const [filterAnchorEl, setFilterAnchorEl] = useState<HTMLElement | null>(
+    null,
+  );
   const [viewType, setViewType] = useState<ViewType>(ViewType.Cards);
   const [openAddPracticePlanDialog, setOpenAddPracticePlanDialog] =
     useState<boolean>(false);
@@ -117,6 +121,7 @@ const PracticePlanList = () => {
         nameRegex: filter.searchValue,
         tagRegex: filter.tagRegex,
         tagList: filter.tagList,
+        isPrivate: filter.isPrivate,
         sortBy: filter.sortBy,
         sortOrder: filter.sortOrder,
         page: filter.page,
@@ -331,10 +336,10 @@ const PracticePlanList = () => {
                   <SortIcon />
                 </ToggleButton>
                 <ToggleButton
-                  value={showFilters ? "shown" : "hide"}
-                  selected={showFilters}
-                  onChange={() => {
-                    setShowFilters(!showFilters);
+                  value={filterAnchorEl ? "shown" : "hide"}
+                  selected={Boolean(filterAnchorEl)}
+                  onClick={(e) => {
+                    setFilterAnchorEl(filterAnchorEl ? null : e.currentTarget);
                   }}
                 >
                   <FilterAltIcon />
@@ -352,54 +357,83 @@ const PracticePlanList = () => {
               />
             </SoftBox>
           )}
-          <Collapse in={showFilters} timeout="auto" unmountOnExit>
-            <CardContent sx={{ p: 2 }}>
-              <Grid container spacing={2} sx={{ pl: 2, width: "100%" }}>
-                <Grid
-                  item
-                  xs={12}
-                  md={6}
-                  sx={{ display: "flex", flexDirection: "column" }}
-                >
-                  <SoftTypography variant="body2">
-                    {t("PracticePlanList:filter.tags.title")}
-                  </SoftTypography>
-                  <SoftInput
-                    id="outlined-basic"
-                    placeholder={t("PracticePlanList:filter.tags.placeholder")}
-                    value={practicePlanFilter.tagRegex}
-                    onChange={onPracticePlanFilterValueChange("tagRegex")}
-                    onKeyDown={handleTagKeyDown}
-                    sx={{ width: "100%" }}
-                    endAdornment={
-                      <InputAdornment position="end">
-                        <KeyboardReturnIcon
-                          sx={{
-                            fontSize: 20,
-                            opacity:
-                              practicePlanFilter.tagRegex != "" ? 1 : 0.4,
-                          }}
-                        />
-                      </InputAdornment>
-                    }
+          <Popover
+            open={Boolean(filterAnchorEl)}
+            anchorEl={filterAnchorEl}
+            onClose={() => setFilterAnchorEl(null)}
+            anchorOrigin={{
+              vertical: "bottom",
+              horizontal: "right",
+            }}
+            transformOrigin={{
+              vertical: "top",
+              horizontal: "right",
+            }}
+            slotProps={{
+              paper: {
+                sx: {
+                  backgroundColor: "background.paper",
+                  boxShadow: 3,
+                },
+              },
+            }}
+          >
+            <SoftBox sx={{ p: 2, minWidth: 280 }}>
+              <SoftTypography variant="body2" sx={{ mb: 1 }}>
+                {t("PracticePlanList:filter.tags.title")}
+              </SoftTypography>
+              <SoftInput
+                id="outlined-basic"
+                placeholder={t("PracticePlanList:filter.tags.placeholder")}
+                value={practicePlanFilter.tagRegex}
+                onChange={onPracticePlanFilterValueChange("tagRegex")}
+                onKeyDown={handleTagKeyDown}
+                sx={{ width: "100%" }}
+                endAdornment={
+                  <InputAdornment position="end">
+                    <KeyboardReturnIcon
+                      sx={{
+                        fontSize: 20,
+                        opacity: practicePlanFilter.tagRegex != "" ? 1 : 0.4,
+                      }}
+                    />
+                  </InputAdornment>
+                }
+              />
+              <SoftBox sx={{ display: "flex", flexWrap: "wrap", gap: 1, mt: 1 }}>
+                {practicePlanFilter.tagList.map((tag) => (
+                  <Chip
+                    key={tag}
+                    label={tag}
+                    onDelete={() => handleDeleteTag(tag)}
+                    color="primary"
+                    variant="outlined"
                   />
-                  <SoftBox
-                    sx={{ display: "flex", flexWrap: "wrap", gap: 1, mt: 1 }}
-                  >
-                    {practicePlanFilter.tagList.map((tag) => (
-                      <Chip
-                        key={tag}
-                        label={tag}
-                        onDelete={() => handleDeleteTag(tag)}
-                        color="primary"
-                        variant="outlined"
-                      />
-                    ))}
-                  </SoftBox>
-                </Grid>
-              </Grid>
-            </CardContent>
-          </Collapse>
+                ))}
+              </SoftBox>
+              <SoftBox sx={{ mt: 2 }}>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={practicePlanFilter.isPrivate === true}
+                      onChange={() => {
+                        setLoadedPracticePlans([]);
+                        setPracticePlanFilter({
+                          ...practicePlanFilter,
+                          isPrivate:
+                            practicePlanFilter.isPrivate === true
+                              ? undefined
+                              : true,
+                          page: 1,
+                        });
+                      }}
+                    />
+                  }
+                  label={t("PracticePlanList:filter.isPrivate")}
+                />
+              </SoftBox>
+            </SoftBox>
+          </Popover>
         </Card>
       )}
     >

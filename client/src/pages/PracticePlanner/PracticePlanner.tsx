@@ -11,6 +11,10 @@ import {
   BottomNavigationAction,
   Card,
   Checkbox,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   FormControlLabel,
   FormGroup,
   IconButton,
@@ -29,10 +33,13 @@ import {
 
 import {
   useGetPracticePlanQuery,
+  useGetSharedPracticePlanQuery,
   usePatchPracticePlanMutation,
   useGetAllPracticePlanAccessUsersQuery,
   useDeletePracticePlanMutation,
   useSharePracticePlanMutation,
+  useCreatePracticePlanShareLinkMutation,
+  useDeletePracticePlanShareLinkMutation,
   useRemovePracticePlanAccessMutation,
 } from "../../api/quadcoachApi/practicePlansApi";
 import { AccessLevel } from "../../api/quadcoachApi/tacticboardApi";
@@ -52,6 +59,8 @@ import {
 import EditIcon from "@mui/icons-material/Edit";
 import SaveIcon from "@mui/icons-material/Save";
 import DeleteIcon from "@mui/icons-material/Delete";
+import ShareIcon from "@mui/icons-material/IosShare";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import AddIcon from "@mui/icons-material/Add";
@@ -70,7 +79,13 @@ const MarkdownRenderer = lazy(
   () => import("../../components/MarkdownRenderer"),
 );
 
-const PracticePlanner = (): JSX.Element => {
+type PracticePlannerProps = {
+  sharedToken?: string;
+};
+
+const PracticePlanner = ({
+  sharedToken,
+}: PracticePlannerProps): JSX.Element => {
   const { t } = useTranslation("PracticePlanner");
   const navigate = useNavigate();
   const location = useLocation();
@@ -88,16 +103,38 @@ const PracticePlanner = (): JSX.Element => {
   const [accessMode, setAccessMode] = useState<AccessLevel>("view");
   const [userEmail, setUserEmail] = useState<string>("");
   const [emailError, setEmailError] = useState<string>("");
+  const [isShareDialogOpen, setIsShareDialogOpen] = useState<boolean>(false);
+  const [shareLink, setShareLink] = useState<string>("");
+  const [isCopyHighlightActive, setIsCopyHighlightActive] =
+    useState<boolean>(false);
+  const copyHighlightTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
 
-  const { planId } = useParams<{ planId: string }>();
+  const { planId, token } = useParams<{ planId: string; token: string }>();
+  const effectiveSharedToken = sharedToken || token || "";
+  const isSharedMode = effectiveSharedToken !== "";
 
   const {
-    data: plan,
-    isLoading: isPlanLoading,
-    isError: isPlanError,
+    data: ownPlan,
+    isLoading: isOwnPlanLoading,
+    isError: isOwnPlanError,
   } = useGetPracticePlanQuery(planId || "", {
-    skip: !planId,
+    skip: !planId || isSharedMode,
   });
+
+  const {
+    data: sharedPlan,
+    isLoading: isSharedPlanLoading,
+    isError: isSharedPlanError,
+  } = useGetSharedPracticePlanQuery(effectiveSharedToken, {
+    skip: !isSharedMode,
+  });
+
+  const plan = isSharedMode ? sharedPlan : ownPlan;
+  const isPlanLoading = isSharedMode ? isSharedPlanLoading : isOwnPlanLoading;
+  const isPlanError = isSharedMode ? isSharedPlanError : isOwnPlanError;
+  const currentPlanId = planId || plan?._id;
   const [
     updatePlan,
     { isLoading: isUpdatePlanLoading, isSuccess: isUpdatePlanSuccess },
@@ -120,11 +157,16 @@ const PracticePlanner = (): JSX.Element => {
 
   const { data: accessUsers } = useGetAllPracticePlanAccessUsersQuery(
     planId || "",
-    { skip: !planId || !userId || userId === "" },
+    { skip: !planId || !userId || userId === "" || isSharedMode },
   );
 
   const [sharePracticePlan, { isLoading: isSharePracticePlanLoading }] =
     useSharePracticePlanMutation();
+
+  const [createShareLink, { isLoading: isCreateShareLinkLoading }] =
+    useCreatePracticePlanShareLinkMutation();
+  const [deleteShareLink, { isLoading: isDeleteShareLinkLoading }] =
+    useDeletePracticePlanShareLinkMutation();
 
   const [
     removePracticePlanAccess,
@@ -132,9 +174,10 @@ const PracticePlanner = (): JSX.Element => {
   ] = useRemovePracticePlanAccessMutation();
 
   const isCreator =
-    plan?.user?.toString() === userId ||
-    userRoles.includes("Admin") ||
-    userRoles.includes("admin");
+    !isSharedMode &&
+    (plan?.user?.toString() === userId ||
+      userRoles.includes("Admin") ||
+      userRoles.includes("admin"));
 
   useEffect(() => {
     if (userId) {
@@ -143,15 +186,19 @@ const PracticePlanner = (): JSX.Element => {
   }, [userId, getFavoritePlans]);
 
   useEffect(() => {
-    if (favoritePlans && planId) {
+    if (favoritePlans && currentPlanId) {
       setIsFavorite(
         favoritePlans.some(
-          (favoritePlan) => favoritePlan.practicePlan === planId,
+          (favoritePlan) => favoritePlan.practicePlan === currentPlanId,
         ),
       );
     }
-  }, [favoritePlans, setIsFavorite, planId]);
+  }, [favoritePlans, setIsFavorite, currentPlanId]);
   useEffect(() => {
+    if (isSharedMode) {
+      setIsPrivileged(false);
+      return;
+    }
     if (!userId) {
       setIsPrivileged(false);
       return;
@@ -170,7 +217,19 @@ const PracticePlanner = (): JSX.Element => {
     } else {
       setIsPrivileged(false);
     }
-  }, [userId, isCreator, accessUsers]);
+  }, [userId, isCreator, accessUsers, isSharedMode]);
+
+  useEffect(() => {
+    if (plan?.shareToken) {
+      setShareLink(
+        `${
+          import.meta.env.PUBLIC_BASE_URL || "https://quadcoach.app"
+        }/practice-plans/share/${plan.shareToken}`,
+      );
+    } else {
+      setShareLink("");
+    }
+  }, [plan?.shareToken]);
 
   // When plan data first loads (or changes) and not in edit mode, sync form values manually
   useEffect(() => {
@@ -359,6 +418,14 @@ const PracticePlanner = (): JSX.Element => {
     }
   }, [isUpdatePlanSuccess]);
 
+  useEffect(() => {
+    return () => {
+      if (copyHighlightTimeoutRef.current) {
+        clearTimeout(copyHighlightTimeoutRef.current);
+      }
+    };
+  }, []);
+
   const handleAddAccess = async () => {
     if (!planId || !userEmail.trim()) {
       setEmailError("Email is required");
@@ -384,6 +451,45 @@ const PracticePlanner = (): JSX.Element => {
     }
   };
 
+  const onShareClick = async () => {
+    if (!currentPlanId) return;
+
+    try {
+      const response = await createShareLink(currentPlanId).unwrap();
+      setShareLink(response.shareLink);
+      setIsShareDialogOpen(true);
+    } catch (error) {
+      console.error("Failed to create share link", error);
+    }
+  };
+
+  const onCopyShareLinkClick = async () => {
+    if (!shareLink) return;
+    try {
+      await navigator.clipboard.writeText(shareLink);
+      setIsCopyHighlightActive(true);
+      if (copyHighlightTimeoutRef.current) {
+        clearTimeout(copyHighlightTimeoutRef.current);
+      }
+      copyHighlightTimeoutRef.current = setTimeout(() => {
+        setIsCopyHighlightActive(false);
+      }, 1000);
+    } catch (error) {
+      console.error("Failed to copy share link", error);
+    }
+  };
+
+  const onDeleteShareClick = async () => {
+    if (!currentPlanId) return;
+    try {
+      await deleteShareLink(currentPlanId).unwrap();
+      setShareLink("");
+      setIsShareDialogOpen(false);
+    } catch (error) {
+      console.error("Failed to delete share link", error);
+    }
+  };
+
   if (isPlanLoading) {
     return (
       <DashboardLayout>
@@ -400,7 +506,7 @@ const PracticePlanner = (): JSX.Element => {
       </DashboardLayout>
     );
   }
-  if (!plan || isPlanError || !planId) {
+  if (!plan || isPlanError || (!planId && !isSharedMode)) {
     return (
       <DashboardLayout>
         {() => (
@@ -433,7 +539,7 @@ const PracticePlanner = (): JSX.Element => {
       isDataLoading={isPlanLoading}
       headerAction={
         <SoftBox display="flex">
-          {userId && userId !== "" && planId && (
+          {userId && userId !== "" && currentPlanId && (
             <Tooltip title={t("favoritePracticePlan")}>
               <IconButton
                 disabled={
@@ -442,18 +548,30 @@ const PracticePlanner = (): JSX.Element => {
                 onClick={() => {
                   if (isFavorite) {
                     removeFavoritePlan({
-                      practicePlanId: planId,
+                      practicePlanId: currentPlanId,
                       userId: userId,
                     });
                   } else {
                     addFavoritePlan({
-                      practicePlanId: planId,
+                      practicePlanId: currentPlanId,
                       userId: userId,
                     });
                   }
                 }}
               >
                 <FavoriteIcon color={isFavorite ? "error" : "inherit"} />
+              </IconButton>
+            </Tooltip>
+          )}
+          {isPrivileged && plan.isPrivate && (
+            <Tooltip title={t("share.tooltip")}>
+              <IconButton
+                onClick={onShareClick}
+                disabled={isCreateShareLinkLoading || isDeleteShareLinkLoading}
+              >
+                <ShareIcon
+                  sx={{ color: plan.shareToken ? "green" : "#000000" }}
+                />
               </IconButton>
             </Tooltip>
           )}
@@ -491,7 +609,7 @@ const PracticePlanner = (): JSX.Element => {
       showScrollToTopButton={(scrollTrigger) => scrollTrigger && isUpMd}
       bottomNavigation={
         !isUpMd && [
-          userId && userId !== "" && planId && (
+          userId && userId !== "" && currentPlanId && (
             <Tooltip key="favorite" title={t("favoritePracticePlan")}>
               <BottomNavigationAction
                 icon={<FavoriteIcon color={isFavorite ? "error" : "inherit"} />}
@@ -501,12 +619,12 @@ const PracticePlanner = (): JSX.Element => {
                 onClick={() => {
                   if (isFavorite) {
                     removeFavoritePlan({
-                      practicePlanId: planId,
+                      practicePlanId: currentPlanId,
                       userId: userId,
                     });
                   } else {
                     addFavoritePlan({
-                      practicePlanId: planId,
+                      practicePlanId: currentPlanId,
                       userId: userId,
                     });
                   }
@@ -806,6 +924,55 @@ const PracticePlanner = (): JSX.Element => {
                 </SoftBox>
               )}
             />
+            <Dialog
+              open={isShareDialogOpen}
+              onClose={() => {
+                setIsShareDialogOpen(false);
+                setIsCopyHighlightActive(false);
+              }}
+              fullWidth
+              maxWidth="sm"
+            >
+              <DialogTitle>{t("share.dialog.title")}</DialogTitle>
+              <DialogContent>
+                <Box
+                  sx={{ mt: 1, display: "flex", alignItems: "center", gap: 1 }}
+                >
+                  <SoftInput
+                    readOnly
+                    fullWidth
+                    value={shareLink}
+                    sx={{
+                      flex: 1,
+                      minWidth: 0,
+                    }}
+                  />
+                  <Tooltip title={t("share.dialog.copy")}>
+                    <span>
+                      <IconButton
+                        onClick={onCopyShareLinkClick}
+                        disabled={!shareLink}
+                        color={isCopyHighlightActive ? "info" : "inherit"}
+                      >
+                        <ContentCopyIcon />
+                      </IconButton>
+                    </span>
+                  </Tooltip>
+                </Box>
+              </DialogContent>
+              <DialogActions>
+                <SoftButton onClick={() => setIsShareDialogOpen(false)}>
+                  {t("share.dialog.close")}
+                </SoftButton>
+                <SoftButton
+                  color="error"
+                  onClick={onDeleteShareClick}
+                  disabled={!shareLink || isDeleteShareLinkLoading}
+                >
+                  {t("share.dialog.delete")}
+                </SoftButton>
+              </DialogActions>
+            </Dialog>
           </>
         </FormikProvider>
       )}

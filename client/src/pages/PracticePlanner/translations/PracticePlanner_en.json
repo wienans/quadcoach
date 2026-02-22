@@ -38,6 +38,15 @@
     "add": "Add",
     "remove": "Remove"
   },
+  "share": {
+    "tooltip": "Create or manage share link",
+    "dialog": {
+      "title": "Share practice plan",
+      "copy": "Copy link",
+      "delete": "Delete share",
+      "close": "Close"
+    }
+  },
   "validation": {
     "fixValidationErrors": "Please fix the highlighted validation errors:",
     "name": {
