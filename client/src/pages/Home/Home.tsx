@@ -51,6 +51,52 @@ const Home = () => {
                       fontSize: { xs: "1.25rem", sm: "1.5rem", md: "2rem" },
                     }}
                   >
+                    Add Share option for Tacticboards & Practice Plans
+                  </SoftTypography>
+                  <SoftTypography
+                    variant="h3"
+                    fontWeight="bold"
+                    textTransform="uppercase"
+                    color="text"
+                    sx={{
+                      fontSize: { xs: "1rem", sm: "1.25rem", md: "2rem" },
+                      color: { xs: "text.secondary", sm: "inherit" },
+                    }}
+                  >
+                    22.Feb.2026
+                  </SoftTypography>
+                </SoftBox>
+                <SoftTypography>
+                  We added a new feature, where you can share your private
+                  Tacticboards & Practice Plans via a special link. <br />
+                  The Content is not listed for other users but via the special
+                  links your team has access. Everyone who has that link can
+                  access the content. <br />
+                  Due to this new feature people without a account can access
+                  the private content too.
+                </SoftTypography>
+              </SoftBox>
+            </Card>
+          </SoftBox>
+          <SoftBox mt={5}>
+            <Card sx={{ height: "100%" }}>
+              <SoftBox p={{ xs: 1.5, sm: 2 }}>
+                <SoftBox
+                  display="flex"
+                  flexDirection={{ xs: "column", sm: "row" }}
+                  justifyContent={{ xs: "flex-start", sm: "space-between" }}
+                  alignItems={{ xs: "flex-start", sm: "center" }}
+                  width="100%"
+                  gap={{ xs: 1, sm: 0 }}
+                >
+                  <SoftTypography
+                    variant="h3"
+                    fontWeight="bold"
+                    textTransform="uppercase"
+                    sx={{
+                      fontSize: { xs: "1.25rem", sm: "1.5rem", md: "2rem" },
+                    }}
+                  >
                     Update Tacticboard
                   </SoftTypography>
                   <SoftTypography
