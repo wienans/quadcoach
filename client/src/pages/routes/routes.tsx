@@ -67,6 +67,19 @@ const routes = [
         },
         children: [
           {
+            path: "share/:token",
+            handle: {
+              type: RouteHandleType.sharedTacticBoard,
+            },
+            async lazy() {
+              const SharedTacticBoard = (await import("../SharedTacticBoard"))
+                .default;
+              return {
+                element: <SharedTacticBoard />,
+              };
+            },
+          },
+          {
             path: ":id",
             handle: {
               type: RouteHandleType.tacticBoardProfile,
@@ -217,19 +230,6 @@ const routes = [
           const UpdatePassword = (await import("../UpdatePassword")).default;
           return {
             element: <UpdatePassword />,
-          };
-        },
-      },
-      {
-        path: "/share/:token",
-        handle: {
-          type: RouteHandleType.sharedTacticBoard,
-        },
-        async lazy() {
-          const SharedTacticBoard = (await import("../SharedTacticBoard"))
-            .default;
-          return {
-            element: <SharedTacticBoard />,
           };
         },
       },

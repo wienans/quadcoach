@@ -59,7 +59,7 @@ import ShareIcon from "@mui/icons-material/IosShare";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { useTranslation } from "react-i18next";
-import { lazy, Suspense, useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { useAuth } from "../../store/hooks";
 import TacticBoardInProfileWrapper from "./TacticBoardInProfile";
 import MDEditor from "@uiw/react-md-editor";
@@ -100,6 +100,11 @@ const TacticBoardProfile = () => {
   const [emailError, setEmailError] = useState<string>("");
   const [isShareDialogOpen, setIsShareDialogOpen] = useState<boolean>(false);
   const [shareLink, setShareLink] = useState<string>("");
+  const [isCopyHighlightActive, setIsCopyHighlightActive] =
+    useState<boolean>(false);
+  const copyHighlightTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
   const { id: userId, roles: userRoles } = useAuth();
 
   const {
@@ -247,11 +252,19 @@ const TacticBoardProfile = () => {
   }, [favoriteTacticboards, setIsFavorite, tacticBoardId]);
 
   useEffect(() => {
+    return () => {
+      if (copyHighlightTimeoutRef.current) {
+        clearTimeout(copyHighlightTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
     if (tacticBoard?.shareToken) {
       setShareLink(
-        `${import.meta.env.VITE_PUBLIC_BASE_URL}/tacticboards/share/${
-          tacticBoard.shareToken
-        }`,
+        `${
+          import.meta.env.PUBLIC_BASE_URL || "https://quadcoach.app"
+        }/tacticboards/share/${tacticBoard.shareToken}`,
       );
     } else {
       setShareLink("");
@@ -325,6 +338,13 @@ const TacticBoardProfile = () => {
     if (!shareLink) return;
     try {
       await navigator.clipboard.writeText(shareLink);
+      setIsCopyHighlightActive(true);
+      if (copyHighlightTimeoutRef.current) {
+        clearTimeout(copyHighlightTimeoutRef.current);
+      }
+      copyHighlightTimeoutRef.current = setTimeout(() => {
+        setIsCopyHighlightActive(false);
+      }, 1000);
     } catch (error) {
       console.error("Failed to copy share link", error);
     }
@@ -904,7 +924,10 @@ const TacticBoardProfile = () => {
             <Footer />
             <Dialog
               open={isShareDialogOpen}
-              onClose={() => setIsShareDialogOpen(false)}
+              onClose={() => {
+                setIsShareDialogOpen(false);
+                setIsCopyHighlightActive(false);
+              }}
               fullWidth
               maxWidth="sm"
             >
@@ -929,6 +952,7 @@ const TacticBoardProfile = () => {
                       <IconButton
                         onClick={onCopyShareLinkClick}
                         disabled={!shareLink}
+                        color={isCopyHighlightActive ? "info" : "inherit"}
                       >
                         <ContentCopyIcon />
                       </IconButton>
