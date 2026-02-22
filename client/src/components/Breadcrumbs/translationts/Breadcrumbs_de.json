@@ -10,5 +10,7 @@
   "tacticBoard": "Taktik Tafel",
   "componentsTest": "Komponententest",
   "practicePlans": "Trainingspläne",
-  "practicePlanner": "Trainingsplaner"
+  "practicePlanner": "Trainingsplaner",
+  "draftingBoard": "Entwurfstafel",
+  "sharedTacticBoard": "Geteilte Taktik Tafel"
 }

@@ -11,6 +11,7 @@ router.use(ddosLimiter);
 
 // Public GET endpoints - no additional auth required
 router.route("/header").get(tacticboardController.getAllTacticboardHeaders);
+router.route("/share/:token").get(tacticboardController.getByShareToken);
 
 router
   .route("/")
@@ -30,17 +31,29 @@ router
   .post(verifyJWT, tacticboardController.setAccess)
   .delete(verifyJWT, tacticboardController.deleteAccess);
 
-router.route("/:id/checkAccess").get(verifyJWT, tacticboardController.checkAccess);
+router
+  .route("/:id/checkAccess")
+  .get(verifyJWT, tacticboardController.checkAccess);
 
-router.route("/:id/share").post(verifyJWT, tacticboardController.shareTacticBoard);
+router
+  .route("/:id/share")
+  .post(verifyJWT, tacticboardController.shareTacticBoard);
+router
+  .route("/:id/share-link")
+  .post(verifyJWT, tacticboardController.createShareLink)
+  .delete(verifyJWT, tacticboardController.deleteShareLink);
 
 // All page mutation endpoints require authentication
 router
   .route("/:id/pages/:pageId")
   .patch(verifyJWT, tacticboardController.updatePageById)
   .delete(verifyJWT, tacticboardController.deletePageById);
-router.route("/:id/meta").patch(verifyJWT, tacticboardController.updateMetaById);
-router.route("/:id/newPage").post(verifyJWT, tacticboardController.createNewPage);
+router
+  .route("/:id/meta")
+  .patch(verifyJWT, tacticboardController.updateMetaById);
+router
+  .route("/:id/newPage")
+  .post(verifyJWT, tacticboardController.createNewPage);
 router
   .route("/:id/insertPage/:position")
   .post(verifyJWT, tacticboardController.insertPageAtPosition);

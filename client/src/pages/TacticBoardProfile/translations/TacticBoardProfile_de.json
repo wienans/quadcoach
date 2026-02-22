@@ -13,7 +13,8 @@
       "label": "Private Taktik Tafel"
     },
     "tags": {
-      "label": "Tags"
+      "label": "Tags",
+      "none": "Keine Tags"
     }
   },
   "topMenu": {
@@ -31,7 +32,16 @@
     },
     "isFullscreenButton": {
       "tooltip": "Vollbildmodus"
+    },
+    "shareButton": {
+      "tooltip": "Share-Link erstellen oder verwalten"
     }
+  },
+  "shareDialog": {
+    "title": "Taktik Tafel teilen",
+    "copy": "Link kopieren",
+    "delete": "Share löschen",
+    "close": "Schließen"
   },
   "access": {
     "title": "Zugang",

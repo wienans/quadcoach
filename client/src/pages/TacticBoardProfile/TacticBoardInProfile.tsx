@@ -28,19 +28,21 @@ import { useGetAllTacticboardAccessUsersQuery } from "../../api/quadcoachApi/tac
 import { getUuid } from "../../contexts/tacticBoard/TacticBoardFabricJsContext/fabricTypes";
 export type TacticBoardInProfileProps = {
   tacticBoardId: string | undefined;
+  sharedToken?: string;
   isEditMode?: boolean;
   onEditClick?: () => void;
 };
 
 const TacticBoardInProfile = ({
   tacticBoardId,
+  sharedToken,
   isEditMode,
   onEditClick,
 }: TacticBoardInProfileProps): JSX.Element | undefined => {
   const { t } = useTranslation("TacticBoardProfile");
   const navigate = useNavigate();
   const { tacticBoard, isTacticBoardError, isTacticBoardLoading } =
-    useLoadTacticBoard(tacticBoardId);
+    useLoadTacticBoard(tacticBoardId, sharedToken);
 
   const { isRecording, startRecording, stopRecording, downloadVideo } =
     useVideoRecording();
@@ -69,6 +71,11 @@ const TacticBoardInProfile = ({
   );
 
   useEffect(() => {
+    if (sharedToken) {
+      setIsPrivileged(false);
+      return;
+    }
+
     if (
       userId == tacticBoard?.user ||
       userRoles.includes("Admin") ||
@@ -86,7 +93,7 @@ const TacticBoardInProfile = ({
         );
       }
     }
-  }, [userId, tacticBoard, userRoles, accessUsers]);
+  }, [userId, tacticBoard, userRoles, accessUsers, sharedToken]);
 
   useEffect(() => {
     if (
@@ -408,7 +415,7 @@ const TacticBoardInProfile = ({
     setPage(value);
     onLoadPage(value);
   };
-  if (!tacticBoardId) return;
+  if (!tacticBoardId && !sharedToken) return;
   if (isTacticBoardError)
     return (
       <Alert severity="error">
@@ -495,28 +502,30 @@ const TacticBoardInProfile = ({
         </SoftBox>
 
         {isPrivileged && isEditMode && (
-          <Tooltip
-            title={t("TacticBoardProfile:topMenu.isEditModeButton.tooltip")}
-          >
-            <ToggleButton
-              disabled={isTacticBoardLoading || isRecording || isAnimating}
-              value={false}
-              size="small"
-              selected={false}
-              onClick={() => {
-                if (onEditClick) {
-                  onEditClick();
-                } else {
-                  navigate(`/tacticboards/${tacticBoardId}/update`);
-                }
-              }}
-              sx={{
-                mr: 1,
-              }}
+          <>
+            <Tooltip
+              title={t("TacticBoardProfile:topMenu.isEditModeButton.tooltip")}
             >
-              <EditIcon color="primary" />
-            </ToggleButton>
-          </Tooltip>
+              <ToggleButton
+                disabled={isTacticBoardLoading || isRecording || isAnimating}
+                value={false}
+                size="small"
+                selected={false}
+                onClick={() => {
+                  if (onEditClick) {
+                    onEditClick();
+                  } else {
+                    navigate(`/tacticboards/${tacticBoardId}/update`);
+                  }
+                }}
+                sx={{
+                  mr: 1,
+                }}
+              >
+                <EditIcon color="primary" />
+              </ToggleButton>
+            </Tooltip>
+          </>
         )}
         <Tooltip
           title={t("TacticBoardProfile:topMenu.isFullscreenButton.tooltip")}
@@ -546,12 +555,14 @@ const TacticBoardInProfile = ({
 
 export type TacticBoardInProfileWrapperProps = {
   tacticBoardId: string | undefined;
+  sharedToken?: string;
   isEditMode?: boolean;
   onEditClick?: () => void;
 };
 
 const TacticBoardInProfileWrapper = ({
   tacticBoardId,
+  sharedToken,
   isEditMode,
   onEditClick,
 }: TacticBoardInProfileWrapperProps): JSX.Element => {
@@ -560,6 +571,7 @@ const TacticBoardInProfileWrapper = ({
       <TacticBoardProvider heightFirstResizing={false}>
         <TacticBoardInProfile
           tacticBoardId={tacticBoardId}
+          sharedToken={sharedToken}
           isEditMode={isEditMode}
           onEditClick={onEditClick}
         />

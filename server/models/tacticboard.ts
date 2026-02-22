@@ -55,6 +55,7 @@ export interface ITacticBoard {
   pages?: Types.Array<ITacticPage>;
   description?: string;
   coaching_points?: string;
+  shareToken?: string | null;
 }
 
 const objectSchema = new Schema<IObject>({
@@ -75,11 +76,9 @@ const objectSchema = new Schema<IObject>({
   },
   width: {
     type: Number,
-    required: true,
   },
   height: {
     type: Number,
-    required: true,
   },
   fill: {
     type: String,
@@ -216,9 +215,15 @@ const tacticBoardSchema = new Schema<ITacticBoard>(
     coaching_points: {
       type: String,
     },
+    shareToken: {
+      type: String,
+      default: null,
+    },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
+
+tacticBoardSchema.index({ shareToken: 1 }, { unique: true, sparse: true });
 
 const TacticBoard = model<ITacticBoard>("tacticboards", tacticBoardSchema);
 

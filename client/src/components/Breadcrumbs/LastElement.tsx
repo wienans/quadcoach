@@ -13,7 +13,7 @@ const LastElement = ({ light, title }: LastElementProps): JSX.Element => (
     color={light ? "white" : "dark"}
     textOverflow="ellipsis"
     fontSize="medium"
-    maxWidth="100px"
+    maxWidth={{ xs: "140px", sm: "220px", md: "300px" }}
     overflow="hidden"
     whiteSpace="nowrap"
     sx={{

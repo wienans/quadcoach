@@ -12,6 +12,10 @@ import {
   FormGroup,
   Grid,
   IconButton,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   ListItem,
   List,
   Skeleton,
@@ -25,11 +29,18 @@ import {
   MenuItem,
 } from "@mui/material";
 import * as Yup from "yup";
-import { SoftBox, SoftInput, SoftTypography } from "../../components";
+import {
+  SoftBox,
+  SoftButton,
+  SoftInput,
+  SoftTypography,
+} from "../../components";
 import {
   AccessLevel,
   useDeleteTacticboardAccessMutation,
   useDeleteTacticBoardMutation,
+  useCreateTacticboardShareLinkMutation,
+  useDeleteTacticboardShareLinkMutation,
   useGetAllTacticboardAccessUsersQuery,
   useGetTacticBoardQuery,
   useUpdateTacticBoardMetaMutation,
@@ -44,9 +55,11 @@ import EditIcon from "@mui/icons-material/Edit";
 import SaveIcon from "@mui/icons-material/Save";
 import DeleteIcon from "@mui/icons-material/Delete";
 import FavoriteIcon from "@mui/icons-material/Favorite";
+import ShareIcon from "@mui/icons-material/IosShare";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { useTranslation } from "react-i18next";
-import { lazy, Suspense, useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { useAuth } from "../../store/hooks";
 import TacticBoardInProfileWrapper from "./TacticBoardInProfile";
 import MDEditor from "@uiw/react-md-editor";
@@ -85,6 +98,13 @@ const TacticBoardProfile = () => {
   const [accessMode, setAccessMode] = useState<AccessLevel>("view");
   const [userEmail, setUserEmail] = useState<string>("");
   const [emailError, setEmailError] = useState<string>("");
+  const [isShareDialogOpen, setIsShareDialogOpen] = useState<boolean>(false);
+  const [shareLink, setShareLink] = useState<string>("");
+  const [isCopyHighlightActive, setIsCopyHighlightActive] =
+    useState<boolean>(false);
+  const copyHighlightTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
   const { id: userId, roles: userRoles } = useAuth();
 
   const {
@@ -126,6 +146,11 @@ const TacticBoardProfile = () => {
 
   const [shareTacticBoard, { isLoading: isShareTacticBoardLoading }] =
     useShareTacticBoardMutation();
+
+  const [createShareLink, { isLoading: isCreateShareLinkLoading }] =
+    useCreateTacticboardShareLinkMutation();
+  const [deleteShareLink, { isLoading: isDeleteShareLinkLoading }] =
+    useDeleteTacticboardShareLinkMutation();
 
   const { data: accessUsers } = useGetAllTacticboardAccessUsersQuery(
     tacticBoardId || "",
@@ -226,6 +251,26 @@ const TacticBoardProfile = () => {
     }
   }, [favoriteTacticboards, setIsFavorite, tacticBoardId]);
 
+  useEffect(() => {
+    return () => {
+      if (copyHighlightTimeoutRef.current) {
+        clearTimeout(copyHighlightTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (tacticBoard?.shareToken) {
+      setShareLink(
+        `${
+          import.meta.env.PUBLIC_BASE_URL || "https://quadcoach.app"
+        }/tacticboards/share/${tacticBoard.shareToken}`,
+      );
+    } else {
+      setShareLink("");
+    }
+  }, [tacticBoard?.shareToken]);
+
   const onDeleteTacticBoardClick = () => {
     if (!tacticBoard) return;
     deleteTacticBoard(tacticBoard._id);
@@ -277,6 +322,45 @@ const TacticBoardProfile = () => {
     }
   };
 
+  const onShareClick = async () => {
+    if (!tacticBoardId) return;
+
+    try {
+      const response = await createShareLink(tacticBoardId).unwrap();
+      setShareLink(response.shareLink);
+      setIsShareDialogOpen(true);
+    } catch (error) {
+      console.error("Failed to create share link", error);
+    }
+  };
+
+  const onCopyShareLinkClick = async () => {
+    if (!shareLink) return;
+    try {
+      await navigator.clipboard.writeText(shareLink);
+      setIsCopyHighlightActive(true);
+      if (copyHighlightTimeoutRef.current) {
+        clearTimeout(copyHighlightTimeoutRef.current);
+      }
+      copyHighlightTimeoutRef.current = setTimeout(() => {
+        setIsCopyHighlightActive(false);
+      }, 1000);
+    } catch (error) {
+      console.error("Failed to copy share link", error);
+    }
+  };
+
+  const onDeleteShareClick = async () => {
+    if (!tacticBoardId) return;
+    try {
+      await deleteShareLink(tacticBoardId).unwrap();
+      setShareLink("");
+      setIsShareDialogOpen(false);
+    } catch (error) {
+      console.error("Failed to delete share link", error);
+    }
+  };
+
   if (isTacticBoardLoading) {
     return (
       <DashboardLayout>
@@ -313,6 +397,8 @@ const TacticBoardProfile = () => {
       </DashboardLayout>
     );
   }
+
+  const hasActiveShare = !!tacticBoard.shareToken;
 
   return (
     <FormikProvider value={formik}>
@@ -361,6 +447,22 @@ const TacticBoardProfile = () => {
                     }}
                   >
                     <FavoriteIcon color={isFavorite ? "error" : "inherit"} />
+                  </IconButton>
+                </Tooltip>
+              )}
+              {isPrivileged && tacticBoard.isPrivate && (
+                <Tooltip
+                  title={t("TacticBoardProfile:topMenu.shareButton.tooltip")}
+                >
+                  <IconButton
+                    onClick={onShareClick}
+                    disabled={
+                      isCreateShareLinkLoading || isDeleteShareLinkLoading
+                    }
+                  >
+                    <ShareIcon
+                      sx={{ color: hasActiveShare ? "green" : "#000000" }}
+                    />
                   </IconButton>
                 </Tooltip>
               )}
@@ -559,7 +661,8 @@ const TacticBoardProfile = () => {
                                       );
                                     }
                                   })}
-                                {formik.values.tags?.length == 0 && "No Tags"}
+                                {formik.values.tags?.length == 0 &&
+                                  t("info.tags.none")}
                               </div>
                             );
                           }}
@@ -819,6 +922,57 @@ const TacticBoardProfile = () => {
               )}
             </Card>
             <Footer />
+            <Dialog
+              open={isShareDialogOpen}
+              onClose={() => {
+                setIsShareDialogOpen(false);
+                setIsCopyHighlightActive(false);
+              }}
+              fullWidth
+              maxWidth="sm"
+            >
+              <DialogTitle>
+                {t("TacticBoardProfile:shareDialog.title")}
+              </DialogTitle>
+              <DialogContent>
+                <Box
+                  sx={{ mt: 1, display: "flex", alignItems: "center", gap: 1 }}
+                >
+                  <SoftInput
+                    fullWidth
+                    readOnly
+                    value={shareLink}
+                    sx={{
+                      flex: 1,
+                      minWidth: 0,
+                    }}
+                  />
+                  <Tooltip title={t("TacticBoardProfile:shareDialog.copy")}>
+                    <span>
+                      <IconButton
+                        onClick={onCopyShareLinkClick}
+                        disabled={!shareLink}
+                        color={isCopyHighlightActive ? "info" : "inherit"}
+                      >
+                        <ContentCopyIcon />
+                      </IconButton>
+                    </span>
+                  </Tooltip>
+                </Box>
+              </DialogContent>
+              <DialogActions>
+                <SoftButton onClick={() => setIsShareDialogOpen(false)}>
+                  {t("TacticBoardProfile:shareDialog.close")}
+                </SoftButton>
+                <SoftButton
+                  color="error"
+                  onClick={onDeleteShareClick}
+                  disabled={!shareLink || isDeleteShareLinkLoading}
+                >
+                  {t("TacticBoardProfile:shareDialog.delete")}
+                </SoftButton>
+              </DialogActions>
+            </Dialog>
           </>
         )}
       </ProfileLayout>
