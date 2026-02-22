@@ -69,12 +69,18 @@ const PracticePlanSchema = new Schema<IPracticePlan>(
     sections: { type: [SectionSchema], default: [] },
     user: { type: Schema.Types.ObjectId, ref: "users", required: true },
     isPrivate: { type: Boolean, default: false, required: true },
-    shareToken: { type: String, default: null },
+    shareToken: { type: String, default: undefined },
   },
   { timestamps: true },
 );
 
-PracticePlanSchema.index({ shareToken: 1 }, { unique: true, sparse: true });
+PracticePlanSchema.index(
+  { shareToken: 1 },
+  {
+    unique: true,
+    partialFilterExpression: { shareToken: { $type: "string" } },
+  },
+);
 
 export const PracticePlan = model<IPracticePlan>(
   "practiceplans",

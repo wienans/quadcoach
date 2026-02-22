@@ -217,13 +217,19 @@ const tacticBoardSchema = new Schema<ITacticBoard>(
     },
     shareToken: {
       type: String,
-      default: null,
+      default: undefined,
     },
   },
   { timestamps: true },
 );
 
-tacticBoardSchema.index({ shareToken: 1 }, { unique: true, sparse: true });
+tacticBoardSchema.index(
+  { shareToken: 1 },
+  {
+    unique: true,
+    partialFilterExpression: { shareToken: { $type: "string" } },
+  },
+);
 
 const TacticBoard = model<ITacticBoard>("tacticboards", tacticBoardSchema);
 

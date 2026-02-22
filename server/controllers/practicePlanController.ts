@@ -655,7 +655,7 @@ export const deleteShareLink = asyncHandler(
       return;
     }
 
-    practicePlan.shareToken = null;
+    practicePlan.shareToken = undefined;
     await practicePlan.save();
 
     res.json({ message: "Share link removed" });

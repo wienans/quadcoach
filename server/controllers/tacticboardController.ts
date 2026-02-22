@@ -1097,7 +1097,7 @@ export const deleteShareLink = asyncHandler(
       return;
     }
 
-    tacticboard.shareToken = null;
+    tacticboard.shareToken = undefined;
     await tacticboard.save();
 
     res.json({ message: "Share link removed" });
