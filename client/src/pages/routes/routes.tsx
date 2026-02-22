@@ -134,6 +134,19 @@ const routes = [
         },
         children: [
           {
+            path: "share/:token",
+            handle: {
+              type: RouteHandleType.sharedPracticePlan,
+            },
+            async lazy() {
+              const SharedPracticePlan = (await import("../SharedPracticePlan"))
+                .default;
+              return {
+                element: <SharedPracticePlan />,
+              };
+            },
+          },
+          {
             path: ":planId",
             handle: {
               type: RouteHandleType.practicePlanner,

@@ -38,10 +38,17 @@ export type AccessResponse = {
   level: AccessLevel | null;
 };
 
+export type ShareLinkResponse = {
+  message: string;
+  token: string;
+  shareLink: string;
+};
+
 export type GetPracticePlanRequest = {
   nameRegex?: string;
   tagRegex?: string;
   tagList?: string[];
+  isPrivate?: boolean;
   sortBy?: "name" | "created" | "updated";
   sortOrder?: "asc" | "desc";
   page?: number;
@@ -69,6 +76,7 @@ export const practicePlansApiSlice = quadcoachApi.injectEndpoints({
           nameRegex,
           tagRegex,
           tagList,
+          isPrivate,
           sortBy,
           sortOrder,
           page = 1,
@@ -89,6 +97,9 @@ export const practicePlansApiSlice = quadcoachApi.injectEndpoints({
         if (tagRegex != null && tagRegex !== "") {
           urlParams.append("tags[regex]", tagRegex);
           urlParams.append("tags[options]", "i");
+        }
+        if (isPrivate !== undefined) {
+          urlParams.append("isPrivate[eq]", String(isPrivate));
         }
         if (sortBy != null) {
           urlParams.append("sortBy", sortBy);
@@ -130,6 +141,19 @@ export const practicePlansApiSlice = quadcoachApi.injectEndpoints({
     getPracticePlan: builder.query<PracticePlanEntity, string>({
       query: (id) => ({
         url: `/api/practice-plans/${id}`,
+        method: "get",
+      }),
+      providesTags: (result) =>
+        result
+          ? [
+              { type: TagType.practiceplan, id: result._id },
+              TagType.practiceplan,
+            ]
+          : [TagType.practiceplan],
+    }),
+    getSharedPracticePlan: builder.query<PracticePlanEntity, string>({
+      query: (token) => ({
+        url: `/api/practice-plans/share/${token}`,
         method: "get",
       }),
       providesTags: (result) =>
@@ -211,6 +235,24 @@ export const practicePlansApiSlice = quadcoachApi.injectEndpoints({
         { type: TagType.practiceplan, id: `${practicePlan}-access` },
       ],
     }),
+    createPracticePlanShareLink: builder.mutation<ShareLinkResponse, string>({
+      query: (practicePlanId) => ({
+        url: `/api/practice-plans/${practicePlanId}/share-link`,
+        method: "post",
+      }),
+      invalidatesTags: (_result, _error, practicePlanId) => [
+        { type: TagType.practiceplan, id: practicePlanId },
+      ],
+    }),
+    deletePracticePlanShareLink: builder.mutation<{ message: string }, string>({
+      query: (practicePlanId) => ({
+        url: `/api/practice-plans/${practicePlanId}/share-link`,
+        method: "delete",
+      }),
+      invalidatesTags: (_result, _error, practicePlanId) => [
+        { type: TagType.practiceplan, id: practicePlanId },
+      ],
+    }),
   }),
 });
 
@@ -219,10 +261,13 @@ export const {
   useLazyGetPracticePlanHeadersQuery,
   useCreatePracticePlanMutation,
   useGetPracticePlanQuery,
+  useGetSharedPracticePlanQuery,
   usePatchPracticePlanMutation,
   useDeletePracticePlanMutation,
   useGetAllPracticePlanAccessUsersQuery,
   useAddPracticePlanAccessMutation,
   useRemovePracticePlanAccessMutation,
   useSharePracticePlanMutation,
+  useCreatePracticePlanShareLinkMutation,
+  useDeletePracticePlanShareLinkMutation,
 } = practicePlansApiSlice;
