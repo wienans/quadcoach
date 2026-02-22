@@ -1,5 +1,5 @@
 import { useEffect, useCallback } from "react";
-import { fabric } from "fabric";
+import * as fabric from "fabric";
 import { useTacticBoardCanvas } from "./useTacticBoardCanvas";
 
 export interface KeyboardShortcutsConfig {

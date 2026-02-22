@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import "./fabricJsExtensions";
 import {
   createContext,
@@ -9,7 +10,7 @@ import {
   useEffect,
   useMemo,
 } from "react";
-import { fabric } from "fabric";
+import * as fabric from "fabric";
 import { TacticPage } from "../../../api/quadcoachApi/domain";
 import { useContainerResizeEvent } from "./useResizeEvent";
 
@@ -17,7 +18,7 @@ import { TacticPageValidator } from "./validation";
 import { ExtendedBaseBrush } from "./fabricTypes";
 import { CanvasOperationError } from "./types";
 
-const canvasDefaultOptions: fabric.ICanvasOptions = {
+const canvasDefaultOptions: any = {
   preserveObjectStacking: true,
   width: 1220,
   height: 686,
@@ -87,10 +88,7 @@ const TacticBoardFabricJsContextProvider: FC<{
       if (!instance) return;
 
       try {
-        canvasFabricRef.current = new fabric.Canvas(
-          canvasRef.current,
-          canvasDefaultOptions,
-        );
+        canvasFabricRef.current = new fabric.Canvas(instance, canvasDefaultOptions);
 
         // Re-initialize resize observer now that canvas is ready
         initializeContainerResizeObserver();
@@ -236,7 +234,10 @@ const TacticBoardFabricJsContextProvider: FC<{
             const addObj = new fabric.Rect(obj as object);
             canvasFabric.add(addObj);
           } else if (obj.type === "path") {
-            const addObj = new fabric.Path(obj.path?.toString(), obj as object);
+            const addObj = new fabric.Path(
+              obj.path?.toString() ?? "",
+              obj as object,
+            );
             canvasFabric.add(addObj);
           } else if (obj.type === "text") {
             if (obj.text) {
@@ -270,10 +271,10 @@ const TacticBoardFabricJsContextProvider: FC<{
                   objects.push(addObj);
                 }
               } else if (groupObj.type === "path") {
-                const addObj = new fabric.Path(
-                  groupObj.path?.toString(),
-                  groupObj as object,
-                );
+                  const addObj = new fabric.Path(
+                    groupObj.path?.toString() ?? "",
+                    groupObj as object,
+                  );
                 objects.push(addObj);
               } else if (groupObj.type === "rect") {
                 const addObj = new fabric.Rect(groupObj as object);

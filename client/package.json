@@ -27,8 +27,7 @@
     "@uiw/react-md-editor": "^4.0.11",
     "axios": "^1.13.5",
     "chroma-js": "^2.6.0",
-    "fabric": "^5.5.2",
-    "fabricjs-react": "^1.2.2",
+    "fabric": "^7.2.0",
     "formik": "^2.4.9",
     "i18next": "^23.16.8",
     "i18next-browser-languagedetector": "^7.2.2",
@@ -50,7 +49,6 @@
     "yup": "^1.7.1"
   },
   "devDependencies": {
-    "@types/fabric": "^5.3.11",
     "@types/node": "^20.19.33",
     "@types/react": "^18.3.28",
     "@types/react-color": "^3.0.13",
@@ -63,7 +61,7 @@
     "eslint-plugin-react-hooks": "^4.6.2",
     "eslint-plugin-react-refresh": "0.4.3",
     "prettier": "3.8.1",
-    "typescript": "5.2.2",
+    "typescript": "^5.2.2",
     "vite": "^4.5.14"
   }
 }

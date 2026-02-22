@@ -1,8 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import "./translations";
 import { useNavigate } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { Alert, Skeleton } from "@mui/material";
+import * as fabric from "fabric";
 import { useTranslation } from "react-i18next";
 import { FabricJsCanvas, SoftBox } from "../../components";
 import cloneDeep from "lodash/cloneDeep";
@@ -420,7 +422,7 @@ const TacticsBoard = (): JSX.Element => {
 
             if (shouldAnimateLeft) {
               pendingAnimations += 1;
-              obj.animate("left", targetLeft, {
+              (obj as any).animate("left", targetLeft, {
                 onChange: requestRenderAll,
                 duration: 1000,
                 onComplete: onOneAnimationComplete,
@@ -429,7 +431,7 @@ const TacticsBoard = (): JSX.Element => {
 
             if (shouldAnimateTop) {
               pendingAnimations += 1;
-              obj.animate("top", targetTop, {
+              (obj as any).animate("top", targetTop, {
                 onChange: requestRenderAll,
                 duration: 1000,
                 onComplete: onOneAnimationComplete,
@@ -518,7 +520,7 @@ const TacticsBoard = (): JSX.Element => {
 
             if (shouldAnimateLeft) {
               pendingAnimations += 1;
-              obj.animate("left", targetLeft, {
+              (obj as any).animate("left", targetLeft, {
                 onChange: requestRenderAll,
                 duration: 1000,
                 onComplete: onOneAnimationComplete,
@@ -527,7 +529,7 @@ const TacticsBoard = (): JSX.Element => {
 
             if (shouldAnimateTop) {
               pendingAnimations += 1;
-              obj.animate("top", targetTop, {
+              (obj as any).animate("top", targetTop, {
                 onChange: requestRenderAll,
                 duration: 1000,
                 onComplete: onOneAnimationComplete,

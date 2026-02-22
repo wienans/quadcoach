@@ -1,4 +1,5 @@
-import { fabric } from "fabric";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import * as fabric from "fabric";
 import { v4 } from "uuid";
 
 export enum ObjectType {
@@ -28,7 +29,7 @@ export enum AccessoryType {
 }
 
 // Enhanced TypeScript definitions for fabric.js extensions
-declare module "fabric/fabric-impl" {
+declare module "fabric" {
   export interface IObjectOptions {
     id?: string;
     objectType?: ObjectType | string;
@@ -148,7 +149,7 @@ export class PersonObject extends fabric.Group {
     });
 
     const personId = v4();
-    super([personCircle, personText], { id: personId });
+    super([personCircle, personText], { id: personId } as any);
 
     this.personOptions = personOptions;
     this.personElements = {

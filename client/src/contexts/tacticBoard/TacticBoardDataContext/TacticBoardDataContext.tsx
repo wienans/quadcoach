@@ -11,7 +11,7 @@ import { TacticBoardCanvasContext } from "../TacticBoardCanvasContext/TacticBoar
 import { TacticPageValidator } from "../TacticBoardFabricJsContext/validation";
 import { FabricObjectFactory } from "../TacticBoardFabricJsContext/objectFactory";
 import { CanvasOperationError } from "../TacticBoardFabricJsContext/types";
-import { fabric } from "fabric";
+import * as fabric from "fabric";
 
 export interface TacticBoardDataContextProps {
   loadFromTacticPage: (page: TacticPage) => void;
@@ -73,7 +73,7 @@ const TacticBoardDataContextProvider: FC<{
                 canvasFabric.add(addObj);
               } else if (objData.type === "path") {
                 const addObj = new fabric.Path(
-                  objData.path?.toString(),
+                  objData.path?.toString() ?? "",
                   objData as object,
                 );
                 canvasFabric.add(addObj);

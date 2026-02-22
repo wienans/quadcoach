@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   Avatar,
   Collapse,
@@ -14,7 +15,7 @@ import ExpandMore from "@mui/icons-material/ExpandMore";
 import SportsVolleyballIcon from "@mui/icons-material/SportsVolleyball";
 import { AccessoryType } from "../../../contexts/tacticBoard/TacticBoardFabricJsContext/types";
 import { useTranslation } from "react-i18next";
-import { fabric } from "fabric";
+import * as fabric from "fabric";
 import { v4 as uuidv4 } from "uuid";
 import { useTacticBoardCanvas } from "../../../hooks/taticBoard";
 import {
@@ -65,10 +66,10 @@ const AccessoryItemSection = (): JSX.Element => {
     fabric.loadSVGFromURL(
       getAccesTypeSvg(accessType),
       function (objects, options) {
-        const obj = fabric.util.groupSVGElements(objects, {
+        const obj = fabric.util.groupSVGElements(objects as any, {
           ...options,
           uuid: uuidv4(),
-        });
+        } as any);
         obj.scaleX = getAccesTypeScale(accessType);
         obj.scaleY = getAccesTypeScale(accessType);
         obj.left = 600;
