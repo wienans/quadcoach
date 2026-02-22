@@ -3,6 +3,9 @@ import { RouteHandle, RouteHandleType } from "../../pages/routes/routeTypes";
 import { useTranslation } from "react-i18next";
 import ExerciseBreadcrumbElement from "./ExerciseBreadcrumbElement";
 import BreadcrumbElement from "./BreadcrumbElement";
+import TacticBoardBreadcrumbElement from "./TacticBoardBreadcrumbElement";
+import SharedTacticBoardBreadcrumbElement from "./SharedTacticBoardBreadcrumbElement";
+import PracticePlannerBreadcrumbElement from "./PracticePlannerBreadcrumbElement";
 
 export type BreadcrumbElementProps = {
   route: UIMatch<unknown, RouteHandle>;
@@ -21,6 +24,30 @@ const BreadcrumbElementWrapper = ({
     case RouteHandleType.exercise:
       return (
         <ExerciseBreadcrumbElement
+          route={route}
+          isLastElement={isLastElement}
+          light={light}
+        />
+      );
+    case RouteHandleType.tacticBoardProfile:
+      return (
+        <TacticBoardBreadcrumbElement
+          route={route}
+          isLastElement={isLastElement}
+          light={light}
+        />
+      );
+    case RouteHandleType.sharedTacticBoard:
+      return (
+        <SharedTacticBoardBreadcrumbElement
+          route={route}
+          isLastElement={isLastElement}
+          light={light}
+        />
+      );
+    case RouteHandleType.practicePlanner:
+      return (
+        <PracticePlannerBreadcrumbElement
           route={route}
           isLastElement={isLastElement}
           light={light}

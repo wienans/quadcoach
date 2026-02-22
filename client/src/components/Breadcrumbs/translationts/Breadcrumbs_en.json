@@ -10,5 +10,7 @@
   "tacticBoard": "Tactic Board",
   "componentsTest": "Test components",
   "practicePlans": "Practice Plans",
-  "practicePlanner": "Practice Planner"
+  "practicePlanner": "Practice Planner",
+  "draftingBoard": "Drafting Board",
+  "sharedTacticBoard": "Shared Tactic Board" 
 }

@@ -31,7 +31,16 @@
     },
     "isFullscreenButton": {
       "tooltip": "Enables the fullscreen mode"
+    },
+    "shareButton": {
+      "tooltip": "Create or manage share link"
     }
+  },
+  "shareDialog": {
+    "title": "Share tacticboard",
+    "copy": "Copy link",
+    "delete": "Delete share",
+    "close": "Close"
   },
   "access": {
     "title": "Access",

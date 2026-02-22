@@ -53,6 +53,12 @@ export type AccessResponse = {
   level: AccessLevel | null;
 };
 
+export type ShareLinkResponse = {
+  message: string;
+  token: string;
+  shareLink: string;
+};
+
 export const tacticBoardApiSlice = quadcoachApi.injectEndpoints({
   endpoints: (builder) => ({
     getTacticBoard: builder.query<TacticBoard, string>({
@@ -61,6 +67,16 @@ export const tacticBoardApiSlice = quadcoachApi.injectEndpoints({
         method: "get",
       }),
       // Tag both the list and the individual item
+      providesTags: (result) =>
+        result
+          ? [{ type: TagType.tacticboard, id: result._id }, TagType.tacticboard]
+          : [TagType.tacticboard],
+    }),
+    getSharedTacticBoard: builder.query<TacticBoard, string>({
+      query: (token: string) => ({
+        url: `/api/tacticboards/share/${token}`,
+        method: "get",
+      }),
       providesTags: (result) =>
         result
           ? [{ type: TagType.tacticboard, id: result._id }, TagType.tacticboard]
@@ -388,11 +404,30 @@ export const tacticBoardApiSlice = quadcoachApi.injectEndpoints({
         { type: TagType.tacticboard, id: `${tacticboardId}-access` },
       ],
     }),
+    createTacticboardShareLink: builder.mutation<ShareLinkResponse, string>({
+      query: (tacticboardId) => ({
+        url: `/api/tacticboards/${tacticboardId}/share-link`,
+        method: "post",
+      }),
+      invalidatesTags: (_result, _error, tacticboardId) => [
+        { type: TagType.tacticboard, id: tacticboardId },
+      ],
+    }),
+    deleteTacticboardShareLink: builder.mutation<{ message: string }, string>({
+      query: (tacticboardId) => ({
+        url: `/api/tacticboards/${tacticboardId}/share-link`,
+        method: "delete",
+      }),
+      invalidatesTags: (_result, _error, tacticboardId) => [
+        { type: TagType.tacticboard, id: tacticboardId },
+      ],
+    }),
   }),
 });
 
 export const {
   useGetTacticBoardQuery,
+  useGetSharedTacticBoardQuery,
   useLazyGetTacticBoardsQuery,
   useDeleteTacticBoardMutation,
   useUpdateTacticBoardMutation,
@@ -412,4 +447,6 @@ export const {
   useSetTacticboardAccessMutation,
   useDeleteTacticboardAccessMutation,
   useShareTacticBoardMutation,
+  useCreateTacticboardShareLinkMutation,
+  useDeleteTacticboardShareLinkMutation,
 } = tacticBoardApiSlice;

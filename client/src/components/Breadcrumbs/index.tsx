@@ -44,8 +44,7 @@ const Breadcrumbs = ({ light = false }: BreadcrumbsProps) => {
           "& .MuiBreadcrumbs-li": {
             display: "flex",
             alignItems: "center",
-            overflowX: "hidden",
-            textOverflow: "ellipsis",
+            minWidth: 0,
             whiteSpace: "nowrap",
           },
           "& .MuiBreadcrumbs-separator": {

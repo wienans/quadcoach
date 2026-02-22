@@ -1,8 +1,14 @@
 import { useEffect } from "react";
 import { useTacticBoardCanvas, useTacticBoardData } from ".";
-import { useGetTacticBoardQuery } from "../../api/quadcoachApi/tacticboardApi";
+import {
+  useGetSharedTacticBoardQuery,
+  useGetTacticBoardQuery,
+} from "../../api/quadcoachApi/tacticboardApi";
 
-export const useLoadTacticBoard = (tacticBoardId?: string) => {
+export const useLoadTacticBoard = (
+  tacticBoardId?: string,
+  sharedToken?: string,
+) => {
   const { setSelection } = useTacticBoardCanvas();
   const { loadFromTacticPage: loadFromJson } = useTacticBoardData();
 
@@ -11,23 +17,30 @@ export const useLoadTacticBoard = (tacticBoardId?: string) => {
     isError: isTacticBoardError,
     isLoading: isTacticBoardLoading,
   } = useGetTacticBoardQuery(tacticBoardId || "", {
-    skip: tacticBoardId == null,
+    skip: tacticBoardId == null || (sharedToken != null && sharedToken !== ""),
   });
 
-  useEffect(() => {
-    if (
-      isTacticBoardLoading ||
-      isTacticBoardError ||
-      !tacticBoard?.pages?.length
-    )
-      return;
-  }, [
-    isTacticBoardError,
-    isTacticBoardLoading,
-    tacticBoard,
-    loadFromJson,
-    setSelection,
-  ]);
+  const {
+    data: sharedTacticBoard,
+    isError: isSharedTacticBoardError,
+    isLoading: isSharedTacticBoardLoading,
+  } = useGetSharedTacticBoardQuery(sharedToken || "", {
+    skip: sharedToken == null || sharedToken === "",
+  });
 
-  return { tacticBoard, isTacticBoardError, isTacticBoardLoading };
+  const boardToUse = sharedToken ? sharedTacticBoard : tacticBoard;
+  const isError = sharedToken ? isSharedTacticBoardError : isTacticBoardError;
+  const isLoading = sharedToken
+    ? isSharedTacticBoardLoading
+    : isTacticBoardLoading;
+
+  useEffect(() => {
+    if (isLoading || isError || !boardToUse?.pages?.length) return;
+  }, [isError, isLoading, boardToUse, loadFromJson, setSelection]);
+
+  return {
+    tacticBoard: boardToUse,
+    isTacticBoardError: isError,
+    isTacticBoardLoading: isLoading,
+  };
 };

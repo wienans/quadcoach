@@ -20,6 +20,8 @@ type TacticBoard = {
   pages: TacticPage[];
   description?: string;
   coaching_points?: string;
+  shareToken?: string | null;
+  shareTokenCreatedAt?: string | null;
 };
 
 type TacticBoardWithOutPageId = {

@@ -220,6 +220,19 @@ const routes = [
           };
         },
       },
+      {
+        path: "/share/:token",
+        handle: {
+          type: RouteHandleType.sharedTacticBoard,
+        },
+        async lazy() {
+          const SharedTacticBoard = (await import("../SharedTacticBoard"))
+            .default;
+          return {
+            element: <SharedTacticBoard />,
+          };
+        },
+      },
     ],
   },
 ];
