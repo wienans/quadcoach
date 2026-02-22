@@ -7,6 +7,7 @@ import Exercise from "../models/exercise";
 import TacticboardFav from "../models/tacticboardFav";
 import TacticboardAccess from "../models/tacticboardAccess";
 import User from "../models/user";
+import { logEvents } from "../middleware/logger";
 
 interface UserInfo {
   id?: string;
@@ -1050,9 +1051,11 @@ export const createShareLink = asyncHandler(
         shareLink: `${publicBaseUrl}/tacticboards/share/${tacticboard.shareToken}`,
       });
     } catch (e: any) {
-      res
-        .status(500)
-        .json({ message: "Failed to create share link", error: e.message });
+      logEvents(
+        `Failed to create share link for tacticboard ${req.params.id}: ${e.message}`,
+        "error.log",
+      );
+      res.status(500).json({ message: "Failed to create share link" });
     }
   },
 );
