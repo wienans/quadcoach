@@ -39,6 +39,9 @@ router
   .route("/:id/share")
   .post(verifyJWT, tacticboardController.shareTacticBoard);
 router
+  .route("/:id/duplicate")
+  .post(verifyJWT, tacticboardController.duplicateById);
+router
   .route("/:id/share-link")
   .post(verifyJWT, tacticboardController.createShareLink)
   .delete(verifyJWT, tacticboardController.deleteShareLink);
