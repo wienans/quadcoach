@@ -4,7 +4,6 @@ import {
   AccordionDetails,
   AccordionSummary,
   Alert,
-  BottomNavigationAction,
   Card,
   Checkbox,
   Chip,
@@ -26,6 +25,7 @@ import {
   Box,
   ListItemText,
   Button,
+  Menu,
   MenuItem,
 } from "@mui/material";
 import * as Yup from "yup";
@@ -39,6 +39,7 @@ import {
   AccessLevel,
   useDeleteTacticboardAccessMutation,
   useDeleteTacticBoardMutation,
+  useDuplicateTacticBoardMutation,
   useCreateTacticboardShareLinkMutation,
   useDeleteTacticboardShareLinkMutation,
   useGetAllTacticboardAccessUsersQuery,
@@ -57,6 +58,8 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import ShareIcon from "@mui/icons-material/IosShare";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import FileCopyIcon from "@mui/icons-material/FileCopy";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { useTranslation } from "react-i18next";
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
@@ -102,6 +105,8 @@ const TacticBoardProfile = () => {
   const [shareLink, setShareLink] = useState<string>("");
   const [isCopyHighlightActive, setIsCopyHighlightActive] =
     useState<boolean>(false);
+  const [mobileMenuAnchorEl, setMobileMenuAnchorEl] =
+    useState<null | HTMLElement>(null);
   const copyHighlightTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
     null,
   );
@@ -132,6 +137,8 @@ const TacticBoardProfile = () => {
       error: deleteError,
     },
   ] = useDeleteTacticBoardMutation();
+  const [duplicateTacticBoard, { isLoading: isDuplicateTacticBoardLoading }] =
+    useDuplicateTacticBoardMutation();
   const [
     addFavoriteTacticboard,
     { isLoading: isAddFavoriteTacticboardLoading },
@@ -275,6 +282,16 @@ const TacticBoardProfile = () => {
     if (!tacticBoard) return;
     deleteTacticBoard(tacticBoard._id);
   };
+
+  const onDuplicateTacticBoardClick = async () => {
+    if (!tacticBoardId) return;
+    try {
+      const response = await duplicateTacticBoard(tacticBoardId).unwrap();
+      navigate(`/tacticboards/${response._id}`);
+    } catch (error) {
+      console.error("Failed to duplicate tacticboard", error);
+    }
+  };
   useEffect(() => {
     if (!isDeleteTacticBoardSuccess) return;
     navigate("/tacticboards");
@@ -361,6 +378,9 @@ const TacticBoardProfile = () => {
     }
   };
 
+  const isMobileMenuOpen = Boolean(mobileMenuAnchorEl);
+  const onMobileMenuClose = () => setMobileMenuAnchorEl(null);
+
   if (isTacticBoardLoading) {
     return (
       <DashboardLayout>
@@ -425,7 +445,7 @@ const TacticBoardProfile = () => {
         headerAction={
           <>
             <SoftBox display="flex">
-              {userId && userId !== "" && tacticBoardId && (
+              {isUpMd && userId && userId !== "" && tacticBoardId && (
                 <Tooltip title={t("TacticBoardProfile:favoriteTacticBoard")}>
                   <IconButton
                     disabled={
@@ -450,7 +470,19 @@ const TacticBoardProfile = () => {
                   </IconButton>
                 </Tooltip>
               )}
-              {isPrivileged && tacticBoard.isPrivate && (
+              {isUpMd && userId && userId !== "" && tacticBoardId && (
+                <Tooltip
+                  title={t("TacticBoardProfile:topMenu.duplicateButton.tooltip")}
+                >
+                  <IconButton
+                    onClick={onDuplicateTacticBoardClick}
+                    disabled={isDuplicateTacticBoardLoading}
+                  >
+                    <FileCopyIcon />
+                  </IconButton>
+                </Tooltip>
+              )}
+              {isUpMd && isPrivileged && tacticBoard.isPrivate && (
                 <Tooltip
                   title={t("TacticBoardProfile:topMenu.shareButton.tooltip")}
                 >
@@ -466,7 +498,7 @@ const TacticBoardProfile = () => {
                   </IconButton>
                 </Tooltip>
               )}
-              {isPrivileged && (
+              {isUpMd && isPrivileged && (
                 <Tooltip title={t("TacticBoardProfile:editTacticBoardMeta")}>
                   <IconButton
                     onClick={() => {
@@ -482,7 +514,7 @@ const TacticBoardProfile = () => {
                   </IconButton>
                 </Tooltip>
               )}
-              {isPrivileged && (
+              {isUpMd && isPrivileged && (
                 <Tooltip title={t("TacticBoardProfile:deleteTacticBoard")}>
                   <IconButton
                     onClick={onDeleteTacticBoardClick}
@@ -497,74 +529,102 @@ const TacticBoardProfile = () => {
                   </IconButton>
                 </Tooltip>
               )}
+              {!isUpMd && (
+                <>
+                  <Tooltip title={t("TacticBoardProfile:actionsMenu.tooltip")}>
+                    <IconButton
+                      onClick={(event) => setMobileMenuAnchorEl(event.currentTarget)}
+                    >
+                      <MoreVertIcon />
+                    </IconButton>
+                  </Tooltip>
+                  <Menu
+                    anchorEl={mobileMenuAnchorEl}
+                    open={isMobileMenuOpen}
+                    onClose={onMobileMenuClose}
+                  >
+                    {userId && userId !== "" && tacticBoardId && (
+                      <MenuItem
+                        onClick={() => {
+                          onMobileMenuClose();
+                          if (isFavorite) {
+                            removeFavoriteTacticboard({
+                              tacticboardId: tacticBoardId,
+                              userId: userId,
+                            });
+                          } else {
+                            addFavoriteTacticboard({
+                              tacticboardId: tacticBoardId,
+                              userId: userId,
+                            });
+                          }
+                        }}
+                        disabled={
+                          isAddFavoriteTacticboardLoading ||
+                          isRemoveFavoriteTacticboardLoading
+                        }
+                      >
+                        {t("TacticBoardProfile:favoriteTacticBoard")}
+                      </MenuItem>
+                    )}
+                    {userId && userId !== "" && tacticBoardId && (
+                      <MenuItem
+                        onClick={() => {
+                          onMobileMenuClose();
+                          onDuplicateTacticBoardClick();
+                        }}
+                        disabled={isDuplicateTacticBoardLoading}
+                      >
+                        {t("TacticBoardProfile:topMenu.duplicateButton.tooltip")}
+                      </MenuItem>
+                    )}
+                    {isPrivileged && tacticBoard.isPrivate && (
+                      <MenuItem
+                        onClick={() => {
+                          onMobileMenuClose();
+                          onShareClick();
+                        }}
+                        disabled={
+                          isCreateShareLinkLoading || isDeleteShareLinkLoading
+                        }
+                      >
+                        {t("TacticBoardProfile:topMenu.shareButton.tooltip")}
+                      </MenuItem>
+                    )}
+                    {isPrivileged && (
+                      <MenuItem
+                        onClick={() => {
+                          onMobileMenuClose();
+                          setIsEditMode(!isEditMode);
+
+                          if (isEditMode && formik.isValid) {
+                            formik.submitForm().then(() => {});
+                          }
+                        }}
+                      >
+                        {t("TacticBoardProfile:editTacticBoardMeta")}
+                      </MenuItem>
+                    )}
+                    {isPrivileged && (
+                      <MenuItem
+                        onClick={() => {
+                          onMobileMenuClose();
+                          onDeleteTacticBoardClick();
+                        }}
+                        disabled={
+                          !tacticBoard ||
+                          isDeleteTacticBoardLoading ||
+                          isUpdateTacticBoardMetaLoading
+                        }
+                      >
+                        {t("TacticBoardProfile:deleteTacticBoard")}
+                      </MenuItem>
+                    )}
+                  </Menu>
+                </>
+              )}
             </SoftBox>
           </>
-        }
-        bottomNavigation={
-          !isUpMd && [
-            userId && userId !== "" && tacticBoardId && (
-              <Tooltip
-                key="favorite"
-                title={t("TacticBoardProfile:favoriteTacticBoard")}
-              >
-                <BottomNavigationAction
-                  icon={
-                    <FavoriteIcon color={isFavorite ? "error" : "inherit"} />
-                  }
-                  disabled={
-                    isAddFavoriteTacticboardLoading ||
-                    isRemoveFavoriteTacticboardLoading
-                  }
-                  onClick={() => {
-                    if (isFavorite) {
-                      removeFavoriteTacticboard({
-                        tacticboardId: tacticBoardId,
-                        userId: userId,
-                      });
-                    } else {
-                      addFavoriteTacticboard({
-                        tacticboardId: tacticBoardId,
-                        userId: userId,
-                      });
-                    }
-                  }}
-                />
-              </Tooltip>
-            ),
-            isPrivileged && (
-              <Tooltip
-                key="edit"
-                title={t("TacticBoardProfile:editTacticBoardMeta")}
-              >
-                <BottomNavigationAction
-                  icon={<EditIcon />}
-                  onClick={() => {
-                    setIsEditMode(!isEditMode);
-
-                    if (isEditMode && formik.isValid) {
-                      formik.submitForm().then(() => {});
-                    }
-                  }}
-                />
-              </Tooltip>
-            ),
-            isPrivileged && (
-              <Tooltip
-                key="delete"
-                title={t("TacticBoardProfile:deleteTacticBoard")}
-              >
-                <BottomNavigationAction
-                  icon={<DeleteIcon />}
-                  onClick={onDeleteTacticBoardClick}
-                  disabled={
-                    !tacticBoard ||
-                    isDeleteTacticBoardLoading ||
-                    isUpdateTacticBoardMetaLoading
-                  }
-                />
-              </Tooltip>
-            ),
-          ]
         }
       >
         {() => (
