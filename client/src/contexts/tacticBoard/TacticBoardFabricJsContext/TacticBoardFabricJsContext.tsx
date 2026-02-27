@@ -9,7 +9,7 @@ import {
   useEffect,
   useMemo,
 } from "react";
-import { fabric } from "fabric";
+import * as fabric from "fabric";
 import { TacticPage } from "../../../api/quadcoachApi/domain";
 import { useContainerResizeEvent } from "./useResizeEvent";
 
@@ -17,7 +17,7 @@ import { TacticPageValidator } from "./validation";
 import { ExtendedBaseBrush } from "./fabricTypes";
 import { CanvasOperationError } from "./types";
 
-const canvasDefaultOptions: fabric.ICanvasOptions = {
+const canvasDefaultOptions: Partial<fabric.CanvasOptions> = {
   preserveObjectStacking: true,
   width: 1220,
   height: 686,
@@ -87,10 +87,7 @@ const TacticBoardFabricJsContextProvider: FC<{
       if (!instance) return;
 
       try {
-        canvasFabricRef.current = new fabric.Canvas(
-          canvasRef.current,
-          canvasDefaultOptions,
-        );
+        canvasFabricRef.current = new fabric.Canvas(instance, canvasDefaultOptions);
 
         // Re-initialize resize observer now that canvas is ready
         initializeContainerResizeObserver();
@@ -161,7 +158,7 @@ const TacticBoardFabricJsContextProvider: FC<{
       const canvasFabric = canvasFabricRef.current;
       if (!canvasFabric) return {};
 
-      const json = canvasFabric.toJSON([
+      const json = canvasFabric.toObject([
         "uuid",
         "objectType",
       ]) as unknown as TacticPage;
@@ -185,13 +182,16 @@ const TacticBoardFabricJsContextProvider: FC<{
   const setBackgroundImage = useCallback((src: string) => {
     const canvasFabric = canvasFabricRef.current;
     if (!canvasFabric) return;
-    canvasFabric.setBackgroundImage(src, () => canvasFabric.requestRenderAll());
+    void fabric.FabricImage.fromURL(src).then((image) => {
+      canvasFabric.backgroundImage = image;
+      canvasFabric.requestRenderAll();
+    });
   }, []);
 
   const getBackgroundImage = useCallback(() => {
     const canvasFabric = canvasFabricRef.current;
     if (!canvasFabric) return;
-    const bgImage = canvasFabric.backgroundImage as fabric.Image;
+    const bgImage = canvasFabric.backgroundImage as fabric.FabricImage;
     if (!bgImage?.getSrc()) return;
     return new URL(bgImage.getSrc()).pathname;
   }, []);
@@ -220,9 +220,10 @@ const TacticBoardFabricJsContextProvider: FC<{
 
       // Set background image
       if (page.backgroundImage?.src) {
-        canvasFabric.setBackgroundImage(page.backgroundImage.src, () =>
-          canvasFabric.requestRenderAll(),
-        );
+        void fabric.FabricImage.fromURL(page.backgroundImage.src).then((image) => {
+          canvasFabric.backgroundImage = image;
+          canvasFabric.requestRenderAll();
+        });
       }
 
       // Load objects - temporarily using original logic for debugging
@@ -236,7 +237,10 @@ const TacticBoardFabricJsContextProvider: FC<{
             const addObj = new fabric.Rect(obj as object);
             canvasFabric.add(addObj);
           } else if (obj.type === "path") {
-            const addObj = new fabric.Path(obj.path?.toString(), obj as object);
+            const addObj = new fabric.Path(
+              obj.path?.toString() ?? "",
+              obj as object,
+            );
             canvasFabric.add(addObj);
           } else if (obj.type === "text") {
             if (obj.text) {
@@ -270,10 +274,10 @@ const TacticBoardFabricJsContextProvider: FC<{
                   objects.push(addObj);
                 }
               } else if (groupObj.type === "path") {
-                const addObj = new fabric.Path(
-                  groupObj.path?.toString(),
-                  groupObj as object,
-                );
+                  const addObj = new fabric.Path(
+                    groupObj.path?.toString() ?? "",
+                    groupObj as object,
+                  );
                 objects.push(addObj);
               } else if (groupObj.type === "rect") {
                 const addObj = new fabric.Rect(groupObj as object);

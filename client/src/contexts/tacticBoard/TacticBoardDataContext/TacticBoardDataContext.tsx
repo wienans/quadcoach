@@ -11,7 +11,7 @@ import { TacticBoardCanvasContext } from "../TacticBoardCanvasContext/TacticBoar
 import { TacticPageValidator } from "../TacticBoardFabricJsContext/validation";
 import { FabricObjectFactory } from "../TacticBoardFabricJsContext/objectFactory";
 import { CanvasOperationError } from "../TacticBoardFabricJsContext/types";
-import { fabric } from "fabric";
+import * as fabric from "fabric";
 
 export interface TacticBoardDataContextProps {
   loadFromTacticPage: (page: TacticPage) => void;
@@ -44,9 +44,10 @@ const TacticBoardDataContextProvider: FC<{
 
         // Set background image
         if (page.backgroundImage?.src) {
-          canvasFabric.setBackgroundImage(page.backgroundImage.src, () =>
-            canvasFabric.requestRenderAll(),
-          );
+          void fabric.FabricImage.fromURL(page.backgroundImage.src).then((image) => {
+            canvasFabric.backgroundImage = image;
+            canvasFabric.requestRenderAll();
+          });
         }
 
         // Load objects using factory pattern
@@ -73,7 +74,7 @@ const TacticBoardDataContextProvider: FC<{
                 canvasFabric.add(addObj);
               } else if (objData.type === "path") {
                 const addObj = new fabric.Path(
-                  objData.path?.toString(),
+                  objData.path?.toString() ?? "",
                   objData as object,
                 );
                 canvasFabric.add(addObj);
@@ -114,7 +115,7 @@ const TacticBoardDataContextProvider: FC<{
       const canvasFabric = canvasFabricRef.current;
       if (!canvasFabric) return {};
 
-      const json = canvasFabric.toJSON([
+      const json = canvasFabric.toObject([
         "uuid",
         "objectType",
       ]) as unknown as TacticPage;

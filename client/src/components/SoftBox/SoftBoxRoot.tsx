@@ -15,7 +15,7 @@ Coded by www.creative-tim.com
 
 // @mui material components
 import Box from "@mui/material/Box";
-import { styled, Theme } from "@mui/material/styles";
+import { styled } from "@mui/material/styles";
 import { Property, Globals } from "csstype";
 import { ValidBorderRadius } from "../../assets/theme/base/borders";
 import {
@@ -24,7 +24,7 @@ import {
   isTabsBoxShadow,
   ValidBoxShadows,
 } from "../../assets/theme/base/boxShadows";
-import { ResponsiveStyleValue } from "@mui/system";
+import { BoxProps } from "@mui/material";
 import {
   isPaletteColor,
   PaletteGradients,
@@ -46,19 +46,7 @@ export type OwnerState = {
   variant?: Variant;
   bgColor?: Gradients | SoftBoxColors | string;
   color?: string;
-  borderRadius?:
-    | ResponsiveStyleValue<
-        | Property.BorderRadius<string | number>
-        | NonNullable<Property.BorderRadius<string | number> | undefined>[]
-        | undefined
-      >
-    | ((
-        theme: Theme,
-      ) => ResponsiveStyleValue<
-        | Property.BorderRadius<string | number>
-        | NonNullable<Property.BorderRadius<string | number> | undefined>[]
-        | undefined
-      >);
+  borderRadius?: BoxProps["borderRadius"];
   shadow?: ValidBoxShadows | Property.BoxShadow;
   opacity?:
     | Property.Opacity

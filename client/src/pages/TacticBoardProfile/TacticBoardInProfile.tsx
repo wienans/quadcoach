@@ -268,7 +268,7 @@ const TacticBoardInProfile = ({
 
             if (shouldAnimateLeft) {
               pendingAnimations += 1;
-              obj.animate("left", targetLeft, {
+              obj.animate({ left: targetLeft }, {
                 onChange: requestRenderAll,
                 duration: 1000,
                 onComplete: onOneAnimationComplete,
@@ -277,7 +277,7 @@ const TacticBoardInProfile = ({
 
             if (shouldAnimateTop) {
               pendingAnimations += 1;
-              obj.animate("top", targetTop, {
+              obj.animate({ top: targetTop }, {
                 onChange: requestRenderAll,
                 duration: 1000,
                 onComplete: onOneAnimationComplete,
@@ -371,7 +371,7 @@ const TacticBoardInProfile = ({
 
             if (shouldAnimateLeft) {
               pendingAnimations += 1;
-              obj.animate("left", targetLeft, {
+              obj.animate({ left: targetLeft }, {
                 onChange: requestRenderAll,
                 duration: 1000,
                 onComplete: onOneAnimationComplete,
@@ -380,7 +380,7 @@ const TacticBoardInProfile = ({
 
             if (shouldAnimateTop) {
               pendingAnimations += 1;
-              obj.animate("top", targetTop, {
+              obj.animate({ top: targetTop }, {
                 onChange: requestRenderAll,
                 duration: 1000,
                 onComplete: onOneAnimationComplete,
