@@ -1,6 +1,6 @@
 import asyncHandler from "express-async-handler";
 import { Request, Response } from "express";
-import TacticBoard from "../models/tacticboard";
+import TacticBoard, { ITacticBoard } from "../models/tacticboard";
 import mongoose from "mongoose";
 import crypto from "crypto";
 import Exercise from "../models/exercise";
@@ -906,15 +906,14 @@ export const duplicateById = asyncHandler(
       return;
     }
 
-    const { _id, __v, createdAt, updatedAt, ...duplicatedData } =
-      tacticboard.toObject() as any;
+    const { shareToken: _shareToken, ...duplicatedData } =
+      tacticboard.toObject<ITacticBoard>();
 
     const duplicatedTacticboard = new TacticBoard({
       ...duplicatedData,
       name: `Copy of ${tacticboard.name ?? "Tacticboard"}`,
-      creator: req.UserInfo.name ?? "Unknown",
+      creator: req.UserInfo.name ?? req.UserInfo.id,
       user: req.UserInfo.id,
-      shareToken: undefined,
     });
 
     const result = await duplicatedTacticboard.save();
