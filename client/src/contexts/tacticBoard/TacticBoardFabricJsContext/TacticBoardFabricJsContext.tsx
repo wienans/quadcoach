@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import "./fabricJsExtensions";
 import {
   createContext,
@@ -18,7 +17,7 @@ import { TacticPageValidator } from "./validation";
 import { ExtendedBaseBrush } from "./fabricTypes";
 import { CanvasOperationError } from "./types";
 
-const canvasDefaultOptions: any = {
+const canvasDefaultOptions: Partial<fabric.CanvasOptions> = {
   preserveObjectStacking: true,
   width: 1220,
   height: 686,
@@ -159,7 +158,7 @@ const TacticBoardFabricJsContextProvider: FC<{
       const canvasFabric = canvasFabricRef.current;
       if (!canvasFabric) return {};
 
-      const json = canvasFabric.toJSON([
+      const json = canvasFabric.toObject([
         "uuid",
         "objectType",
       ]) as unknown as TacticPage;
@@ -183,13 +182,16 @@ const TacticBoardFabricJsContextProvider: FC<{
   const setBackgroundImage = useCallback((src: string) => {
     const canvasFabric = canvasFabricRef.current;
     if (!canvasFabric) return;
-    canvasFabric.setBackgroundImage(src, () => canvasFabric.requestRenderAll());
+    void fabric.FabricImage.fromURL(src).then((image) => {
+      canvasFabric.backgroundImage = image;
+      canvasFabric.requestRenderAll();
+    });
   }, []);
 
   const getBackgroundImage = useCallback(() => {
     const canvasFabric = canvasFabricRef.current;
     if (!canvasFabric) return;
-    const bgImage = canvasFabric.backgroundImage as fabric.Image;
+    const bgImage = canvasFabric.backgroundImage as fabric.FabricImage;
     if (!bgImage?.getSrc()) return;
     return new URL(bgImage.getSrc()).pathname;
   }, []);
@@ -218,9 +220,10 @@ const TacticBoardFabricJsContextProvider: FC<{
 
       // Set background image
       if (page.backgroundImage?.src) {
-        canvasFabric.setBackgroundImage(page.backgroundImage.src, () =>
-          canvasFabric.requestRenderAll(),
-        );
+        void fabric.FabricImage.fromURL(page.backgroundImage.src).then((image) => {
+          canvasFabric.backgroundImage = image;
+          canvasFabric.requestRenderAll();
+        });
       }
 
       // Load objects - temporarily using original logic for debugging

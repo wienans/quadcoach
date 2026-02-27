@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as fabric from "fabric";
 import { ObjectType } from "./types";
 
@@ -45,21 +44,21 @@ export type {
 
 // Helper functions for type-safe object creation
 export const createExtendedCircle = (
-  options: any,
+  options: Partial<fabric.CircleProps>,
 ): FabricCircleWithUuid => {
   return new fabric.Circle(options) as FabricCircleWithUuid;
 };
 
 export const createExtendedText = (
   text: string,
-  options: any,
+  options: Partial<fabric.TextProps>,
 ): FabricTextWithUuid => {
   return new fabric.Text(text, options) as FabricTextWithUuid;
 };
 
 export const createExtendedGroup = (
   objects: fabric.Object[],
-  options: any,
+  options: Partial<fabric.GroupProps>,
 ): FabricGroupWithUuid => {
   return new fabric.Group(objects, options) as FabricGroupWithUuid;
 };

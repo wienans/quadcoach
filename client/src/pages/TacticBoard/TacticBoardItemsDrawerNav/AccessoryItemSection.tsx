@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   Avatar,
   Collapse,
@@ -63,13 +62,15 @@ const AccessoryItemSection = (): JSX.Element => {
   const handleToggleOpen = () => setOpen(!open);
 
   const onAccessoryAddClick = (accessType: AccessoryType) => () => {
-    fabric.loadSVGFromURL(
-      getAccesTypeSvg(accessType),
-      function (objects, options) {
-        const obj = fabric.util.groupSVGElements(objects as any, {
-          ...options,
-          uuid: uuidv4(),
-        } as any);
+    void fabric.loadSVGFromURL(getAccesTypeSvg(accessType)).then((result) => {
+      const svgObjects = result.objects.filter(
+        (
+          item,
+        ): item is fabric.FabricObject => item !== null,
+      );
+      const obj = fabric.util.groupSVGElements(svgObjects, {
+        ...result.options,
+      });
         obj.scaleX = getAccesTypeScale(accessType);
         obj.scaleY = getAccesTypeScale(accessType);
         obj.left = 600;
@@ -86,8 +87,7 @@ const AccessoryItemSection = (): JSX.Element => {
         } else {
           addObject(obj);
         }
-      },
-    );
+    });
   };
 
   return (

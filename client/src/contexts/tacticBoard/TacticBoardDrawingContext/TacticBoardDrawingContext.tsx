@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   createContext,
   ReactNode,
@@ -183,7 +182,7 @@ const TacticBoardDrawingContextProvider: FC<{
     // We define it here (not in a separate useEffect) because the canvas
     // ref may still be null when the component first mounts.  By attaching
     // the listener lazily inside updateMode we guarantee the canvas exists.
-    const handlePathCreated = (e: any) => {
+    const handlePathCreated = (e: unknown) => {
       const canvas = getCanvas();
       if (!canvas) return;
 
@@ -201,7 +200,7 @@ const TacticBoardDrawingContextProvider: FC<{
         return;
       }
 
-      const rawData = pathData as any[];
+      const rawData = pathData as Array<Array<string | number>>;
 
       let lastX: number | null = null;
       let lastY: number | null = null;
@@ -313,7 +312,7 @@ const TacticBoardDrawingContextProvider: FC<{
       if (!canvas) return;
       if (detachLineToolHandlersRef.current) return;
 
-      const onMouseDown = (opt: any) => {
+      const onMouseDown = (opt: { e: fabric.TPointerEvent }) => {
         if (
           !drawModeRef.current ||
           (!shiftPressedRef.current && !straightLineModeRef.current)
@@ -321,7 +320,7 @@ const TacticBoardDrawingContextProvider: FC<{
           return;
         }
 
-        const pointer = canvas.getPointer(opt.e);
+        const pointer = canvas.getScenePoint(opt.e);
         lineStartRef.current = new fabric.Point(pointer.x, pointer.y);
         isLineDrawingRef.current = true;
 
@@ -344,7 +343,7 @@ const TacticBoardDrawingContextProvider: FC<{
         canvas.add(line);
       };
 
-      const onMouseMove = (opt: any) => {
+      const onMouseMove = (opt: { e: fabric.TPointerEvent }) => {
         const line = previewLineRef.current;
         if (
           !drawModeRef.current ||
@@ -354,12 +353,12 @@ const TacticBoardDrawingContextProvider: FC<{
         }
         if (!isLineDrawingRef.current || !lineStartRef.current || !line) return;
 
-        const pointer = canvas.getPointer(opt.e);
+        const pointer = canvas.getScenePoint(opt.e);
         line.set({ x2: pointer.x, y2: pointer.y });
         canvas.requestRenderAll();
       };
 
-      const onMouseUp = (opt: any) => {
+      const onMouseUp = (opt: { e: fabric.TPointerEvent }) => {
         const line = previewLineRef.current;
         if (
           !drawModeRef.current ||
@@ -369,7 +368,7 @@ const TacticBoardDrawingContextProvider: FC<{
         }
         if (!isLineDrawingRef.current || !lineStartRef.current || !line) return;
 
-        const pointer = canvas.getPointer(opt.e);
+        const pointer = canvas.getScenePoint(opt.e);
         line.set({ x2: pointer.x, y2: pointer.y });
 
         const startX = line.x1 ?? lineStartRef.current.x;

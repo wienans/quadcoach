@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   Alert,
   IconButton,
@@ -148,7 +147,7 @@ const TacticBoardInBlock = ({
 
             if (shouldAnimateLeft) {
               pendingAnimations += 1;
-              (obj as any).animate("left", targetLeft, {
+              obj.animate({ left: targetLeft }, {
                 onChange: requestRenderAll,
                 duration: 1000,
                 onComplete: onOneAnimationComplete,
@@ -157,7 +156,7 @@ const TacticBoardInBlock = ({
 
             if (shouldAnimateTop) {
               pendingAnimations += 1;
-              (obj as any).animate("top", targetTop, {
+              obj.animate({ top: targetTop }, {
                 onChange: requestRenderAll,
                 duration: 1000,
                 onComplete: onOneAnimationComplete,

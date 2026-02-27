@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   createContext,
   ReactNode,
@@ -17,7 +16,7 @@ import {
 } from "../TacticBoardFabricJsContext/commands";
 import { CanvasOperationError } from "../TacticBoardFabricJsContext/types";
 
-const canvasDefaultOptions: any = {
+const canvasDefaultOptions: Partial<fabric.CanvasOptions> = {
   preserveObjectStacking: true,
   width: 1220,
   height: 686,
@@ -153,7 +152,7 @@ const TacticBoardCanvasContextProvider: FC<{
       // Get current background directly to avoid circular dependency
       let oldBackground: string | undefined;
       try {
-        const bgImage = canvas.backgroundImage as fabric.Image;
+        const bgImage = canvas.backgroundImage as fabric.FabricImage;
         if (bgImage?.getSrc()) {
           oldBackground = new URL(bgImage.getSrc()).pathname;
         }
@@ -175,7 +174,7 @@ const TacticBoardCanvasContextProvider: FC<{
     try {
       const canvas = canvasFabricRef.current;
       if (!canvas) return;
-      const bgImage = canvas.backgroundImage as fabric.Image;
+      const bgImage = canvas.backgroundImage as fabric.FabricImage;
       if (!bgImage?.getSrc()) return;
       return new URL(bgImage.getSrc()).pathname;
     } catch (urlError) {

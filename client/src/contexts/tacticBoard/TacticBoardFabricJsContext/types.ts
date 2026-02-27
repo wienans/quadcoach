@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as fabric from "fabric";
 import { v4 } from "uuid";
 
@@ -149,7 +148,8 @@ export class PersonObject extends fabric.Group {
     });
 
     const personId = v4();
-    super([personCircle, personText], { id: personId } as any);
+    super([personCircle, personText]);
+    this.id = personId;
 
     this.personOptions = personOptions;
     this.personElements = {

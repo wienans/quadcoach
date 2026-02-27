@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as fabric from "fabric";
 import { FabricObjectCreationError } from "./types";
 import { PartialTacticBoardObject } from "./tacticBoardTypes";
@@ -6,21 +5,23 @@ import { setUuid } from "./fabricTypes";
 
 export type ObjectCreator = (data: PartialTacticBoardObject) => fabric.Object | null;
 
+type ObjectLike = Partial<Record<string, unknown>>;
+
 export class FabricObjectFactory {
   private static creators: Map<string, ObjectCreator> = new Map();
 
   static {
     // Initialize creators in static block to avoid type issues
     this.creators.set("circle", (data) => {
-      const options = { ...data } as any;
-      delete (options as any & { type?: string }).type; // Remove type property to avoid fabric.js issues
-      return new fabric.Circle(options);
+      const options: ObjectLike = { ...data };
+      delete options.type; // Remove type property to avoid fabric.js issues
+      return new fabric.Circle(options as Partial<fabric.CircleProps>);
     });
 
     this.creators.set("rect", (data) => {
-      const options = { ...data } as any;
-      delete (options as any & { type?: string }).type;
-      return new fabric.Rect(options);
+      const options: ObjectLike = { ...data };
+      delete options.type;
+      return new fabric.Rect(options as Partial<fabric.RectProps>);
     });
 
     this.creators.set("path", (data) => {
@@ -32,30 +33,27 @@ export class FabricObjectFactory {
       } else {
         pathString = data.path.toString();
       }
-      const options = { ...data } as any;
-      delete (options as any & { type?: string }).type;
-      delete (
-        options as any & { path?: string | [[string | number]] }
-      ).path;
-      return new fabric.Path(pathString, options);
+      const options: ObjectLike = { ...data };
+      delete options.type;
+      delete options.path;
+      return new fabric.Path(pathString, options as Partial<fabric.PathProps>);
     });
 
     this.creators.set("text", (data) => {
       if (!data.text) return null;
-      const options = { ...data } as any;
-      delete (options as any & { type?: string }).type;
-      const text = (options as any & { text?: string })
-        .text as string;
-      delete (options as any & { text?: string }).text;
-      return new fabric.Text(text, options);
+      const options: ObjectLike = { ...data };
+      delete options.type;
+      const text = options.text as string;
+      delete options.text;
+      return new fabric.Text(text, options as Partial<fabric.TextProps>);
     });
 
     this.creators.set("textbox", (data) => {
-      const options = { ...data } as any;
-      delete (options as any & { type?: string }).type;
-      const text = (options as any & { text?: string }).text;
-      delete (options as any & { text?: string }).text;
-      return new fabric.Textbox(text ?? "", options);
+      const options: ObjectLike = { ...data };
+      delete options.type;
+      const text = options.text as string | undefined;
+      delete options.text;
+      return new fabric.Textbox(text ?? "", options as Partial<fabric.TextboxProps>);
     });
 
     this.creators.set("line", (data) => {
@@ -65,15 +63,18 @@ export class FabricObjectFactory {
         x2: number;
         y2: number;
       };
-      const options = { ...data } as any;
-      delete (options as any & { type?: string }).type;
-      return new fabric.Line([lineData.x1, lineData.y1, lineData.x2, lineData.y2], options);
+      const options: ObjectLike = { ...data };
+      delete options.type;
+      return new fabric.Line(
+        [lineData.x1, lineData.y1, lineData.x2, lineData.y2],
+        options as Partial<fabric.FabricObjectProps>,
+      );
     });
 
     this.creators.set("triangle", (data) => {
-      const options = { ...data } as any;
-      delete (options as any & { type?: string }).type;
-      return new fabric.Triangle(options);
+      const options: ObjectLike = { ...data };
+      delete options.type;
+      return new fabric.Triangle(options as Partial<fabric.FabricObjectProps>);
     });
 
     this.creators.set("group", (data) => this.createGroupObject(data));
@@ -123,7 +124,9 @@ export class FabricObjectFactory {
       return null;
     }
 
-    return new fabric.Group(objects, data as any);
+    const { objects: originalObjects, ...groupData } = data;
+    void originalObjects;
+    return new fabric.Group(objects, groupData as Partial<fabric.GroupProps>);
   }
 
   static registerCreator(type: string, creator: ObjectCreator): void {
