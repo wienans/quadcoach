@@ -5,6 +5,10 @@ interface IObject {
   type: string;
   left: number;
   top: number;
+  x1?: number;
+  y1?: number;
+  x2?: number;
+  y2?: number;
   width: number;
   height: number;
   fill?: string;
@@ -73,6 +77,18 @@ const objectSchema = new Schema<IObject>({
   top: {
     type: Number,
     required: true,
+  },
+  x1: {
+    type: Number,
+  },
+  y1: {
+    type: Number,
+  },
+  x2: {
+    type: Number,
+  },
+  y2: {
+    type: Number,
   },
   width: {
     type: Number,
