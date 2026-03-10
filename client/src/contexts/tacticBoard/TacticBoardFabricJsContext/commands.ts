@@ -1,4 +1,20 @@
-import { fabric } from "fabric";
+import * as fabric from "fabric";
+
+const applyBackgroundImage = (
+  canvas: fabric.Canvas,
+  background?: string,
+): void => {
+  if (!background) {
+    canvas.backgroundImage = undefined;
+    canvas.requestRenderAll();
+    return;
+  }
+
+  void fabric.FabricImage.fromURL(background).then((image) => {
+    canvas.backgroundImage = image;
+    canvas.requestRenderAll();
+  });
+};
 
 // Command interface
 export interface Command {
@@ -189,19 +205,11 @@ export class SetBackgroundCommand implements Command {
   ) {}
 
   execute(): void {
-    this.canvas.setBackgroundImage(this.newBackground, () =>
-      this.canvas.requestRenderAll(),
-    );
+    applyBackgroundImage(this.canvas, this.newBackground);
   }
 
   undo(): void {
-    if (this.oldBackground) {
-      this.canvas.setBackgroundImage(this.oldBackground, () =>
-        this.canvas.requestRenderAll(),
-      );
-    } else {
-      this.canvas.setBackgroundImage("", () => this.canvas.requestRenderAll());
-    }
+    applyBackgroundImage(this.canvas, this.oldBackground);
   }
 
   getDescription(): string {

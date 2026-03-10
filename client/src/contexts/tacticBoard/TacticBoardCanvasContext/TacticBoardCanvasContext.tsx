@@ -7,7 +7,7 @@ import {
   MutableRefObject,
   useMemo,
 } from "react";
-import { fabric } from "fabric";
+import * as fabric from "fabric";
 import {
   CommandHistory,
   AddObjectCommand,
@@ -16,7 +16,7 @@ import {
 } from "../TacticBoardFabricJsContext/commands";
 import { CanvasOperationError } from "../TacticBoardFabricJsContext/types";
 
-const canvasDefaultOptions: fabric.ICanvasOptions = {
+const canvasDefaultOptions: Partial<fabric.CanvasOptions> = {
   preserveObjectStacking: true,
   width: 1220,
   height: 686,
@@ -69,10 +69,7 @@ const TacticBoardCanvasContextProvider: FC<{
     if (!instance) return;
 
     try {
-      canvasFabricRef.current = new fabric.Canvas(
-        canvasRef.current,
-        canvasDefaultOptions,
-      );
+      canvasFabricRef.current = new fabric.Canvas(instance, canvasDefaultOptions);
 
       // Set up event listeners for command tracking
       const canvas = canvasFabricRef.current;
@@ -155,7 +152,7 @@ const TacticBoardCanvasContextProvider: FC<{
       // Get current background directly to avoid circular dependency
       let oldBackground: string | undefined;
       try {
-        const bgImage = canvas.backgroundImage as fabric.Image;
+        const bgImage = canvas.backgroundImage as fabric.FabricImage;
         if (bgImage?.getSrc()) {
           oldBackground = new URL(bgImage.getSrc()).pathname;
         }
@@ -177,7 +174,7 @@ const TacticBoardCanvasContextProvider: FC<{
     try {
       const canvas = canvasFabricRef.current;
       if (!canvas) return;
-      const bgImage = canvas.backgroundImage as fabric.Image;
+      const bgImage = canvas.backgroundImage as fabric.FabricImage;
       if (!bgImage?.getSrc()) return;
       return new URL(bgImage.getSrc()).pathname;
     } catch (urlError) {
