@@ -1,6 +1,6 @@
 import asyncHandler from "express-async-handler";
 import { Request, Response } from "express";
-import TacticBoard from "../models/tacticboard";
+import TacticBoard, { ITacticBoard } from "../models/tacticboard";
 import mongoose from "mongoose";
 import crypto from "crypto";
 import Exercise from "../models/exercise";
@@ -11,6 +11,7 @@ import { logEvents } from "../middleware/logger";
 
 interface UserInfo {
   id?: string;
+  name?: string;
   roles?: string[];
 }
 
@@ -866,6 +867,60 @@ export const deleteAccess = asyncHandler(
     }
 
     res.json({ message: "Access removed successfully" });
+  },
+);
+
+// @desc    Duplicate tacticboard by ID
+// @route   POST /api/tacticboards/:id/duplicate
+// @access  Private - authenticated users with view access
+export const duplicateById = asyncHandler(
+  async (req: RequestWithUser, res: Response) => {
+    if (!req.UserInfo?.id) {
+      res.status(401).json({ message: "Unauthorized" });
+      return;
+    }
+
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      res.status(400).json({ message: "Invalid ID format" });
+      return;
+    }
+
+    const tacticboard = await TacticBoard.findById(req.params.id);
+    if (!tacticboard) {
+      res.status(404).json({ message: "Tacticboard not found" });
+      return;
+    }
+
+    const isOwner = tacticboard.user?.toString() === req.UserInfo.id;
+    const isAdmin =
+      req.UserInfo.roles?.includes("Admin") ||
+      req.UserInfo.roles?.includes("admin");
+    const hasSharedAccess = await TacticboardAccess.exists({
+      user: req.UserInfo.id,
+      tacticboard: req.params.id,
+    });
+    const canView = !tacticboard.isPrivate || isOwner || isAdmin || hasSharedAccess;
+
+    if (!canView) {
+      res.status(403).json({ message: "Forbidden" });
+      return;
+    }
+
+    const { shareToken: _shareToken, ...duplicatedData } =
+      tacticboard.toObject<ITacticBoard>();
+
+    const duplicatedTacticboard = new TacticBoard({
+      ...duplicatedData,
+      name: `Copy of ${tacticboard.name ?? "Tacticboard"}`,
+      creator: req.UserInfo.name ?? req.UserInfo.id,
+      user: req.UserInfo.id,
+    });
+
+    const result = await duplicatedTacticboard.save();
+    res.status(201).json({
+      message: "Tacticboard duplicated successfully",
+      _id: result._id,
+    });
   },
 );
 

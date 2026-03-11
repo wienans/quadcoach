@@ -123,6 +123,18 @@ export const tacticBoardApiSlice = quadcoachApi.injectEndpoints({
         TagType.tacticboardTag,
       ],
     }),
+    duplicateTacticBoard: builder.mutation<
+      { message: string; _id: string },
+      string
+    >({
+      query(tacticboardId) {
+        return {
+          url: `/api/tacticboards/${tacticboardId}/duplicate`,
+          method: "post",
+        };
+      },
+      invalidatesTags: () => [TagType.tacticboard, TagType.tacticboardTag],
+    }),
     addTacticBoard: builder.mutation<
       { message: string; _id: string },
       TacticBoardWithOutIds
@@ -430,6 +442,7 @@ export const {
   useGetSharedTacticBoardQuery,
   useLazyGetTacticBoardsQuery,
   useDeleteTacticBoardMutation,
+  useDuplicateTacticBoardMutation,
   useUpdateTacticBoardMutation,
   useUpdateTacticBoardMetaMutation,
   useUpdateTacticBoardPageMutation,

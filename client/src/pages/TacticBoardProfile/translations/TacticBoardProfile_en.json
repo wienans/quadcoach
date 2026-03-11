@@ -35,7 +35,13 @@
     },
     "shareButton": {
       "tooltip": "Create or manage share link"
+    },
+    "duplicateButton": {
+      "tooltip": "Duplicate tactic board"
     }
+  },
+  "actionsMenu": {
+    "tooltip": "Open actions menu"
   },
   "shareDialog": {
     "title": "Share tacticboard",
