@@ -53,13 +53,13 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
       },
     },
     process.env.ACCESS_TOKEN_SECRET,
-    { expiresIn: "15m" }
+    { expiresIn: "60m" },
   );
 
   const refreshToken = jwt.sign(
     { email: foundUser.email },
     process.env.REFRESH_TOKEN_SECRET,
-    { expiresIn: "7d" }
+    { expiresIn: "7d" },
   );
 
   // Create secure cookie with refresh token
@@ -102,14 +102,14 @@ export const resetPassword = asyncHandler(
     const token = jwt.sign(
       { email: foundUser.email, id: foundUser._id },
       process.env.ACCESS_TOKEN_SECRET,
-      { expiresIn: "1h" }
+      { expiresIn: "1h" },
     );
 
     foundUser.passwordResetToken = token;
     await foundUser.save();
     const source = fs.readFileSync(
       path.join(__dirname, "../templates/resetPassword.html"),
-      "utf-8"
+      "utf-8",
     );
     const template = handlebars.compile(source);
     const replacements = {
@@ -137,11 +137,11 @@ export const resetPassword = asyncHandler(
       .catch((error) => {
         logEvents(
           `Sending Reset Password E-Mail failed:` + error,
-          "errLog.log"
+          "errLog.log",
         );
       });
     res.status(200).json({ message: "Password reset link sent" });
-  }
+  },
 );
 
 // @desc    Update password using reset token
@@ -162,7 +162,7 @@ export const updatePassword = asyncHandler(
     try {
       const decode = jwt.verify(
         passwordResetToken,
-        process.env.ACCESS_TOKEN_SECRET
+        process.env.ACCESS_TOKEN_SECRET,
       ) as JwtPayload;
       const foundUser = await User.findOne({
         email: decode.email,
@@ -182,7 +182,7 @@ export const updatePassword = asyncHandler(
         return;
       }
     }
-  }
+  },
 );
 
 // @desc    Register new user account
@@ -227,7 +227,7 @@ export const register = asyncHandler(async (req: Request, res: Response) => {
 
   const source = fs.readFileSync(
     path.join(__dirname, "../templates/verifyEmail.html"),
-    "utf8"
+    "utf8",
   );
   const template = handlebars.compile(source);
   const replacements = {
@@ -279,7 +279,7 @@ export const refresh = asyncHandler(
     try {
       const decode = jwt.verify(
         refreshToken,
-        process.env.REFRESH_TOKEN_SECRET
+        process.env.REFRESH_TOKEN_SECRET,
       ) as JwtPayload;
       const foundUser = await User.findOne({
         email: decode.email,
@@ -299,7 +299,7 @@ export const refresh = asyncHandler(
           },
         },
         process.env.ACCESS_TOKEN_SECRET,
-        { expiresIn: "15m" }
+        { expiresIn: "60m" },
       );
 
       res.json({ accessToken });
@@ -309,7 +309,7 @@ export const refresh = asyncHandler(
         return;
       }
     }
-  }
+  },
 );
 
 // @desc    Clear refresh token cookie
