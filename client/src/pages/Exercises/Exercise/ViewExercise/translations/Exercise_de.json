@@ -13,6 +13,16 @@
   "errorDeletingExercise": "Es ist ein Fehler beim Löschen der Übung aufgetreten.",
   "errorLoadingRelatedExercises": "Es ist ein Fehler beim Laden der zugehörigen Übungen aufgetreten.",
   "favoriteExercise": "Favorisiere Übung",
+  "menu": {
+    "more": "Weitere Aktionen",
+    "share": "Teilen",
+    "delete": "Löschen"
+  },
+  "shareDialog": {
+    "title": "Übung teilen",
+    "close": "Schließen",
+    "noUsers": "Noch keine geteilten Benutzer"
+  },
   "info": {
     "title": "Info",
     "personNumber": "Personen",

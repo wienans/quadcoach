@@ -12,6 +12,7 @@ import { logEvents } from "../middleware/logger";
 interface UserInfo {
   id?: string;
   roles?: string[];
+  name?: string;
 }
 
 interface RequestWithUser extends Request {
@@ -866,6 +867,73 @@ export const deleteAccess = asyncHandler(
     }
 
     res.json({ message: "Access removed successfully" });
+  },
+);
+
+// @desc    Duplicate tacticboard by ID
+// @route   POST /api/tacticboards/:id/duplicate
+// @access  Private - authenticated users with access to view the board
+export const duplicateById = asyncHandler(
+  async (req: RequestWithUser, res: Response) => {
+    if (!req.UserInfo?.id) {
+      res.status(401).json({ message: "Unauthorized" });
+      return;
+    }
+
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      res.status(400).json({ message: "Invalid ID format" });
+      return;
+    }
+
+    const tacticboard = await TacticBoard.findById(req.params.id);
+    if (!tacticboard) {
+      res.status(404).json({ message: "Tacticboard not found" });
+      return;
+    }
+
+    const isOwner = tacticboard.user?.toString() === req.UserInfo.id;
+    const isAdmin =
+      req.UserInfo.roles?.includes("Admin") ||
+      req.UserInfo.roles?.includes("admin");
+    const hasSharedAccess = await TacticboardAccess.exists({
+      user: req.UserInfo.id,
+      tacticboard: req.params.id,
+    });
+
+    const canDuplicate =
+      !tacticboard.isPrivate || isOwner || isAdmin || Boolean(hasSharedAccess);
+
+    if (!canDuplicate) {
+      res.status(403).json({ message: "Forbidden" });
+      return;
+    }
+
+    const tacticboardData = tacticboard.toObject() as {
+      isPrivate?: boolean;
+      tags?: string[];
+      pages?: unknown[];
+      description?: string;
+      coaching_points?: string;
+      creator?: string;
+    };
+
+    const duplicatedTacticboard = new TacticBoard({
+      name: `Copy of ${tacticboard.name ?? "Tacticboard"}`,
+      isPrivate: tacticboardData.isPrivate,
+      tags: tacticboardData.tags,
+      pages: tacticboardData.pages,
+      description: tacticboardData.description,
+      coaching_points: tacticboardData.coaching_points,
+      creator: req.UserInfo.name ?? tacticboardData.creator ?? req.UserInfo.id,
+      user: req.UserInfo.id,
+    });
+
+    const result = await duplicatedTacticboard.save();
+
+    res.status(201).json({
+      message: "Tacticboard duplicated successfully",
+      _id: result._id,
+    });
   },
 );
 

@@ -43,6 +43,13 @@
     "delete": "Share löschen",
     "close": "Schließen"
   },
+  "menu": {
+    "more": "Weitere Aktionen",
+    "share": "Teilen",
+    "unshare": "Freigabe aufheben",
+    "duplicate": "Duplizieren",
+    "delete": "Löschen"
+  },
   "access": {
     "title": "Zugang",
     "view": "Ansicht",
@@ -54,6 +61,7 @@
   "description": "Beschreibung",
   "coaching_points": "Coaching Points",
   "deleteTacticBoard": "Taktik Tafel löschen",
+  "errorDuplicatingTacticBoard": "Beim Duplizieren der Taktik Tafel ist ein Fehler aufgetreten.",
   "usedInExercises": "Wird in folgenden Übungen verwendet:",
   "editTacticBoardMeta": "Taktik Tafel Metadaten bearbeiten / speichern",
   "favoriteTacticBoard": "Favorisierte Taktik Tafel",

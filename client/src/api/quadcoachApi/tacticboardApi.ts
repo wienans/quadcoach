@@ -59,6 +59,11 @@ export type ShareLinkResponse = {
   shareLink: string;
 };
 
+export type DuplicateTacticBoardResponse = {
+  message: string;
+  _id: string;
+};
+
 export const tacticBoardApiSlice = quadcoachApi.injectEndpoints({
   endpoints: (builder) => ({
     getTacticBoard: builder.query<TacticBoard, string>({
@@ -122,6 +127,18 @@ export const tacticBoardApiSlice = quadcoachApi.injectEndpoints({
         TagType.tacticboard,
         TagType.tacticboardTag,
       ],
+    }),
+    duplicateTacticBoard: builder.mutation<
+      DuplicateTacticBoardResponse,
+      string
+    >({
+      query(tacticboardId) {
+        return {
+          url: `/api/tacticboards/${tacticboardId}/duplicate`,
+          method: "post",
+        };
+      },
+      invalidatesTags: [TagType.tacticboard],
     }),
     addTacticBoard: builder.mutation<
       { message: string; _id: string },
@@ -430,6 +447,7 @@ export const {
   useGetSharedTacticBoardQuery,
   useLazyGetTacticBoardsQuery,
   useDeleteTacticBoardMutation,
+  useDuplicateTacticBoardMutation,
   useUpdateTacticBoardMutation,
   useUpdateTacticBoardMetaMutation,
   useUpdateTacticBoardPageMutation,

@@ -47,6 +47,12 @@
       "close": "Close"
     }
   },
+  "menu": {
+    "more": "More actions",
+    "share": "Share",
+    "unshare": "Unshare",
+    "delete": "Delete"
+  },
   "validation": {
     "fixValidationErrors": "Please fix the highlighted validation errors:",
     "name": {

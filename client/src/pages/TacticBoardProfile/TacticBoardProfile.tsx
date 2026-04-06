@@ -30,17 +30,20 @@ import {
 } from "@mui/material";
 import * as Yup from "yup";
 import {
+  HeaderOverflowMenu,
   SoftBox,
   SoftButton,
   SoftInput,
   SoftTypography,
 } from "../../components";
+import type { HeaderOverflowAction } from "../../components";
 import {
   AccessLevel,
   useDeleteTacticboardAccessMutation,
   useDeleteTacticBoardMutation,
   useCreateTacticboardShareLinkMutation,
   useDeleteTacticboardShareLinkMutation,
+  useDuplicateTacticBoardMutation,
   useGetAllTacticboardAccessUsersQuery,
   useGetTacticBoardQuery,
   useUpdateTacticBoardMetaMutation,
@@ -100,6 +103,7 @@ const TacticBoardProfile = () => {
   const [emailError, setEmailError] = useState<string>("");
   const [isShareDialogOpen, setIsShareDialogOpen] = useState<boolean>(false);
   const [shareLink, setShareLink] = useState<string>("");
+  const [duplicateError, setDuplicateError] = useState<string>("");
   const [isCopyHighlightActive, setIsCopyHighlightActive] =
     useState<boolean>(false);
   const copyHighlightTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
@@ -151,6 +155,8 @@ const TacticBoardProfile = () => {
     useCreateTacticboardShareLinkMutation();
   const [deleteShareLink, { isLoading: isDeleteShareLinkLoading }] =
     useDeleteTacticboardShareLinkMutation();
+  const [duplicateTacticBoard, { isLoading: isDuplicateTacticBoardLoading }] =
+    useDuplicateTacticBoardMutation();
 
   const { data: accessUsers } = useGetAllTacticboardAccessUsersQuery(
     tacticBoardId || "",
@@ -361,6 +367,20 @@ const TacticBoardProfile = () => {
     }
   };
 
+  const onDuplicateTacticBoardClick = async () => {
+    if (!tacticBoardId) return;
+
+    setDuplicateError("");
+
+    try {
+      const response = await duplicateTacticBoard(tacticBoardId).unwrap();
+      navigate(`/tacticboards/${response._id}`);
+    } catch (error) {
+      console.error("Failed to duplicate tacticboard", error);
+      setDuplicateError(t("TacticBoardProfile:errorDuplicatingTacticBoard"));
+    }
+  };
+
   if (isTacticBoardLoading) {
     return (
       <DashboardLayout>
@@ -398,7 +418,47 @@ const TacticBoardProfile = () => {
     );
   }
 
-  const hasActiveShare = !!tacticBoard.shareToken;
+  const canDuplicateTacticBoard =
+    Boolean(userId) && userId !== "" && Boolean(tacticBoardId);
+  const tacticBoardMenuActions: HeaderOverflowAction[] = [];
+
+  if (isPrivileged && tacticBoard.isPrivate) {
+    tacticBoardMenuActions.push({
+      key: "share",
+      label: t(
+        tacticBoard.shareToken
+          ? "TacticBoardProfile:menu.unshare"
+          : "TacticBoardProfile:menu.share",
+      ),
+      onClick: onShareClick,
+      icon: <ShareIcon fontSize="small" />,
+      disabled: isCreateShareLinkLoading || isDeleteShareLinkLoading,
+    });
+  }
+
+  if (canDuplicateTacticBoard) {
+    tacticBoardMenuActions.push({
+      key: "duplicate",
+      label: t("TacticBoardProfile:menu.duplicate"),
+      onClick: onDuplicateTacticBoardClick,
+      icon: <ContentCopyIcon fontSize="small" />,
+      disabled: isDuplicateTacticBoardLoading,
+    });
+  }
+
+  if (isPrivileged) {
+    tacticBoardMenuActions.push({
+      key: "delete",
+      label: t("TacticBoardProfile:menu.delete"),
+      onClick: onDeleteTacticBoardClick,
+      icon: <DeleteIcon fontSize="small" />,
+      disabled:
+        !tacticBoard ||
+        isDeleteTacticBoardLoading ||
+        isUpdateTacticBoardMetaLoading,
+      color: "error",
+    });
+  }
 
   return (
     <FormikProvider value={formik}>
@@ -450,22 +510,6 @@ const TacticBoardProfile = () => {
                   </IconButton>
                 </Tooltip>
               )}
-              {isPrivileged && tacticBoard.isPrivate && (
-                <Tooltip
-                  title={t("TacticBoardProfile:topMenu.shareButton.tooltip")}
-                >
-                  <IconButton
-                    onClick={onShareClick}
-                    disabled={
-                      isCreateShareLinkLoading || isDeleteShareLinkLoading
-                    }
-                  >
-                    <ShareIcon
-                      sx={{ color: hasActiveShare ? "green" : "#000000" }}
-                    />
-                  </IconButton>
-                </Tooltip>
-              )}
               {isPrivileged && (
                 <Tooltip title={t("TacticBoardProfile:editTacticBoardMeta")}>
                   <IconButton
@@ -482,20 +526,14 @@ const TacticBoardProfile = () => {
                   </IconButton>
                 </Tooltip>
               )}
-              {isPrivileged && (
-                <Tooltip title={t("TacticBoardProfile:deleteTacticBoard")}>
-                  <IconButton
-                    onClick={onDeleteTacticBoardClick}
-                    color="error"
-                    disabled={
-                      !tacticBoard ||
-                      isDeleteTacticBoardLoading ||
-                      isUpdateTacticBoardMetaLoading
-                    }
-                  >
-                    <DeleteIcon />
-                  </IconButton>
-                </Tooltip>
+              {tacticBoardMenuActions.length > 0 && (
+                <HeaderOverflowMenu
+                  actions={tacticBoardMenuActions}
+                  tooltip={t("TacticBoardProfile:menu.more")}
+                  disabled={tacticBoardMenuActions.every(
+                    (action) => action.disabled,
+                  )}
+                />
               )}
             </SoftBox>
           </>
@@ -548,27 +586,16 @@ const TacticBoardProfile = () => {
                 />
               </Tooltip>
             ),
-            isPrivileged && (
-              <Tooltip
-                key="delete"
-                title={t("TacticBoardProfile:deleteTacticBoard")}
-              >
-                <BottomNavigationAction
-                  icon={<DeleteIcon />}
-                  onClick={onDeleteTacticBoardClick}
-                  disabled={
-                    !tacticBoard ||
-                    isDeleteTacticBoardLoading ||
-                    isUpdateTacticBoardMetaLoading
-                  }
-                />
-              </Tooltip>
-            ),
           ]
         }
       >
         {() => (
           <>
+            {duplicateError && (
+              <Alert color="error" sx={{ mt: 5, mb: 3 }}>
+                {duplicateError}
+              </Alert>
+            )}
             {isDeleteTacticBoardError && (
               <Alert color="error" sx={{ mt: 5, mb: 3 }}>
                 {t("TacticBoardProfile:errorDeletingTacticBoard")}
