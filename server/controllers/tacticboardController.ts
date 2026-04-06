@@ -914,17 +914,30 @@ export const duplicateById = asyncHandler(
       pages?: unknown[];
       description?: string;
       coaching_points?: string;
-      creator?: string;
+    };
+
+    const stripIds = (obj: unknown): unknown => {
+      if (Array.isArray(obj)) {
+        return obj.map(stripIds);
+      }
+      if (obj !== null && typeof obj === "object") {
+        return Object.fromEntries(
+          Object.entries(obj as Record<string, unknown>)
+            .filter(([key]) => key !== "_id")
+            .map(([key, value]) => [key, stripIds(value)]),
+        );
+      }
+      return obj;
     };
 
     const duplicatedTacticboard = new TacticBoard({
       name: `Copy of ${tacticboard.name ?? "Tacticboard"}`,
       isPrivate: tacticboardData.isPrivate,
       tags: tacticboardData.tags,
-      pages: tacticboardData.pages,
+      pages: stripIds(tacticboardData.pages),
       description: tacticboardData.description,
       coaching_points: tacticboardData.coaching_points,
-      creator: req.UserInfo.name ?? tacticboardData.creator ?? req.UserInfo.id,
+      creator: req.UserInfo.name ?? req.UserInfo.id,
       user: req.UserInfo.id,
     });
 
