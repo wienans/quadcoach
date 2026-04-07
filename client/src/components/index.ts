@@ -8,6 +8,8 @@ export { default as NotificationItem } from "./NotificationItem";
 export { default as SettingsMenu } from "./SettingsMenu";
 export { default as Collapsible } from "./Collapsible";
 export { default as FabricJsCanvas } from "./FabricJsCanvas";
+export { default as HeaderOverflowMenu } from "./HeaderOverflowMenu";
+export type { HeaderOverflowAction } from "./HeaderOverflowMenu";
 export { CanvasErrorBoundary } from "./CanvasErrorBoundary";
 export { default as TacticsBoardToolBar } from "./TacticsBoardToolBar";
 export { default as AddTacticBoardDialog } from "./AddTacticBoardDialog";

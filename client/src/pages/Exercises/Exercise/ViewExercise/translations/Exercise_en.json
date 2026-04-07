@@ -13,6 +13,16 @@
   "errorDeletingExercise": "An error occurred while deleting exercise.",
   "errorLoadingRelatedExercises": "An error occurred while loading related exercises.",
   "favoriteExercise": "Favorite exercise",
+  "menu": {
+    "more": "More actions",
+    "share": "Share",
+    "delete": "Delete"
+  },
+  "shareDialog": {
+    "title": "Share exercise",
+    "close": "Close",
+    "noUsers": "No shared users yet"
+  },
   "info": {
     "title": "Info",
     "personNumber": "Persons",

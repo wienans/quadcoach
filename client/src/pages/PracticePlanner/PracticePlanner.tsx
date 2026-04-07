@@ -51,11 +51,13 @@ import {
 import { useAuth } from "../../store/hooks";
 import { useEffect, useRef, useState } from "react";
 import {
+  HeaderOverflowMenu,
   SoftBox,
   SoftButton,
   SoftInput,
   SoftTypography,
 } from "../../components";
+import type { HeaderOverflowAction } from "../../components";
 import EditIcon from "@mui/icons-material/Edit";
 import SaveIcon from "@mui/icons-material/Save";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -518,6 +520,29 @@ const PracticePlanner = ({
     );
   }
 
+  const practicePlanMenuActions: HeaderOverflowAction[] = [];
+
+  if (isPrivileged && plan.isPrivate) {
+    practicePlanMenuActions.push({
+      key: "share",
+      label: t(plan.shareToken ? "menu.unshare" : "menu.share"),
+      onClick: onShareClick,
+      icon: <ShareIcon fontSize="small" />,
+      disabled: isCreateShareLinkLoading || isDeleteShareLinkLoading,
+    });
+  }
+
+  if (isPrivileged) {
+    practicePlanMenuActions.push({
+      key: "delete",
+      label: t("menu.delete"),
+      onClick: onDeletePlanClick,
+      icon: <DeleteIcon fontSize="small" />,
+      disabled: !plan || isDeletePlanLoading,
+      color: "error",
+    });
+  }
+
   return (
     <ProfileLayout
       title={
@@ -563,18 +588,6 @@ const PracticePlanner = ({
               </IconButton>
             </Tooltip>
           )}
-          {isPrivileged && plan.isPrivate && (
-            <Tooltip title={t("share.tooltip")}>
-              <IconButton
-                onClick={onShareClick}
-                disabled={isCreateShareLinkLoading || isDeleteShareLinkLoading}
-              >
-                <ShareIcon
-                  sx={{ color: plan.shareToken ? "green" : "#000000" }}
-                />
-              </IconButton>
-            </Tooltip>
-          )}
           {isPrivileged && (
             <Tooltip
               title={t("updatePracticePlan", {
@@ -593,16 +606,14 @@ const PracticePlanner = ({
               </IconButton>
             </Tooltip>
           )}
-          {isPrivileged && (
-            <Tooltip title={t("deletePracticePlan")}>
-              <IconButton
-                onClick={onDeletePlanClick}
-                color="error"
-                disabled={!plan || isDeletePlanLoading}
-              >
-                <DeleteIcon />
-              </IconButton>
-            </Tooltip>
+          {practicePlanMenuActions.length > 0 && (
+            <HeaderOverflowMenu
+              actions={practicePlanMenuActions}
+              tooltip={t("menu.more")}
+              disabled={practicePlanMenuActions.every(
+                (action) => action.disabled,
+              )}
+            />
           )}
         </SoftBox>
       }
@@ -643,15 +654,6 @@ const PracticePlanner = ({
                 icon={isEditMode ? <SaveIcon /> : <EditIcon />}
                 onClick={onToggleEditMode}
                 disabled={isPlanLoading || isUpdatePlanLoading}
-              />
-            </Tooltip>
-          ),
-          isPrivileged && (
-            <Tooltip key="delete" title={t("deletePracticePlan")}>
-              <BottomNavigationAction
-                icon={<DeleteIcon />}
-                onClick={onDeletePlanClick}
-                disabled={!plan || isDeletePlanLoading}
               />
             </Tooltip>
           ),

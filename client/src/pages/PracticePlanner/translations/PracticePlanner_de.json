@@ -47,6 +47,12 @@
       "close": "Schließen"
     }
   },
+  "menu": {
+    "more": "Weitere Aktionen",
+    "share": "Teilen",
+    "unshare": "Freigabe aufheben",
+    "delete": "Löschen"
+  },
   "validation": {
     "fixValidationErrors": "Bitte beheben Sie die markierten Validierungsfehler:",
     "name": {

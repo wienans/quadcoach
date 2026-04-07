@@ -3,9 +3,13 @@ import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
 import {
   Alert,
+  Box,
+  Button,
   Card,
+  List,
+  ListItem,
+  ListItemText,
   Skeleton,
-  useMediaQuery,
   IconButton,
   Tooltip,
   Theme,
@@ -14,11 +18,7 @@ import {
   AccordionSummary,
   AccordionDetails,
   TextField,
-  Box,
-  List,
-  ListItem,
-  ListItemText,
-  Button,
+  useMediaQuery,
 } from "@mui/material";
 import {
   useDeleteExerciseMutation,
@@ -58,7 +58,13 @@ import {
   FieldArrayRenderProps,
 } from "formik";
 import * as Yup from "yup";
-import { SoftButton, SoftBox, SoftInput } from "../../../../components";
+import {
+  HeaderOverflowMenu,
+  SoftButton,
+  SoftBox,
+  SoftInput,
+} from "../../../../components";
+import type { HeaderOverflowAction } from "../../../../components";
 
 const Exercise = () => {
   const location = useLocation();
@@ -446,6 +452,19 @@ const Exercise = () => {
     );
   }
 
+  const exerciseMenuActions: HeaderOverflowAction[] = [];
+
+  if (isPrivileged) {
+    exerciseMenuActions.push({
+      key: "delete",
+      label: t("Exercise:menu.delete"),
+      onClick: onDeleteExerciseClick,
+      icon: <DeleteIcon fontSize="small" />,
+      disabled: !exercise || isDeleteExerciseLoading,
+      color: "error",
+    });
+  }
+
   return (
     <ProfileLayout
       title={
@@ -510,16 +529,12 @@ const Exercise = () => {
               </IconButton>
             </Tooltip>
           )}
-          {isPrivileged && (
-            <Tooltip title={t("Exercise:deleteExercise")}>
-              <IconButton
-                onClick={onDeleteExerciseClick}
-                color="error"
-                disabled={!exercise || isDeleteExerciseLoading}
-              >
-                <DeleteIcon />
-              </IconButton>
-            </Tooltip>
+          {exerciseMenuActions.length > 0 && (
+            <HeaderOverflowMenu
+              actions={exerciseMenuActions}
+              tooltip={t("Exercise:menu.more")}
+              disabled={exerciseMenuActions.every((action) => action.disabled)}
+            />
           )}
         </SoftBox>
       }
@@ -561,15 +576,6 @@ const Exercise = () => {
                 icon={isEditMode ? <SaveIcon /> : <EditIcon />}
                 onClick={onToggleEditMode}
                 disabled={isExerciseLoading || isUpdateExerciseLoading}
-              />
-            </Tooltip>
-          ),
-          isPrivileged && (
-            <Tooltip key="delete" title={t("Exercise:deleteExercise")}>
-              <BottomNavigationAction
-                icon={<DeleteIcon />}
-                onClick={onDeleteExerciseClick}
-                disabled={!exercise || isDeleteExerciseLoading}
               />
             </Tooltip>
           ),

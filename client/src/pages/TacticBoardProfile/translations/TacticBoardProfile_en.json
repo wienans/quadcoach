@@ -43,6 +43,13 @@
     "delete": "Delete share",
     "close": "Close"
   },
+  "menu": {
+    "more": "More actions",
+    "share": "Share",
+    "unshare": "Unshare",
+    "duplicate": "Duplicate",
+    "delete": "Delete"
+  },
   "access": {
     "title": "Access",
     "view": "View",
@@ -54,6 +61,7 @@
   "description": "Description",
   "coaching_points": "Coaching points",
   "deleteTacticBoard": "Delete tacticboard",
+  "errorDuplicatingTacticBoard": "An error occurred while duplicating the tacticboard.",
   "usedInExercises": "Used in exercises:",
   "editTacticBoardMeta": "Edit / Save tacticboard metadata",
   "favoriteTacticBoard": "Favorite tacticboard",
