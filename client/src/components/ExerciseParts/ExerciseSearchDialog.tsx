@@ -108,10 +108,12 @@ const ExerciseSearchDialog: React.FC<ExerciseSearchDialogProps> = ({
       .map((exercise) => {
         const blockIds = selectedBlocks[exercise._id] || [];
         const blockDurations: Record<string, number> = {};
-        
+
         // Create mapping of blockId to duration
-        blockIds.forEach(blockId => {
-          const block = exercise.description_blocks.find(b => b._id === blockId);
+        blockIds.forEach((blockId) => {
+          const block = exercise.description_blocks.find(
+            (b) => b._id === blockId,
+          );
           if (block) {
             blockDurations[blockId] = block.time_min;
           }
@@ -244,8 +246,10 @@ const ExerciseSearchDialog: React.FC<ExerciseSearchDialogProps> = ({
                             >
                               <Box flex={1}>
                                 <Typography variant="subtitle2">
-                                  {t("block", { defaultValue: "Block" })}{" "}
-                                  {index + 1}
+                                  {t("block.title", {
+                                    blockNumber: index + 1,
+                                    defaultValue: "Block {{blockNumber}}",
+                                  })}
                                 </Typography>
                                 <Typography
                                   variant="caption"
