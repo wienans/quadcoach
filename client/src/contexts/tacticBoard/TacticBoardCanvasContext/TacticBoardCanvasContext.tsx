@@ -15,11 +15,15 @@ import {
   SetBackgroundCommand,
 } from "../TacticBoardFabricJsContext/commands";
 import { CanvasOperationError } from "../TacticBoardFabricJsContext/types";
+import {
+  TACTIC_BOARD_SCENE_HEIGHT,
+  TACTIC_BOARD_SCENE_WIDTH,
+} from "./backgroundImage";
 
 const canvasDefaultOptions: ConstructorParameters<typeof fabric.Canvas>[1] = {
   preserveObjectStacking: true,
-  width: 1220,
-  height: 686,
+  width: TACTIC_BOARD_SCENE_WIDTH,
+  height: TACTIC_BOARD_SCENE_HEIGHT,
   selection: false,
   allowTouchScrolling: true,
 };

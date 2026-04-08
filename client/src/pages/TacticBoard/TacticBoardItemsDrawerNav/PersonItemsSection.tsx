@@ -28,6 +28,9 @@ import {
   setObjectType,
 } from "../../../contexts/tacticBoard/TacticBoardFabricJsContext/fabricTypes";
 
+const playerRadius = 15;
+const playerTextOffset = 16;
+
 const getFabricPersonColor = (personType: PersonType): string | undefined => {
   switch (personType) {
     case PersonType.Beater:
@@ -98,10 +101,13 @@ const PersonItemsSection = ({
   };
 
   const onPersonAddClick = (personType: PersonType) => () => {
+    const playerLeft = teamA ? 250 : 1220 - 250 - 30;
+    const playerTop = 640;
+
     const circle = createExtendedCircle({
-      radius: 15,
-      left: teamA ? 250 : 1220 - 250 - 30,
-      top: 640,
+      radius: playerRadius,
+      left: 0,
+      top: 0,
       stroke: getFabricPersonColor(personType), // Set the color of the stroke
       strokeWidth: 3, // Set the width of the stroke
       fill: teamA ? teamAInfo.color : teamBInfo.color,
@@ -110,8 +116,8 @@ const PersonItemsSection = ({
 
     const newNumber = getNextNumber();
     const text = createExtendedText(newNumber.toString(), {
-      left: teamA ? 250 + 16 : 1220 - 250 - 30 + 16,
-      top: 640 + 16,
+      left: playerTextOffset,
+      top: playerTextOffset,
       fontFamily: "Arial",
       fontSize: 20,
       textAlign: "center",
@@ -121,6 +127,10 @@ const PersonItemsSection = ({
     setUuid(text, uuidv4());
 
     const group = createExtendedGroup([circle, text], {
+      left: playerLeft,
+      top: playerTop,
+      originX: "left",
+      originY: "top",
       hasControls: false, // Disable resizing handles
     });
     setUuid(group, uuidv4());

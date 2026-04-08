@@ -8,6 +8,10 @@ import {
 } from "react";
 import { TacticPage } from "../../../api/quadcoachApi/domain";
 import { TacticBoardCanvasContext } from "../TacticBoardCanvasContext/TacticBoardCanvasContext";
+import {
+  applyBackgroundImage,
+  loadBackgroundImage,
+} from "../TacticBoardCanvasContext/backgroundImage";
 import { TacticPageValidator } from "../TacticBoardFabricJsContext/validation";
 import { FabricObjectFactory } from "../TacticBoardFabricJsContext/objectFactory";
 import { CanvasOperationError } from "../TacticBoardFabricJsContext/types";
@@ -44,16 +48,12 @@ const TacticBoardDataContextProvider: FC<{
 
         // Set background image
         if (page.backgroundImage?.src) {
-          void fabric.FabricImage.fromURL(page.backgroundImage.src)
-            .then((image) => {
-              canvasFabric.backgroundImage = image;
-              canvasFabric.requestRenderAll();
-            })
+          void loadBackgroundImage(canvasFabric, page.backgroundImage.src)
             .catch((error) => {
               console.error("Failed to load background image:", error);
             });
         } else {
-          canvasFabric.backgroundImage = undefined;
+          applyBackgroundImage(canvasFabric);
         }
 
         // Load objects using factory pattern

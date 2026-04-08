@@ -1,4 +1,5 @@
 import * as fabric from "fabric";
+import { loadBackgroundImage } from "../TacticBoardCanvasContext/backgroundImage";
 
 // Command interface
 export interface Command {
@@ -188,11 +189,7 @@ const setCanvasBackground = (canvas: fabric.Canvas, src?: string): void => {
     return;
   }
 
-  void fabric.FabricImage.fromURL(src)
-    .then((image) => {
-      canvas.backgroundImage = image;
-      canvas.requestRenderAll();
-    })
+  void loadBackgroundImage(canvas, src)
     .catch((error) => {
       console.error("Failed to load background image", error);
     });

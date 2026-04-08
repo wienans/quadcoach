@@ -27,6 +27,10 @@ import {
   setUuid,
   setObjectType,
 } from "../../contexts/tacticBoard/TacticBoardFabricJsContext/fabricTypes";
+import {
+  TACTIC_BOARD_SCENE_HEIGHT,
+  TACTIC_BOARD_SCENE_WIDTH,
+} from "../../contexts/tacticBoard/TacticBoardCanvasContext/backgroundImage";
 import "../fullscreen.css";
 
 // Team colors from PersonItemsSection
@@ -36,6 +40,9 @@ const teamAInfo = {
 const teamBInfo = {
   color: "#dd2d2d",
 };
+
+const playerRadius = 15;
+const playerTextOffset = 16;
 
 // Helper function to get player stroke color based on person type
 const getFabricPersonColor = (personType: PersonType): string | undefined => {
@@ -130,8 +137,8 @@ const DraftingBoardContent = (): JSX.Element => {
       objects: [],
       backgroundImage: {
         type: "image",
-        width: 800,
-        height: 600,
+        width: TACTIC_BOARD_SCENE_WIDTH,
+        height: TACTIC_BOARD_SCENE_HEIGHT,
         src: "/empty-court.svg",
       },
     });
@@ -149,9 +156,9 @@ const DraftingBoardContent = (): JSX.Element => {
       playerNumber: number,
     ) => {
       const circle = createExtendedCircle({
-        radius: 15,
-        left,
-        top,
+        radius: playerRadius,
+        left: 0,
+        top: 0,
         stroke: getFabricPersonColor(personType),
         strokeWidth: 3,
         fill: teamA ? teamAInfo.color : teamBInfo.color,
@@ -159,8 +166,8 @@ const DraftingBoardContent = (): JSX.Element => {
       setUuid(circle, uuidv4());
 
       const text = createExtendedText(playerNumber.toString(), {
-        left: left + 16,
-        top: top + 16,
+        left: playerTextOffset,
+        top: playerTextOffset,
         fontFamily: "Arial",
         fontSize: 20,
         textAlign: "center",
@@ -170,6 +177,10 @@ const DraftingBoardContent = (): JSX.Element => {
       setUuid(text, uuidv4());
 
       const group = createExtendedGroup([circle, text], {
+        left,
+        top,
+        originX: "left",
+        originY: "top",
         hasControls: false, // Disable resizing handles
       });
       setUuid(group, uuidv4());
@@ -257,8 +268,8 @@ const DraftingBoardContent = (): JSX.Element => {
       objects: [],
       backgroundImage: {
         type: "image",
-        width: 800,
-        height: 600,
+        width: TACTIC_BOARD_SCENE_WIDTH,
+        height: TACTIC_BOARD_SCENE_HEIGHT,
         src: "/half-court.svg",
       },
     });
