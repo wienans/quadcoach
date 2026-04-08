@@ -28,7 +28,7 @@ import { ChromePicker, ColorResult } from "react-color";
 import Popover from "@mui/material/Popover";
 import ColorLensIcon from "@mui/icons-material/ColorLens";
 import { LineStyle } from "../../../contexts/tacticBoard/TacticBoardDrawingContext/TacticBoardDrawingContext";
-import { fabric } from "fabric";
+import * as fabric from "fabric";
 import { v4 as uuidv4 } from "uuid";
 import { setUuid } from "../../../contexts/tacticBoard/TacticBoardFabricJsContext/fabricTypes";
 

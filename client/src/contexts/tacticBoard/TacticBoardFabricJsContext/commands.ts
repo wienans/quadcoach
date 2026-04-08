@@ -1,4 +1,4 @@
-import { fabric } from "fabric";
+import * as fabric from "fabric";
 
 // Command interface
 export interface Command {
@@ -181,6 +181,23 @@ export class RemoveMultipleObjectsCommand implements Command {
   }
 }
 
+const setCanvasBackground = (canvas: fabric.Canvas, src?: string): void => {
+  if (!src) {
+    canvas.backgroundImage = undefined;
+    canvas.requestRenderAll();
+    return;
+  }
+
+  void fabric.FabricImage.fromURL(src)
+    .then((image) => {
+      canvas.backgroundImage = image;
+      canvas.requestRenderAll();
+    })
+    .catch((error) => {
+      console.error("Failed to load background image", error);
+    });
+};
+
 export class SetBackgroundCommand implements Command {
   constructor(
     private canvas: fabric.Canvas,
@@ -189,19 +206,11 @@ export class SetBackgroundCommand implements Command {
   ) {}
 
   execute(): void {
-    this.canvas.setBackgroundImage(this.newBackground, () =>
-      this.canvas.requestRenderAll(),
-    );
+    setCanvasBackground(this.canvas, this.newBackground);
   }
 
   undo(): void {
-    if (this.oldBackground) {
-      this.canvas.setBackgroundImage(this.oldBackground, () =>
-        this.canvas.requestRenderAll(),
-      );
-    } else {
-      this.canvas.setBackgroundImage("", () => this.canvas.requestRenderAll());
-    }
+    setCanvasBackground(this.canvas, this.oldBackground);
   }
 
   getDescription(): string {

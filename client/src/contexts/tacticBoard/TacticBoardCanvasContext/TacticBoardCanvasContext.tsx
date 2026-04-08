@@ -7,7 +7,7 @@ import {
   MutableRefObject,
   useMemo,
 } from "react";
-import { fabric } from "fabric";
+import * as fabric from "fabric";
 import {
   CommandHistory,
   AddObjectCommand,
@@ -16,7 +16,7 @@ import {
 } from "../TacticBoardFabricJsContext/commands";
 import { CanvasOperationError } from "../TacticBoardFabricJsContext/types";
 
-const canvasDefaultOptions: fabric.ICanvasOptions = {
+const canvasDefaultOptions: ConstructorParameters<typeof fabric.Canvas>[1] = {
   preserveObjectStacking: true,
   width: 1220,
   height: 686,
@@ -69,10 +69,7 @@ const TacticBoardCanvasContextProvider: FC<{
     if (!instance) return;
 
     try {
-      canvasFabricRef.current = new fabric.Canvas(
-        canvasRef.current,
-        canvasDefaultOptions,
-      );
+      canvasFabricRef.current = new fabric.Canvas(instance, canvasDefaultOptions);
 
       // Set up event listeners for command tracking
       const canvas = canvasFabricRef.current;

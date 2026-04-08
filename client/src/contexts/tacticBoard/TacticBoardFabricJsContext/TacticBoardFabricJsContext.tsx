@@ -9,7 +9,7 @@ import {
   useEffect,
   useMemo,
 } from "react";
-import { fabric } from "fabric";
+import * as fabric from "fabric";
 import { TacticPage } from "../../../api/quadcoachApi/domain";
 import { useContainerResizeEvent } from "./useResizeEvent";
 
@@ -17,7 +17,7 @@ import { TacticPageValidator } from "./validation";
 import { ExtendedBaseBrush } from "./fabricTypes";
 import { CanvasOperationError } from "./types";
 
-const canvasDefaultOptions: fabric.ICanvasOptions = {
+const canvasDefaultOptions: ConstructorParameters<typeof fabric.Canvas>[1] = {
   preserveObjectStacking: true,
   width: 1220,
   height: 686,
@@ -88,7 +88,7 @@ const TacticBoardFabricJsContextProvider: FC<{
 
       try {
         canvasFabricRef.current = new fabric.Canvas(
-          canvasRef.current,
+          instance,
           canvasDefaultOptions,
         );
 
@@ -161,7 +161,7 @@ const TacticBoardFabricJsContextProvider: FC<{
       const canvasFabric = canvasFabricRef.current;
       if (!canvasFabric) return {};
 
-      const json = canvasFabric.toJSON([
+      const json = canvasFabric.toObject([
         "uuid",
         "objectType",
       ]) as unknown as TacticPage;
@@ -185,7 +185,14 @@ const TacticBoardFabricJsContextProvider: FC<{
   const setBackgroundImage = useCallback((src: string) => {
     const canvasFabric = canvasFabricRef.current;
     if (!canvasFabric) return;
-    canvasFabric.setBackgroundImage(src, () => canvasFabric.requestRenderAll());
+    void fabric.FabricImage.fromURL(src)
+      .then((image) => {
+        canvasFabric.backgroundImage = image;
+        canvasFabric.requestRenderAll();
+      })
+      .catch((error) => {
+        console.error("Failed to load background image:", error);
+      });
   }, []);
 
   const getBackgroundImage = useCallback(() => {
@@ -220,9 +227,16 @@ const TacticBoardFabricJsContextProvider: FC<{
 
       // Set background image
       if (page.backgroundImage?.src) {
-        canvasFabric.setBackgroundImage(page.backgroundImage.src, () =>
-          canvasFabric.requestRenderAll(),
-        );
+        void fabric.FabricImage.fromURL(page.backgroundImage.src)
+          .then((image) => {
+            canvasFabric.backgroundImage = image;
+            canvasFabric.requestRenderAll();
+          })
+          .catch((error) => {
+            console.error("Failed to load background image:", error);
+          });
+      } else {
+        canvasFabric.backgroundImage = undefined;
       }
 
       // Load objects - temporarily using original logic for debugging
@@ -236,7 +250,12 @@ const TacticBoardFabricJsContextProvider: FC<{
             const addObj = new fabric.Rect(obj as object);
             canvasFabric.add(addObj);
           } else if (obj.type === "path") {
-            const addObj = new fabric.Path(obj.path?.toString(), obj as object);
+            const pathSource = obj.path?.toString();
+            if (!pathSource) {
+              return;
+            }
+
+            const addObj = new fabric.Path(pathSource, obj as object);
             canvasFabric.add(addObj);
           } else if (obj.type === "text") {
             if (obj.text) {
@@ -270,10 +289,12 @@ const TacticBoardFabricJsContextProvider: FC<{
                   objects.push(addObj);
                 }
               } else if (groupObj.type === "path") {
-                const addObj = new fabric.Path(
-                  groupObj.path?.toString(),
-                  groupObj as object,
-                );
+                const pathSource = groupObj.path?.toString();
+                if (!pathSource) {
+                  return;
+                }
+
+                const addObj = new fabric.Path(pathSource, groupObj as object);
                 objects.push(addObj);
               } else if (groupObj.type === "rect") {
                 const addObj = new fabric.Rect(groupObj as object);

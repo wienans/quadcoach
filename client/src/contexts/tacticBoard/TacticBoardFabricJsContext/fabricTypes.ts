@@ -1,5 +1,9 @@
-import { fabric } from "fabric";
+import * as fabric from "fabric";
 import { ObjectType } from "./types";
+
+type CircleOptions = ConstructorParameters<typeof fabric.Circle>[0];
+type TextOptions = ConstructorParameters<typeof fabric.Text>[1];
+type GroupOptions = ConstructorParameters<typeof fabric.Group>[1];
 
 // Type aliases for fabric objects with our custom properties
 export type FabricObjectWithUuid = fabric.Object & {
@@ -44,21 +48,21 @@ export type {
 
 // Helper functions for type-safe object creation
 export const createExtendedCircle = (
-  options: fabric.ICircleOptions,
+  options: CircleOptions,
 ): FabricCircleWithUuid => {
   return new fabric.Circle(options) as FabricCircleWithUuid;
 };
 
 export const createExtendedText = (
   text: string,
-  options: fabric.ITextOptions,
+  options: TextOptions,
 ): FabricTextWithUuid => {
   return new fabric.Text(text, options) as FabricTextWithUuid;
 };
 
 export const createExtendedGroup = (
   objects: fabric.Object[],
-  options: fabric.IGroupOptions,
+  options: GroupOptions,
 ): FabricGroupWithUuid => {
   return new fabric.Group(objects, options) as FabricGroupWithUuid;
 };
