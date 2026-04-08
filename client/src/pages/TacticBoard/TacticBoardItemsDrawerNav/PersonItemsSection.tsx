@@ -108,6 +108,8 @@ const PersonItemsSection = ({
       radius: playerRadius,
       left: 0,
       top: 0,
+      originX: "left",
+      originY: "top",
       stroke: getFabricPersonColor(personType), // Set the color of the stroke
       strokeWidth: 3, // Set the width of the stroke
       fill: teamA ? teamAInfo.color : teamBInfo.color,

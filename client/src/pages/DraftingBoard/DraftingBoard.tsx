@@ -159,6 +159,8 @@ const DraftingBoardContent = (): JSX.Element => {
         radius: playerRadius,
         left: 0,
         top: 0,
+        originX: "left",
+        originY: "top",
         stroke: getFabricPersonColor(personType),
         strokeWidth: 3,
         fill: teamA ? teamAInfo.color : teamBInfo.color,
