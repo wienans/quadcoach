@@ -27,7 +27,7 @@ export const getAllUsers = asyncHandler(async (req: Request, res: Response) => {
 
   queryString = queryString.replace(
     /\b(gte|gt|lte|lt|eq|ne|regex|options|in|nin)\b/g,
-    (match) => `$${match}`
+    (match) => `$${match}`,
   );
 
   const users = await User.find().select("-password").lean();
@@ -52,7 +52,7 @@ export const getOnlineUsersCount = asyncHandler(
     });
 
     res.json({ onlineUsersCount });
-  }
+  },
 );
 
 // @desc    Get user by ID
@@ -79,7 +79,7 @@ export const getUserById = asyncHandler(
         res.json(users);
       }
     }
-  }
+  },
 );
 
 // @desc    Create new user
@@ -122,7 +122,7 @@ export const createNewUser = asyncHandler(
     } else {
       res.status(400).json({ message: "Invalid user data received" });
     }
-  }
+  },
 );
 
 // @desc    Update user details
@@ -194,7 +194,7 @@ export const getUserByEmail = asyncHandler(
     }
 
     res.json(user);
-  }
+  },
 );
 
 // @desc    Delete user account
@@ -229,10 +229,10 @@ export const deleteUser = asyncHandler(
     }
     await ExerciseFav.deleteMany({ user: id }).exec();
     await TacticboardFav.deleteMany({ user: id }).exec();
-    const result = await user.deleteOne();
-    const reply = `Username ${result.email} with ID ${result._id} deleted`;
+    await user.deleteOne();
+    const reply = `Username ${user.email} with ID ${user._id} deleted`;
     res.json({ message: reply });
-  }
+  },
 );
 
 // @desc    Get user's owned and accessible exercises
@@ -280,7 +280,7 @@ export const getUserExercises = asyncHandler(
       owned: ownedExercises,
       accessible: accessibleExercises,
     });
-  }
+  },
 );
 
 // @desc    Get user's owned and accessible tacticboards
@@ -327,5 +327,5 @@ export const getUserTacticboards = asyncHandler(
       owned: ownedTacticboards,
       accessible: accessibleTacticboards,
     });
-  }
+  },
 );

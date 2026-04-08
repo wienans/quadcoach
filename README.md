@@ -70,3 +70,20 @@ Go to your Browser and access the [Page](http://localhost:3001)
 # License
 
 This Projects Front-End is based on the [SoftUI Version 4.0.1](https://github.com/creativetimofficial/soft-ui-dashboard-react/tree/4.0.1) by [Creative Tim under MIT LICENSE](./client/LICENSE-Creative-Tim.md). The Software was changed, extended and refactored and all changes to the Front-End are Licensed under the [Repository License](./LICENSE)
+
+## Backup MongoDB
+
+```bash
+mongodump --uri="mongodb://user:pw@localhost:27017" --out=dev-backup
+second mongo instance ->
+mongorestore --uri="mongodb://localhost:27018/" --dir=dev-backup
+```
+
+```bash
+mongosh mongodb://user:pw@localhost:27017/?authMechanism=DEFAULT
+
+show dbs
+use quadcoach
+show collections
+db.users.find()
+```
