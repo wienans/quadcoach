@@ -12,7 +12,57 @@ type LineOptions = ConstructorParameters<typeof fabric.Line>[1];
 type TriangleOptions = ConstructorParameters<typeof fabric.Triangle>[0];
 type GroupOptions = ConstructorParameters<typeof fabric.Group>[1];
 
-export type ObjectCreator = (data: PartialTacticBoardObject) => fabric.Object | null;
+export type ObjectCreator = (
+  data: PartialTacticBoardObject,
+) => fabric.Object | null;
+
+const normalizeFabricType = (type: string): string => {
+  switch (type) {
+    case "Circle":
+      return "circle";
+    case "Rect":
+      return "rect";
+    case "Path":
+      return "path";
+    case "Text":
+      return "text";
+    case "Textbox":
+      return "textbox";
+    case "Line":
+      return "line";
+    case "Triangle":
+      return "triangle";
+    case "Group":
+      return "group";
+    default:
+      return type;
+  }
+};
+
+const toFabricOptions = <T>(
+  data: PartialTacticBoardObject,
+  keep: { objects?: boolean; path?: boolean } = {},
+): T => {
+  const options = { ...data } as T & {
+    type?: string;
+    objects?: unknown;
+    path?: unknown;
+    layoutManager?: unknown;
+  };
+
+  delete options.type;
+  delete options.layoutManager;
+
+  if (!keep.objects) {
+    delete options.objects;
+  }
+
+  if (!keep.path) {
+    delete options.path;
+  }
+
+  return options;
+};
 
 export class FabricObjectFactory {
   private static creators: Map<string, ObjectCreator> = new Map();
@@ -20,14 +70,12 @@ export class FabricObjectFactory {
   static {
     // Initialize creators in static block to avoid type issues
     this.creators.set("circle", (data) => {
-      const options = { ...data } as CircleOptions & { type?: string };
-      delete options.type; // Remove type property to avoid fabric.js issues
+      const options = toFabricOptions<CircleOptions>(data);
       return new fabric.Circle(options);
     });
 
     this.creators.set("rect", (data) => {
-      const options = { ...data } as RectOptions & { type?: string };
-      delete options.type;
+      const options = toFabricOptions<RectOptions>(data);
       return new fabric.Rect(options);
     });
 
@@ -40,33 +88,20 @@ export class FabricObjectFactory {
       } else {
         pathString = data.path.toString();
       }
-      const options = { ...data } as PathOptions & {
-        type?: string;
-        path?: string | [[string | number]];
-      };
-      delete options.type;
-      delete options.path;
+      const options = toFabricOptions<PathOptions>(data);
       return new fabric.Path(pathString, options);
     });
 
     this.creators.set("text", (data) => {
       if (!data.text) return null;
-      const options = { ...data } as TextOptions & {
-        type?: string;
-        text?: string;
-      };
-      delete options.type;
+      const options = toFabricOptions<TextOptions & { text?: string }>(data);
       const text = options.text as string;
       delete options.text;
       return new fabric.Text(text, options);
     });
 
     this.creators.set("textbox", (data) => {
-      const options = { ...data } as TextboxOptions & {
-        type?: string;
-        text?: string;
-      };
-      delete options.type;
+      const options = toFabricOptions<TextboxOptions & { text?: string }>(data);
       const text = options.text;
       delete options.text;
       return new fabric.Textbox(text ?? "", options);
@@ -79,14 +114,15 @@ export class FabricObjectFactory {
         x2: number;
         y2: number;
       };
-      const options = { ...data } as LineOptions & { type?: string };
-      delete options.type;
-      return new fabric.Line([lineData.x1, lineData.y1, lineData.x2, lineData.y2], options);
+      const options = toFabricOptions<LineOptions>(data);
+      return new fabric.Line(
+        [lineData.x1, lineData.y1, lineData.x2, lineData.y2],
+        options,
+      );
     });
 
     this.creators.set("triangle", (data) => {
-      const options = { ...data } as TriangleOptions & { type?: string };
-      delete options.type;
+      const options = toFabricOptions<TriangleOptions>(data);
       return new fabric.Triangle(options);
     });
 
@@ -95,12 +131,13 @@ export class FabricObjectFactory {
 
   static createObject(data: PartialTacticBoardObject): fabric.Object | null {
     try {
-      if (!data.type || typeof data.type !== 'string') {
-        console.warn('Invalid object type:', data.type);
+      if (!data.type || typeof data.type !== "string") {
+        console.warn("Invalid object type:", data.type);
         return null;
       }
-      
-      const creator = this.creators.get(data.type);
+
+      const normalizedType = normalizeFabricType(data.type);
+      const creator = this.creators.get(normalizedType);
       if (!creator) {
         console.warn(`Unknown object type: ${data.type}`);
         return null;
@@ -113,7 +150,10 @@ export class FabricObjectFactory {
 
       return obj;
     } catch (error) {
-      throw new FabricObjectCreationError(typeof data.type === 'string' ? data.type : 'unknown', error as Error);
+      throw new FabricObjectCreationError(
+        typeof data.type === "string" ? data.type : "unknown",
+        error as Error,
+      );
     }
   }
 
@@ -137,11 +177,13 @@ export class FabricObjectFactory {
       return null;
     }
 
-    return new fabric.Group(objects, data as GroupOptions);
+    const options = toFabricOptions<GroupOptions>(data);
+
+    return new fabric.Group(objects, options);
   }
 
   static registerCreator(type: string, creator: ObjectCreator): void {
-    this.creators.set(type, creator);
+    this.creators.set(normalizeFabricType(type), creator);
   }
 
   static getSupportedTypes(): string[] {

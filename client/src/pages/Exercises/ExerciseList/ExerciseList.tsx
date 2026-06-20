@@ -105,7 +105,9 @@ const ExerciseList = () => {
 
   const isUpMd = useMediaQuery((theme: Theme) => theme.breakpoints.up("md"));
 
-  const [filterAnchorEl, setFilterAnchorEl] = useState<HTMLElement | null>(null);
+  const [filterAnchorEl, setFilterAnchorEl] = useState<HTMLElement | null>(
+    null,
+  );
   const { id: userId, name: userName, status: userStatus } = useAuth();
   const [loadedExercises, setLoadedExercises] = useState<Exercise[]>([]);
   const [openAddDialog, setOpenAddDialog] = useState(false);
@@ -264,7 +266,7 @@ const ExerciseList = () => {
       setOpenAddDialog(false);
       setNewExerciseName("");
       navigate(`/exercises/${result._id}?edit=1`);
-    } catch (e) {
+    } catch {
       // keep dialog open for retry or allow closing
     }
   };
@@ -690,9 +692,7 @@ const ExerciseList = () => {
                   <SoftInput
                     autoFocus
                     margin="dense"
-                    placeholder={t(
-                      "ExerciseList:addExerciseDialog.nameLabel",
-                    )}
+                    placeholder={t("ExerciseList:addExerciseDialog.nameLabel")}
                     type="text"
                     size="small"
                     fullWidth

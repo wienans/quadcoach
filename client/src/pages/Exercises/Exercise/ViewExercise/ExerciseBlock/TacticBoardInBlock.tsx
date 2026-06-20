@@ -86,7 +86,7 @@ const TacticBoardInBlock = ({
   }, [tacticBoard]);
 
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    let interval: ReturnType<typeof setInterval> | undefined;
 
     if (isAnimating && tacticBoard) {
       interval = setInterval(() => {
@@ -147,20 +147,26 @@ const TacticBoardInBlock = ({
 
             if (shouldAnimateLeft) {
               pendingAnimations += 1;
-              obj.animate({ left: targetLeft }, {
-                onChange: requestRenderAll,
-                duration: 1000,
-                onComplete: onOneAnimationComplete,
-              });
+              obj.animate(
+                { left: targetLeft },
+                {
+                  onChange: requestRenderAll,
+                  duration: 1000,
+                  onComplete: onOneAnimationComplete,
+                },
+              );
             }
 
             if (shouldAnimateTop) {
               pendingAnimations += 1;
-              obj.animate({ top: targetTop }, {
-                onChange: requestRenderAll,
-                duration: 1000,
-                onComplete: onOneAnimationComplete,
-              });
+              obj.animate(
+                { top: targetTop },
+                {
+                  onChange: requestRenderAll,
+                  duration: 1000,
+                  onComplete: onOneAnimationComplete,
+                },
+              );
             }
           });
 
@@ -173,8 +179,17 @@ const TacticBoardInBlock = ({
       }, 2000);
     }
 
-    return () => clearInterval(interval);
-  }, [isAnimating, onLoadPage, tacticBoard, getAllObjects, canvasRef, targetByUuidMaps]);
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [
+    isAnimating,
+    onLoadPage,
+    tacticBoard,
+    getAllObjects,
+    canvasRef,
+    targetByUuidMaps,
+  ]);
 
   const handleChange = (_: React.ChangeEvent<unknown>, value: number) => {
     setPage(value);

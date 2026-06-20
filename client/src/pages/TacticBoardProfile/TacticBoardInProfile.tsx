@@ -207,7 +207,7 @@ const TacticBoardInProfile = ({
   }, [tacticBoard]);
 
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    let interval: ReturnType<typeof setInterval> | undefined;
 
     if (isAnimating && tacticBoard) {
       interval = setInterval(() => {
@@ -268,20 +268,26 @@ const TacticBoardInProfile = ({
 
             if (shouldAnimateLeft) {
               pendingAnimations += 1;
-              obj.animate({ left: targetLeft }, {
-                onChange: requestRenderAll,
-                duration: 1000,
-                onComplete: onOneAnimationComplete,
-              });
+              obj.animate(
+                { left: targetLeft },
+                {
+                  onChange: requestRenderAll,
+                  duration: 1000,
+                  onComplete: onOneAnimationComplete,
+                },
+              );
             }
 
             if (shouldAnimateTop) {
               pendingAnimations += 1;
-              obj.animate({ top: targetTop }, {
-                onChange: requestRenderAll,
-                duration: 1000,
-                onComplete: onOneAnimationComplete,
-              });
+              obj.animate(
+                { top: targetTop },
+                {
+                  onChange: requestRenderAll,
+                  duration: 1000,
+                  onComplete: onOneAnimationComplete,
+                },
+              );
             }
           });
 
@@ -294,7 +300,9 @@ const TacticBoardInProfile = ({
       }, 2000);
     }
 
-    return () => clearInterval(interval);
+    return () => {
+      if (interval) clearInterval(interval);
+    };
   }, [
     isAnimating,
     onLoadPage,
@@ -305,7 +313,7 @@ const TacticBoardInProfile = ({
   ]);
 
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    let interval: ReturnType<typeof setInterval> | undefined;
     if (isRecording && tacticBoard) {
       interval = setInterval(() => {
         setPage((prevPage) => {
@@ -371,20 +379,26 @@ const TacticBoardInProfile = ({
 
             if (shouldAnimateLeft) {
               pendingAnimations += 1;
-              obj.animate({ left: targetLeft }, {
-                onChange: requestRenderAll,
-                duration: 1000,
-                onComplete: onOneAnimationComplete,
-              });
+              obj.animate(
+                { left: targetLeft },
+                {
+                  onChange: requestRenderAll,
+                  duration: 1000,
+                  onComplete: onOneAnimationComplete,
+                },
+              );
             }
 
             if (shouldAnimateTop) {
               pendingAnimations += 1;
-              obj.animate({ top: targetTop }, {
-                onChange: requestRenderAll,
-                duration: 1000,
-                onComplete: onOneAnimationComplete,
-              });
+              obj.animate(
+                { top: targetTop },
+                {
+                  onChange: requestRenderAll,
+                  duration: 1000,
+                  onComplete: onOneAnimationComplete,
+                },
+              );
             }
           });
 
@@ -398,7 +412,7 @@ const TacticBoardInProfile = ({
     }
 
     return () => {
-      clearInterval(interval);
+      if (interval) clearInterval(interval);
     };
   }, [
     isRecording,

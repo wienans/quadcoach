@@ -12,10 +12,23 @@ export default defineConfig({
   build: {
     rollupOptions: {
       output: {
-        manualChunks: {
-          markdown: ["react-markdown", "remark-gfm"],
-          react: ["react", "react-dom"],
-          mui: ["@mui/material", "@mui/icons-material"],
+        manualChunks(id) {
+          if (!id.includes("node_modules")) return;
+
+          if (id.includes("react-markdown") || id.includes("remark-gfm")) {
+            return "markdown";
+          }
+
+          if (id.includes("/react/") || id.includes("/react-dom/")) {
+            return "react";
+          }
+
+          if (
+            id.includes("@mui/material") ||
+            id.includes("@mui/icons-material")
+          ) {
+            return "mui";
+          }
         },
       },
     },

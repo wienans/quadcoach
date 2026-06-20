@@ -59,6 +59,20 @@ const TacticBoardDrawingContextProvider: FC<{
   const detachLineToolHandlersRef = useRef<(() => void) | null>(null);
   const updateLineToolModeRef = useRef<(() => void) | null>(null);
 
+  const configureFreeDrawingBrush = useCallback(
+    (canvasFabric: fabric.Canvas, dashArray?: number[]) => {
+      if (!canvasFabric.freeDrawingBrush) {
+        canvasFabric.freeDrawingBrush = new fabric.PencilBrush(canvasFabric);
+      }
+
+      canvasFabric.freeDrawingBrush.color = drawColorRef.current;
+      canvasFabric.freeDrawingBrush.width = drawThicknessRef.current;
+      const brush = canvasFabric.freeDrawingBrush as ExtendedBaseBrush;
+      brush.strokeDashArray = dashArray ?? [];
+    },
+    [],
+  );
+
   const setDrawMode = useCallback(
     (drawMode: boolean, dashArray?: number[]) => {
       try {
@@ -78,11 +92,8 @@ const TacticBoardDrawingContextProvider: FC<{
           canvasFabric.isDrawingMode = drawMode;
         }
 
-        if (drawMode && canvasFabric.freeDrawingBrush) {
-          canvasFabric.freeDrawingBrush.color = drawColorRef.current;
-          canvasFabric.freeDrawingBrush.width = drawThicknessRef.current;
-          const brush = canvasFabric.freeDrawingBrush as ExtendedBaseBrush;
-          brush.strokeDashArray = dashArray ?? [];
+        if (drawMode) {
+          configureFreeDrawingBrush(canvasFabric, dashArray);
         }
 
         setControls(false);
@@ -91,7 +102,7 @@ const TacticBoardDrawingContextProvider: FC<{
         console.error("Failed to set draw mode:", error);
       }
     },
-    [canvasFabricRef, setControls],
+    [canvasFabricRef, configureFreeDrawingBrush, setControls],
   );
 
   const setStraightLineMode = useCallback((enabled: boolean) => {
@@ -490,6 +501,10 @@ const TacticBoardDrawingContextProvider: FC<{
         detachLineToolHandlers();
         canvas.isDrawingMode = drawModeRef.current;
 
+        if (drawModeRef.current) {
+          configureFreeDrawingBrush(canvas, dashArrayRef.current);
+        }
+
         if (!drawModeRef.current) {
           setSelection(true);
         }
@@ -534,7 +549,7 @@ const TacticBoardDrawingContextProvider: FC<{
       detachLineToolHandlers();
       detachPathCreatedHandler();
     };
-  }, [canvasFabricRef, setSelection]);
+  }, [canvasFabricRef, configureFreeDrawingBrush, setSelection]);
 
   // Memoize context value to prevent unnecessary re-renders
   const contextValue = useMemo(

@@ -360,7 +360,7 @@ const TacticsBoard = (): JSX.Element => {
   }, [tacticBoard]);
 
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    let interval: ReturnType<typeof setInterval> | undefined;
 
     if (isAnimating && tacticBoard) {
       interval = setInterval(() => {
@@ -421,20 +421,26 @@ const TacticsBoard = (): JSX.Element => {
 
             if (shouldAnimateLeft) {
               pendingAnimations += 1;
-              obj.animate({ left: targetLeft }, {
-                onChange: requestRenderAll,
-                duration: 1000,
-                onComplete: onOneAnimationComplete,
-              });
+              obj.animate(
+                { left: targetLeft },
+                {
+                  onChange: requestRenderAll,
+                  duration: 1000,
+                  onComplete: onOneAnimationComplete,
+                },
+              );
             }
 
             if (shouldAnimateTop) {
               pendingAnimations += 1;
-              obj.animate({ top: targetTop }, {
-                onChange: requestRenderAll,
-                duration: 1000,
-                onComplete: onOneAnimationComplete,
-              });
+              obj.animate(
+                { top: targetTop },
+                {
+                  onChange: requestRenderAll,
+                  duration: 1000,
+                  onComplete: onOneAnimationComplete,
+                },
+              );
             }
           });
 
@@ -447,11 +453,20 @@ const TacticsBoard = (): JSX.Element => {
       }, 2000);
     }
 
-    return () => clearInterval(interval);
-  }, [isAnimating, onLoadPage, tacticBoard, getAllObjects, canvasRef, targetByUuidMaps]);
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [
+    isAnimating,
+    onLoadPage,
+    tacticBoard,
+    getAllObjects,
+    canvasRef,
+    targetByUuidMaps,
+  ]);
 
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    let interval: ReturnType<typeof setInterval> | undefined;
 
     if (isRecording && tacticBoard) {
       interval = setInterval(() => {
@@ -519,20 +534,26 @@ const TacticsBoard = (): JSX.Element => {
 
             if (shouldAnimateLeft) {
               pendingAnimations += 1;
-              obj.animate({ left: targetLeft }, {
-                onChange: requestRenderAll,
-                duration: 1000,
-                onComplete: onOneAnimationComplete,
-              });
+              obj.animate(
+                { left: targetLeft },
+                {
+                  onChange: requestRenderAll,
+                  duration: 1000,
+                  onComplete: onOneAnimationComplete,
+                },
+              );
             }
 
             if (shouldAnimateTop) {
               pendingAnimations += 1;
-              obj.animate({ top: targetTop }, {
-                onChange: requestRenderAll,
-                duration: 1000,
-                onComplete: onOneAnimationComplete,
-              });
+              obj.animate(
+                { top: targetTop },
+                {
+                  onChange: requestRenderAll,
+                  duration: 1000,
+                  onComplete: onOneAnimationComplete,
+                },
+              );
             }
           });
 
@@ -546,7 +567,7 @@ const TacticsBoard = (): JSX.Element => {
     }
 
     return () => {
-      clearInterval(interval);
+      if (interval) clearInterval(interval);
     };
   }, [
     isRecording,

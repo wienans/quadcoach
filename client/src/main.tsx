@@ -1,4 +1,4 @@
-import "./i18n";
+import { initI18n } from "./i18n";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
@@ -16,13 +16,23 @@ import "@fontsource/roboto/700.css";
 
 const router = createBrowserRouter(routes);
 
-ReactDOM.createRoot(document.getElementById("root")!).render(
-  <React.StrictMode>
-    <Provider store={store}>
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <RouterProvider router={router} />
-      </ThemeProvider>
-    </Provider>
-  </React.StrictMode>,
-);
+const root = ReactDOM.createRoot(document.getElementById("root")!);
+
+const renderApp = () => {
+  root.render(
+    <React.StrictMode>
+      <Provider store={store}>
+        <ThemeProvider theme={theme}>
+          <CssBaseline />
+          <RouterProvider router={router} />
+        </ThemeProvider>
+      </Provider>
+    </React.StrictMode>,
+  );
+};
+
+void initI18n()
+  .catch((error) => {
+    console.error("Failed to initialize i18n:", error);
+  })
+  .finally(renderApp);
