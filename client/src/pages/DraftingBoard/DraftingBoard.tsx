@@ -19,44 +19,12 @@ import {
 } from "../TacticBoard/tacticBoardSlice";
 import { cloneDeep } from "lodash";
 import { PersonType } from "../../contexts/tacticBoard/TacticBoardFabricJsContext/types";
-import { v4 as uuidv4 } from "uuid";
-import {
-  createExtendedCircle,
-  createExtendedText,
-  createExtendedGroup,
-  setUuid,
-  setObjectType,
-} from "../../contexts/tacticBoard/TacticBoardFabricJsContext/fabricTypes";
 import {
   TACTIC_BOARD_SCENE_HEIGHT,
   TACTIC_BOARD_SCENE_WIDTH,
 } from "../../contexts/tacticBoard/TacticBoardCanvasContext/backgroundImage";
+import { createPlayer } from "../TacticBoard/playerFactory";
 import "../fullscreen.css";
-
-// Team colors from PersonItemsSection
-const teamAInfo = {
-  color: "#3d85c6",
-};
-const teamBInfo = {
-  color: "#dd2d2d",
-};
-
-const playerRadius = 15;
-const playerTextOffset = 16;
-
-// Helper function to get player stroke color based on person type
-const getFabricPersonColor = (personType: PersonType): string | undefined => {
-  switch (personType) {
-    case PersonType.Beater:
-      return "#000000";
-    case PersonType.Chaser:
-      return "#ffffff";
-    case PersonType.Keeper:
-      return "#03fc35";
-    case PersonType.Seeker:
-      return "#fcfc00";
-  }
-};
 
 const DraftingBoardContent = (): JSX.Element => {
   const dispatch = useAppDispatch();
@@ -146,51 +114,6 @@ const DraftingBoardContent = (): JSX.Element => {
     setBackgroundImage("/empty-court.svg");
   }, [loadFromJson, setBackgroundImage]);
 
-  // Helper function to create a player at specific position
-  const createPlayer = useCallback(
-    (
-      personType: PersonType,
-      teamA: boolean,
-      left: number,
-      top: number,
-      playerNumber: number,
-    ) => {
-      const circle = createExtendedCircle({
-        radius: playerRadius,
-        left: 0,
-        top: 0,
-        originX: "left",
-        originY: "top",
-        stroke: getFabricPersonColor(personType),
-        strokeWidth: 3,
-        fill: teamA ? teamAInfo.color : teamBInfo.color,
-      });
-      setUuid(circle, uuidv4());
-
-      const text = createExtendedText(playerNumber.toString(), {
-        left: playerTextOffset,
-        top: playerTextOffset,
-        fontFamily: "Arial",
-        fontSize: 20,
-        textAlign: "center",
-        originX: "center",
-        originY: "center",
-      });
-      setUuid(text, uuidv4());
-
-      const group = createExtendedGroup([circle, text], {
-        left,
-        top,
-        originX: "left",
-        originY: "top",
-        hasControls: false, // Disable resizing handles
-      });
-      setUuid(group, uuidv4());
-      setObjectType(group, teamA ? "playerA" : "playerB");
-      addObject(group);
-    },
-    [addObject],
-  );
   const findNumberInArray = (array: number[]) => {
     const clonedArray = cloneDeep(array);
     clonedArray.sort(function (a, b) {
@@ -254,14 +177,30 @@ const DraftingBoardContent = (): JSX.Element => {
 
     // Add Team A players
     teamAPositions.forEach((pos) => {
-      createPlayer(pos.type, true, pos.x, pos.y, getNextNumber(true));
+      addObject(
+        createPlayer({
+          personType: pos.type,
+          number: getNextNumber(true),
+          left: pos.x,
+          top: pos.y,
+          teamA: true,
+        }),
+      );
     });
 
     // Add Team B players
     teamBPositions.forEach((pos) => {
-      createPlayer(pos.type, false, pos.x, pos.y, getNextNumber(false));
+      addObject(
+        createPlayer({
+          personType: pos.type,
+          number: getNextNumber(false),
+          left: pos.x,
+          top: pos.y,
+          teamA: false,
+        }),
+      );
     });
-  }, [createPlayer, getNextNumber]);
+  }, [addObject, getNextNumber]);
 
   useEffect(() => {
     // Initialize with empty canvas and enable editing with empty court background

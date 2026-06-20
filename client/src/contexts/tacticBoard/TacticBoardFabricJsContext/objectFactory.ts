@@ -17,51 +17,18 @@ export type ObjectCreator = (
 ) => fabric.Object | null;
 
 const normalizeFabricType = (type: string): string => {
-  switch (type) {
-    case "Circle":
-      return "circle";
-    case "Rect":
-      return "rect";
-    case "Path":
-      return "path";
-    case "Text":
-      return "text";
-    case "Textbox":
-      return "textbox";
-    case "Line":
-      return "line";
-    case "Triangle":
-      return "triangle";
-    case "Group":
-      return "group";
-    default:
-      return type;
-  }
+  return type ? type[0].toLowerCase() + type.slice(1) : type;
 };
 
-const toFabricOptions = <T>(
-  data: PartialTacticBoardObject,
-  keep: { objects?: boolean; path?: boolean } = {},
-): T => {
-  const options = { ...data } as T & {
-    type?: string;
+const stripFabricMeta = <T>(data: PartialTacticBoardObject): T => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { type, objects, path, layoutManager, ...rest } = data as T & {
+    type?: unknown;
     objects?: unknown;
     path?: unknown;
     layoutManager?: unknown;
   };
-
-  delete options.type;
-  delete options.layoutManager;
-
-  if (!keep.objects) {
-    delete options.objects;
-  }
-
-  if (!keep.path) {
-    delete options.path;
-  }
-
-  return options;
+  return rest as T;
 };
 
 export class FabricObjectFactory {
@@ -70,12 +37,12 @@ export class FabricObjectFactory {
   static {
     // Initialize creators in static block to avoid type issues
     this.creators.set("circle", (data) => {
-      const options = toFabricOptions<CircleOptions>(data);
+      const options = stripFabricMeta<CircleOptions>(data);
       return new fabric.Circle(options);
     });
 
     this.creators.set("rect", (data) => {
-      const options = toFabricOptions<RectOptions>(data);
+      const options = stripFabricMeta<RectOptions>(data);
       return new fabric.Rect(options);
     });
 
@@ -88,20 +55,20 @@ export class FabricObjectFactory {
       } else {
         pathString = data.path.toString();
       }
-      const options = toFabricOptions<PathOptions>(data);
+      const options = stripFabricMeta<PathOptions>(data);
       return new fabric.Path(pathString, options);
     });
 
     this.creators.set("text", (data) => {
       if (!data.text) return null;
-      const options = toFabricOptions<TextOptions & { text?: string }>(data);
+      const options = stripFabricMeta<TextOptions & { text?: string }>(data);
       const text = options.text as string;
       delete options.text;
       return new fabric.Text(text, options);
     });
 
     this.creators.set("textbox", (data) => {
-      const options = toFabricOptions<TextboxOptions & { text?: string }>(data);
+      const options = stripFabricMeta<TextboxOptions & { text?: string }>(data);
       const text = options.text;
       delete options.text;
       return new fabric.Textbox(text ?? "", options);
@@ -114,7 +81,7 @@ export class FabricObjectFactory {
         x2: number;
         y2: number;
       };
-      const options = toFabricOptions<LineOptions>(data);
+      const options = stripFabricMeta<LineOptions>(data);
       return new fabric.Line(
         [lineData.x1, lineData.y1, lineData.x2, lineData.y2],
         options,
@@ -122,7 +89,7 @@ export class FabricObjectFactory {
     });
 
     this.creators.set("triangle", (data) => {
-      const options = toFabricOptions<TriangleOptions>(data);
+      const options = stripFabricMeta<TriangleOptions>(data);
       return new fabric.Triangle(options);
     });
 
@@ -177,7 +144,7 @@ export class FabricObjectFactory {
       return null;
     }
 
-    const options = toFabricOptions<GroupOptions>(data);
+    const options = stripFabricMeta<GroupOptions>(data);
 
     return new fabric.Group(objects, options);
   }

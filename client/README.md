@@ -70,12 +70,12 @@ For now we would use following structures and guidance for react functional comp
 ## Translations
 
 For translations we are using i18next or rather react-i18next library for translations. Its documentation can be found [here](https://react.i18next.com/).
-Standard configuration of i18next is located at src/i18n/index. This file needs to be imported before components with their translations are imported or rather i18next.addResourceBundle is called. That's why it is imported inside main.ts at first.
+Standard configuration of i18next is located at src/i18n/index. Translation modules should import that app i18n module instead of importing i18next directly, because addResourceBundle is attached during initialization.
 
 For translations create a new folder called translations, add for every supported language one json file called component_languageKey.json and one index.ts file.
 Content of index.ts would be 
 ```typescript
-  import i18next from "i18next";
+  import i18next from "../../../i18n"; // adjust relative path to src/i18n
   import de from "./yourComponent_de.json";
   import en from "./yourComponent_en.json";
   // more languages...

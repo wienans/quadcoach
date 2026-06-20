@@ -4,7 +4,6 @@ import { useParams } from "react-router-dom";
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { Alert, Skeleton } from "@mui/material";
 import { useTranslation } from "react-i18next";
-import * as fabric from "fabric";
 import { FabricJsCanvas, SoftBox } from "../../components";
 import cloneDeep from "lodash/cloneDeep";
 import {
@@ -24,6 +23,7 @@ import {
   useKeyboardShortcuts,
 } from "../../hooks/taticBoard";
 import { TacticBoardProvider } from "../../contexts/tacticBoard";
+import { animateObjectsToTargets } from "../../contexts/tacticBoard/animation";
 import Navbar from "../../components/Navbar";
 import TacticBoardItemsDrawerNav from "./TacticBoardItemsDrawerNav";
 import { useAppSelector } from "../../store/hooks";
@@ -373,80 +373,12 @@ const TacticsBoard = (): JSX.Element => {
             return newPage;
           }
 
-          const canvas = canvasRef.current;
-          const requestRenderAll = () => {
-            canvas?.requestRenderAll();
-          };
-
-          let pendingAnimations = 0;
-          let didTriggerLoad = false;
-
-          const triggerLoadOnce = () => {
-            if (didTriggerLoad) return;
-            didTriggerLoad = true;
-            onLoadPage(newPage);
-          };
-
-          const onOneAnimationComplete = () => {
-            pendingAnimations -= 1;
-            if (pendingAnimations <= 0) {
-              triggerLoadOnce();
-            }
-          };
-
-          getAllObjects().forEach((obj) => {
-            const objUuid = (obj as fabric.Object & { uuid?: unknown }).uuid;
-            if (typeof objUuid !== "string") return;
-
-            const targetObject = targetByUuid.get(objUuid);
-            if (!targetObject || !canvas) return;
-
-            const targetLeft = targetObject.left;
-            const targetTop = targetObject.top;
-
-            if (
-              typeof targetLeft !== "number" ||
-              typeof targetTop !== "number"
-            ) {
-              return;
-            }
-
-            const currentLeft = obj.left ?? 0;
-            const currentTop = obj.top ?? 0;
-
-            const shouldAnimateLeft = targetLeft !== currentLeft;
-            const shouldAnimateTop = targetTop !== currentTop;
-
-            if (!shouldAnimateLeft && !shouldAnimateTop) return;
-
-            if (shouldAnimateLeft) {
-              pendingAnimations += 1;
-              obj.animate(
-                { left: targetLeft },
-                {
-                  onChange: requestRenderAll,
-                  duration: 1000,
-                  onComplete: onOneAnimationComplete,
-                },
-              );
-            }
-
-            if (shouldAnimateTop) {
-              pendingAnimations += 1;
-              obj.animate(
-                { top: targetTop },
-                {
-                  onChange: requestRenderAll,
-                  duration: 1000,
-                  onComplete: onOneAnimationComplete,
-                },
-              );
-            }
-          });
-
-          if (pendingAnimations === 0) {
-            triggerLoadOnce();
-          }
+          animateObjectsToTargets(
+            getAllObjects(),
+            targetByUuid,
+            canvasRef.current,
+            () => onLoadPage(newPage),
+          );
 
           return newPage;
         });
@@ -486,80 +418,12 @@ const TacticsBoard = (): JSX.Element => {
             return newPage;
           }
 
-          const canvas = canvasRef.current;
-          const requestRenderAll = () => {
-            canvas?.requestRenderAll();
-          };
-
-          let pendingAnimations = 0;
-          let didTriggerLoad = false;
-
-          const triggerLoadOnce = () => {
-            if (didTriggerLoad) return;
-            didTriggerLoad = true;
-            onLoadPage(newPage);
-          };
-
-          const onOneAnimationComplete = () => {
-            pendingAnimations -= 1;
-            if (pendingAnimations <= 0) {
-              triggerLoadOnce();
-            }
-          };
-
-          getAllObjects().forEach((obj) => {
-            const objUuid = (obj as fabric.Object & { uuid?: unknown }).uuid;
-            if (typeof objUuid !== "string") return;
-
-            const targetObject = targetByUuid.get(objUuid);
-            if (!targetObject || !canvas) return;
-
-            const targetLeft = targetObject.left;
-            const targetTop = targetObject.top;
-
-            if (
-              typeof targetLeft !== "number" ||
-              typeof targetTop !== "number"
-            ) {
-              return;
-            }
-
-            const currentLeft = obj.left ?? 0;
-            const currentTop = obj.top ?? 0;
-
-            const shouldAnimateLeft = targetLeft !== currentLeft;
-            const shouldAnimateTop = targetTop !== currentTop;
-
-            if (!shouldAnimateLeft && !shouldAnimateTop) return;
-
-            if (shouldAnimateLeft) {
-              pendingAnimations += 1;
-              obj.animate(
-                { left: targetLeft },
-                {
-                  onChange: requestRenderAll,
-                  duration: 1000,
-                  onComplete: onOneAnimationComplete,
-                },
-              );
-            }
-
-            if (shouldAnimateTop) {
-              pendingAnimations += 1;
-              obj.animate(
-                { top: targetTop },
-                {
-                  onChange: requestRenderAll,
-                  duration: 1000,
-                  onComplete: onOneAnimationComplete,
-                },
-              );
-            }
-          });
-
-          if (pendingAnimations === 0) {
-            triggerLoadOnce();
-          }
+          animateObjectsToTargets(
+            getAllObjects(),
+            targetByUuid,
+            canvasRef.current,
+            () => onLoadPage(newPage),
+          );
 
           return newPage;
         });

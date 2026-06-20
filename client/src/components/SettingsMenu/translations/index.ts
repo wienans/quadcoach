@@ -1,4 +1,4 @@
-import i18next from "i18next";
+import i18next from "../../../i18n";
 import en from "./SettingsMenu_en.json";
 import de from "./SettingsMenu_de.json";
 

@@ -1,4 +1,4 @@
-import i18next from "i18next";
+import i18next from "../../../i18n";
 import en from "./ExerciseOverviewDialog_en.json";
 import de from "./ExerciseOverviewDialog_de.json";
 

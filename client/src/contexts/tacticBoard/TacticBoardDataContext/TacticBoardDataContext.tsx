@@ -1,3 +1,4 @@
+import "../TacticBoardFabricJsContext/fabricJsExtensions";
 import {
   createContext,
   ReactNode,

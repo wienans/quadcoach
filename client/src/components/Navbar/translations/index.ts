@@ -1,4 +1,4 @@
-import i18next from "i18next";
+import i18next from "../../../i18n";
 import de from "./DashboardNavbar_de.json";
 import en from "./DashboardNavbar_en.json";
 

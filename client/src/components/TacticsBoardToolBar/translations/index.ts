@@ -1,4 +1,4 @@
-import i18next from "i18next";
+import i18next from "../../../i18n";
 import de from "./TacticsBoardToolBar_de.json";
 import en from "./TacticsBoardToolBar_en.json";
 
