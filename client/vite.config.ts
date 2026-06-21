@@ -8,6 +8,18 @@ export default defineConfig({
       "/api": "http://quadcoach-backend:3001",
     },
   },
+  optimizeDeps: {
+    entries: ["index.html", "src/**/*.{ts,tsx}", "!src/**/*.d.ts"],
+    include: [
+      "@emotion/react",
+      "@emotion/styled",
+      "@mui/material",
+      "@mui/material/styles",
+      "@mui/styled-engine",
+      "@mui/system",
+      "@mui/x-data-grid",
+    ],
+  },
   plugins: [react()],
   build: {
     rollupOptions: {
