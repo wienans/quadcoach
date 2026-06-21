@@ -221,7 +221,7 @@ const DraftingBoardTopItemsMenu = ({
     if (!canvas) return;
 
     const textbox = new fabric.Textbox("Double-click to edit", {
-      left: 100,
+      left: 200,
       top: 100,
       width: 300,
       fontSize: 24,
