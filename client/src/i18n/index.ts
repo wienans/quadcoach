@@ -4,7 +4,19 @@ import LanguageDetector from "i18next-browser-languagedetector";
 
 let initPromise: Promise<void> | undefined;
 
-export const initI18n = (): Promise<void> => {
+const addResourceBundle: typeof i18n.addResourceBundle = (...args) => {
+  if (!i18n.isInitialized) {
+    void initI18n();
+  }
+
+  return i18n.addResourceBundle(...args);
+};
+
+if (typeof i18n.addResourceBundle !== "function") {
+  i18n.addResourceBundle = addResourceBundle;
+}
+
+export function initI18n(): Promise<void> {
   if (i18n.isInitialized) {
     return Promise.resolve();
   }
@@ -26,7 +38,7 @@ export const initI18n = (): Promise<void> => {
     .then(() => undefined);
 
   return initPromise;
-};
+}
 
 export const i18nReady = initI18n();
 
