@@ -27,3 +27,17 @@
 
 - **DO NOT RUN THE DEV SERVER I HAVE IT ALREADY RUNNING**
 - **DO NOT COMMIT YOUR CHANGES**
+
+## Agent skills
+
+### Issue tracker
+
+Issues live in GitHub Issues; skills use the `gh` CLI. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Canonical triage labels: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Multi-context layout — `CONTEXT-MAP.md` at root points to per-context `CONTEXT.md` files under `client/` and `server/`. See `docs/agents/domain.md`.

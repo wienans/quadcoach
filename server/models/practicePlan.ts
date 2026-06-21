@@ -38,7 +38,7 @@ const ExerciseItemSchema = new Schema<IExerciseItem>(
     kind: { type: String, enum: ["exercise", "break"], required: true },
     description: { type: String },
     exerciseId: { type: Schema.Types.ObjectId, ref: "exercises" },
-    blockId: { type: Schema.Types.ObjectId, ref: "blocks" },
+    blockId: { type: Schema.Types.ObjectId },
     duration: { type: Number, min: 0 },
   },
   { _id: true },
