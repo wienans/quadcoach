@@ -1,4 +1,5 @@
 import { MutableRefObject, useCallback, useRef } from "react";
+import * as fabric from "fabric";
 
 export const useContainerResizeEvent = (
   container: MutableRefObject<HTMLDivElement | null>,
@@ -34,7 +35,7 @@ export const useContainerResizeEvent = (
         if (calcHeight % 2) {
           calcHeight = calcHeight + 1;
         }
-        canvas.current.setWidth(calcWidth).setHeight(calcHeight);
+        canvas.current.setDimensions({ width: calcWidth, height: calcHeight });
         canvas.current.setZoom(calcWidth / canvasDefaultWidth);
         canvas.current.requestRenderAll();
       } else {
@@ -58,7 +59,7 @@ export const useContainerResizeEvent = (
           calcHeight = calcHeight + 1;
         }
 
-        canvas.current.setWidth(calcWidth).setHeight(calcHeight);
+        canvas.current.setDimensions({ width: calcWidth, height: calcHeight });
         canvas.current.setZoom(calcWidth / canvasDefaultWidth);
         canvas.current.requestRenderAll();
       }

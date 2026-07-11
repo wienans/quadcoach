@@ -88,7 +88,7 @@ export class CanvasErrorBoundary extends Component<Props, State> {
             Try Again
           </Button>
 
-          {process.env.NODE_ENV === "development" && this.state.error && (
+          {import.meta.env.DEV && this.state.error && (
             <Box
               sx={{
                 mt: 3,

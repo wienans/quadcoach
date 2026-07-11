@@ -1,4 +1,4 @@
-import i18next from "i18next";
+import i18next from "../../../../i18n";
 import de from "./SidenavCard_de.json";
 import en from "./SidenavCard_en.json";
 

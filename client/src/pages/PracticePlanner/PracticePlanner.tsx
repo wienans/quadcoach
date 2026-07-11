@@ -361,7 +361,7 @@ const PracticePlanner = ({
         };
         try {
           await updatePlan(planUpdate).unwrap();
-        } catch (e) {
+        } catch {
           // Error alert handled by isUpdateExerciseError condition
         }
       }

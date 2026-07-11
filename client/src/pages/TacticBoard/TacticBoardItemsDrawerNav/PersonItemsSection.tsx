@@ -14,32 +14,17 @@ import PersonAddAlt1Icon from "@mui/icons-material/PersonAddAlt1";
 import CircleIcon from "@mui/icons-material/Circle";
 import { PersonType } from "../../../contexts/tacticBoard/TacticBoardFabricJsContext/types";
 import { useTranslation } from "react-i18next";
-import { v4 as uuidv4 } from "uuid";
 import {
   useTacticBoardCanvas,
   useTacticBoardData,
 } from "../../../hooks/taticBoard";
 import { cloneDeep } from "lodash";
 import {
-  createExtendedCircle,
-  createExtendedText,
-  createExtendedGroup,
-  setUuid,
-  setObjectType,
-} from "../../../contexts/tacticBoard/TacticBoardFabricJsContext/fabricTypes";
-
-const getFabricPersonColor = (personType: PersonType): string | undefined => {
-  switch (personType) {
-    case PersonType.Beater:
-      return "#000000";
-    case PersonType.Chaser:
-      return "#ffffff";
-    case PersonType.Keeper:
-      return "#03fc35";
-    case PersonType.Seeker:
-      return "#fcfc00";
-  }
-};
+  createPlayer,
+  getFabricPersonColor,
+  teamAInfo,
+  teamBInfo,
+} from "../playerFactory";
 
 const findNumberInArray = (array: number[]) => {
   const clonedArray = cloneDeep(array);
@@ -58,12 +43,6 @@ const findNumberInArray = (array: number[]) => {
     lowest = clonedArray[clonedArray.length - 1] + 1;
   }
   return lowest;
-};
-const teamAInfo = {
-  color: "#3d85c6",
-};
-const teamBInfo = {
-  color: "#dd2d2d",
 };
 
 export type PersonItemsSectionProps = {
@@ -98,34 +77,19 @@ const PersonItemsSection = ({
   };
 
   const onPersonAddClick = (personType: PersonType) => () => {
-    const circle = createExtendedCircle({
-      radius: 15,
-      left: teamA ? 250 : 1220 - 250 - 30,
-      top: 640,
-      stroke: getFabricPersonColor(personType), // Set the color of the stroke
-      strokeWidth: 3, // Set the width of the stroke
-      fill: teamA ? teamAInfo.color : teamBInfo.color,
-    });
-    setUuid(circle, uuidv4());
-
+    const playerLeft = teamA ? 250 : 1220 - 250 - 30;
+    const playerTop = 640;
     const newNumber = getNextNumber();
-    const text = createExtendedText(newNumber.toString(), {
-      left: teamA ? 250 + 16 : 1220 - 250 - 30 + 16,
-      top: 640 + 16,
-      fontFamily: "Arial",
-      fontSize: 20,
-      textAlign: "center",
-      originX: "center",
-      originY: "center",
-    });
-    setUuid(text, uuidv4());
 
-    const group = createExtendedGroup([circle, text], {
-      hasControls: false, // Disable resizing handles
-    });
-    setUuid(group, uuidv4());
-    setObjectType(group, teamA ? "playerA" : "playerB");
-    addObject(group);
+    addObject(
+      createPlayer({
+        personType,
+        number: newNumber,
+        left: playerLeft,
+        top: playerTop,
+        teamA,
+      }),
+    );
   };
 
   return (

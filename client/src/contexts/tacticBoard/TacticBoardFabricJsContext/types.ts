@@ -1,4 +1,4 @@
-import { fabric } from "fabric";
+import * as fabric from "fabric";
 import { v4 } from "uuid";
 
 export enum ObjectType {
@@ -28,25 +28,23 @@ export enum AccessoryType {
 }
 
 // Enhanced TypeScript definitions for fabric.js extensions
-declare module "fabric/fabric-impl" {
-  export interface IObjectOptions {
+declare module "fabric" {
+  interface FabricObjectProps {
     id?: string;
     objectType?: ObjectType | string;
     uuid?: string;
   }
 
-  export interface Object {
+  interface SerializedObjectProps {
     id?: string;
     objectType?: ObjectType | string;
     uuid?: string;
   }
 
-  export interface Canvas {
-    freeDrawingBrush: {
-      color: string;
-      width: number;
-      strokeDashArray?: number[] | null;
-    } & fabric.BaseBrush;
+  interface FabricObject {
+    id?: string;
+    objectType?: ObjectType | string;
+    uuid?: string;
   }
 }
 

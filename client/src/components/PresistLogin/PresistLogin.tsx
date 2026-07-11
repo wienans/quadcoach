@@ -14,7 +14,7 @@ const PresistLogin = (): JSX.Element => {
     useRefreshMutation();
 
   useEffect(() => {
-    if (effectRan.current === true || process.env.NODE_ENV !== "development") {
+    if (effectRan.current === true || !import.meta.env.DEV) {
       // React 18 Strict Mode
 
       const verifyRefreshToken = async () => {

@@ -1,8 +1,10 @@
 import { RouteHandleType } from "./routeTypes";
+import RouteErrorBoundary from "./RouteErrorBoundary";
 
 const routes = [
   {
     path: "/",
+    errorElement: <RouteErrorBoundary />,
     handle: {
       type: RouteHandleType.layout,
     },

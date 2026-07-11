@@ -279,7 +279,7 @@ const Exercise = () => {
         };
         try {
           await updateExercise(exerciseUpdate).unwrap();
-        } catch (e) {
+        } catch {
           // Error alert handled by isUpdateExerciseError condition
         }
       }

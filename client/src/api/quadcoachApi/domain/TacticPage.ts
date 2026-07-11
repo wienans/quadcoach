@@ -6,6 +6,4 @@ export type {
   TacticBoardPageWithoutId as TacticPageWithOutId
 } from "../../../contexts/tacticBoard/TacticBoardFabricJsContext/tacticBoardTypes";
 
-// Default export for backward compatibility
-import type { TacticBoardPage } from "../../../contexts/tacticBoard/TacticBoardFabricJsContext/tacticBoardTypes";
-export default TacticBoardPage;
+export type { TacticBoardPage as default } from "../../../contexts/tacticBoard/TacticBoardFabricJsContext/tacticBoardTypes";

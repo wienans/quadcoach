@@ -15,7 +15,7 @@ const REFRESH_LOCK_DURATION = 5000; // 5 seconds lock duration
 export const useAutoRefreshToken = () => {
   const token = useSelector(selectCurrentToken);
   const [refresh] = useRefreshMutation();
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const channelRef = useRef<BroadcastChannel | null>(null);
 
   useEffect(() => {

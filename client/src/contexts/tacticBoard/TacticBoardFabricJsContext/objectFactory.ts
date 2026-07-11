@@ -1,9 +1,35 @@
-import { fabric } from "fabric";
+import * as fabric from "fabric";
 import { FabricObjectCreationError } from "./types";
 import { PartialTacticBoardObject } from "./tacticBoardTypes";
 import { setUuid } from "./fabricTypes";
 
-export type ObjectCreator = (data: PartialTacticBoardObject) => fabric.Object | null;
+type CircleOptions = ConstructorParameters<typeof fabric.Circle>[0];
+type RectOptions = ConstructorParameters<typeof fabric.Rect>[0];
+type PathOptions = ConstructorParameters<typeof fabric.Path>[1];
+type TextOptions = ConstructorParameters<typeof fabric.Text>[1];
+type TextboxOptions = ConstructorParameters<typeof fabric.Textbox>[1];
+type LineOptions = ConstructorParameters<typeof fabric.Line>[1];
+type TriangleOptions = ConstructorParameters<typeof fabric.Triangle>[0];
+type GroupOptions = ConstructorParameters<typeof fabric.Group>[1];
+
+export type ObjectCreator = (
+  data: PartialTacticBoardObject,
+) => fabric.Object | null;
+
+const normalizeFabricType = (type: string): string => {
+  return type ? type[0].toLowerCase() + type.slice(1) : type;
+};
+
+const stripFabricMeta = <T>(data: PartialTacticBoardObject): T => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { type, objects, path, layoutManager, ...rest } = data as T & {
+    type?: unknown;
+    objects?: unknown;
+    path?: unknown;
+    layoutManager?: unknown;
+  };
+  return rest as T;
+};
 
 export class FabricObjectFactory {
   private static creators: Map<string, ObjectCreator> = new Map();
@@ -11,14 +37,12 @@ export class FabricObjectFactory {
   static {
     // Initialize creators in static block to avoid type issues
     this.creators.set("circle", (data) => {
-      const options = { ...data } as fabric.ICircleOptions;
-      delete (options as fabric.ICircleOptions & { type?: string }).type; // Remove type property to avoid fabric.js issues
+      const options = stripFabricMeta<CircleOptions>(data);
       return new fabric.Circle(options);
     });
 
     this.creators.set("rect", (data) => {
-      const options = { ...data } as fabric.IRectOptions;
-      delete (options as fabric.IRectOptions & { type?: string }).type;
+      const options = stripFabricMeta<RectOptions>(data);
       return new fabric.Rect(options);
     });
 
@@ -31,29 +55,22 @@ export class FabricObjectFactory {
       } else {
         pathString = data.path.toString();
       }
-      const options = { ...data } as fabric.IPathOptions;
-      delete (options as fabric.IPathOptions & { type?: string }).type;
-      delete (
-        options as fabric.IPathOptions & { path?: string | [[string | number]] }
-      ).path;
+      const options = stripFabricMeta<PathOptions>(data);
       return new fabric.Path(pathString, options);
     });
 
     this.creators.set("text", (data) => {
       if (!data.text) return null;
-      const options = { ...data } as fabric.ITextOptions;
-      delete (options as fabric.ITextOptions & { type?: string }).type;
-      const text = (options as fabric.ITextOptions & { text?: string })
-        .text as string;
-      delete (options as fabric.ITextOptions & { text?: string }).text;
+      const options = stripFabricMeta<TextOptions & { text?: string }>(data);
+      const text = options.text as string;
+      delete options.text;
       return new fabric.Text(text, options);
     });
 
     this.creators.set("textbox", (data) => {
-      const options = { ...data } as fabric.ITextboxOptions;
-      delete (options as fabric.ITextboxOptions & { type?: string }).type;
-      const text = (options as fabric.ITextboxOptions & { text?: string }).text;
-      delete (options as fabric.ITextboxOptions & { text?: string }).text;
+      const options = stripFabricMeta<TextboxOptions & { text?: string }>(data);
+      const text = options.text;
+      delete options.text;
       return new fabric.Textbox(text ?? "", options);
     });
 
@@ -64,14 +81,15 @@ export class FabricObjectFactory {
         x2: number;
         y2: number;
       };
-      const options = { ...data } as fabric.ILineOptions;
-      delete (options as fabric.ILineOptions & { type?: string }).type;
-      return new fabric.Line([lineData.x1, lineData.y1, lineData.x2, lineData.y2], options);
+      const options = stripFabricMeta<LineOptions>(data);
+      return new fabric.Line(
+        [lineData.x1, lineData.y1, lineData.x2, lineData.y2],
+        options,
+      );
     });
 
     this.creators.set("triangle", (data) => {
-      const options = { ...data } as fabric.ITriangleOptions;
-      delete (options as fabric.ITriangleOptions & { type?: string }).type;
+      const options = stripFabricMeta<TriangleOptions>(data);
       return new fabric.Triangle(options);
     });
 
@@ -80,12 +98,13 @@ export class FabricObjectFactory {
 
   static createObject(data: PartialTacticBoardObject): fabric.Object | null {
     try {
-      if (!data.type || typeof data.type !== 'string') {
-        console.warn('Invalid object type:', data.type);
+      if (!data.type || typeof data.type !== "string") {
+        console.warn("Invalid object type:", data.type);
         return null;
       }
-      
-      const creator = this.creators.get(data.type);
+
+      const normalizedType = normalizeFabricType(data.type);
+      const creator = this.creators.get(normalizedType);
       if (!creator) {
         console.warn(`Unknown object type: ${data.type}`);
         return null;
@@ -98,7 +117,10 @@ export class FabricObjectFactory {
 
       return obj;
     } catch (error) {
-      throw new FabricObjectCreationError(typeof data.type === 'string' ? data.type : 'unknown', error as Error);
+      throw new FabricObjectCreationError(
+        typeof data.type === "string" ? data.type : "unknown",
+        error as Error,
+      );
     }
   }
 
@@ -122,11 +144,13 @@ export class FabricObjectFactory {
       return null;
     }
 
-    return new fabric.Group(objects, data as fabric.IGroupOptions);
+    const options = stripFabricMeta<GroupOptions>(data);
+
+    return new fabric.Group(objects, options);
   }
 
   static registerCreator(type: string, creator: ObjectCreator): void {
-    this.creators.set(type, creator);
+    this.creators.set(normalizeFabricType(type), creator);
   }
 
   static getSupportedTypes(): string[] {

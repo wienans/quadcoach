@@ -1,4 +1,4 @@
-import { fabric } from "fabric";
+import * as fabric from "fabric";
 
 const originalToObject = fabric.Object.prototype.toObject;
 const myAdditional = ["id", "additionalProperties"];

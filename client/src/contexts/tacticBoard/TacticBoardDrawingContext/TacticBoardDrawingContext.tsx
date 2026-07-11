@@ -8,7 +8,7 @@ import {
   useContext,
   useRef,
 } from "react";
-import { fabric } from "fabric";
+import * as fabric from "fabric";
 import { v4 as uuidv4 } from "uuid";
 
 import { TacticBoardCanvasContext } from "../TacticBoardCanvasContext/TacticBoardCanvasContext";
@@ -59,6 +59,20 @@ const TacticBoardDrawingContextProvider: FC<{
   const detachLineToolHandlersRef = useRef<(() => void) | null>(null);
   const updateLineToolModeRef = useRef<(() => void) | null>(null);
 
+  const configureFreeDrawingBrush = useCallback(
+    (canvasFabric: fabric.Canvas, dashArray?: number[]) => {
+      if (!canvasFabric.freeDrawingBrush) {
+        canvasFabric.freeDrawingBrush = new fabric.PencilBrush(canvasFabric);
+      }
+
+      canvasFabric.freeDrawingBrush.color = drawColorRef.current;
+      canvasFabric.freeDrawingBrush.width = drawThicknessRef.current;
+      const brush = canvasFabric.freeDrawingBrush as ExtendedBaseBrush;
+      brush.strokeDashArray = dashArray ?? [];
+    },
+    [],
+  );
+
   const setDrawMode = useCallback(
     (drawMode: boolean, dashArray?: number[]) => {
       try {
@@ -78,11 +92,8 @@ const TacticBoardDrawingContextProvider: FC<{
           canvasFabric.isDrawingMode = drawMode;
         }
 
-        if (drawMode && canvasFabric.freeDrawingBrush) {
-          canvasFabric.freeDrawingBrush.color = drawColorRef.current;
-          canvasFabric.freeDrawingBrush.width = drawThicknessRef.current;
-          const brush = canvasFabric.freeDrawingBrush as ExtendedBaseBrush;
-          brush.strokeDashArray = dashArray ?? [];
+        if (drawMode) {
+          configureFreeDrawingBrush(canvasFabric, dashArray);
         }
 
         setControls(false);
@@ -91,7 +102,7 @@ const TacticBoardDrawingContextProvider: FC<{
         console.error("Failed to set draw mode:", error);
       }
     },
-    [canvasFabricRef, setControls],
+    [canvasFabricRef, configureFreeDrawingBrush, setControls],
   );
 
   const setStraightLineMode = useCallback((enabled: boolean) => {
@@ -182,11 +193,11 @@ const TacticBoardDrawingContextProvider: FC<{
     // We define it here (not in a separate useEffect) because the canvas
     // ref may still be null when the component first mounts.  By attaching
     // the listener lazily inside updateMode we guarantee the canvas exists.
-    const handlePathCreated = (e: fabric.IEvent) => {
+    const handlePathCreated = (e: { path: fabric.FabricObject }) => {
       const canvas = getCanvas();
       if (!canvas) return;
 
-      const path = (e as unknown as { path?: fabric.Path }).path;
+      const path = e.path instanceof fabric.Path ? e.path : null;
       if (!path) return;
 
       if (!arrowTipEnabledRef.current) {
@@ -313,7 +324,7 @@ const TacticBoardDrawingContextProvider: FC<{
       if (!canvas) return;
       if (detachLineToolHandlersRef.current) return;
 
-      const onMouseDown = (opt: fabric.IEvent) => {
+      const onMouseDown = (opt: fabric.TPointerEventInfo) => {
         if (
           !drawModeRef.current ||
           (!shiftPressedRef.current && !straightLineModeRef.current)
@@ -321,7 +332,7 @@ const TacticBoardDrawingContextProvider: FC<{
           return;
         }
 
-        const pointer = canvas.getPointer(opt.e);
+        const pointer = canvas.getScenePoint(opt.e);
         lineStartRef.current = new fabric.Point(pointer.x, pointer.y);
         isLineDrawingRef.current = true;
 
@@ -344,7 +355,7 @@ const TacticBoardDrawingContextProvider: FC<{
         canvas.add(line);
       };
 
-      const onMouseMove = (opt: fabric.IEvent) => {
+      const onMouseMove = (opt: fabric.TPointerEventInfo) => {
         const line = previewLineRef.current;
         if (
           !drawModeRef.current ||
@@ -354,12 +365,12 @@ const TacticBoardDrawingContextProvider: FC<{
         }
         if (!isLineDrawingRef.current || !lineStartRef.current || !line) return;
 
-        const pointer = canvas.getPointer(opt.e);
+        const pointer = canvas.getScenePoint(opt.e);
         line.set({ x2: pointer.x, y2: pointer.y });
         canvas.requestRenderAll();
       };
 
-      const onMouseUp = (opt: fabric.IEvent) => {
+      const onMouseUp = (opt: fabric.TPointerEventInfo) => {
         const line = previewLineRef.current;
         if (
           !drawModeRef.current ||
@@ -369,7 +380,7 @@ const TacticBoardDrawingContextProvider: FC<{
         }
         if (!isLineDrawingRef.current || !lineStartRef.current || !line) return;
 
-        const pointer = canvas.getPointer(opt.e);
+        const pointer = canvas.getScenePoint(opt.e);
         line.set({ x2: pointer.x, y2: pointer.y });
 
         const startX = line.x1 ?? lineStartRef.current.x;
@@ -490,6 +501,10 @@ const TacticBoardDrawingContextProvider: FC<{
         detachLineToolHandlers();
         canvas.isDrawingMode = drawModeRef.current;
 
+        if (drawModeRef.current) {
+          configureFreeDrawingBrush(canvas, dashArrayRef.current);
+        }
+
         if (!drawModeRef.current) {
           setSelection(true);
         }
@@ -534,7 +549,7 @@ const TacticBoardDrawingContextProvider: FC<{
       detachLineToolHandlers();
       detachPathCreatedHandler();
     };
-  }, [canvasFabricRef, setSelection]);
+  }, [canvasFabricRef, configureFreeDrawingBrush, setSelection]);
 
   // Memoize context value to prevent unnecessary re-renders
   const contextValue = useMemo(

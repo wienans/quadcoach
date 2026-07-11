@@ -1,4 +1,4 @@
-import i18next from "i18next";
+import i18next from "../../../i18n";
 import de from "./UpdatePassword_de.json";
 import en from "./UpdatePassword_en.json";
 

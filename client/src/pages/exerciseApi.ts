@@ -1,4 +1,4 @@
-import { TagDescription } from "@reduxjs/toolkit/dist/query";
+import type { TagDescription } from "@reduxjs/toolkit/query";
 import { quadcoachApi } from "../api";
 import { TagType } from "../api/enum";
 import { Exercise } from "../api/quadcoachApi/domain";

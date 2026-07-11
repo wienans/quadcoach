@@ -1,4 +1,4 @@
-import i18next from "i18next";
+import i18next from "../../../i18n";
 import en from "./PracticePlanList_en.json";
 import de from "./PracticePlanList_de.json";
 

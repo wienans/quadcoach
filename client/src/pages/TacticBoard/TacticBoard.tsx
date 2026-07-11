@@ -23,6 +23,7 @@ import {
   useKeyboardShortcuts,
 } from "../../hooks/taticBoard";
 import { TacticBoardProvider } from "../../contexts/tacticBoard";
+import { animateObjectsToTargets } from "../../contexts/tacticBoard/animation";
 import Navbar from "../../components/Navbar";
 import TacticBoardItemsDrawerNav from "./TacticBoardItemsDrawerNav";
 import { useAppSelector } from "../../store/hooks";
@@ -359,7 +360,7 @@ const TacticsBoard = (): JSX.Element => {
   }, [tacticBoard]);
 
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    let interval: ReturnType<typeof setInterval> | undefined;
 
     if (isAnimating && tacticBoard) {
       interval = setInterval(() => {
@@ -372,85 +373,32 @@ const TacticsBoard = (): JSX.Element => {
             return newPage;
           }
 
-          const canvas = canvasRef.current;
-          const requestRenderAll = () => {
-            canvas?.requestRenderAll();
-          };
-
-          let pendingAnimations = 0;
-          let didTriggerLoad = false;
-
-          const triggerLoadOnce = () => {
-            if (didTriggerLoad) return;
-            didTriggerLoad = true;
-            onLoadPage(newPage);
-          };
-
-          const onOneAnimationComplete = () => {
-            pendingAnimations -= 1;
-            if (pendingAnimations <= 0) {
-              triggerLoadOnce();
-            }
-          };
-
-          getAllObjects().forEach((obj) => {
-            const objUuid = (obj as fabric.Object & { uuid?: unknown }).uuid;
-            if (typeof objUuid !== "string") return;
-
-            const targetObject = targetByUuid.get(objUuid);
-            if (!targetObject || !canvas) return;
-
-            const targetLeft = targetObject.left;
-            const targetTop = targetObject.top;
-
-            if (
-              typeof targetLeft !== "number" ||
-              typeof targetTop !== "number"
-            ) {
-              return;
-            }
-
-            const currentLeft = obj.left ?? 0;
-            const currentTop = obj.top ?? 0;
-
-            const shouldAnimateLeft = targetLeft !== currentLeft;
-            const shouldAnimateTop = targetTop !== currentTop;
-
-            if (!shouldAnimateLeft && !shouldAnimateTop) return;
-
-            if (shouldAnimateLeft) {
-              pendingAnimations += 1;
-              obj.animate("left", targetLeft, {
-                onChange: requestRenderAll,
-                duration: 1000,
-                onComplete: onOneAnimationComplete,
-              });
-            }
-
-            if (shouldAnimateTop) {
-              pendingAnimations += 1;
-              obj.animate("top", targetTop, {
-                onChange: requestRenderAll,
-                duration: 1000,
-                onComplete: onOneAnimationComplete,
-              });
-            }
-          });
-
-          if (pendingAnimations === 0) {
-            triggerLoadOnce();
-          }
+          animateObjectsToTargets(
+            getAllObjects(),
+            targetByUuid,
+            canvasRef.current,
+            () => onLoadPage(newPage),
+          );
 
           return newPage;
         });
       }, 2000);
     }
 
-    return () => clearInterval(interval);
-  }, [isAnimating, onLoadPage, tacticBoard, getAllObjects, canvasRef, targetByUuidMaps]);
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [
+    isAnimating,
+    onLoadPage,
+    tacticBoard,
+    getAllObjects,
+    canvasRef,
+    targetByUuidMaps,
+  ]);
 
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    let interval: ReturnType<typeof setInterval> | undefined;
 
     if (isRecording && tacticBoard) {
       interval = setInterval(() => {
@@ -470,74 +418,12 @@ const TacticsBoard = (): JSX.Element => {
             return newPage;
           }
 
-          const canvas = canvasRef.current;
-          const requestRenderAll = () => {
-            canvas?.requestRenderAll();
-          };
-
-          let pendingAnimations = 0;
-          let didTriggerLoad = false;
-
-          const triggerLoadOnce = () => {
-            if (didTriggerLoad) return;
-            didTriggerLoad = true;
-            onLoadPage(newPage);
-          };
-
-          const onOneAnimationComplete = () => {
-            pendingAnimations -= 1;
-            if (pendingAnimations <= 0) {
-              triggerLoadOnce();
-            }
-          };
-
-          getAllObjects().forEach((obj) => {
-            const objUuid = (obj as fabric.Object & { uuid?: unknown }).uuid;
-            if (typeof objUuid !== "string") return;
-
-            const targetObject = targetByUuid.get(objUuid);
-            if (!targetObject || !canvas) return;
-
-            const targetLeft = targetObject.left;
-            const targetTop = targetObject.top;
-
-            if (
-              typeof targetLeft !== "number" ||
-              typeof targetTop !== "number"
-            ) {
-              return;
-            }
-
-            const currentLeft = obj.left ?? 0;
-            const currentTop = obj.top ?? 0;
-
-            const shouldAnimateLeft = targetLeft !== currentLeft;
-            const shouldAnimateTop = targetTop !== currentTop;
-
-            if (!shouldAnimateLeft && !shouldAnimateTop) return;
-
-            if (shouldAnimateLeft) {
-              pendingAnimations += 1;
-              obj.animate("left", targetLeft, {
-                onChange: requestRenderAll,
-                duration: 1000,
-                onComplete: onOneAnimationComplete,
-              });
-            }
-
-            if (shouldAnimateTop) {
-              pendingAnimations += 1;
-              obj.animate("top", targetTop, {
-                onChange: requestRenderAll,
-                duration: 1000,
-                onComplete: onOneAnimationComplete,
-              });
-            }
-          });
-
-          if (pendingAnimations === 0) {
-            triggerLoadOnce();
-          }
+          animateObjectsToTargets(
+            getAllObjects(),
+            targetByUuid,
+            canvasRef.current,
+            () => onLoadPage(newPage),
+          );
 
           return newPage;
         });
@@ -545,7 +431,7 @@ const TacticsBoard = (): JSX.Element => {
     }
 
     return () => {
-      clearInterval(interval);
+      if (interval) clearInterval(interval);
     };
   }, [
     isRecording,
