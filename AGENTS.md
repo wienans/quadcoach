@@ -26,7 +26,7 @@
 ## Important
 
 - **DO NOT RUN THE DEV SERVER I HAVE IT ALREADY RUNNING**
-- **DO NOT COMMIT YOUR CHANGES**
+- **Only commit changes if instructed to**
 
 ## Agent skills
 
