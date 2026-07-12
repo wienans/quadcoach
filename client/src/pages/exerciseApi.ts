@@ -47,7 +47,7 @@ export type ExerciseAccessEntry = {
 
 export type ExerciseAccessResponse = {
   hasAccess: boolean;
-  type: "owner" | "admin" | "granted" | null;
+  type: "owner" | "admin" | "granted" | "public" | null;
 };
 
 export const exerciseApiSlice = quadcoachApi.injectEndpoints({

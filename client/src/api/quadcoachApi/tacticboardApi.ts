@@ -49,7 +49,7 @@ export type AccessEntry = {
 
 export type AccessResponse = {
   hasAccess: boolean;
-  type: "owner" | "admin" | "granted" | null;
+  type: "owner" | "admin" | "granted" | "public" | null;
   level: AccessLevel | null;
 };
 
