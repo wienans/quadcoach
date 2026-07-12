@@ -11,6 +11,7 @@ import {
 } from "./helpers/practicePlanValidation";
 import User from "../models/user";
 import { logEvents } from "../middleware/logger";
+import { requireResourceAuthorization } from "./helpers/requireResourceAuthorization";
 
 interface RequestWithUser extends Request {
   UserInfo?: {
@@ -160,28 +161,20 @@ export const getPracticePlan = async (req: RequestWithUser, res: Response) => {
     }
     const result = await PracticePlan.findOne({ _id: req.params.id });
     if (result) {
-      // Check if the practice plan is private
-      if (result.isPrivate && result.user) {
-        const userId = req.UserInfo?.id;
-        const isOwner =
-          userId && userId !== "" && userId === result.user.toString();
-        const isAdmin =
-          req.UserInfo?.roles?.includes("Admin") ||
-          req.UserInfo?.roles?.includes("admin");
-
-        // Check if user has shared access (only if user is authenticated)
-        const hasSharedAccess =
-          userId && userId !== ""
-            ? await PracticePlanAccess.exists({
-                user: userId,
-                practicePlan: req.params.id,
-              })
-            : false;
-
-        if (!isOwner && !isAdmin && !hasSharedAccess) {
-          res.status(403).json({ message: "Forbidden" });
-          return;
-        }
+      if (
+        !(await requireResourceAuthorization(
+          req,
+          res,
+          {
+            type: "practicePlan",
+            id: req.params.id,
+            ownerId: result.user?.toString(),
+            isPrivate: result.isPrivate,
+          },
+          "view",
+        ))
+      ) {
+        return;
       }
 
       res.send(result);
@@ -205,22 +198,19 @@ export const patchPracticePlan = async (
 
     const findResult = await PracticePlan.findOne({ _id: req.params.id });
     if (findResult) {
-      if (!req.UserInfo?.id) {
-        res.status(401).json({ message: "Unauthorized" });
-        return;
-      }
-      const accessUser = await PracticePlanAccess.findOne({
-        user: req.UserInfo.id,
-        practicePlan: req.params.id,
-      });
-      const hasAccess =
-        findResult.user?.toString() === req.UserInfo.id ||
-        req.UserInfo.roles?.includes("Admin") ||
-        req.UserInfo.roles?.includes("admin") ||
-        (accessUser && accessUser.access == "edit");
-
-      if (!hasAccess) {
-        res.status(403).json({ message: "Forbidden" });
+      if (
+        !(await requireResourceAuthorization(
+          req,
+          res,
+          {
+            type: "practicePlan",
+            id: req.params.id,
+            ownerId: findResult.user?.toString(),
+            isPrivate: findResult.isPrivate,
+          },
+          "edit",
+        ))
+      ) {
         return;
       }
 
@@ -273,22 +263,19 @@ export const deletePracticePlan = async (
     const findResult = await PracticePlan.findOne({ _id: req.params.id });
 
     if (findResult) {
-      // Check permissions
-      if (!req.UserInfo?.id) {
-        res.status(401).json({ message: "Unauthorized" });
-        return;
-      }
-      const accessUser = await PracticePlanAccess.findOne({
-        user: req.UserInfo.id,
-        practicePlan: req.params.id,
-      });
-      const hasAccess =
-        findResult.user?.toString() === req.UserInfo.id ||
-        req.UserInfo.roles?.includes("Admin") ||
-        req.UserInfo.roles?.includes("admin");
-
-      if (!hasAccess) {
-        res.status(403).json({ message: "Forbidden" });
+      if (
+        !(await requireResourceAuthorization(
+          req,
+          res,
+          {
+            type: "practicePlan",
+            id: req.params.id,
+            ownerId: findResult.user?.toString(),
+            isPrivate: findResult.isPrivate,
+          },
+          "delete",
+        ))
+      ) {
         return;
       }
 
@@ -323,23 +310,19 @@ export const getAllAccessUsers = asyncHandler(
       return;
     }
 
-    // Check if user has access to view access list
-    if (!req.UserInfo?.id) {
-      res.status(401).json({ message: "Unauthorized" });
-      return;
-    }
-
-    const hasAccess =
-      practicePlan.user?.toString() === req.UserInfo.id ||
-      req.UserInfo.roles?.includes("Admin") ||
-      req.UserInfo.roles?.includes("admin") ||
-      (await PracticePlanAccess.exists({
-        user: req.UserInfo.id,
-        practicePlan: req.params.id,
-      }));
-
-    if (!hasAccess) {
-      res.status(403).json({ message: "Forbidden" });
+    if (
+      !(await requireResourceAuthorization(
+        req,
+        res,
+        {
+          type: "practicePlan",
+          id: req.params.id,
+          ownerId: practicePlan.user?.toString(),
+          isPrivate: practicePlan.isPrivate,
+        },
+        "manageAccess",
+      ))
+    ) {
       return;
     }
 
@@ -367,21 +350,19 @@ export const setAccess = asyncHandler(
       return;
     }
 
-    // Check if user is the creator/owner or admin (only they can grant access)
-    if (!req.UserInfo?.id) {
-      res.status(401).json({ message: "Unauthorized" });
-      return;
-    }
-
-    const isCreator =
-      practicePlan.user?.toString() === req.UserInfo.id ||
-      req.UserInfo.roles?.includes("Admin") ||
-      req.UserInfo.roles?.includes("admin");
-
-    if (!isCreator) {
-      res
-        .status(403)
-        .json({ message: "Only the creator can modify access settings" });
+    if (
+      !(await requireResourceAuthorization(
+        req,
+        res,
+        {
+          type: "practicePlan",
+          id: req.params.id,
+          ownerId: practicePlan.user?.toString(),
+          isPrivate: practicePlan.isPrivate,
+        },
+        "manageAccess",
+      ))
+    ) {
       return;
     }
 
@@ -433,21 +414,19 @@ export const deleteAccess = asyncHandler(
       return;
     }
 
-    // Check if user is the creator/owner or admin (only they can remove access)
-    if (!req.UserInfo?.id) {
-      res.status(401).json({ message: "Unauthorized" });
-      return;
-    }
-
-    const isCreator =
-      practicePlan.user?.toString() === req.UserInfo.id ||
-      req.UserInfo.roles?.includes("Admin") ||
-      req.UserInfo.roles?.includes("admin");
-
-    if (!isCreator) {
-      res
-        .status(403)
-        .json({ message: "Only the creator can modify access settings" });
+    if (
+      !(await requireResourceAuthorization(
+        req,
+        res,
+        {
+          type: "practicePlan",
+          id: req.params.id,
+          ownerId: practicePlan.user?.toString(),
+          isPrivate: practicePlan.isPrivate,
+        },
+        "manageAccess",
+      ))
+    ) {
       return;
     }
 
@@ -498,13 +477,19 @@ export const sharePracticePlan = asyncHandler(
       return;
     }
 
-    const isOwner = practicePlan.user?.toString() === req.UserInfo.id;
-    const isAdmin = req.UserInfo.roles?.some(
-      (role) => role.toLowerCase() === "admin",
-    );
-
-    if (!isOwner && !isAdmin) {
-      res.status(403).json({ message: "Forbidden" });
+    if (
+      !(await requireResourceAuthorization(
+        req,
+        res,
+        {
+          type: "practicePlan",
+          id: req.params.id,
+          ownerId: practicePlan.user?.toString(),
+          isPrivate: practicePlan.isPrivate,
+        },
+        "manageAccess",
+      ))
+    ) {
       return;
     }
 
@@ -582,19 +567,19 @@ export const createShareLink = asyncHandler(
       return;
     }
 
-    const accessUser = await PracticePlanAccess.findOne({
-      user: req.UserInfo.id,
-      practicePlan: req.params.id,
-    });
-
-    const hasEditAccess =
-      practicePlan.user?.toString() === req.UserInfo.id ||
-      req.UserInfo.roles?.includes("Admin") ||
-      req.UserInfo.roles?.includes("admin") ||
-      (accessUser && accessUser.access === "edit");
-
-    if (!hasEditAccess) {
-      res.status(403).json({ message: "Forbidden" });
+    if (
+      !(await requireResourceAuthorization(
+        req,
+        res,
+        {
+          type: "practicePlan",
+          id: req.params.id,
+          ownerId: practicePlan.user?.toString(),
+          isPrivate: practicePlan.isPrivate,
+        },
+        "edit",
+      ))
+    ) {
       return;
     }
     try {
@@ -639,19 +624,19 @@ export const deleteShareLink = asyncHandler(
       return;
     }
 
-    const accessUser = await PracticePlanAccess.findOne({
-      user: req.UserInfo.id,
-      practicePlan: req.params.id,
-    });
-
-    const hasEditAccess =
-      practicePlan.user?.toString() === req.UserInfo.id ||
-      req.UserInfo.roles?.includes("Admin") ||
-      req.UserInfo.roles?.includes("admin") ||
-      (accessUser && accessUser.access === "edit");
-
-    if (!hasEditAccess) {
-      res.status(403).json({ message: "Forbidden" });
+    if (
+      !(await requireResourceAuthorization(
+        req,
+        res,
+        {
+          type: "practicePlan",
+          id: req.params.id,
+          ownerId: practicePlan.user?.toString(),
+          isPrivate: practicePlan.isPrivate,
+        },
+        "edit",
+      ))
+    ) {
       return;
     }
 

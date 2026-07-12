@@ -8,6 +8,10 @@ import TacticboardFav from "../models/tacticboardFav";
 import TacticboardAccess from "../models/tacticboardAccess";
 import User from "../models/user";
 import { logEvents } from "../middleware/logger";
+import {
+  getResourceAuthorization,
+  requireResourceAuthorization,
+} from "./helpers/requireResourceAuthorization";
 
 interface UserInfo {
   id?: string;
@@ -223,28 +227,20 @@ export const getById = asyncHandler(
     if (mongoose.isValidObjectId(req.params.id)) {
       const result = await TacticBoard.findOne({ _id: req.params.id });
       if (result) {
-        // Check if the tacticboard is private
-        if (result.isPrivate && result.user) {
-          const userId = req.UserInfo?.id;
-          const isOwner =
-            userId && userId !== "" && userId === result.user.toString();
-          const isAdmin =
-            req.UserInfo?.roles?.includes("Admin") ||
-            req.UserInfo?.roles?.includes("admin");
-
-          // Check if user has shared access (only if user is authenticated)
-          const hasSharedAccess =
-            userId && userId !== ""
-              ? await TacticboardAccess.exists({
-                  user: userId,
-                  tacticboard: req.params.id,
-                })
-              : false;
-
-          if (!isOwner && !isAdmin && !hasSharedAccess) {
-            res.status(403).json({ message: "Forbidden" });
-            return;
-          }
+        if (
+          !(await requireResourceAuthorization(
+            req,
+            res,
+            {
+              type: "tacticBoard",
+              id: req.params.id,
+              ownerId: result.user?.toString(),
+              isPrivate: result.isPrivate ?? false,
+            },
+            "view",
+          ))
+        ) {
+          return;
         }
 
         res.send(result);
@@ -288,22 +284,19 @@ export const updateById = asyncHandler(
     if (mongoose.isValidObjectId(req.params.id)) {
       const findResult = await TacticBoard.findOne({ _id: req.params.id });
       if (findResult) {
-        if (!req.UserInfo?.id) {
-          res.status(401).json({ message: "Unauthorized" });
-          return;
-        }
-        const accessUser = await TacticboardAccess.findOne({
-          user: req.UserInfo.id,
-          tacticboard: req.params.id,
-        });
-        const hasAccess =
-          findResult.user?.toString() === req.UserInfo.id ||
-          req.UserInfo.roles?.includes("Admin") ||
-          req.UserInfo.roles?.includes("admin") ||
-          (accessUser && accessUser.access == "edit");
-
-        if (!hasAccess) {
-          res.status(403).json({ message: "Forbidden" });
+        if (
+          !(await requireResourceAuthorization(
+            req,
+            res,
+            {
+              type: "tacticBoard",
+              id: req.params.id,
+              ownerId: findResult.user?.toString(),
+              isPrivate: findResult.isPrivate ?? false,
+            },
+            "edit",
+          ))
+        ) {
           return;
         }
 
@@ -337,22 +330,19 @@ export const updatePageById = asyncHandler(
     ) {
       const findResult = await TacticBoard.findOne({ _id: req.params.id });
       if (findResult) {
-        if (!req.UserInfo?.id) {
-          res.status(401).json({ message: "Unauthorized" });
-          return;
-        }
-        const accessUser = await TacticboardAccess.findOne({
-          user: req.UserInfo.id,
-          tacticboard: req.params.id,
-        });
-        const hasAccess =
-          findResult.user?.toString() === req.UserInfo.id ||
-          req.UserInfo.roles?.includes("Admin") ||
-          req.UserInfo.roles?.includes("admin") ||
-          (accessUser && accessUser.access == "edit");
-
-        if (!hasAccess) {
-          res.status(403).json({ message: "Forbidden" });
+        if (
+          !(await requireResourceAuthorization(
+            req,
+            res,
+            {
+              type: "tacticBoard",
+              id: tacticBoardId,
+              ownerId: findResult.user?.toString(),
+              isPrivate: findResult.isPrivate ?? false,
+            },
+            "edit",
+          ))
+        ) {
           return;
         }
 
@@ -392,22 +382,19 @@ export const updateMetaById = asyncHandler(
     if (mongoose.isValidObjectId(tacticBoardId)) {
       const findResult = await TacticBoard.findOne({ _id: tacticBoardId });
       if (findResult) {
-        if (!req.UserInfo?.id) {
-          res.status(401).json({ message: "Unauthorized" });
-          return;
-        }
-        const accessUser = await TacticboardAccess.findOne({
-          user: req.UserInfo.id,
-          tacticboard: req.params.id,
-        });
-        const hasAccess =
-          findResult.user?.toString() === req.UserInfo.id ||
-          req.UserInfo.roles?.includes("Admin") ||
-          req.UserInfo.roles?.includes("admin") ||
-          (accessUser && accessUser.access == "edit");
-
-        if (!hasAccess) {
-          res.status(403).json({ message: "Forbidden" });
+        if (
+          !(await requireResourceAuthorization(
+            req,
+            res,
+            {
+              type: "tacticBoard",
+              id: tacticBoardId,
+              ownerId: findResult.user?.toString(),
+              isPrivate: findResult.isPrivate ?? false,
+            },
+            "edit",
+          ))
+        ) {
           return;
         }
 
@@ -472,23 +459,19 @@ export const deleteById = asyncHandler(
       const findResult = await TacticBoard.findOne({ _id: req.params.id });
 
       if (findResult) {
-        // Check permissions
-        if (!req.UserInfo?.id) {
-          res.status(401).json({ message: "Unauthorized" });
-          return;
-        }
-        const accessUser = await TacticboardAccess.findOne({
-          user: req.UserInfo.id,
-          tacticboard: req.params.id,
-        });
-        const hasAccess =
-          findResult.user?.toString() === req.UserInfo.id ||
-          req.UserInfo.roles?.includes("Admin") ||
-          req.UserInfo.roles?.includes("admin") ||
-          (accessUser && accessUser.access == "edit");
-
-        if (!hasAccess) {
-          res.status(403).json({ message: "Forbidden" });
+        if (
+          !(await requireResourceAuthorization(
+            req,
+            res,
+            {
+              type: "tacticBoard",
+              id: req.params.id,
+              ownerId: findResult.user?.toString(),
+              isPrivate: findResult.isPrivate ?? false,
+            },
+            "delete",
+          ))
+        ) {
           return;
         }
 
@@ -541,23 +524,19 @@ export const createNewPage = asyncHandler(
     if (mongoose.isValidObjectId(tacticBoardId)) {
       const findResult = await TacticBoard.findOne({ _id: tacticBoardId });
       if (findResult) {
-        // Authorization check
-        if (!req.UserInfo?.id) {
-          res.status(401).json({ message: "Unauthorized" });
-          return;
-        }
-        const accessUser = await TacticboardAccess.findOne({
-          user: req.UserInfo.id,
-          tacticboard: req.params.id,
-        });
-        const hasAccess =
-          findResult.user?.toString() === req.UserInfo.id ||
-          req.UserInfo.roles?.includes("Admin") ||
-          req.UserInfo.roles?.includes("admin") ||
-          (accessUser && accessUser.access == "edit");
-
-        if (!hasAccess) {
-          res.status(403).json({ message: "Forbidden" });
+        if (
+          !(await requireResourceAuthorization(
+            req,
+            res,
+            {
+              type: "tacticBoard",
+              id: tacticBoardId,
+              ownerId: findResult.user?.toString(),
+              isPrivate: findResult.isPrivate ?? false,
+            },
+            "edit",
+          ))
+        ) {
           return;
         }
 
@@ -592,23 +571,19 @@ export const insertPageAtPosition = asyncHandler(
     if (mongoose.isValidObjectId(tacticBoardId) && !isNaN(insertPosition)) {
       const findResult = await TacticBoard.findOne({ _id: tacticBoardId });
       if (findResult) {
-        // Authorization check
-        if (!req.UserInfo?.id) {
-          res.status(401).json({ message: "Unauthorized" });
-          return;
-        }
-        const accessUser = await TacticboardAccess.findOne({
-          user: req.UserInfo.id,
-          tacticboard: req.params.id,
-        });
-        const hasAccess =
-          findResult.user?.toString() === req.UserInfo.id ||
-          req.UserInfo.roles?.includes("Admin") ||
-          req.UserInfo.roles?.includes("admin") ||
-          (accessUser && accessUser.access == "edit");
-
-        if (!hasAccess) {
-          res.status(403).json({ message: "Forbidden" });
+        if (
+          !(await requireResourceAuthorization(
+            req,
+            res,
+            {
+              type: "tacticBoard",
+              id: tacticBoardId,
+              ownerId: findResult.user?.toString(),
+              isPrivate: findResult.isPrivate ?? false,
+            },
+            "edit",
+          ))
+        ) {
           return;
         }
 
@@ -661,23 +636,19 @@ export const deletePageById = asyncHandler(
     ) {
       const findResult = await TacticBoard.findOne({ _id: tacticBoardId });
       if (findResult) {
-        // Authorization check
-        if (!req.UserInfo?.id) {
-          res.status(401).json({ message: "Unauthorized" });
-          return;
-        }
-        const accessUser = await TacticboardAccess.findOne({
-          user: req.UserInfo.id,
-          tacticboard: req.params.id,
-        });
-        const hasAccess =
-          findResult.user?.toString() === req.UserInfo.id ||
-          req.UserInfo.roles?.includes("Admin") ||
-          req.UserInfo.roles?.includes("admin") ||
-          (accessUser && accessUser.access == "edit");
-
-        if (!hasAccess) {
-          res.status(403).json({ message: "Forbidden" });
+        if (
+          !(await requireResourceAuthorization(
+            req,
+            res,
+            {
+              type: "tacticBoard",
+              id: tacticBoardId,
+              ownerId: findResult.user?.toString(),
+              isPrivate: findResult.isPrivate ?? false,
+            },
+            "edit",
+          ))
+        ) {
           return;
         }
 
@@ -721,31 +692,26 @@ export const checkAccess = asyncHandler(
       return;
     }
 
-    // Check if user is the owner
-    if (tacticboard.user?.toString() === req.UserInfo.id) {
-      res.json({ hasAccess: true, type: "owner", level: "edit" });
-      return;
-    }
-
-    // Check if user is an admin
-    if (
-      req.UserInfo.roles?.includes("Admin") ||
-      req.UserInfo.roles?.includes("admin")
-    ) {
-      res.json({ hasAccess: true, type: "admin", level: "edit" });
-      return;
-    }
-
-    // Check if user has been granted access
-    const access = await TacticboardAccess.findOne({
-      user: req.UserInfo.id,
-      tacticboard: req.params.id,
-    });
-
+    const decision = await getResourceAuthorization(
+      req,
+      {
+        type: "tacticBoard",
+        id: req.params.id,
+        ownerId: tacticboard.user?.toString(),
+        isPrivate: tacticboard.isPrivate ?? false,
+      },
+      "view",
+    );
     res.json({
-      hasAccess: !!access,
-      type: access ? "granted" : null,
-      level: access?.access || null,
+      hasAccess: decision.allowed,
+      type: decision.allowed ? decision.basis : null,
+      level:
+        decision.allowed && decision.basis === "granted"
+          ? decision.accessLevel
+          : decision.allowed &&
+              (decision.basis === "owner" || decision.basis === "admin")
+            ? "edit"
+            : null,
     });
   },
 );
@@ -766,21 +732,19 @@ export const setAccess = asyncHandler(
       return;
     }
 
-    // Check if user is the creator/owner or admin (only they can grant access)
-    if (!req.UserInfo?.id) {
-      res.status(401).json({ message: "Unauthorized" });
-      return;
-    }
-
-    const isCreator =
-      tacticboard.user?.toString() === req.UserInfo.id ||
-      req.UserInfo.roles?.includes("Admin") ||
-      req.UserInfo.roles?.includes("admin");
-
-    if (!isCreator) {
-      res
-        .status(403)
-        .json({ message: "Only the creator can modify access settings" });
+    if (
+      !(await requireResourceAuthorization(
+        req,
+        res,
+        {
+          type: "tacticBoard",
+          id: req.params.id,
+          ownerId: tacticboard.user?.toString(),
+          isPrivate: tacticboard.isPrivate ?? false,
+        },
+        "manageAccess",
+      ))
+    ) {
       return;
     }
 
@@ -832,21 +796,19 @@ export const deleteAccess = asyncHandler(
       return;
     }
 
-    // Check if user is the creator/owner or admin (only they can remove access)
-    if (!req.UserInfo?.id) {
-      res.status(401).json({ message: "Unauthorized" });
-      return;
-    }
-
-    const isCreator =
-      tacticboard.user?.toString() === req.UserInfo.id ||
-      req.UserInfo.roles?.includes("Admin") ||
-      req.UserInfo.roles?.includes("admin");
-
-    if (!isCreator) {
-      res
-        .status(403)
-        .json({ message: "Only the creator can modify access settings" });
+    if (
+      !(await requireResourceAuthorization(
+        req,
+        res,
+        {
+          type: "tacticBoard",
+          id: req.params.id,
+          ownerId: tacticboard.user?.toString(),
+          isPrivate: tacticboard.isPrivate ?? false,
+        },
+        "manageAccess",
+      ))
+    ) {
       return;
     }
 
@@ -891,20 +853,19 @@ export const duplicateById = asyncHandler(
       return;
     }
 
-    const isOwner = tacticboard.user?.toString() === req.UserInfo.id;
-    const isAdmin =
-      req.UserInfo.roles?.includes("Admin") ||
-      req.UserInfo.roles?.includes("admin");
-    const hasSharedAccess = await TacticboardAccess.exists({
-      user: req.UserInfo.id,
-      tacticboard: req.params.id,
-    });
-
-    const canDuplicate =
-      !tacticboard.isPrivate || isOwner || isAdmin || Boolean(hasSharedAccess);
-
-    if (!canDuplicate) {
-      res.status(403).json({ message: "Forbidden" });
+    if (
+      !(await requireResourceAuthorization(
+        req,
+        res,
+        {
+          type: "tacticBoard",
+          id: req.params.id,
+          ownerId: tacticboard.user?.toString(),
+          isPrivate: tacticboard.isPrivate ?? false,
+        },
+        "view",
+      ))
+    ) {
       return;
     }
 
@@ -966,23 +927,19 @@ export const getAllAccessUsers = asyncHandler(
       return;
     }
 
-    // Check if user has access to view access list
-    if (!req.UserInfo?.id) {
-      res.status(401).json({ message: "Unauthorized" });
-      return;
-    }
-
-    const hasAccess =
-      tacticboard.user?.toString() === req.UserInfo.id ||
-      req.UserInfo.roles?.includes("Admin") ||
-      req.UserInfo.roles?.includes("admin") ||
-      (await TacticboardAccess.exists({
-        user: req.UserInfo.id,
-        tacticboard: req.params.id,
-      }));
-
-    if (!hasAccess) {
-      res.status(403).json({ message: "Forbidden" });
+    if (
+      !(await requireResourceAuthorization(
+        req,
+        res,
+        {
+          type: "tacticBoard",
+          id: req.params.id,
+          ownerId: tacticboard.user?.toString(),
+          isPrivate: tacticboard.isPrivate ?? false,
+        },
+        "manageAccess",
+      ))
+    ) {
       return;
     }
 
@@ -1021,13 +978,19 @@ export const shareTacticBoard = asyncHandler(
       return;
     }
 
-    const isOwner = tacticBoard.user?.toString() === req.UserInfo.id;
-    const isAdmin = req.UserInfo.roles?.some(
-      (role) => role.toLowerCase() === "admin",
-    );
-
-    if (!isOwner && !isAdmin) {
-      res.status(403).json({ message: "Forbidden" });
+    if (
+      !(await requireResourceAuthorization(
+        req,
+        res,
+        {
+          type: "tacticBoard",
+          id: req.params.id,
+          ownerId: tacticBoard.user?.toString(),
+          isPrivate: tacticBoard.isPrivate ?? false,
+        },
+        "manageAccess",
+      ))
+    ) {
       return;
     }
 
@@ -1105,19 +1068,19 @@ export const createShareLink = asyncHandler(
       return;
     }
 
-    const accessUser = await TacticboardAccess.findOne({
-      user: req.UserInfo.id,
-      tacticboard: req.params.id,
-    });
-
-    const hasEditAccess =
-      tacticboard.user?.toString() === req.UserInfo.id ||
-      req.UserInfo.roles?.includes("Admin") ||
-      req.UserInfo.roles?.includes("admin") ||
-      (accessUser && accessUser.access === "edit");
-
-    if (!hasEditAccess) {
-      res.status(403).json({ message: "Forbidden" });
+    if (
+      !(await requireResourceAuthorization(
+        req,
+        res,
+        {
+          type: "tacticBoard",
+          id: req.params.id,
+          ownerId: tacticboard.user?.toString(),
+          isPrivate: tacticboard.isPrivate ?? false,
+        },
+        "edit",
+      ))
+    ) {
       return;
     }
     try {
@@ -1162,19 +1125,19 @@ export const deleteShareLink = asyncHandler(
       return;
     }
 
-    const accessUser = await TacticboardAccess.findOne({
-      user: req.UserInfo.id,
-      tacticboard: req.params.id,
-    });
-
-    const hasEditAccess =
-      tacticboard.user?.toString() === req.UserInfo.id ||
-      req.UserInfo.roles?.includes("Admin") ||
-      req.UserInfo.roles?.includes("admin") ||
-      (accessUser && accessUser.access === "edit");
-
-    if (!hasEditAccess) {
-      res.status(403).json({ message: "Forbidden" });
+    if (
+      !(await requireResourceAuthorization(
+        req,
+        res,
+        {
+          type: "tacticBoard",
+          id: req.params.id,
+          ownerId: tacticboard.user?.toString(),
+          isPrivate: tacticboard.isPrivate ?? false,
+        },
+        "edit",
+      ))
+    ) {
       return;
     }
 
