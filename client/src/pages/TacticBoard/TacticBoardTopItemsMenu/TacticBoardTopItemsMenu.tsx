@@ -33,7 +33,7 @@ import { v4 as uuidv4 } from "uuid";
 import { setUuid } from "../../../contexts/tacticBoard/TacticBoardFabricJsContext/fabricTypes";
 
 type TacticBoardTopItemMenuProps = {
-  isPrivileged: boolean;
+  canEdit: boolean;
   isEditMode: boolean;
   onDelete: () => void;
 };
@@ -41,7 +41,7 @@ type TacticBoardTopItemMenuProps = {
 type ToolType = "cursor" | "pencil" | "line" | "text";
 
 const TacticBoardTopItemsMenu = ({
-  isPrivileged,
+  canEdit,
   isEditMode,
   onDelete,
 }: TacticBoardTopItemMenuProps): JSX.Element => {
@@ -81,12 +81,10 @@ const TacticBoardTopItemsMenu = ({
   const [currentFontSize, setCurrentFontSize] = useState<number>(24);
 
   const [currentThickness, setCurrentThickness] = useState(1);
-  const [currentLineStyle, setCurrentLineStyle] = useState<LineStyle>(
-    getLineStyle(),
-  );
-  const [arrowTipEnabled, setArrowTipEnabledState] = useState<boolean>(
-    getArrowTipEnabled(),
-  );
+  const [currentLineStyle, setCurrentLineStyle] =
+    useState<LineStyle>(getLineStyle());
+  const [arrowTipEnabled, setArrowTipEnabledState] =
+    useState<boolean>(getArrowTipEnabled());
 
   const toggleItems = () => {
     dispatch(toggleTacticBoardItemsDrawerOpen());
@@ -101,7 +99,7 @@ const TacticBoardTopItemsMenu = ({
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Delete" && isPrivileged && isEditMode) {
+      if (event.key === "Delete" && canEdit && isEditMode) {
         onDelete();
       }
     };
@@ -110,7 +108,7 @@ const TacticBoardTopItemsMenu = ({
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [isPrivileged, isEditMode, onDelete]);
+  }, [canEdit, isEditMode, onDelete]);
 
   const syncSelectedTextbox = useCallback(() => {
     const canvas = canvasFabricRef.current;
@@ -326,7 +324,7 @@ const TacticBoardTopItemsMenu = ({
         }}
       >
         {/* MENU BUTTON START */}
-        {isPrivileged && isEditMode && (
+        {canEdit && isEditMode && (
           <Tooltip
             title={t("TacticBoard:topMenu.itemsMenuButton.tooltip", {
               context: tacticBoardItemsDrawerOpen ? "open" : "closed",
@@ -349,7 +347,7 @@ const TacticBoardTopItemsMenu = ({
         )}
         {/* MENU BUTTON END */}
         {/* DRAW BUTTON START */}
-        {isPrivileged && isEditMode && (
+        {canEdit && isEditMode && (
           <>
             <Select
               id="tool-select"
@@ -481,7 +479,7 @@ const TacticBoardTopItemsMenu = ({
         )}
         {/* DRAW BUTTON END */}
 
-        {isPrivileged && isEditMode && selectedTextbox && (
+        {canEdit && isEditMode && selectedTextbox && (
           <>
             <Tooltip title={t("TacticBoard:topMenu.textColorButton.tooltip")}>
               <span>
@@ -533,7 +531,7 @@ const TacticBoardTopItemsMenu = ({
         {/* TEXT BUTTON END */}
 
         {/* DELETE BUTTON START */}
-        {isPrivileged && isEditMode && (
+        {canEdit && isEditMode && (
           <Tooltip title={t("TacticBoard:topMenu.objectDeleteButton.tooltip")}>
             <span>
               <ToggleButton

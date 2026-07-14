@@ -7,6 +7,12 @@ import ExerciseAccess from "../models/exerciseAccess";
 import User from "../models/user";
 import { PracticePlan } from "../models/practicePlan";
 import TacticBoard from "../models/tacticboard";
+import {
+  getResourceAuthorization,
+  requireResourceAuthorization,
+  serializeResourceAuthorizationDecision,
+} from "./helpers/requireResourceAuthorization";
+import { authorizationResourceFor } from "../authorization/resourceAuthorization";
 
 interface RequestWithUser extends Request {
   UserInfo?: {
@@ -216,22 +222,14 @@ export const updateById = asyncHandler(
     if (mongoose.isValidObjectId(req.params.id)) {
       const findResult = await Exercise.findOne({ _id: req.params.id });
       if (findResult) {
-        if (!req.UserInfo?.id) {
-          res.status(401).json({ message: "Unauthorized" });
-          return;
-        }
-
-        const accessUser = await ExerciseAccess.findOne({
-          user: req.UserInfo.id,
-          exercise: req.params.id,
-        });
-        const hasAccess =
-          findResult.user?.toString() === req.UserInfo.id ||
-          req.UserInfo.roles?.includes("Admin") ||
-          req.UserInfo.roles?.includes("admin") ||
-          (accessUser && accessUser.access == "edit");
-        if (!hasAccess) {
-          res.status(403).json({ message: "Forbidden" });
+        if (
+          !(await requireResourceAuthorization(
+            req,
+            res,
+            authorizationResourceFor.exercise(req.params.id, findResult),
+            "edit",
+          ))
+        ) {
           return;
         }
 
@@ -252,9 +250,13 @@ export const updateById = asyncHandler(
           return;
         }
 
+        const updates = { ...(req.body as Record<string, unknown>) };
+        delete updates.user;
+        delete updates.owner;
+
         const result = await Exercise.updateOne(
           { _id: req.params.id },
-          { $set: req.body }
+          { $set: updates }
         );
         res.send(result);
       } else {
@@ -274,22 +276,14 @@ export const deleteById = asyncHandler(
     if (mongoose.isValidObjectId(req.params.id)) {
       const findResult = await Exercise.findOne({ _id: req.params.id });
       if (findResult) {
-        if (!req.UserInfo?.id) {
-          res.status(401).json({ message: "Unauthorized" });
-          return;
-        }
-        const accessUser = await ExerciseAccess.findOne({
-          user: req.UserInfo.id,
-          exercise: req.params.id,
-        });
-        const hasAccess =
-          findResult.user?.toString() === req.UserInfo.id ||
-          req.UserInfo.roles?.includes("Admin") ||
-          req.UserInfo.roles?.includes("admin") ||
-          (accessUser && accessUser.access == "edit");
-
-        if (!hasAccess) {
-          res.status(403).json({ message: "Forbidden" });
+        if (
+          !(await requireResourceAuthorization(
+            req,
+            res,
+            authorizationResourceFor.exercise(req.params.id, findResult),
+            "delete",
+          ))
+        ) {
           return;
         }
 
@@ -376,23 +370,14 @@ export const setAccess = asyncHandler(
       return;
     }
 
-    // Check if user has access to grant access
-    if (!req.UserInfo?.id) {
-      res.status(401).json({ message: "Unauthorized" });
-      return;
-    }
-
-    const hasAccess =
-      exercise.user?.toString() === req.UserInfo.id ||
-      req.UserInfo.roles?.includes("Admin") ||
-      req.UserInfo.roles?.includes("admin") ||
-      (await ExerciseAccess.exists({
-        user: req.UserInfo.id,
-        exercise: req.params.id,
-      }));
-
-    if (!hasAccess) {
-      res.status(403).json({ message: "Forbidden" });
+    if (
+      !(await requireResourceAuthorization(
+        req,
+        res,
+        authorizationResourceFor.exercise(req.params.id, exercise),
+        "manageAccess",
+      ))
+    ) {
       return;
     }
 
@@ -446,23 +431,14 @@ export const deleteAccess = asyncHandler(
       return;
     }
 
-    // Check if user has access to remove access
-    if (!req.UserInfo?.id) {
-      res.status(401).json({ message: "Unauthorized" });
-      return;
-    }
-
-    const hasAccess =
-      exercise.user?.toString() === req.UserInfo.id ||
-      req.UserInfo.roles?.includes("Admin") ||
-      req.UserInfo.roles?.includes("admin") ||
-      (await ExerciseAccess.exists({
-        user: req.UserInfo.id,
-        exercise: req.params.id,
-      }));
-
-    if (!hasAccess) {
-      res.status(403).json({ message: "Forbidden" });
+    if (
+      !(await requireResourceAuthorization(
+        req,
+        res,
+        authorizationResourceFor.exercise(req.params.id, exercise),
+        "manageAccess",
+      ))
+    ) {
       return;
     }
 
@@ -507,44 +483,13 @@ export const checkAccess = asyncHandler(
       return;
     }
 
-    // Check if user is the owner
-    if (exercise.user?.toString() === req.UserInfo.id) {
-      res.json({ hasAccess: true, type: "owner" });
-      return;
-    }
+    const decision = await getResourceAuthorization(
+      req,
+      authorizationResourceFor.exercise(req.params.id, exercise),
+      "view",
+    );
 
-    // Check if user is an admin
-    if (
-      req.UserInfo.roles?.includes("Admin") ||
-      req.UserInfo.roles?.includes("admin")
-    ) {
-      res.json({ hasAccess: true, type: "admin" });
-      return;
-    }
-
-    // Check if user has been granted access
-    const accessEntry = await ExerciseAccess.findOne({
-      user: req.UserInfo.id,
-      exercise: req.params.id,
-    });
-
-    if (accessEntry) {
-      res.json({ hasAccess: true, type: "granted" });
-      return;
-    }
-
-    res.json({ hasAccess: false, type: null });
-
-    // Check if user has been granted access
-    const access = await ExerciseAccess.findOne({
-      user: req.UserInfo.id,
-      exercise: req.params.id,
-    });
-
-    res.json({
-      hasAccess: !!access,
-      type: access ? "granted" : null,
-    });
+    res.json(serializeResourceAuthorizationDecision(decision));
   }
 );
 
@@ -563,23 +508,14 @@ export const getAllAccessUsers = asyncHandler(
       res.status(404).json({ message: "Exercise not found" });
       return;
     }
-    // Check if user has access
-    if (!req.UserInfo?.id) {
-      res.status(401).json({ message: "Unauthorized" });
-      return;
-    }
-
-    const hasAccess =
-      exercise.user?.toString() === req.UserInfo.id ||
-      req.UserInfo.roles?.includes("Admin") ||
-      req.UserInfo.roles?.includes("admin") ||
-      (await ExerciseAccess.exists({
-        user: req.UserInfo.id,
-        exercise: req.params.id,
-      }));
-
-    if (!hasAccess) {
-      res.status(403).json({ message: "Forbidden" });
+    if (
+      !(await requireResourceAuthorization(
+        req,
+        res,
+        authorizationResourceFor.exercise(req.params.id, exercise),
+        "manageAccess",
+      ))
+    ) {
       return;
     }
 
@@ -621,13 +557,14 @@ export const shareExercise = asyncHandler(
       return;
     }
 
-    const isOwner = exercise.user?.toString() === req.UserInfo.id;
-    const isAdmin = req.UserInfo.roles?.some(
-      (role) => role.toLowerCase() === "admin"
-    );
-
-    if (!isOwner && !isAdmin) {
-      res.status(403).json({ message: "Forbidden" });
+    if (
+      !(await requireResourceAuthorization(
+        req,
+        res,
+        authorizationResourceFor.exercise(req.params.id, exercise),
+        "manageAccess",
+      ))
+    ) {
       return;
     }
 

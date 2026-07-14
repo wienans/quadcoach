@@ -33,7 +33,8 @@ type TacticBoardTopMenuProps = {
   saveTacticBoard: () => void;
   tacticBoard: TacticBoard;
   isTacticBoardLoading: boolean;
-  isPrivileged: boolean;
+  canEdit: boolean;
+  canDelete: boolean;
   currentPage: number;
   onLoadPage: (
     page: number,
@@ -56,7 +57,8 @@ const TacticBoardTopMenu = ({
   saveTacticBoard,
   tacticBoard,
   isTacticBoardLoading,
-  isPrivileged,
+  canEdit,
+  canDelete,
   currentPage,
   onLoadPage,
   setPage,
@@ -77,7 +79,7 @@ const TacticBoardTopMenu = ({
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
 
   const onToggleEditMode = () => {
-    if (isPrivileged && isEditMode) {
+    if (canEdit && isEditMode) {
       saveTacticBoard();
     }
     setSelection(!isEditMode);
@@ -177,7 +179,7 @@ const TacticBoardTopMenu = ({
           )}
 
           {/* ANIMATION BUTTON END */}
-          {isPrivileged && isEditMode && (
+          {canEdit && isEditMode && (
             <Tooltip
               title={t("TacticBoard:topMenu.pagination.tooltip_removePage")}
             >
@@ -210,7 +212,7 @@ const TacticBoardTopMenu = ({
             disabled={isTacticBoardLoading || isRecording || isAnimating}
             onChange={handleChange}
           />
-          {isPrivileged && isEditMode && (
+          {canEdit && isEditMode && (
             <Tooltip
               title={t("TacticBoard:topMenu.pagination.tooltip_addPage")}
             >
@@ -273,7 +275,7 @@ const TacticBoardTopMenu = ({
           </span>
         </Tooltip>
         {/* EDIT/SAVE BUTTON START */}
-        {isPrivileged && (
+        {canEdit && (
           <Tooltip
             title={t("TacticBoard:topMenu.isEditModeButton.tooltip", {
               context: isEditMode ? "editMode" : "viewMode",
@@ -299,7 +301,7 @@ const TacticBoardTopMenu = ({
             </span>
           </Tooltip>
         )}
-        {isPrivileged && (
+        {canDelete && (
           <Tooltip title={t("TacticBoard:topMenu.deleteButton.tooltip")}>
             <span>
               <ToggleButton

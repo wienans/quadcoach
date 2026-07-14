@@ -28,6 +28,7 @@ import {
   useGetAllExerciseAccessUsersQuery,
   useShareExerciseMutation,
   useDeleteExerciseAccessMutation,
+  useCheckExerciseAccessQuery,
 } from "../../../exerciseApi";
 import { useTranslation } from "react-i18next";
 import {
@@ -50,7 +51,12 @@ import {
   useRemoveFavoriteExerciseMutation,
 } from "../../../../api/quadcoachApi/favoriteApi";
 
-import { ExercisePartialId, Block } from "../../../../api/quadcoachApi/domain";
+import {
+  Block,
+  canEditResource,
+  canManageResource,
+  ExercisePartialId,
+} from "../../../../api/quadcoachApi/domain";
 import {
   FormikProvider,
   useFormik,
@@ -71,8 +77,7 @@ const Exercise = () => {
   const { t } = useTranslation("Exercise");
   const { id: exerciseId } = useParams();
   const navigate = useNavigate();
-  const [isPrivileged, setIsPrivileged] = useState<boolean>(false);
-  const { id: userId, roles: userRoles } = useAuth();
+  const { id: userId } = useAuth();
   const [isFavorite, setIsFavorite] = useState<boolean>(false);
   const [userEmail, setUserEmail] = useState<string>("");
   const [emailError, setEmailError] = useState<string>("");
@@ -114,15 +119,16 @@ const Exercise = () => {
   const [getFavoriteExercises, { data: favoriteExercises }] =
     useLazyGetFavoriteExercisesQuery();
 
+  const { data: authorization } = useCheckExerciseAccessQuery(
+    exerciseId || "",
+    { skip: !exerciseId || !userId },
+  );
+  const canEdit = canEditResource(authorization);
+  const canManageResourceActions = canManageResource(authorization);
   const { data: accessUsers } = useGetAllExerciseAccessUsersQuery(
     exerciseId || "",
-    { skip: !exerciseId },
+    { skip: !exerciseId || !canManageResourceActions },
   );
-
-  const isCreator =
-    exercise?.user?.toString() === userId ||
-    userRoles.includes("Admin") ||
-    userRoles.includes("admin");
 
   const [shareExercise, { isLoading: isShareExerciseLoading }] =
     useShareExerciseMutation();
@@ -152,27 +158,6 @@ const Exercise = () => {
       );
     }
   }, [favoriteExercises, setIsFavorite, exerciseId]);
-
-  useEffect(() => {
-    if (!userId) {
-      setIsPrivileged(false);
-      return;
-    }
-    if (isCreator) {
-      setIsPrivileged(true);
-      return;
-    }
-    if (
-      accessUsers &&
-      accessUsers.some(
-        (entry) => entry.user._id === userId && entry.access === "edit",
-      )
-    ) {
-      setIsPrivileged(true);
-    } else {
-      setIsPrivileged(false);
-    }
-  }, [userId, isCreator, accessUsers]);
 
   // Add update exercise mutation
   const [
@@ -289,7 +274,7 @@ const Exercise = () => {
   // Auto-enter edit mode if URL has ?edit=1 and user is privileged (runs after formik init)
   useEffect(() => {
     if (autoEditAppliedRef.current) return;
-    if (!isEditMode && isPrivileged) {
+    if (!isEditMode && canEdit) {
       const params = new URLSearchParams(location.search);
       if (params.get("edit") === "1") {
         autoEditAppliedRef.current = true;
@@ -305,11 +290,11 @@ const Exercise = () => {
         autoEditAppliedRef.current = true; // no edit flag; avoid re-checking
       }
     }
-  }, [location.search, isPrivileged, isEditMode, formik, location.pathname]);
+  }, [location.search, canEdit, isEditMode, formik, location.pathname]);
 
   // Edit mode toggle functionality
   const onToggleEditMode = async () => {
-    if (!isPrivileged) return;
+    if (!canEdit) return;
     if (isEditMode) {
       const errors = await formik.validateForm();
       if (Object.keys(errors).length === 0) {
@@ -454,7 +439,7 @@ const Exercise = () => {
 
   const exerciseMenuActions: HeaderOverflowAction[] = [];
 
-  if (isPrivileged) {
+  if (canManageResourceActions) {
     exerciseMenuActions.push({
       key: "delete",
       label: t("Exercise:menu.delete"),
@@ -511,7 +496,7 @@ const Exercise = () => {
               </IconButton>
             </Tooltip>
           )}
-          {isPrivileged && (
+          {canEdit && (
             <Tooltip
               title={t("Exercise:updateExercise", {
                 context: isEditMode ? "editMode" : "viewMode",
@@ -565,7 +550,7 @@ const Exercise = () => {
               />
             </Tooltip>
           ),
-          isPrivileged && (
+          canEdit && (
             <Tooltip
               key="edit"
               title={t("Exercise:updateExercise", {
@@ -727,7 +712,7 @@ const Exercise = () => {
             />
           )}
 
-          {isEditMode && isCreator && (
+          {isEditMode && canManageResourceActions && (
             <Accordion defaultExpanded>
               <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                 {t("Exercise:access.title")}

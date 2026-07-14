@@ -41,8 +41,9 @@ import {
   useCreatePracticePlanShareLinkMutation,
   useDeletePracticePlanShareLinkMutation,
   useRemovePracticePlanAccessMutation,
+  useCheckPracticePlanAccessQuery,
+  AccessLevel,
 } from "../../api/quadcoachApi/practicePlansApi";
-import { AccessLevel } from "../../api/quadcoachApi/tacticboardApi";
 import {
   useAddFavoritePracticePlanMutation,
   useRemoveFavoritePracticePlanMutation,
@@ -71,6 +72,10 @@ import { useFormik } from "formik";
 
 import { FieldArray, FieldArrayRenderProps, FormikProvider } from "formik";
 import { PracticePlanEntityPartialId } from "../../api/quadcoachApi/domain/PracticePlan";
+import {
+  canEditResource,
+  canManageResource,
+} from "../../api/quadcoachApi/domain";
 import PracticeSection from "./PracticeSection";
 import { lazy, Suspense } from "react";
 import MDEditor from "@uiw/react-md-editor";
@@ -91,10 +96,9 @@ const PracticePlanner = ({
   const { t } = useTranslation("PracticePlanner");
   const navigate = useNavigate();
   const location = useLocation();
-  const [isPrivileged, setIsPrivileged] = useState<boolean>(false);
   const [isFavorite, setIsFavorite] = useState<boolean>(false);
   const [isEditMode, setIsEditMode] = useState<boolean>(false);
-  const { id: userId, roles: userRoles } = useAuth();
+  const { id: userId } = useAuth();
   const autoEditAppliedRef = useRef(false);
   // Track whether to show validation summary (only after failed save attempt)
   const [showValidationSummary, setShowValidationSummary] =
@@ -137,6 +141,12 @@ const PracticePlanner = ({
   const isPlanLoading = isSharedMode ? isSharedPlanLoading : isOwnPlanLoading;
   const isPlanError = isSharedMode ? isSharedPlanError : isOwnPlanError;
   const currentPlanId = planId || plan?._id;
+  const { data: authorization } = useCheckPracticePlanAccessQuery(
+    currentPlanId || "",
+    { skip: !currentPlanId || !userId || isSharedMode },
+  );
+  const canEdit = canEditResource(authorization);
+  const canManageResourceActions = canManageResource(authorization);
   const [
     updatePlan,
     { isLoading: isUpdatePlanLoading, isSuccess: isUpdatePlanSuccess },
@@ -158,8 +168,8 @@ const PracticePlanner = ({
     useRemoveFavoritePracticePlanMutation();
 
   const { data: accessUsers } = useGetAllPracticePlanAccessUsersQuery(
-    planId || "",
-    { skip: !planId || !userId || userId === "" || isSharedMode },
+    currentPlanId || "",
+    { skip: !currentPlanId || !canManageResourceActions },
   );
 
   const [sharePracticePlan, { isLoading: isSharePracticePlanLoading }] =
@@ -174,12 +184,6 @@ const PracticePlanner = ({
     removePracticePlanAccess,
     { isLoading: isRemovePracticePlanAccessLoading },
   ] = useRemovePracticePlanAccessMutation();
-
-  const isCreator =
-    !isSharedMode &&
-    (plan?.user?.toString() === userId ||
-      userRoles.includes("Admin") ||
-      userRoles.includes("admin"));
 
   useEffect(() => {
     if (userId) {
@@ -196,31 +200,6 @@ const PracticePlanner = ({
       );
     }
   }, [favoritePlans, setIsFavorite, currentPlanId]);
-  useEffect(() => {
-    if (isSharedMode) {
-      setIsPrivileged(false);
-      return;
-    }
-    if (!userId) {
-      setIsPrivileged(false);
-      return;
-    }
-    if (isCreator) {
-      setIsPrivileged(true);
-      return;
-    }
-    if (
-      accessUsers &&
-      accessUsers.some(
-        (entry) => entry.user._id === userId && entry.access === "edit",
-      )
-    ) {
-      setIsPrivileged(true);
-    } else {
-      setIsPrivileged(false);
-    }
-  }, [userId, isCreator, accessUsers, isSharedMode]);
-
   useEffect(() => {
     if (plan?.shareToken) {
       setShareLink(
@@ -371,7 +350,7 @@ const PracticePlanner = ({
   // Auto-enter edit mode if URL has ?edit=1 and user is privileged (runs after formik init)
   useEffect(() => {
     if (autoEditAppliedRef.current) return;
-    if (!isEditMode && isPrivileged) {
+    if (!isEditMode && canEdit) {
       const params = new URLSearchParams(location.search);
       if (params.get("edit") === "1") {
         autoEditAppliedRef.current = true;
@@ -387,11 +366,11 @@ const PracticePlanner = ({
         autoEditAppliedRef.current = true; // no edit flag; avoid re-checking
       }
     }
-  }, [location.search, isPrivileged, isEditMode, formik, location.pathname]);
+  }, [location.search, canEdit, isEditMode, formik, location.pathname]);
 
   // Edit mode toggle functionality
   const onToggleEditMode = async () => {
-    if (!isPrivileged) return;
+    if (!canEdit) return;
     if (isEditMode) {
       const errors = await formik.validateForm();
       if (Object.keys(errors).length === 0) {
@@ -522,7 +501,7 @@ const PracticePlanner = ({
 
   const practicePlanMenuActions: HeaderOverflowAction[] = [];
 
-  if (isPrivileged && plan.isPrivate) {
+  if (canEdit && plan.isPrivate) {
     practicePlanMenuActions.push({
       key: "share",
       label: t(plan.shareToken ? "menu.unshare" : "menu.share"),
@@ -532,7 +511,7 @@ const PracticePlanner = ({
     });
   }
 
-  if (isPrivileged) {
+  if (canManageResourceActions) {
     practicePlanMenuActions.push({
       key: "delete",
       label: t("menu.delete"),
@@ -588,7 +567,7 @@ const PracticePlanner = ({
               </IconButton>
             </Tooltip>
           )}
-          {isPrivileged && (
+          {canEdit && (
             <Tooltip
               title={t("updatePracticePlan", {
                 context: isEditMode ? "editMode" : "viewMode",
@@ -643,7 +622,7 @@ const PracticePlanner = ({
               />
             </Tooltip>
           ),
-          isPrivileged && (
+          canEdit && (
             <Tooltip
               key="edit"
               title={t("updatePracticePlan", {
@@ -689,8 +668,8 @@ const PracticePlanner = ({
                 </Alert>
               )}
 
-            {/* Access Management Card - only shown in edit mode for creators */}
-            {isEditMode && isCreator && (
+            {/* Visibility and Access management */}
+            {isEditMode && (
               <Card sx={{ mb: 3 }}>
                 <SoftBox p={3}>
                   <SoftTypography variant="h6" fontWeight="medium" mb={2}>
@@ -716,107 +695,113 @@ const PracticePlanner = ({
                   </FormGroup>
 
                   {/* User Access Management */}
-                  <Box sx={{ mt: 3 }}>
-                    <SoftTypography variant="body2" fontWeight="medium" mb={2}>
-                      {t("access.manageUsers")}
-                    </SoftTypography>
+                  {canManageResourceActions && (
+                    <Box sx={{ mt: 3 }}>
+                      <SoftTypography
+                        variant="body2"
+                        fontWeight="medium"
+                        mb={2}
+                      >
+                        {t("access.manageUsers")}
+                      </SoftTypography>
 
-                    <Box
-                      sx={{
-                        display: "flex",
-                        gap: 1,
-                        alignItems: "flex-start",
-                        mb: 2,
-                      }}
-                    >
-                      <TextField
-                        size="small"
-                        label={t("access.add_user")}
-                        placeholder="Enter user email"
-                        value={userEmail}
-                        onChange={(e) => {
-                          setUserEmail(e.target.value);
-                          if (emailError) setEmailError("");
-                        }}
-                        error={!!emailError}
-                        helperText={emailError}
+                      <Box
                         sx={{
-                          flex: 1,
-                          minWidth: 250,
-                          "& .MuiInputBase-root": {
-                            height: "40px",
-                          },
-                          "& .MuiInputBase-input": {
-                            padding: "8.5px 14px",
-                          },
-                        }}
-                      />
-                      <TextField
-                        select
-                        size="small"
-                        label={t("access.mode")}
-                        value={accessMode}
-                        onChange={(event) =>
-                          setAccessMode(event.target.value as AccessLevel)
-                        }
-                        sx={{
-                          minWidth: 120,
-                          width: 120,
-                          "& .MuiInputBase-root": {
-                            height: "40px",
-                          },
-                          "& .MuiInputBase-input": {
-                            padding: "8.5px 14px",
-                          },
+                          display: "flex",
+                          gap: 1,
+                          alignItems: "flex-start",
+                          mb: 2,
                         }}
                       >
-                        <MenuItem value="edit">{t("access.edit")}</MenuItem>
-                        <MenuItem value="view">{t("access.view")}</MenuItem>
-                      </TextField>
-                      <Button
-                        variant="contained"
-                        size="small"
-                        disabled={
-                          isSharePracticePlanLoading || !userEmail.trim()
-                        }
-                        onClick={handleAddAccess}
-                        sx={{ height: "40px", minWidth: "80px" }}
-                      >
-                        {t("access.add")}
-                      </Button>
-                    </Box>
-
-                    <List>
-                      {accessUsers?.map((entry) => (
-                        <ListItem
-                          key={entry.user._id}
-                          secondaryAction={
-                            <Button
-                              size="small"
-                              color="error"
-                              disabled={isRemovePracticePlanAccessLoading}
-                              onClick={() => {
-                                if (planId) {
-                                  removePracticePlanAccess({
-                                    practicePlan: planId,
-                                    userId: entry.user._id,
-                                  });
-                                }
-                              }}
-                            >
-                              {t("access.remove")}
-                            </Button>
+                        <TextField
+                          size="small"
+                          label={t("access.add_user")}
+                          placeholder="Enter user email"
+                          value={userEmail}
+                          onChange={(e) => {
+                            setUserEmail(e.target.value);
+                            if (emailError) setEmailError("");
+                          }}
+                          error={!!emailError}
+                          helperText={emailError}
+                          sx={{
+                            flex: 1,
+                            minWidth: 250,
+                            "& .MuiInputBase-root": {
+                              height: "40px",
+                            },
+                            "& .MuiInputBase-input": {
+                              padding: "8.5px 14px",
+                            },
+                          }}
+                        />
+                        <TextField
+                          select
+                          size="small"
+                          label={t("access.mode")}
+                          value={accessMode}
+                          onChange={(event) =>
+                            setAccessMode(event.target.value as AccessLevel)
                           }
+                          sx={{
+                            minWidth: 120,
+                            width: 120,
+                            "& .MuiInputBase-root": {
+                              height: "40px",
+                            },
+                            "& .MuiInputBase-input": {
+                              padding: "8.5px 14px",
+                            },
+                          }}
                         >
-                          <ListItemText
-                            primary={
-                              entry.user.name + " (" + entry.access + ")"
+                          <MenuItem value="edit">{t("access.edit")}</MenuItem>
+                          <MenuItem value="view">{t("access.view")}</MenuItem>
+                        </TextField>
+                        <Button
+                          variant="contained"
+                          size="small"
+                          disabled={
+                            isSharePracticePlanLoading || !userEmail.trim()
+                          }
+                          onClick={handleAddAccess}
+                          sx={{ height: "40px", minWidth: "80px" }}
+                        >
+                          {t("access.add")}
+                        </Button>
+                      </Box>
+
+                      <List>
+                        {accessUsers?.map((entry) => (
+                          <ListItem
+                            key={entry.user._id}
+                            secondaryAction={
+                              <Button
+                                size="small"
+                                color="error"
+                                disabled={isRemovePracticePlanAccessLoading}
+                                onClick={() => {
+                                  if (planId) {
+                                    removePracticePlanAccess({
+                                      practicePlan: planId,
+                                      userId: entry.user._id,
+                                    });
+                                  }
+                                }}
+                              >
+                                {t("access.remove")}
+                              </Button>
                             }
-                          />
-                        </ListItem>
-                      ))}
-                    </List>
-                  </Box>
+                          >
+                            <ListItemText
+                              primary={
+                                entry.user.name + " (" + entry.access + ")"
+                              }
+                            />
+                          </ListItem>
+                        ))}
+                      </List>
+                    </Box>
+                  )}
                 </SoftBox>
               </Card>
             )}
