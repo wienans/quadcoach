@@ -20,6 +20,50 @@ export interface ResourceAuthorizationResource {
   isPrivate: boolean;
 }
 
+interface OwnedResource {
+  user?: { toString(): string } | null;
+}
+
+interface PrivateResource extends OwnedResource {
+  isPrivate?: boolean | null;
+}
+
+export const authorizationResourceFor = {
+  exercise(
+    id: string,
+    resource: OwnedResource,
+  ): ResourceAuthorizationResource {
+    return {
+      type: "exercise",
+      id,
+      ownerId: resource.user?.toString(),
+      isPrivate: false,
+    };
+  },
+  tacticBoard(
+    id: string,
+    resource: PrivateResource,
+  ): ResourceAuthorizationResource {
+    return {
+      type: "tacticBoard",
+      id,
+      ownerId: resource.user?.toString(),
+      isPrivate: resource.isPrivate ?? false,
+    };
+  },
+  practicePlan(
+    id: string,
+    resource: PrivateResource,
+  ): ResourceAuthorizationResource {
+    return {
+      type: "practicePlan",
+      id,
+      ownerId: resource.user?.toString(),
+      isPrivate: resource.isPrivate ?? false,
+    };
+  },
+};
+
 export interface ResourceAuthorizationRequest {
   action: ResourceAction;
   actor?: ResourceAuthorizationActor;

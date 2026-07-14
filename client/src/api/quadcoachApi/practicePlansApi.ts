@@ -6,7 +6,12 @@ import type {
   PracticePlanSection,
   PracticePlanHeader,
 } from "./domain/PracticePlan";
-import { AccessLevel } from "./tacticboardApi";
+import type {
+  ResourceAccessLevel,
+  ResourceAuthorizationResponse,
+} from "./domain";
+
+export type AccessLevel = ResourceAccessLevel;
 
 export interface CreatePracticePlanRequest {
   name: string;
@@ -30,12 +35,6 @@ export type PracticePlanAccessEntry = {
   practicePlan: string;
   access: AccessLevel;
   createdAt: string;
-};
-
-export type AccessResponse = {
-  hasAccess: boolean;
-  type: "owner" | "admin" | "granted" | "public" | null;
-  level: AccessLevel | null;
 };
 
 export type ShareLinkResponse = {
@@ -184,6 +183,18 @@ export const practicePlansApiSlice = quadcoachApi.injectEndpoints({
       }),
       invalidatesTags: [TagType.practiceplan],
     }),
+    checkPracticePlanAccess: builder.query<
+      ResourceAuthorizationResponse,
+      string
+    >({
+      query: (practicePlanId) => ({
+        url: `/api/practice-plans/${practicePlanId}/checkAccess`,
+        method: "get",
+      }),
+      providesTags: (_result, _error, practicePlanId) => [
+        { type: TagType.practiceplan, id: `${practicePlanId}-access` },
+      ],
+    }),
     getAllPracticePlanAccessUsers: builder.query<
       PracticePlanAccessEntry[],
       string
@@ -264,6 +275,7 @@ export const {
   useGetSharedPracticePlanQuery,
   usePatchPracticePlanMutation,
   useDeletePracticePlanMutation,
+  useCheckPracticePlanAccessQuery,
   useGetAllPracticePlanAccessUsersQuery,
   useAddPracticePlanAccessMutation,
   useRemovePracticePlanAccessMutation,

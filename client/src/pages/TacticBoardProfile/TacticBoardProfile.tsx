@@ -48,6 +48,7 @@ import {
   useGetTacticBoardQuery,
   useUpdateTacticBoardMetaMutation,
   useShareTacticBoardMutation,
+  useCheckTacticboardAccessQuery,
 } from "../../api/quadcoachApi/tacticboardApi";
 import { useParams, useNavigate } from "react-router-dom";
 import {
@@ -76,7 +77,11 @@ import {
   FormikProvider,
   useFormik,
 } from "formik";
-import { TacticBoardPartialId } from "../../api/quadcoachApi/domain";
+import {
+  canEditResource,
+  canManageResource,
+  TacticBoardPartialId,
+} from "../../api/quadcoachApi/domain";
 import AddTagDialog from "./AddTagDialog";
 import Footer from "../../components/Footer";
 import {
@@ -93,7 +98,6 @@ const TacticBoardProfile = () => {
   const { id: tacticBoardId } = useParams();
 
   const navigate = useNavigate();
-  const [isPrivileged, setIsPrivileged] = useState<boolean>(false);
   const [isFavorite, setIsFavorite] = useState<boolean>(false);
   const isUpMd = useMediaQuery((theme: Theme) => theme.breakpoints.up("md"));
   const [isEditMode, setIsEditMode] = useState<boolean>(false);
@@ -109,7 +113,7 @@ const TacticBoardProfile = () => {
   const copyHighlightTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
     null,
   );
-  const { id: userId, roles: userRoles } = useAuth();
+  const { id: userId } = useAuth();
 
   const {
     data: tacticBoard,
@@ -118,6 +122,12 @@ const TacticBoardProfile = () => {
   } = useGetTacticBoardQuery(tacticBoardId || "", {
     skip: tacticBoardId == null,
   });
+  const { data: authorization } = useCheckTacticboardAccessQuery(
+    tacticBoardId || "",
+    { skip: !tacticBoardId || !userId },
+  );
+  const canEdit = canEditResource(authorization);
+  const canManageResourceActions = canManageResource(authorization);
 
   const [
     updateTacticBoardMeta,
@@ -160,6 +170,7 @@ const TacticBoardProfile = () => {
 
   const { data: accessUsers } = useGetAllTacticboardAccessUsersQuery(
     tacticBoardId || "",
+    { skip: !tacticBoardId || !canManageResourceActions },
   );
 
   const [
@@ -220,31 +231,6 @@ const TacticBoardProfile = () => {
       }
     },
   });
-
-  useEffect(() => {
-    if (
-      tacticBoard?.user?.toString() === userId ||
-      userRoles.includes("Admin") ||
-      userRoles.includes("admin")
-    ) {
-      setIsPrivileged(true);
-    } else {
-      if (accessUsers) {
-        setIsPrivileged(
-          accessUsers.some((user) => {
-            return (
-              user.user._id.toString() === userId && user.access === "edit"
-            );
-          }),
-        );
-      }
-    }
-  }, [tacticBoard, userId, userRoles, accessUsers]);
-
-  const isCreator =
-    tacticBoard?.user?.toString() === userId ||
-    userRoles.includes("Admin") ||
-    userRoles.includes("admin");
 
   useEffect(() => {
     if (favoriteTacticboards) {
@@ -422,7 +408,7 @@ const TacticBoardProfile = () => {
     Boolean(userId) && userId !== "" && Boolean(tacticBoardId);
   const tacticBoardMenuActions: HeaderOverflowAction[] = [];
 
-  if (isPrivileged && tacticBoard.isPrivate) {
+  if (canEdit && tacticBoard.isPrivate) {
     tacticBoardMenuActions.push({
       key: "share",
       label: t(
@@ -446,7 +432,7 @@ const TacticBoardProfile = () => {
     });
   }
 
-  if (isPrivileged) {
+  if (canManageResourceActions) {
     tacticBoardMenuActions.push({
       key: "delete",
       label: t("TacticBoardProfile:menu.delete"),
@@ -510,7 +496,7 @@ const TacticBoardProfile = () => {
                   </IconButton>
                 </Tooltip>
               )}
-              {isPrivileged && (
+              {canEdit && (
                 <Tooltip title={t("TacticBoardProfile:editTacticBoardMeta")}>
                   <IconButton
                     onClick={() => {
@@ -569,7 +555,7 @@ const TacticBoardProfile = () => {
                 />
               </Tooltip>
             ),
-            isPrivileged && (
+            canEdit && (
               <Tooltip
                 key="edit"
                 title={t("TacticBoardProfile:editTacticBoardMeta")}
@@ -843,7 +829,7 @@ const TacticBoardProfile = () => {
                   </AccordionDetails>
                 </Accordion>
               )}
-              {isEditMode && isCreator && (
+              {isEditMode && canManageResourceActions && (
                 <Accordion defaultExpanded>
                   <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                     {t("TacticBoardProfile:access.title")}

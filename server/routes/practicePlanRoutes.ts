@@ -13,6 +13,7 @@ import {
   createShareLink,
   deleteShareLink,
   getByShareToken,
+  checkAccess,
 } from "../controllers/practicePlanController";
 import verifyJWT from "../middleware/verifyJWT";
 import verifyJWTOptional from "../middleware/verifyJWTOptional";
@@ -37,6 +38,7 @@ router.delete("/:id", verifyJWT, deletePracticePlan);
 router.post("/:id/access", verifyJWT, setAccess);
 router.get("/:id/access", verifyJWT, getAllAccessUsers);
 router.delete("/:id/access", verifyJWT, deleteAccess);
+router.get("/:id/checkAccess", verifyJWT, checkAccess);
 router.route("/:id/share").post(verifyJWT, sharePracticePlan);
 router
   .route("/:id/share-link")

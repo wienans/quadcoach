@@ -11,3 +11,9 @@ export type {
   TacticBoardPartialId,
 } from "./TacticBoard";
 export type { default as User, UserWithOutId, UserPartialId } from "./User";
+export type {
+  ResourceAccessLevel,
+  ResourceAuthorizationBasis,
+  ResourceAuthorizationResponse,
+} from "./ResourceAuthorization";
+export { canEditResource, canManageResource } from "./ResourceAuthorization";

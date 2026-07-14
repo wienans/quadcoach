@@ -1,7 +1,10 @@
 import type { TagDescription } from "@reduxjs/toolkit/query";
 import { quadcoachApi } from "../api";
 import { TagType } from "../api/enum";
-import { Exercise } from "../api/quadcoachApi/domain";
+import {
+  Exercise,
+  ResourceAuthorizationResponse,
+} from "../api/quadcoachApi/domain";
 
 export type GetExercisesRequest = {
   nameRegex?: string;
@@ -43,11 +46,6 @@ export type ExerciseAccessEntry = {
   exercise: string;
   access: AccessLevel;
   createdAt: string;
-};
-
-export type ExerciseAccessResponse = {
-  hasAccess: boolean;
-  type: "owner" | "admin" | "granted" | "public" | null;
 };
 
 export const exerciseApiSlice = quadcoachApi.injectEndpoints({
@@ -291,7 +289,7 @@ export const exerciseApiSlice = quadcoachApi.injectEndpoints({
             }, new Array<TagDescription<TagType>>())
           : [TagType.exercise, TagType.block],
     }),
-    checkExerciseAccess: builder.query<ExerciseAccessResponse, string>({
+    checkExerciseAccess: builder.query<ResourceAuthorizationResponse, string>({
       query: (exerciseId) => ({
         url: `/api/exercises/${exerciseId}/checkAccess`,
         method: "get",

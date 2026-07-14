@@ -10,13 +10,18 @@ import {
   useCreateTacticBoardPageMutation,
   useDeleteTacticBoardMutation,
   useDeleteTacticBoardPageMutation,
-  useGetAllTacticboardAccessUsersQuery,
+  useCheckTacticboardAccessQuery,
   useGetTacticBoardQuery,
   useInsertTacticBoardPageMutation,
   useUpdateTacticBoardPageMutation,
 } from "../../api/quadcoachApi/tacticboardApi";
 import "../fullscreen.css";
-import { TacticBoard, TacticPage } from "../../api/quadcoachApi/domain";
+import {
+  canEditResource,
+  canManageResource,
+  TacticBoard,
+  TacticPage,
+} from "../../api/quadcoachApi/domain";
 import {
   useTacticBoardCanvas,
   useTacticBoardData,
@@ -76,20 +81,21 @@ const TacticsBoard = (): JSX.Element => {
     useDeleteTacticBoardPageMutation();
   const [deleteTacticBoard] = useDeleteTacticBoardMutation();
 
-  const { data: accessUsers } = useGetAllTacticboardAccessUsersQuery(
-    tacticBoardId || "",
-  );
-
   const [currentPage, setPage] = useState<number>(1);
   const [maxPages, setMaxPages] = useState<number>(1);
   const [isAnimating, setIsAnimating] = useState<boolean>(false);
   const [isFullScreen, setIsFullScreen] = useState<boolean>(false);
-  const [isPrivileged, setIsPrivileged] = useState<boolean>(false);
   const [firstAPICall, setFirstAPICall] = useState<number>(0);
 
   const isEditMode = useAppSelector((state) => state.tacticBoard.isEditMode);
 
-  const { id: userId, roles: userRoles } = useAuth();
+  const { id: userId } = useAuth();
+  const { data: authorization } = useCheckTacticboardAccessQuery(
+    tacticBoardId || "",
+    { skip: !tacticBoardId || !userId },
+  );
+  const canEdit = canEditResource(authorization);
+  const canDelete = canManageResource(authorization);
 
   const onDeleteActiveObject = () => {
     removeActiveObjects();
@@ -110,7 +116,7 @@ const TacticsBoard = (): JSX.Element => {
         return;
       if (!tacticBoard) return;
       const updatedTacticBoard: TacticBoard = cloneDeep(tacticBoard);
-      if (isPrivileged && isEditMode) {
+      if (canEdit && isEditMode) {
         if (newPage) {
           updatedTacticBoard.pages[page - 1] = {
             ...updatedTacticBoard.pages[page - 1],
@@ -219,7 +225,7 @@ const TacticsBoard = (): JSX.Element => {
       }
       loadFromJson(updatedTacticBoard.pages[page - 1]);
 
-      if (isPrivileged && isEditMode) {
+      if (canEdit && isEditMode) {
         setSelection(true);
       } else {
         setSelection(false);
@@ -228,7 +234,7 @@ const TacticsBoard = (): JSX.Element => {
     },
     [
       tacticBoard,
-      isPrivileged,
+      canEdit,
       isEditMode,
       loadFromJson,
       setControls,
@@ -456,26 +462,6 @@ const TacticsBoard = (): JSX.Element => {
     };
   }, []);
 
-  useEffect(() => {
-    if (
-      userId == tacticBoard?.user ||
-      userRoles.includes("Admin") ||
-      userRoles.includes("admin")
-    ) {
-      setIsPrivileged(true);
-    } else {
-      if (accessUsers) {
-        setIsPrivileged(
-          accessUsers.some((user) => {
-            return (
-              user.user._id.toString() === userId && user.access === "edit"
-            );
-          }),
-        );
-      }
-    }
-  }, [userId, tacticBoard, userRoles, accessUsers]);
-
   return (
     <SoftBox
       sx={{
@@ -532,7 +518,8 @@ const TacticsBoard = (): JSX.Element => {
               isDeletePageLoading
             }
             tacticBoard={tacticBoard}
-            isPrivileged={isPrivileged}
+            canEdit={canEdit}
+            canDelete={canDelete}
             currentPage={currentPage}
             onLoadPage={onLoadPage}
             setPage={setPage}
@@ -565,7 +552,7 @@ const TacticsBoard = (): JSX.Element => {
             >
               {isEditMode && (
                 <TacticBoardTopItemsMenu
-                  isPrivileged={isPrivileged}
+                  canEdit={canEdit}
                   isEditMode={isEditMode}
                   onDelete={onDeleteActiveObject}
                 />

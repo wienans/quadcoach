@@ -11,7 +11,9 @@ import { logEvents } from "../middleware/logger";
 import {
   getResourceAuthorization,
   requireResourceAuthorization,
+  serializeResourceAuthorizationDecision,
 } from "./helpers/requireResourceAuthorization";
+import { authorizationResourceFor } from "../authorization/resourceAuthorization";
 
 interface UserInfo {
   id?: string;
@@ -231,12 +233,7 @@ export const getById = asyncHandler(
           !(await requireResourceAuthorization(
             req,
             res,
-            {
-              type: "tacticBoard",
-              id: req.params.id,
-              ownerId: result.user?.toString(),
-              isPrivate: result.isPrivate ?? false,
-            },
+            authorizationResourceFor.tacticBoard(req.params.id, result),
             "view",
           ))
         ) {
@@ -288,21 +285,20 @@ export const updateById = asyncHandler(
           !(await requireResourceAuthorization(
             req,
             res,
-            {
-              type: "tacticBoard",
-              id: req.params.id,
-              ownerId: findResult.user?.toString(),
-              isPrivate: findResult.isPrivate ?? false,
-            },
+            authorizationResourceFor.tacticBoard(req.params.id, findResult),
             "edit",
           ))
         ) {
           return;
         }
 
+        const updates = { ...(req.body as Record<string, unknown>) };
+        delete updates.user;
+        delete updates.owner;
+
         const result = await TacticBoard.updateOne(
           { _id: req.params.id },
-          { $set: req.body },
+          { $set: updates },
         );
         if (result.modifiedCount > 0) {
           res.json({ message: "Tacticboard updated successfully" });
@@ -334,12 +330,7 @@ export const updatePageById = asyncHandler(
           !(await requireResourceAuthorization(
             req,
             res,
-            {
-              type: "tacticBoard",
-              id: tacticBoardId,
-              ownerId: findResult.user?.toString(),
-              isPrivate: findResult.isPrivate ?? false,
-            },
+            authorizationResourceFor.tacticBoard(tacticBoardId, findResult),
             "edit",
           ))
         ) {
@@ -386,12 +377,7 @@ export const updateMetaById = asyncHandler(
           !(await requireResourceAuthorization(
             req,
             res,
-            {
-              type: "tacticBoard",
-              id: tacticBoardId,
-              ownerId: findResult.user?.toString(),
-              isPrivate: findResult.isPrivate ?? false,
-            },
+            authorizationResourceFor.tacticBoard(tacticBoardId, findResult),
             "edit",
           ))
         ) {
@@ -463,12 +449,7 @@ export const deleteById = asyncHandler(
           !(await requireResourceAuthorization(
             req,
             res,
-            {
-              type: "tacticBoard",
-              id: req.params.id,
-              ownerId: findResult.user?.toString(),
-              isPrivate: findResult.isPrivate ?? false,
-            },
+            authorizationResourceFor.tacticBoard(req.params.id, findResult),
             "delete",
           ))
         ) {
@@ -528,12 +509,7 @@ export const createNewPage = asyncHandler(
           !(await requireResourceAuthorization(
             req,
             res,
-            {
-              type: "tacticBoard",
-              id: tacticBoardId,
-              ownerId: findResult.user?.toString(),
-              isPrivate: findResult.isPrivate ?? false,
-            },
+            authorizationResourceFor.tacticBoard(tacticBoardId, findResult),
             "edit",
           ))
         ) {
@@ -575,12 +551,7 @@ export const insertPageAtPosition = asyncHandler(
           !(await requireResourceAuthorization(
             req,
             res,
-            {
-              type: "tacticBoard",
-              id: tacticBoardId,
-              ownerId: findResult.user?.toString(),
-              isPrivate: findResult.isPrivate ?? false,
-            },
+            authorizationResourceFor.tacticBoard(tacticBoardId, findResult),
             "edit",
           ))
         ) {
@@ -640,12 +611,7 @@ export const deletePageById = asyncHandler(
           !(await requireResourceAuthorization(
             req,
             res,
-            {
-              type: "tacticBoard",
-              id: tacticBoardId,
-              ownerId: findResult.user?.toString(),
-              isPrivate: findResult.isPrivate ?? false,
-            },
+            authorizationResourceFor.tacticBoard(tacticBoardId, findResult),
             "edit",
           ))
         ) {
@@ -694,25 +660,10 @@ export const checkAccess = asyncHandler(
 
     const decision = await getResourceAuthorization(
       req,
-      {
-        type: "tacticBoard",
-        id: req.params.id,
-        ownerId: tacticboard.user?.toString(),
-        isPrivate: tacticboard.isPrivate ?? false,
-      },
+      authorizationResourceFor.tacticBoard(req.params.id, tacticboard),
       "view",
     );
-    res.json({
-      hasAccess: decision.allowed,
-      type: decision.allowed ? decision.basis : null,
-      level:
-        decision.allowed && decision.basis === "granted"
-          ? decision.accessLevel
-          : decision.allowed &&
-              (decision.basis === "owner" || decision.basis === "admin")
-            ? "edit"
-            : null,
-    });
+    res.json(serializeResourceAuthorizationDecision(decision));
   },
 );
 
@@ -736,12 +687,7 @@ export const setAccess = asyncHandler(
       !(await requireResourceAuthorization(
         req,
         res,
-        {
-          type: "tacticBoard",
-          id: req.params.id,
-          ownerId: tacticboard.user?.toString(),
-          isPrivate: tacticboard.isPrivate ?? false,
-        },
+        authorizationResourceFor.tacticBoard(req.params.id, tacticboard),
         "manageAccess",
       ))
     ) {
@@ -800,12 +746,7 @@ export const deleteAccess = asyncHandler(
       !(await requireResourceAuthorization(
         req,
         res,
-        {
-          type: "tacticBoard",
-          id: req.params.id,
-          ownerId: tacticboard.user?.toString(),
-          isPrivate: tacticboard.isPrivate ?? false,
-        },
+        authorizationResourceFor.tacticBoard(req.params.id, tacticboard),
         "manageAccess",
       ))
     ) {
@@ -857,12 +798,7 @@ export const duplicateById = asyncHandler(
       !(await requireResourceAuthorization(
         req,
         res,
-        {
-          type: "tacticBoard",
-          id: req.params.id,
-          ownerId: tacticboard.user?.toString(),
-          isPrivate: tacticboard.isPrivate ?? false,
-        },
+        authorizationResourceFor.tacticBoard(req.params.id, tacticboard),
         "view",
       ))
     ) {
@@ -931,12 +867,7 @@ export const getAllAccessUsers = asyncHandler(
       !(await requireResourceAuthorization(
         req,
         res,
-        {
-          type: "tacticBoard",
-          id: req.params.id,
-          ownerId: tacticboard.user?.toString(),
-          isPrivate: tacticboard.isPrivate ?? false,
-        },
+        authorizationResourceFor.tacticBoard(req.params.id, tacticboard),
         "manageAccess",
       ))
     ) {
@@ -982,12 +913,7 @@ export const shareTacticBoard = asyncHandler(
       !(await requireResourceAuthorization(
         req,
         res,
-        {
-          type: "tacticBoard",
-          id: req.params.id,
-          ownerId: tacticBoard.user?.toString(),
-          isPrivate: tacticBoard.isPrivate ?? false,
-        },
+        authorizationResourceFor.tacticBoard(req.params.id, tacticBoard),
         "manageAccess",
       ))
     ) {
@@ -1072,12 +998,7 @@ export const createShareLink = asyncHandler(
       !(await requireResourceAuthorization(
         req,
         res,
-        {
-          type: "tacticBoard",
-          id: req.params.id,
-          ownerId: tacticboard.user?.toString(),
-          isPrivate: tacticboard.isPrivate ?? false,
-        },
+        authorizationResourceFor.tacticBoard(req.params.id, tacticboard),
         "edit",
       ))
     ) {
@@ -1129,12 +1050,7 @@ export const deleteShareLink = asyncHandler(
       !(await requireResourceAuthorization(
         req,
         res,
-        {
-          type: "tacticBoard",
-          id: req.params.id,
-          ownerId: tacticboard.user?.toString(),
-          isPrivate: tacticboard.isPrivate ?? false,
-        },
+        authorizationResourceFor.tacticBoard(req.params.id, tacticboard),
         "edit",
       ))
     ) {

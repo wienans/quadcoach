@@ -179,4 +179,132 @@ describe("resource authorization HTTP mapping", () => {
     expect(deleteResponse.status).toBe(403);
     expect(accessResponse.status).toBe(403);
   });
+
+  it("reports editor capability without exposing named Access", async () => {
+    const { user: owner } = await createVerifiedUser({
+      email: "capability_owner@example.com",
+    });
+    const { user: editor } = await createVerifiedUser({
+      email: "capability_editor@example.com",
+    });
+    const exercise = await Exercise.create({
+      name: "Capability Exercise",
+      persons: 6,
+      time_min: 10,
+      user: owner._id,
+    });
+    const tacticBoard = await TacticBoard.create({
+      name: "Capability Board",
+      user: owner._id,
+      isPrivate: true,
+      pages: [],
+    });
+    const practicePlan = await PracticePlan.create({
+      name: "Capability Plan",
+      user: owner._id,
+      isPrivate: true,
+      sections: [],
+    });
+    await Promise.all([
+      ExerciseAccess.create({
+        user: editor._id,
+        exercise: exercise._id,
+        access: "edit",
+      }),
+      TacticboardAccess.create({
+        user: editor._id,
+        tacticboard: tacticBoard._id,
+        access: "edit",
+      }),
+      PracticePlanAccess.create({
+        user: editor._id,
+        practicePlan: practicePlan._id,
+        access: "edit",
+      }),
+    ]);
+    const editorAuthorization = await authorizationFor(editor);
+    const resources = [
+      ["exercises", exercise._id],
+      ["tacticboards", tacticBoard._id],
+      ["practice-plans", practicePlan._id],
+    ] as const;
+
+    for (const [path, id] of resources) {
+      const capabilityResponse = await request(app)
+        .get(`/api/${path}/${id}/checkAccess`)
+        .set("Authorization", editorAuthorization);
+      const accessListResponse = await request(app)
+        .get(`/api/${path}/${id}/access`)
+        .set("Authorization", editorAuthorization);
+
+      expect(capabilityResponse.status).toBe(200);
+      expect(capabilityResponse.body).toEqual({
+        hasAccess: true,
+        type: "granted",
+        level: "edit",
+      });
+      expect(accessListResponse.status).toBe(403);
+    }
+  });
+
+  it("does not let editors transfer resource ownership", async () => {
+    const { user: owner } = await createVerifiedUser({
+      email: "immutable_owner@example.com",
+    });
+    const { user: editor } = await createVerifiedUser({
+      email: "immutable_editor@example.com",
+    });
+    const exercise = await Exercise.create({
+      name: "Immutable Exercise",
+      persons: 6,
+      time_min: 10,
+      user: owner._id,
+    });
+    const tacticBoard = await TacticBoard.create({
+      name: "Immutable Board",
+      user: owner._id,
+      isPrivate: true,
+      pages: [],
+    });
+    await Promise.all([
+      ExerciseAccess.create({
+        user: editor._id,
+        exercise: exercise._id,
+        access: "edit",
+      }),
+      TacticboardAccess.create({
+        user: editor._id,
+        tacticboard: tacticBoard._id,
+        access: "edit",
+      }),
+    ]);
+    const editorAuthorization = await authorizationFor(editor);
+    const resources = [
+      {
+        path: "exercises",
+        id: exercise._id,
+        load: () => Exercise.findById(exercise._id),
+      },
+      {
+        path: "tacticboards",
+        id: tacticBoard._id,
+        load: () => TacticBoard.findById(tacticBoard._id),
+      },
+    ] as const;
+
+    for (const { path, id, load } of resources) {
+      const updateResponse = await request(app)
+        .put(`/api/${path}/${id}`)
+        .set("Authorization", editorAuthorization)
+        .send({ user: editor._id });
+      const persistedResource = await load();
+      const deleteResponse = await request(app)
+        .delete(`/api/${path}/${id}`)
+        .set("Authorization", editorAuthorization);
+
+      expect(updateResponse.status).toBe(200);
+      expect(persistedResource?.user?.toString()).toBe(owner._id.toString());
+      expect(deleteResponse.status).toBe(403);
+    }
+  });
 });

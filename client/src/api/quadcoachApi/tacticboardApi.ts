@@ -1,6 +1,11 @@
 import { quadcoachApi } from "..";
 import { TagType } from "../enum";
-import { TacticBoard, TacticPage } from "./domain";
+import {
+  ResourceAccessLevel,
+  ResourceAuthorizationResponse,
+  TacticBoard,
+  TacticPage,
+} from "./domain";
 import { TacticBoardWithOutIds } from "./domain/TacticBoard";
 import { TacticBoardHeader } from "./domain/TacticBoard";
 
@@ -35,7 +40,7 @@ export type GetTacticBoardResponse = {
   };
 };
 
-export type AccessLevel = "view" | "edit";
+export type AccessLevel = ResourceAccessLevel;
 
 export type AccessEntry = {
   user: {
@@ -45,12 +50,6 @@ export type AccessEntry = {
   tacticboard: string;
   access: AccessLevel;
   createdAt: string;
-};
-
-export type AccessResponse = {
-  hasAccess: boolean;
-  type: "owner" | "admin" | "granted" | "public" | null;
-  level: AccessLevel | null;
 };
 
 export type ShareLinkResponse = {
@@ -364,7 +363,10 @@ export const tacticBoardApiSlice = quadcoachApi.injectEndpoints({
             ]
           : [TagType.tacticboard],
     }),
-    checkTacticboardAccess: builder.query<AccessResponse, string>({
+    checkTacticboardAccess: builder.query<
+      ResourceAuthorizationResponse,
+      string
+    >({
       query: (tacticboardId) => ({
         url: `/api/tacticboards/${tacticboardId}/checkAccess`,
         method: "get",

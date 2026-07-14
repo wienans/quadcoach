@@ -26,6 +26,20 @@ export const getResourceAuthorization = async (
     resource,
   });
 
+export const serializeResourceAuthorizationDecision = (
+  decision: ResourceAuthorizationDecision,
+) => ({
+  hasAccess: decision.allowed,
+  type: decision.allowed ? decision.basis : null,
+  level:
+    decision.allowed && decision.basis === "granted"
+      ? decision.accessLevel
+      : decision.allowed &&
+          (decision.basis === "owner" || decision.basis === "admin")
+        ? "edit"
+        : null,
+});
+
 export const requireResourceAuthorization = async (
   req: RequestWithUser,
   res: Response,

@@ -10,7 +10,9 @@ import TacticBoard from "../models/tacticboard";
 import {
   getResourceAuthorization,
   requireResourceAuthorization,
+  serializeResourceAuthorizationDecision,
 } from "./helpers/requireResourceAuthorization";
+import { authorizationResourceFor } from "../authorization/resourceAuthorization";
 
 interface RequestWithUser extends Request {
   UserInfo?: {
@@ -224,12 +226,7 @@ export const updateById = asyncHandler(
           !(await requireResourceAuthorization(
             req,
             res,
-            {
-              type: "exercise",
-              id: req.params.id,
-              ownerId: findResult.user?.toString(),
-              isPrivate: false,
-            },
+            authorizationResourceFor.exercise(req.params.id, findResult),
             "edit",
           ))
         ) {
@@ -253,9 +250,13 @@ export const updateById = asyncHandler(
           return;
         }
 
+        const updates = { ...(req.body as Record<string, unknown>) };
+        delete updates.user;
+        delete updates.owner;
+
         const result = await Exercise.updateOne(
           { _id: req.params.id },
-          { $set: req.body }
+          { $set: updates }
         );
         res.send(result);
       } else {
@@ -279,12 +280,7 @@ export const deleteById = asyncHandler(
           !(await requireResourceAuthorization(
             req,
             res,
-            {
-              type: "exercise",
-              id: req.params.id,
-              ownerId: findResult.user?.toString(),
-              isPrivate: false,
-            },
+            authorizationResourceFor.exercise(req.params.id, findResult),
             "delete",
           ))
         ) {
@@ -378,12 +374,7 @@ export const setAccess = asyncHandler(
       !(await requireResourceAuthorization(
         req,
         res,
-        {
-          type: "exercise",
-          id: req.params.id,
-          ownerId: exercise.user?.toString(),
-          isPrivate: false,
-        },
+        authorizationResourceFor.exercise(req.params.id, exercise),
         "manageAccess",
       ))
     ) {
@@ -444,12 +435,7 @@ export const deleteAccess = asyncHandler(
       !(await requireResourceAuthorization(
         req,
         res,
-        {
-          type: "exercise",
-          id: req.params.id,
-          ownerId: exercise.user?.toString(),
-          isPrivate: false,
-        },
+        authorizationResourceFor.exercise(req.params.id, exercise),
         "manageAccess",
       ))
     ) {
@@ -499,26 +485,11 @@ export const checkAccess = asyncHandler(
 
     const decision = await getResourceAuthorization(
       req,
-      {
-        type: "exercise",
-        id: req.params.id,
-        ownerId: exercise.user?.toString(),
-        isPrivate: false,
-      },
+      authorizationResourceFor.exercise(req.params.id, exercise),
       "view",
     );
 
-    res.json({
-      hasAccess: decision.allowed,
-      type: decision.allowed ? decision.basis : null,
-      level:
-        decision.allowed && decision.basis === "granted"
-          ? decision.accessLevel
-          : decision.allowed &&
-              (decision.basis === "owner" || decision.basis === "admin")
-            ? "edit"
-            : null,
-    });
+    res.json(serializeResourceAuthorizationDecision(decision));
   }
 );
 
@@ -541,12 +512,7 @@ export const getAllAccessUsers = asyncHandler(
       !(await requireResourceAuthorization(
         req,
         res,
-        {
-          type: "exercise",
-          id: req.params.id,
-          ownerId: exercise.user?.toString(),
-          isPrivate: false,
-        },
+        authorizationResourceFor.exercise(req.params.id, exercise),
         "manageAccess",
       ))
     ) {
@@ -595,12 +561,7 @@ export const shareExercise = asyncHandler(
       !(await requireResourceAuthorization(
         req,
         res,
-        {
-          type: "exercise",
-          id: req.params.id,
-          ownerId: exercise.user?.toString(),
-          isPrivate: false,
-        },
+        authorizationResourceFor.exercise(req.params.id, exercise),
         "manageAccess",
       ))
     ) {

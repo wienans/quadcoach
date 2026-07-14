@@ -25,7 +25,8 @@ import { TacticBoardProvider } from "../../contexts/tacticBoard";
 import { animateObjectsToTargets } from "../../contexts/tacticBoard/animation";
 import { useAuth } from "../../store/hooks";
 import useVideoRecording from "../../hooks/taticBoard/useVideoRecording";
-import { useGetAllTacticboardAccessUsersQuery } from "../../api/quadcoachApi/tacticboardApi";
+import { useCheckTacticboardAccessQuery } from "../../api/quadcoachApi/tacticboardApi";
+import { canEditResource } from "../../api/quadcoachApi/domain";
 export type TacticBoardInProfileProps = {
   tacticBoardId: string | undefined;
   sharedToken?: string;
@@ -52,7 +53,6 @@ const TacticBoardInProfile = ({
   const [isAnimating, setIsAnimating] = useState<boolean>(false);
 
   const [isFullScreen, setIsFullScreen] = useState<boolean>(false);
-  const [isPrivileged, setIsPrivileged] = useState<boolean>(false);
   const refFullScreenContainer = useRef<HTMLDivElement>(null);
   const {
     canvasFabricRef: canvasRef,
@@ -63,37 +63,13 @@ const TacticBoardInProfile = ({
 
   const { loadFromTacticPage: loadFromJson } = useTacticBoardData();
 
-  const { id: userId, roles: userRoles } = useAuth();
+  const { id: userId } = useAuth();
 
-  const { data: accessUsers } = useGetAllTacticboardAccessUsersQuery(
+  const { data: authorization } = useCheckTacticboardAccessQuery(
     tacticBoardId || "",
-    { skip: !tacticBoardId || !userId || userId === "" },
+    { skip: !tacticBoardId || !userId || Boolean(sharedToken) },
   );
-
-  useEffect(() => {
-    if (sharedToken) {
-      setIsPrivileged(false);
-      return;
-    }
-
-    if (
-      userId == tacticBoard?.user ||
-      userRoles.includes("Admin") ||
-      userRoles.includes("admin")
-    ) {
-      setIsPrivileged(true);
-    } else {
-      if (accessUsers) {
-        setIsPrivileged(
-          accessUsers.some((user) => {
-            return (
-              user.user._id.toString() === userId && user.access === "edit"
-            );
-          }),
-        );
-      }
-    }
-  }, [userId, tacticBoard, userRoles, accessUsers, sharedToken]);
+  const canEdit = !sharedToken && canEditResource(authorization);
 
   useEffect(() => {
     if (
@@ -379,7 +355,7 @@ const TacticBoardInProfile = ({
           </Tooltip>
         </SoftBox>
 
-        {isPrivileged && isEditMode && (
+        {canEdit && isEditMode && (
           <>
             <Tooltip
               title={t("TacticBoardProfile:topMenu.isEditModeButton.tooltip")}

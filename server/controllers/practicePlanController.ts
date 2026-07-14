@@ -11,7 +11,12 @@ import {
 } from "./helpers/practicePlanValidation";
 import User from "../models/user";
 import { logEvents } from "../middleware/logger";
-import { requireResourceAuthorization } from "./helpers/requireResourceAuthorization";
+import {
+  getResourceAuthorization,
+  requireResourceAuthorization,
+  serializeResourceAuthorizationDecision,
+} from "./helpers/requireResourceAuthorization";
+import { authorizationResourceFor } from "../authorization/resourceAuthorization";
 
 interface RequestWithUser extends Request {
   UserInfo?: {
@@ -165,12 +170,7 @@ export const getPracticePlan = async (req: RequestWithUser, res: Response) => {
         !(await requireResourceAuthorization(
           req,
           res,
-          {
-            type: "practicePlan",
-            id: req.params.id,
-            ownerId: result.user?.toString(),
-            isPrivate: result.isPrivate,
-          },
+          authorizationResourceFor.practicePlan(req.params.id, result),
           "view",
         ))
       ) {
@@ -202,12 +202,7 @@ export const patchPracticePlan = async (
         !(await requireResourceAuthorization(
           req,
           res,
-          {
-            type: "practicePlan",
-            id: req.params.id,
-            ownerId: findResult.user?.toString(),
-            isPrivate: findResult.isPrivate,
-          },
+          authorizationResourceFor.practicePlan(req.params.id, findResult),
           "edit",
         ))
       ) {
@@ -267,12 +262,7 @@ export const deletePracticePlan = async (
         !(await requireResourceAuthorization(
           req,
           res,
-          {
-            type: "practicePlan",
-            id: req.params.id,
-            ownerId: findResult.user?.toString(),
-            isPrivate: findResult.isPrivate,
-          },
+          authorizationResourceFor.practicePlan(req.params.id, findResult),
           "delete",
         ))
       ) {
@@ -294,6 +284,29 @@ export const deletePracticePlan = async (
   }
 };
 
+export const checkAccess = asyncHandler(
+  async (req: RequestWithUser, res: Response) => {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      res.status(400).json({ message: "Invalid practice plan ID" });
+      return;
+    }
+
+    const practicePlan = await PracticePlan.findById(req.params.id);
+    if (!practicePlan) {
+      res.status(404).json({ message: "Practice Plan not found" });
+      return;
+    }
+
+    const decision = await getResourceAuthorization(
+      req,
+      authorizationResourceFor.practicePlan(req.params.id, practicePlan),
+      "view",
+    );
+
+    res.json(serializeResourceAuthorizationDecision(decision));
+  },
+);
+
 // @desc    Get all users who have access to a practice plan
 // @route   GET /api/practice-plans/:id/access
 // @access  Private - Users with access
@@ -314,12 +327,7 @@ export const getAllAccessUsers = asyncHandler(
       !(await requireResourceAuthorization(
         req,
         res,
-        {
-          type: "practicePlan",
-          id: req.params.id,
-          ownerId: practicePlan.user?.toString(),
-          isPrivate: practicePlan.isPrivate,
-        },
+        authorizationResourceFor.practicePlan(req.params.id, practicePlan),
         "manageAccess",
       ))
     ) {
@@ -354,12 +362,7 @@ export const setAccess = asyncHandler(
       !(await requireResourceAuthorization(
         req,
         res,
-        {
-          type: "practicePlan",
-          id: req.params.id,
-          ownerId: practicePlan.user?.toString(),
-          isPrivate: practicePlan.isPrivate,
-        },
+        authorizationResourceFor.practicePlan(req.params.id, practicePlan),
         "manageAccess",
       ))
     ) {
@@ -418,12 +421,7 @@ export const deleteAccess = asyncHandler(
       !(await requireResourceAuthorization(
         req,
         res,
-        {
-          type: "practicePlan",
-          id: req.params.id,
-          ownerId: practicePlan.user?.toString(),
-          isPrivate: practicePlan.isPrivate,
-        },
+        authorizationResourceFor.practicePlan(req.params.id, practicePlan),
         "manageAccess",
       ))
     ) {
@@ -481,12 +479,7 @@ export const sharePracticePlan = asyncHandler(
       !(await requireResourceAuthorization(
         req,
         res,
-        {
-          type: "practicePlan",
-          id: req.params.id,
-          ownerId: practicePlan.user?.toString(),
-          isPrivate: practicePlan.isPrivate,
-        },
+        authorizationResourceFor.practicePlan(req.params.id, practicePlan),
         "manageAccess",
       ))
     ) {
@@ -571,12 +564,7 @@ export const createShareLink = asyncHandler(
       !(await requireResourceAuthorization(
         req,
         res,
-        {
-          type: "practicePlan",
-          id: req.params.id,
-          ownerId: practicePlan.user?.toString(),
-          isPrivate: practicePlan.isPrivate,
-        },
+        authorizationResourceFor.practicePlan(req.params.id, practicePlan),
         "edit",
       ))
     ) {
@@ -628,12 +616,7 @@ export const deleteShareLink = asyncHandler(
       !(await requireResourceAuthorization(
         req,
         res,
-        {
-          type: "practicePlan",
-          id: req.params.id,
-          ownerId: practicePlan.user?.toString(),
-          isPrivate: practicePlan.isPrivate,
-        },
+        authorizationResourceFor.practicePlan(req.params.id, practicePlan),
         "edit",
       ))
     ) {
