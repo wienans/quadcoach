@@ -11,11 +11,11 @@ A per-user grant letting one specific account view or edit another user's resour
 _Avoid_: permission, share (a Share Link is a different thing)
 
 **Share Link**:
-A public, read-only URL ("anyone with the link") generated from a `shareToken` on a TacticBoard or PracticePlan. Meant for quick distribution (post it anywhere) and easy revocation. Does not require an account. Exercises do not have Share Links.
+A public, read-only URL ("anyone with the link") generated from a `shareToken` on a Private TacticBoard or PracticePlan. Each resource has at most one active Share Link, with no automatic expiration. Ensuring returns that link or creates it when absent; rotating atomically replaces it; revoking removes it. After rotation, revocation, or publication succeeds, the old link cannot begin a new read. A Share Link read exposes the resource's full domain content but omits its token, Owner user ID, privacy flag, and persistence metadata. It behaves the same whether the viewer is anonymous or signed in and never creates or changes Access. Meant for quick distribution (post it anywhere) and easy revocation. The Owner, Admins, and users with edit Access may manage it; that authority does not let an editor manage named Access grants. Share Link and Access lifecycles are independent. Publishing the resource revokes its Share Link; making a public resource Private does not create or restore one. Exercises do not have Share Links.
 _Avoid_: public link, token link
 
 **Private** (`isPrivate`):
-A flag on TacticBoard and PracticePlan. When set, the resource is visible only to its owner, users granted Access, and Admins. Exercises have no such flag — the Exercise library is public by design.
+A flag on TacticBoard and PracticePlan. When set, the resource is excluded from ordinary public discovery and access; it remains visible to its Owner, users granted Access, and Admins. Possession of an active Share Link is an explicit read-only capability exception. Exercises have no such flag — the Exercise library is public by design.
 
 **Owner**:
 The user a resource belongs to (`user` field). May edit and delete it. The denormalized `creator` name field is display-only.
