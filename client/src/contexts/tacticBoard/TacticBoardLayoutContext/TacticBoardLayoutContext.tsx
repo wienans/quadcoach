@@ -16,6 +16,8 @@ export interface TacticBoardLayoutContextProps {
   setContainerRef: (instance: HTMLDivElement | null) => void;
 }
 
+// The context and its provider intentionally share this module.
+// eslint-disable-next-line react-refresh/only-export-components
 export const TacticBoardLayoutContext = createContext<
   TacticBoardLayoutContextProps | undefined
 >(undefined);

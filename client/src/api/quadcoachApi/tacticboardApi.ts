@@ -8,23 +8,29 @@ import {
 } from "./domain";
 import { TacticBoardWithOutIds } from "./domain/TacticBoard";
 import { TacticBoardHeader } from "./domain/TacticBoard";
+import {
+  GetTacticBoardRequest,
+  serializeTacticBoardCollectionRequest,
+} from "./tacticBoardCollectionRequest";
+import {
+  TacticBoardAccessDeleteRequest,
+  TacticBoardAccessEntry,
+  TacticBoardAccessEntryResponseDto,
+  TacticBoardAccessMutationResponse,
+  TacticBoardAccessMutationResponseDto,
+  TacticBoardAccessRequest,
+  fromTacticBoardAccessEntryResponseDto,
+  fromTacticBoardAccessMutationResponseDto,
+  toTacticBoardAccessDeleteRequestDto,
+  toTacticBoardAccessRequestDto,
+} from "./compatibility/tacticBoardWire";
 
-export type GetTacticBoardRequest = {
-  nameRegex?: string;
-  tagRegex?: string;
-  tagList?: string[];
-  isPrivate?: boolean;
-  sortBy?: "name" | "created" | "updated";
-  sortOrder?: "asc" | "desc";
-  page?: number;
-  limit?: number;
-};
+export type { GetTacticBoardRequest } from "./tacticBoardCollectionRequest";
 
 export type GetTacticBoardHeadersResponse = {
   tacticboards: TacticBoardHeader[];
   pagination: {
     page: number;
-    limit: number;
     total: number;
     pages: number;
   };
@@ -34,23 +40,12 @@ export type GetTacticBoardResponse = {
   tacticboards: TacticBoard[];
   pagination: {
     page: number;
-    limit: number;
     total: number;
     pages: number;
   };
 };
 
 export type AccessLevel = ResourceAccessLevel;
-
-export type AccessEntry = {
-  user: {
-    _id: string;
-    name: string;
-  };
-  tacticboard: string;
-  access: AccessLevel;
-  createdAt: string;
-};
 
 export type ShareLinkResponse = {
   message: string;
@@ -157,43 +152,7 @@ export const tacticBoardApiSlice = quadcoachApi.injectEndpoints({
       GetTacticBoardRequest | undefined
     >({
       query: (request) => {
-        const {
-          nameRegex,
-          tagRegex,
-          tagList,
-          isPrivate,
-          sortBy,
-          sortOrder,
-          page = 1,
-          limit = 50,
-        } = request || {};
-        const urlParams = new URLSearchParams();
-
-        urlParams.append("page", page.toString());
-        urlParams.append("limit", limit.toString());
-
-        if (nameRegex != null && nameRegex !== "") {
-          urlParams.append("name[regex]", nameRegex);
-          urlParams.append("name[options]", "i");
-        }
-        if (tagList != null && tagList.length > 0) {
-          urlParams.append("tags[in]", tagList.join(","));
-        }
-        if (tagRegex != null && tagRegex !== "") {
-          urlParams.append("tags[regex]", tagRegex);
-          urlParams.append("tags[options]", "i");
-        }
-        if (isPrivate !== undefined) {
-          urlParams.append("isPrivate[eq]", String(isPrivate));
-        }
-        if (sortBy != null) {
-          urlParams.append("sortBy", sortBy);
-        }
-        if (sortOrder != null) {
-          urlParams.append("sortOrder", sortOrder);
-        }
-
-        const urlParamsString = urlParams.toString();
+        const urlParamsString = serializeTacticBoardCollectionRequest(request);
         return {
           url: `/api/tacticboards${
             urlParamsString === "" ? "" : `?${urlParamsString}`
@@ -308,43 +267,7 @@ export const tacticBoardApiSlice = quadcoachApi.injectEndpoints({
       GetTacticBoardRequest | undefined
     >({
       query: (request) => {
-        const {
-          nameRegex,
-          tagRegex,
-          tagList,
-          isPrivate,
-          sortBy,
-          sortOrder,
-          page = 1,
-          limit = 50,
-        } = request || {};
-        const urlParams = new URLSearchParams();
-
-        urlParams.append("page", page.toString());
-        urlParams.append("limit", limit.toString());
-
-        if (nameRegex != null && nameRegex !== "") {
-          urlParams.append("name[regex]", nameRegex);
-          urlParams.append("name[options]", "i");
-        }
-        if (tagList != null && tagList.length > 0) {
-          urlParams.append("tags[in]", tagList.join(","));
-        }
-        if (tagRegex != null && tagRegex !== "") {
-          urlParams.append("tags[regex]", tagRegex);
-          urlParams.append("tags[options]", "i");
-        }
-        if (isPrivate !== undefined) {
-          urlParams.append("isPrivate[eq]", String(isPrivate));
-        }
-        if (sortBy != null) {
-          urlParams.append("sortBy", sortBy);
-        }
-        if (sortOrder != null) {
-          urlParams.append("sortOrder", sortOrder);
-        }
-
-        const urlParamsString = urlParams.toString();
+        const urlParamsString = serializeTacticBoardCollectionRequest(request);
         return {
           url: `/api/tacticboards/header${
             urlParamsString === "" ? "" : `?${urlParamsString}`
@@ -375,52 +298,59 @@ export const tacticBoardApiSlice = quadcoachApi.injectEndpoints({
         { type: TagType.tacticboard, id: `${tacticboardId}-access` },
       ],
     }),
-    getAllTacticboardAccessUsers: builder.query<AccessEntry[], string>({
+    getAllTacticboardAccessUsers: builder.query<
+      TacticBoardAccessEntry[],
+      string
+    >({
       query: (tacticboardId) => ({
         url: `/api/tacticboards/${tacticboardId}/access`,
         method: "get",
       }),
+      transformResponse: (response: TacticBoardAccessEntryResponseDto[]) =>
+        response.map(fromTacticBoardAccessEntryResponseDto),
       providesTags: (_result, _error, tacticboardId) => [
         { type: TagType.tacticboard, id: `${tacticboardId}-access` },
       ],
     }),
     setTacticboardAccess: builder.mutation<
-      AccessEntry,
-      { tacticboardId: string; userId: string; access: AccessLevel }
+      TacticBoardAccessMutationResponse,
+      TacticBoardAccessRequest
     >({
-      query: ({ tacticboardId, userId, access }) => ({
-        url: `/api/tacticboards/${tacticboardId}/access`,
+      query: (request) => ({
+        url: `/api/tacticboards/${request.tacticBoardId}/access`,
         method: "post",
-        data: { userId, access },
+        data: toTacticBoardAccessRequestDto(request),
       }),
-      invalidatesTags: (_result, _error, { tacticboardId }) => [
-        { type: TagType.tacticboard, id: `${tacticboardId}-access` },
+      transformResponse: (response: TacticBoardAccessMutationResponseDto) =>
+        fromTacticBoardAccessMutationResponseDto(response),
+      invalidatesTags: (_result, _error, { tacticBoardId }) => [
+        { type: TagType.tacticboard, id: `${tacticBoardId}-access` },
       ],
     }),
     deleteTacticboardAccess: builder.mutation<
       { message: string },
-      { tacticboardId: string; userId: string }
+      TacticBoardAccessDeleteRequest
     >({
-      query: ({ tacticboardId, userId }) => ({
-        url: `/api/tacticboards/${tacticboardId}/access`,
+      query: (request) => ({
+        url: `/api/tacticboards/${request.tacticBoardId}/access`,
         method: "delete",
-        data: { userId },
+        data: toTacticBoardAccessDeleteRequestDto(request),
       }),
-      invalidatesTags: (_result, _error, { tacticboardId }) => [
-        { type: TagType.tacticboard, id: `${tacticboardId}-access` },
+      invalidatesTags: (_result, _error, { tacticBoardId }) => [
+        { type: TagType.tacticboard, id: `${tacticBoardId}-access` },
       ],
     }),
     shareTacticBoard: builder.mutation<
       { message: string },
-      { tacticboardId: string; email: string; access: AccessLevel }
+      { tacticBoardId: string; email: string; access: AccessLevel }
     >({
-      query: ({ tacticboardId, email, access }) => ({
-        url: `/api/tacticboards/${tacticboardId}/share`,
+      query: ({ tacticBoardId, email, access }) => ({
+        url: `/api/tacticboards/${tacticBoardId}/share`,
         method: "post",
         data: { email, access },
       }),
-      invalidatesTags: (_result, _error, { tacticboardId }) => [
-        { type: TagType.tacticboard, id: `${tacticboardId}-access` },
+      invalidatesTags: (_result, _error, { tacticBoardId }) => [
+        { type: TagType.tacticboard, id: `${tacticBoardId}-access` },
       ],
     }),
     createTacticboardShareLink: builder.mutation<ShareLinkResponse, string>({

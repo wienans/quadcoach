@@ -31,6 +31,8 @@ export interface TacticBoardDrawingContextProps {
   getArrowTipEnabled: () => boolean;
 }
 
+// The context and its provider intentionally share this module.
+// eslint-disable-next-line react-refresh/only-export-components
 export const TacticBoardDrawingContext = createContext<
   TacticBoardDrawingContextProps | undefined
 >(undefined);

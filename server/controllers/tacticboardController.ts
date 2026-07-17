@@ -14,6 +14,11 @@ import {
   serializeResourceAuthorizationDecision,
 } from "./helpers/requireResourceAuthorization";
 import { authorizationResourceFor } from "../authorization/resourceAuthorization";
+import {
+  toLegacyTacticBoardAccessPersistence,
+  toLegacyTacticBoardListResponse,
+  toLegacyTacticBoardReferencePersistence,
+} from "../compatibility/tacticBoardCompatibility";
 
 interface UserInfo {
   id?: string;
@@ -117,14 +122,16 @@ export const getAllTacticboards = asyncHandler(
       .skip(skip)
       .limit(limit);
 
-    res.send({
-      tacticboards: boards,
-      pagination: {
-        total: totalCount,
-        page,
-        pages: Math.ceil(totalCount / limit),
-      },
-    });
+    res.send(
+      toLegacyTacticBoardListResponse({
+        tacticBoards: boards,
+        pagination: {
+          total: totalCount,
+          page,
+          pages: Math.ceil(totalCount / limit),
+        },
+      }),
+    );
   },
 );
 
@@ -210,14 +217,16 @@ export const getAllTacticboardHeaders = asyncHandler(
       .skip(skip)
       .limit(limit);
 
-    res.send({
-      tacticboards: boards,
-      pagination: {
-        total: totalCount,
-        page,
-        pages: Math.ceil(totalCount / limit),
-      },
-    });
+    res.send(
+      toLegacyTacticBoardListResponse({
+        tacticBoards: boards,
+        pagination: {
+          total: totalCount,
+          page,
+          pages: Math.ceil(totalCount / limit),
+        },
+      }),
+    );
   },
 );
 
@@ -709,8 +718,15 @@ export const setAccess = asyncHandler(
 
     try {
       const accessEntry = await TacticboardAccess.findOneAndUpdate(
-        { user: userId, tacticboard: req.params.id },
-        { user: userId, tacticboard: req.params.id, access },
+        toLegacyTacticBoardReferencePersistence({
+          userId,
+          tacticBoardId: req.params.id,
+        }),
+        toLegacyTacticBoardAccessPersistence({
+          userId,
+          tacticBoardId: req.params.id,
+          access,
+        }),
         { upsert: true, new: true },
       );
       res.status(201).json(accessEntry);
@@ -759,10 +775,12 @@ export const deleteAccess = asyncHandler(
       return;
     }
 
-    const result = await TacticboardAccess.deleteOne({
-      user: userId,
-      tacticboard: req.params.id,
-    });
+    const result = await TacticboardAccess.deleteOne(
+      toLegacyTacticBoardReferencePersistence({
+        userId,
+        tacticBoardId: req.params.id,
+      }),
+    );
 
     if (result.deletedCount === 0) {
       res.status(404).json({ message: "Access entry not found" });

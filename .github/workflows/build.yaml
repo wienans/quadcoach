@@ -27,17 +27,19 @@ jobs:
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
-      - name: Build Server
+      - name: Test and Build Server
         if: "!cancelled()"
         working-directory: ./server
         run: |
-          ls
-          npm install
+          npm ci
+          npm test
           npm run build
-      - name: Build Client
+          npm run verify:clean-artifacts
+      - name: Test, Lint, and Build Client
         if: "!cancelled()"
         working-directory: ./client
         run: |
-          ls
-          npm install
+          npm ci
+          npm test
+          npm run lint
           npm run build

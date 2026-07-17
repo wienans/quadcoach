@@ -6,6 +6,10 @@ import PracticePlanFav from "../models/practicePlanFav";
 import mongoose from "mongoose";
 import Exercise, { IExercise } from "../models/exercise";
 import TacticBoard, { ITacticBoard } from "../models/tacticboard";
+import {
+  fromLegacyTacticBoardFavoriteRequest,
+  toLegacyTacticBoardFavoritePersistence,
+} from "../compatibility/tacticBoardCompatibility";
 
 interface RequestWithUser extends Request {
   UserInfo?: {
@@ -182,7 +186,9 @@ export const getFavoriteTacticboardsHeaders = asyncHandler(
 
 export const addFavoriteTacticboard = asyncHandler(
   async (req: RequestWithUser, res: Response) => {
-    const { userId, tacticboardId } = req.body;
+    const { userId, tacticBoardId } = fromLegacyTacticBoardFavoriteRequest(
+      req.body,
+    );
 
     if (
       !req.UserInfo?.id ||
@@ -194,17 +200,16 @@ export const addFavoriteTacticboard = asyncHandler(
 
     if (
       !mongoose.isValidObjectId(userId) ||
-      !mongoose.isValidObjectId(tacticboardId)
+      !mongoose.isValidObjectId(tacticBoardId)
     ) {
       res.status(400).json({ message: "Invalid tacticboard ID or User ID" });
       return;
     }
 
     try {
-      const favorite = await TacticboardFav.create({
-        user: userId,
-        tacticboard: tacticboardId,
-      });
+      const favorite = await TacticboardFav.create(
+        toLegacyTacticBoardFavoritePersistence({ userId, tacticBoardId }),
+      );
 
       res.status(201).json(favorite);
     } catch (error) {
@@ -219,7 +224,9 @@ export const addFavoriteTacticboard = asyncHandler(
 
 export const removeFavoriteTacticboard = asyncHandler(
   async (req: RequestWithUser, res: Response) => {
-    const { userId, tacticboardId } = req.body;
+    const { userId, tacticBoardId } = fromLegacyTacticBoardFavoriteRequest(
+      req.body,
+    );
 
     if (
       !req.UserInfo?.id ||
@@ -231,16 +238,15 @@ export const removeFavoriteTacticboard = asyncHandler(
 
     if (
       !mongoose.isValidObjectId(userId) ||
-      !mongoose.isValidObjectId(tacticboardId)
+      !mongoose.isValidObjectId(tacticBoardId)
     ) {
       res.status(400).json({ message: "Invalid tacticboard ID or User ID" });
       return;
     }
 
-    const result = await TacticboardFav.deleteOne({
-      user: userId,
-      tacticboard: tacticboardId,
-    });
+    const result = await TacticboardFav.deleteOne(
+      toLegacyTacticBoardFavoritePersistence({ userId, tacticBoardId }),
+    );
 
     if (result.deletedCount === 0) {
       res.status(404).json({ message: "Favorite not found" });

@@ -23,6 +23,8 @@ export interface TacticBoardDataContextProps {
   getAllObjectsJson: () => object;
 }
 
+// The context and its provider intentionally share this module.
+// eslint-disable-next-line react-refresh/only-export-components
 export const TacticBoardDataContext = createContext<
   TacticBoardDataContextProps | undefined
 >(undefined);

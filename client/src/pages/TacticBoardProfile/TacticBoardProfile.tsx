@@ -237,7 +237,7 @@ const TacticBoardProfile = () => {
       setIsFavorite(
         favoriteTacticboards.some(
           (favoriteTacticboard) =>
-            favoriteTacticboard.tacticboard === tacticBoardId,
+            favoriteTacticboard.tacticBoardId === tacticBoardId,
         ),
       );
     }
@@ -299,7 +299,7 @@ const TacticBoardProfile = () => {
 
     try {
       await shareTacticBoard({
-        tacticboardId: tacticBoardId,
+        tacticBoardId,
         email: userEmail.trim(),
         access: accessMode,
       }).unwrap();
@@ -481,12 +481,12 @@ const TacticBoardProfile = () => {
                     onClick={() => {
                       if (isFavorite) {
                         removeFavoriteTacticboard({
-                          tacticboardId: tacticBoardId,
+                          tacticBoardId,
                           userId: userId,
                         });
                       } else {
                         addFavoriteTacticboard({
-                          tacticboardId: tacticBoardId,
+                          tacticBoardId,
                           userId: userId,
                         });
                       }
@@ -542,12 +542,12 @@ const TacticBoardProfile = () => {
                   onClick={() => {
                     if (isFavorite) {
                       removeFavoriteTacticboard({
-                        tacticboardId: tacticBoardId,
+                        tacticBoardId,
                         userId: userId,
                       });
                     } else {
                       addFavoriteTacticboard({
-                        tacticboardId: tacticBoardId,
+                        tacticBoardId,
                         userId: userId,
                       });
                     }
@@ -911,7 +911,7 @@ const TacticBoardProfile = () => {
                                 onClick={() => {
                                   if (tacticBoardId) {
                                     deleteTacticboardAccess({
-                                      tacticboardId: tacticBoardId,
+                                      tacticBoardId,
                                       userId: entry.user._id,
                                     });
                                   }

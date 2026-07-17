@@ -13,6 +13,10 @@ import {
   serializeResourceAuthorizationDecision,
 } from "./helpers/requireResourceAuthorization";
 import { authorizationResourceFor } from "../authorization/resourceAuthorization";
+import {
+  fromLegacyExerciseRequest,
+  toLegacyExercisePersistence,
+} from "../compatibility/tacticBoardCompatibility";
 
 interface RequestWithUser extends Request {
   UserInfo?: {
@@ -194,15 +198,22 @@ export const getById = asyncHandler(async (req: Request, res: Response) => {
 export const createNewExercise = asyncHandler(
   async (req: RequestWithUser, res: Response) => {
     if (req.UserInfo?.id) {
+      const exercisePersistence = toLegacyExercisePersistence(
+        fromLegacyExerciseRequest(req.body),
+      );
       const tacticboardIds = Array.from(
-        new Set(extractTacticboardIdsFromBlocks(req.body?.description_blocks))
+        new Set(
+          extractTacticboardIdsFromBlocks(
+            exercisePersistence.description_blocks,
+          ),
+        ),
       );
 
       if (await rejectIfAnyPrivateTacticboard(tacticboardIds, res)) {
         return;
       }
 
-      let exercise = new Exercise(req.body);
+      let exercise = new Exercise(exercisePersistence);
       const result = await exercise.save();
       if (!result) {
         console.error("Couldn't create Exercise");
@@ -233,8 +244,15 @@ export const updateById = asyncHandler(
           return;
         }
 
+        const exercisePersistence = toLegacyExercisePersistence(
+          fromLegacyExerciseRequest(req.body),
+        );
         const requestedTacticboardIds = Array.from(
-          new Set(extractTacticboardIdsFromBlocks(req.body?.description_blocks))
+          new Set(
+            extractTacticboardIdsFromBlocks(
+              exercisePersistence.description_blocks,
+            ),
+          ),
         );
         const existingTacticboardIds = Array.from(
           new Set(
@@ -250,7 +268,7 @@ export const updateById = asyncHandler(
           return;
         }
 
-        const updates = { ...(req.body as Record<string, unknown>) };
+        const updates = { ...exercisePersistence };
         delete updates.user;
         delete updates.owner;
 

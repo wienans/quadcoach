@@ -5,6 +5,8 @@ interface FooterContextType {
   toggleFooter: () => void;
 }
 
+// The context and its provider intentionally share this module.
+// eslint-disable-next-line react-refresh/only-export-components
 export const FooterContext = createContext<FooterContextType | undefined>(
   undefined,
 );
