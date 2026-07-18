@@ -10,7 +10,12 @@
     "test": "jest --runInBand",
     "typecheck": "tsc --noEmit",
     "verify:clean-artifacts": "ts-node --transpile-only scripts/verifyCleanArtifacts.ts",
-    "verify": "npm test && npm run build && npm run verify:clean-artifacts"
+    "verify": "npm test && npm run build && npm run verify:clean-artifacts",
+    "collection:preflight": "ts-node collectionQuery/operations/preflightCli.ts",
+    "collection:synthetic": "ts-node collectionQuery/operations/syntheticCli.ts",
+    "collection:index:create": "ts-node collectionQuery/operations/indexCli.ts create",
+    "collection:index:verify": "ts-node collectionQuery/operations/indexCli.ts verify",
+    "collection:index:drop": "ts-node collectionQuery/operations/indexCli.ts drop"
   },
   "keywords": [],
   "author": "",
