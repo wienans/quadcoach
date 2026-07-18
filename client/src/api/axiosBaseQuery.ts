@@ -5,6 +5,17 @@ import { deserializeDatesInObject } from "../helpers/dateHelpers";
 import { store } from "../store";
 import { setCredentials } from "./auth/authSlice";
 
+const requestHeaders = () => {
+  const token = store.getState().auth.token;
+
+  return {
+    "Content-Type": "application/json",
+    ...(typeof token === "string" && token.trim().length > 0
+      ? { Authorization: `Bearer ${token.trim()}` }
+      : {}),
+  };
+};
+
 export const axiosBaseReauthQuery =
   (
     { baseUrl }: { baseUrl: string } = { baseUrl: "" },
@@ -26,10 +37,7 @@ export const axiosBaseReauthQuery =
         data,
         params,
         withCredentials: true,
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${store.getState().auth.token}`,
-        },
+        headers: requestHeaders(),
       });
       return { data: deserializeDatesInObject(result.data) };
     } catch (axiosError) {
@@ -43,10 +51,7 @@ export const axiosBaseReauthQuery =
             data,
             params,
             withCredentials: true,
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${store.getState().auth.token}`,
-            },
+            headers: requestHeaders(),
           });
           if (refreshResult?.data) {
             // store the new token
@@ -59,10 +64,7 @@ export const axiosBaseReauthQuery =
               data,
               params,
               withCredentials: true,
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${store.getState().auth.token}`,
-              },
+              headers: requestHeaders(),
             });
             return { data: deserializeDatesInObject(result.data) };
           }
@@ -114,10 +116,7 @@ export const axiosBaseQuery =
         data,
         params,
         withCredentials: true,
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${store.getState().auth.token}`,
-        },
+        headers: requestHeaders(),
       });
       return { data: deserializeDatesInObject(result.data) };
     } catch (axiosError) {
