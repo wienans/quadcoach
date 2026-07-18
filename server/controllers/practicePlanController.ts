@@ -9,6 +9,7 @@ import {
   isNonEmptyName,
   validateNonNegativeDurations,
 } from "./helpers/practicePlanValidation";
+import { allowlistedRequestFields } from "./helpers/allowlistedRequestFields";
 import User from "../models/user";
 import { logEvents } from "../middleware/logger";
 import {
@@ -36,22 +37,6 @@ const PRACTICE_PLAN_UPDATE_FIELDS = [
   ...PRACTICE_PLAN_CREATE_FIELDS,
   "isPrivate",
 ] as const;
-
-function allowlistedFields(
-  body: unknown,
-  fields: readonly string[],
-): Record<string, unknown> {
-  if (typeof body !== "object" || body === null || Array.isArray(body)) {
-    return {};
-  }
-
-  const source = body as Record<string, unknown>;
-  return Object.fromEntries(
-    fields
-      .filter((field) => source[field] !== undefined)
-      .map((field) => [field, source[field]]),
-  );
-}
 
 function isMongoError(error: unknown): error is { code: number } {
   return typeof error === "object" && error !== null && "code" in error;
@@ -169,7 +154,7 @@ export const createPracticePlan = async (
   try {
     const userId = req.UserInfo?.id;
     if (!userId) return res.status(401).json({ message: "Unauthorized" });
-    const fields = allowlistedFields(
+    const fields = allowlistedRequestFields(
       req.body,
       PRACTICE_PLAN_CREATE_FIELDS,
     );
@@ -240,7 +225,7 @@ export const patchPracticePlan = async (
         return;
       }
 
-      const requestUpdates = allowlistedFields(
+      const requestUpdates = allowlistedRequestFields(
         req.body,
         PRACTICE_PLAN_UPDATE_FIELDS,
       );

@@ -34,16 +34,24 @@ type TestResourceTypes = {
   };
 };
 
-interface StoredResource {
+interface StoredResource<Kind extends ShareLinkResourceKind> {
   ownerId: string;
   isPrivate: boolean;
   token?: string;
-  projection: TacticBoardProjection | PracticePlanProjection;
+  projection: TestResourceTypes[Kind]["sharedResource"];
   publishedMetadata?: unknown;
 }
 
-const resourceKey = (kind: ShareLinkResourceKind, id: string): string =>
-  `${kind}:${id}`;
+interface ResourceStore<Kind extends ShareLinkResourceKind> {
+  adapter: ShareLinkPersistenceAdapter<
+    TestResourceTypes[Kind]["publishMetadata"],
+    TestResourceTypes[Kind]["sharedResource"]
+  >;
+  seed(
+    id: string,
+    overrides?: Partial<StoredResource<Kind>>,
+  ): StoredResource<Kind>;
+}
 
 const deferred = () => {
   let resolve = (): void => undefined;
@@ -54,118 +62,127 @@ const deferred = () => {
 };
 
 const createHarness = () => {
-  const resources = new Map<string, StoredResource>();
   const candidates = ["generated-token"];
   let ensureGate: ReturnType<typeof deferred> | undefined;
   let rotateGate: ReturnType<typeof deferred> | undefined;
   let ensureArrivals = 0;
   let rotateArrivals = 0;
 
-  const seed = (
-    kind: ShareLinkResourceKind,
-    id: string,
-    overrides: Partial<StoredResource> = {},
-  ): StoredResource => {
-    const projection =
-      kind === "tacticBoard"
-        ? ({ kind, name: "Board", pages: ["page"] } as const)
-        : ({ kind, name: "Plan", sections: ["section"] } as const);
-    const state: StoredResource = {
-      ownerId: "owner-id",
-      isPrivate: true,
-      projection,
-      ...overrides,
+  const createResourceStore = <Kind extends ShareLinkResourceKind>(
+    projection: () => TestResourceTypes[Kind]["sharedResource"],
+  ): ResourceStore<Kind> => {
+    const resources = new Map<string, StoredResource<Kind>>();
+    const tokenIsUsed = (token: string): boolean =>
+      [...resources.values()].some((value) => value.token === token);
+
+    const adapter: ResourceStore<Kind>["adapter"] = {
+      isValidId: (id) => id.startsWith("valid-"),
+      inspect: async (id) => {
+        const state = resources.get(id);
+        return state
+          ? {
+              ownerId: state.ownerId,
+              isPrivate: state.isPrivate,
+              activeToken: state.token,
+            }
+          : null;
+      },
+      ensure: async (id, candidate) => {
+        if (ensureGate) {
+          ensureArrivals += 1;
+          if (ensureArrivals === 2) ensureGate.resolve();
+          await ensureGate.promise;
+        }
+        const state = resources.get(id);
+        if (!state) return { outcome: "missing" };
+        if (!state.isPrivate) return { outcome: "public" };
+        if (state.token) return { outcome: "existing", token: state.token };
+        if (tokenIsUsed(candidate)) return { outcome: "collision" };
+        state.token = candidate;
+        return { outcome: "created", token: candidate };
+      },
+      rotate: async (id, expectedToken, candidate) => {
+        if (rotateGate) {
+          rotateArrivals += 1;
+          if (rotateArrivals === 2) rotateGate.resolve();
+          await rotateGate.promise;
+        }
+        const state = resources.get(id);
+        if (!state) return { outcome: "missing" };
+        if (!state.isPrivate) return { outcome: "public" };
+        if (!state.token) return { outcome: "inactive" };
+        if (state.token !== expectedToken) return { outcome: "conflict" };
+        if (tokenIsUsed(candidate)) return { outcome: "collision" };
+        state.token = candidate;
+        return { outcome: "rotated", token: candidate };
+      },
+      revoke: async (id) => {
+        const state = resources.get(id);
+        if (!state) return { outcome: "missing" };
+        if (!state.isPrivate) return { outcome: "public" };
+        if (!state.token) return { outcome: "inactive" };
+        delete state.token;
+        return { outcome: "revoked" };
+      },
+      publish: async (id, metadata) => {
+        const state = resources.get(id);
+        if (!state) return { outcome: "missing" };
+        if (!state.isPrivate) return { outcome: "public" };
+        state.publishedMetadata = metadata;
+        state.isPrivate = false;
+        delete state.token;
+        return { outcome: "published" };
+      },
+      resolveActivePrivate: async (token) => {
+        const state = [...resources.values()].find(
+          (candidate) => candidate.isPrivate && candidate.token === token,
+        );
+        return state?.projection ?? null;
+      },
     };
-    resources.set(resourceKey(kind, id), state);
-    return state;
+
+    return {
+      adapter,
+      seed: (id, overrides = {}) => {
+        const state: StoredResource<Kind> = {
+          ownerId: "owner-id",
+          isPrivate: true,
+          projection: projection(),
+          ...overrides,
+        };
+        resources.set(id, state);
+        return state;
+      },
+    };
   };
 
-  const tokenIsUsed = (kind: ShareLinkResourceKind, token: string): boolean =>
-    [...resources.entries()].some(
-      ([key, value]) => key.startsWith(`${kind}:`) && value.token === token,
-    );
+  const stores: {
+    [Kind in ShareLinkResourceKind]: ResourceStore<Kind>;
+  } = {
+    tacticBoard: createResourceStore<"tacticBoard">(() => ({
+      kind: "tacticBoard",
+      name: "Board",
+      pages: ["page"],
+    })),
+    practicePlan: createResourceStore<"practicePlan">(() => ({
+      kind: "practicePlan",
+      name: "Plan",
+      sections: ["section"],
+    })),
+  };
 
-  const createAdapter = <Metadata, Projection>(
-    kind: ShareLinkResourceKind,
-  ): ShareLinkPersistenceAdapter<Metadata, Projection> => ({
-    isValidId: (id) => id.startsWith("valid-"),
-    inspect: async (id) => {
-      const state = resources.get(resourceKey(kind, id));
-      return state
-        ? {
-            ownerId: state.ownerId,
-            isPrivate: state.isPrivate,
-            activeToken: state.token,
-          }
-        : null;
-    },
-    ensure: async (id, candidate) => {
-      if (ensureGate) {
-        ensureArrivals += 1;
-        if (ensureArrivals === 2) ensureGate.resolve();
-        await ensureGate.promise;
-      }
-      const state = resources.get(resourceKey(kind, id));
-      if (!state) return { outcome: "missing" };
-      if (!state.isPrivate) return { outcome: "public" };
-      if (state.token) return { outcome: "existing", token: state.token };
-      if (tokenIsUsed(kind, candidate)) return { outcome: "collision" };
-      state.token = candidate;
-      return { outcome: "created", token: candidate };
-    },
-    rotate: async (id, expectedToken, candidate) => {
-      if (rotateGate) {
-        rotateArrivals += 1;
-        if (rotateArrivals === 2) rotateGate.resolve();
-        await rotateGate.promise;
-      }
-      const state = resources.get(resourceKey(kind, id));
-      if (!state) return { outcome: "missing" };
-      if (!state.isPrivate) return { outcome: "public" };
-      if (!state.token) return { outcome: "inactive" };
-      if (state.token !== expectedToken) return { outcome: "conflict" };
-      if (tokenIsUsed(kind, candidate)) return { outcome: "collision" };
-      state.token = candidate;
-      return { outcome: "rotated", token: candidate };
-    },
-    revoke: async (id) => {
-      const state = resources.get(resourceKey(kind, id));
-      if (!state) return { outcome: "missing" };
-      if (!state.isPrivate) return { outcome: "public" };
-      if (!state.token) return { outcome: "inactive" };
-      delete state.token;
-      return { outcome: "revoked" };
-    },
-    publish: async (id, metadata) => {
-      const state = resources.get(resourceKey(kind, id));
-      if (!state) return { outcome: "missing" };
-      if (!state.isPrivate) return { outcome: "public" };
-      state.publishedMetadata = metadata;
-      state.isPrivate = false;
-      delete state.token;
-      return { outcome: "published" };
-    },
-    resolveActivePrivate: async (token) => {
-      const state = [...resources.entries()].find(
-        ([key, candidate]) =>
-          key.startsWith(`${kind}:`) &&
-          candidate.isPrivate &&
-          candidate.token === token,
-      )?.[1];
-      return (state?.projection as Projection | undefined) ?? null;
-    },
-  });
+  const seed = <Kind extends ShareLinkResourceKind>(
+    kind: Kind,
+    id: string,
+    overrides: Partial<StoredResource<Kind>> = {},
+  ): StoredResource<Kind> => stores[kind].seed(id, overrides);
 
   const authority: ShareLinkManagementAuthority = {
     decide: jest.fn().mockResolvedValue({ allowed: true, basis: "owner" }),
   };
   const persistence = {
-    tacticBoard: createAdapter<PublishMetadata, TacticBoardProjection>(
-      "tacticBoard",
-    ),
-    practicePlan: createAdapter<PublishMetadata, PracticePlanProjection>(
-      "practicePlan",
-    ),
+    tacticBoard: stores.tacticBoard.adapter,
+    practicePlan: stores.practicePlan.adapter,
   };
   const shareLinks = createShareLinks<TestResourceTypes>({
     authority,
@@ -181,7 +198,6 @@ const createHarness = () => {
     authority,
     candidates,
     persistence,
-    resources,
     seed,
     shareLinks,
     waitForConcurrentEnsures: () => {

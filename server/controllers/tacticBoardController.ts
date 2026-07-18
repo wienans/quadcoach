@@ -13,6 +13,7 @@ import {
   requireResourceAuthorization,
   serializeResourceAuthorizationDecision,
 } from "./helpers/requireResourceAuthorization";
+import { allowlistedRequestFields } from "./helpers/allowlistedRequestFields";
 import { authorizationResourceFor } from "../authorization/resourceAuthorization";
 import {
   toLegacyTacticBoardAccessPersistence,
@@ -41,22 +42,6 @@ const TACTIC_BOARD_CREATE_FIELDS = [
 ] as const;
 
 const TACTIC_BOARD_UPDATE_FIELDS = TACTIC_BOARD_CREATE_FIELDS;
-
-function allowlistedFields(
-  body: unknown,
-  fields: readonly string[],
-): Record<string, unknown> {
-  if (typeof body !== "object" || body === null || Array.isArray(body)) {
-    return {};
-  }
-
-  const source = body as Record<string, unknown>;
-  return Object.fromEntries(
-    fields
-      .filter((field) => source[field] !== undefined)
-      .map((field) => [field, source[field]]),
-  );
-}
 
 function isMongoError(error: unknown): error is { code: number } {
   return typeof error === "object" && error !== null && "code" in error;
@@ -295,7 +280,7 @@ export const createNewTacticBoard = asyncHandler(
   async (req: RequestWithUser, res: Response) => {
     if (req.UserInfo?.id) {
       const tacticBoard = new TacticBoard({
-        ...allowlistedFields(req.body, TACTIC_BOARD_CREATE_FIELDS),
+        ...allowlistedRequestFields(req.body, TACTIC_BOARD_CREATE_FIELDS),
         user: req.UserInfo.id,
       });
       const result = await tacticBoard.save();
@@ -334,7 +319,10 @@ export const updateById = asyncHandler(
           return;
         }
 
-        const updates = allowlistedFields(req.body, TACTIC_BOARD_UPDATE_FIELDS);
+        const updates = allowlistedRequestFields(
+          req.body,
+          TACTIC_BOARD_UPDATE_FIELDS,
+        );
 
         const result = await TacticBoard.updateOne(
           { _id: tacticBoardId },
