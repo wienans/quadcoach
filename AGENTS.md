@@ -9,13 +9,13 @@
 ## Code Style Guidelines
 
 - **TypeScript**: Strict mode enabled, use proper types, avoid `any`
-- **Imports**: ES6 imports, group by: external libraries, internal modules, relative imports
+- **Imports**: ES6 imports
 - **Formatting**: Prettier with default config (empty .prettierrc), 2-space indentation
 - **Naming**: camelCase for variables/functions, PascalCase for components/types, UPPER_CASE for constants
-- **Components**: Use forwardRef pattern for reusable components, export default
+- **Components**: Use forwardRef only when a component intentionally exposes a DOM node or imperative handle. Prefer ordinary function components otherwise.
 - **Error Handling**: Use asyncHandler for async routes, return early with status codes
-- **State**: Redux Toolkit with typed selectors, immutable updates
-- **API**: RESTful endpoints with proper HTTP status codes (200, 201, 400, 401, 403, 404, 409)
+- **State**: Redux Toolkit with typed selectors
+- **API**: RESTful endpoints with proper HTTP status codes
 
 ## Architecture
 
