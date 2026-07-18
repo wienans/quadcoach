@@ -13,14 +13,10 @@ import {
   serializeTacticBoardCollectionRequest,
 } from "./tacticBoardCollectionRequest";
 import {
-  TacticBoardAccessDeleteRequest,
-  TacticBoardAccessEntry,
-  TacticBoardAccessEntryResponseDto,
-  TacticBoardAccessMutationResponse,
-  TacticBoardAccessMutationResponseDto,
-  TacticBoardAccessRequest,
-  fromTacticBoardAccessEntryResponseDto,
-  fromTacticBoardAccessMutationResponseDto,
+  LegacyTacticBoardAccessDeleteRequest,
+  LegacyTacticBoardAccessRequest,
+  fromLegacyTacticBoardAccessDeleteRequest,
+  fromLegacyTacticBoardAccessRequest,
   toTacticBoardAccessDeleteRequestDto,
   toTacticBoardAccessRequestDto,
 } from "./compatibility/tacticBoardWire";
@@ -31,6 +27,7 @@ export type GetTacticBoardHeadersResponse = {
   tacticboards: TacticBoardHeader[];
   pagination: {
     page: number;
+    limit: number;
     total: number;
     pages: number;
   };
@@ -40,12 +37,23 @@ export type GetTacticBoardResponse = {
   tacticboards: TacticBoard[];
   pagination: {
     page: number;
+    limit: number;
     total: number;
     pages: number;
   };
 };
 
 export type AccessLevel = ResourceAccessLevel;
+
+export type AccessEntry = {
+  user: {
+    _id: string;
+    name: string;
+  };
+  tacticboard: string;
+  access: AccessLevel;
+  createdAt: string;
+};
 
 export type ShareLinkResponse = {
   message: string;
@@ -299,58 +307,61 @@ export const tacticBoardApiSlice = quadcoachApi.injectEndpoints({
       ],
     }),
     getAllTacticboardAccessUsers: builder.query<
-      TacticBoardAccessEntry[],
+      AccessEntry[],
       string
     >({
       query: (tacticboardId) => ({
         url: `/api/tacticboards/${tacticboardId}/access`,
         method: "get",
       }),
-      transformResponse: (response: TacticBoardAccessEntryResponseDto[]) =>
-        response.map(fromTacticBoardAccessEntryResponseDto),
       providesTags: (_result, _error, tacticboardId) => [
         { type: TagType.tacticboard, id: `${tacticboardId}-access` },
       ],
     }),
     setTacticboardAccess: builder.mutation<
-      TacticBoardAccessMutationResponse,
-      TacticBoardAccessRequest
+      AccessEntry,
+      LegacyTacticBoardAccessRequest
     >({
-      query: (request) => ({
-        url: `/api/tacticboards/${request.tacticBoardId}/access`,
-        method: "post",
-        data: toTacticBoardAccessRequestDto(request),
-      }),
-      transformResponse: (response: TacticBoardAccessMutationResponseDto) =>
-        fromTacticBoardAccessMutationResponseDto(response),
-      invalidatesTags: (_result, _error, { tacticBoardId }) => [
-        { type: TagType.tacticboard, id: `${tacticBoardId}-access` },
+      query: (request) => {
+        const canonicalRequest = fromLegacyTacticBoardAccessRequest(request);
+        return {
+          url: `/api/tacticboards/${canonicalRequest.tacticBoardId}/access`,
+          method: "post",
+          data: toTacticBoardAccessRequestDto(canonicalRequest),
+        };
+      },
+      invalidatesTags: (_result, _error, { tacticboardId }) => [
+        { type: TagType.tacticboard, id: `${tacticboardId}-access` },
       ],
     }),
     deleteTacticboardAccess: builder.mutation<
       { message: string },
-      TacticBoardAccessDeleteRequest
+      LegacyTacticBoardAccessDeleteRequest
     >({
-      query: (request) => ({
-        url: `/api/tacticboards/${request.tacticBoardId}/access`,
-        method: "delete",
-        data: toTacticBoardAccessDeleteRequestDto(request),
-      }),
-      invalidatesTags: (_result, _error, { tacticBoardId }) => [
-        { type: TagType.tacticboard, id: `${tacticBoardId}-access` },
+      query: (request) => {
+        const canonicalRequest =
+          fromLegacyTacticBoardAccessDeleteRequest(request);
+        return {
+          url: `/api/tacticboards/${canonicalRequest.tacticBoardId}/access`,
+          method: "delete",
+          data: toTacticBoardAccessDeleteRequestDto(canonicalRequest),
+        };
+      },
+      invalidatesTags: (_result, _error, { tacticboardId }) => [
+        { type: TagType.tacticboard, id: `${tacticboardId}-access` },
       ],
     }),
     shareTacticBoard: builder.mutation<
       { message: string },
-      { tacticBoardId: string; email: string; access: AccessLevel }
+      { tacticboardId: string; email: string; access: AccessLevel }
     >({
-      query: ({ tacticBoardId, email, access }) => ({
-        url: `/api/tacticboards/${tacticBoardId}/share`,
+      query: ({ tacticboardId, email, access }) => ({
+        url: `/api/tacticboards/${tacticboardId}/share`,
         method: "post",
         data: { email, access },
       }),
-      invalidatesTags: (_result, _error, { tacticBoardId }) => [
-        { type: TagType.tacticboard, id: `${tacticBoardId}-access` },
+      invalidatesTags: (_result, _error, { tacticboardId }) => [
+        { type: TagType.tacticboard, id: `${tacticboardId}-access` },
       ],
     }),
     createTacticboardShareLink: builder.mutation<ShareLinkResponse, string>({

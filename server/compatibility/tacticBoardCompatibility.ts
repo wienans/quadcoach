@@ -137,13 +137,3 @@ export function fromLegacyExerciseRequest(
 export function toLegacyExercisePersistence(dto: ExerciseDto): LegacyExercise {
   return toLegacyExercise(dto);
 }
-
-export function fromLegacyExercisePersistence(
-  persistence: LegacyExercise,
-): ExerciseDto {
-  return fromLegacyExercise(persistence);
-}
-
-export function toLegacyExerciseResponse(dto: ExerciseDto): LegacyExercise {
-  return toLegacyExercise(dto);
-}

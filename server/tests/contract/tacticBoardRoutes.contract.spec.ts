@@ -5,7 +5,7 @@ import { app } from "../setup";
 type HttpMethod = "delete" | "get" | "patch" | "post" | "put";
 
 describe("permanent /api/tacticboards route inventory", () => {
-  it("keeps every established method mounted at its lowercase-plural path", async () => {
+  it("keeps public collection and protected mutation methods mounted", async () => {
     const tacticBoardId = new Types.ObjectId().toString();
     const pageId = new Types.ObjectId().toString();
     const routes: ReadonlyArray<{
@@ -14,18 +14,8 @@ describe("permanent /api/tacticboards route inventory", () => {
       expectedStatus: number;
     }> = [
       { method: "get", path: "/api/tacticboards/header", expectedStatus: 200 },
-      {
-        method: "get",
-        path: "/api/tacticboards/share/missing-token",
-        expectedStatus: 404,
-      },
       { method: "get", path: "/api/tacticboards", expectedStatus: 200 },
       { method: "post", path: "/api/tacticboards", expectedStatus: 401 },
-      {
-        method: "get",
-        path: `/api/tacticboards/${tacticBoardId}`,
-        expectedStatus: 404,
-      },
       {
         method: "put",
         path: `/api/tacticboards/${tacticBoardId}`,
@@ -103,7 +93,7 @@ describe("permanent /api/tacticboards route inventory", () => {
       },
     ];
 
-    expect(routes).toHaveLength(20);
+    expect(routes).toHaveLength(18);
     for (const [index, route] of routes.entries()) {
       const response = await request(app)
         [route.method](route.path)

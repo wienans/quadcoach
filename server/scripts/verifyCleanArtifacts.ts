@@ -1,21 +1,13 @@
 import { access, readdir } from "fs/promises";
 import path from "path";
 
-const MANAGED_SOURCE_PATHS = [
-  "app.js",
-  "server.js",
-  "authorization",
-  "collectionQuery",
-  "compatibility",
-  "config",
-  "controllers",
-  "middleware",
-  "models",
-  "prototypes",
-  "routes",
-  "scripts",
-  "tests",
-] as const;
+const EXCLUDED_DIRECTORIES = new Set([
+  ".git",
+  "coverage",
+  "dist",
+  "logs",
+  "node_modules",
+]);
 
 async function pathExists(filePath: string): Promise<boolean> {
   try {
@@ -39,6 +31,9 @@ async function collectJavaScriptFiles(targetPath: string): Promise<string[]> {
     entries.map((entry) => {
       const entryPath = path.join(targetPath, entry.name);
       if (entry.isDirectory()) {
+        if (EXCLUDED_DIRECTORIES.has(entry.name)) {
+          return Promise.resolve([]);
+        }
         return collectJavaScriptFiles(entryPath);
       }
       return Promise.resolve(entry.name.endsWith(".js") ? [entryPath] : []);
@@ -50,13 +45,7 @@ async function collectJavaScriptFiles(targetPath: string): Promise<string[]> {
 export async function findStaleEmittedModules(
   sourceRoot: string,
 ): Promise<string[]> {
-  const emittedFiles = (
-    await Promise.all(
-      MANAGED_SOURCE_PATHS.map((managedPath) =>
-        collectJavaScriptFiles(path.join(sourceRoot, managedPath)),
-      ),
-    )
-  ).flat();
+  const emittedFiles = await collectJavaScriptFiles(sourceRoot);
   const staleFiles: string[] = [];
 
   for (const emittedFile of emittedFiles) {

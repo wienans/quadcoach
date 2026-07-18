@@ -39,4 +39,14 @@ describe("clean artifact verification", () => {
       "controllers/removedController.js",
     ]);
   });
+
+  it("detects stale output in newly added source directories", async () => {
+    const newSourceDirectory = path.join(fixtureRoot, "newSourceArea");
+    await mkdir(newSourceDirectory);
+    await writeFile(path.join(newSourceDirectory, "removedModule.js"), "");
+
+    await expect(findStaleEmittedModules(fixtureRoot)).resolves.toEqual([
+      "newSourceArea/removedModule.js",
+    ]);
+  });
 });

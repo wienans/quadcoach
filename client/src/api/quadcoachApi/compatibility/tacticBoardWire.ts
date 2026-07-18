@@ -1,4 +1,9 @@
-import type { ResourceAccessLevel, TacticPage } from "../domain";
+import type { ResourceAccessLevel } from "../domain";
+
+export type LegacyTacticBoardFavoriteRequest = {
+  userId: string;
+  tacticboardId: string;
+};
 
 export type TacticBoardFavoriteRequest = {
   userId: string;
@@ -30,12 +35,19 @@ export type TacticBoardAccessRequest = {
   access: ResourceAccessLevel;
 };
 
+export type LegacyTacticBoardAccessRequest = {
+  tacticboardId: string;
+  userId: string;
+  access: ResourceAccessLevel;
+};
+
 export type TacticBoardAccessRequestDto = {
   userId: string;
   access: ResourceAccessLevel;
 };
 
 export type TacticBoardAccessEntryResponseDto = {
+  _id?: string;
   user: {
     _id: string;
     name: string;
@@ -43,6 +55,7 @@ export type TacticBoardAccessEntryResponseDto = {
   tacticboard: string;
   access: ResourceAccessLevel;
   createdAt: string | Date;
+  __v?: number;
 };
 
 export type TacticBoardAccessEntry = {
@@ -56,10 +69,12 @@ export type TacticBoardAccessEntry = {
 };
 
 export type TacticBoardAccessMutationResponseDto = {
+  _id?: string;
   user: string;
   tacticboard: string;
   access: ResourceAccessLevel;
   createdAt: string | Date;
+  __v?: number;
 };
 
 export type TacticBoardAccessMutationResponse = {
@@ -74,38 +89,22 @@ export type TacticBoardAccessDeleteRequest = {
   userId: string;
 };
 
+export type LegacyTacticBoardAccessDeleteRequest = {
+  tacticboardId: string;
+  userId: string;
+};
+
 export type TacticBoardAccessDeleteRequestDto = {
   userId: string;
 };
 
-export type ExerciseBlock = {
-  _id: string;
-  video_url?: string;
-  description?: string;
-  coaching_points?: string;
-  tacticBoardId?: string;
-  time_min: number;
-};
-
-export type ExerciseBlockDto = {
-  _id: string;
-  video_url?: string;
-  description?: string;
-  coaching_points?: string;
-  tactics_board?: string;
-  time_min: number;
-};
-
-export type TacticBoardRequest = {
-  name?: string;
-  isPrivate?: boolean;
-  tags?: string[];
-  pages: TacticPage[];
-  description?: string;
-  coaching_points?: string;
-};
-
-export type TacticBoardRequestDto = TacticBoardRequest;
+export const fromLegacyTacticBoardFavoriteRequest = ({
+  userId,
+  tacticboardId,
+}: LegacyTacticBoardFavoriteRequest): TacticBoardFavoriteRequest => ({
+  userId,
+  tacticBoardId: tacticboardId,
+});
 
 export const toTacticBoardFavoriteRequestDto = ({
   userId,
@@ -125,6 +124,28 @@ export const fromTacticBoardFavoriteResponseDto = ({
   user,
   tacticBoardId: tacticboard,
   createdAt,
+});
+
+export const toLegacyTacticBoardFavoriteResponse = ({
+  _id,
+  user,
+  tacticBoardId,
+  createdAt,
+}: TacticBoardFavorite): TacticBoardFavoriteResponseDto => ({
+  _id,
+  user,
+  tacticboard: tacticBoardId,
+  createdAt,
+});
+
+export const fromLegacyTacticBoardAccessRequest = ({
+  tacticboardId,
+  userId,
+  access,
+}: LegacyTacticBoardAccessRequest): TacticBoardAccessRequest => ({
+  tacticBoardId: tacticboardId,
+  userId,
+  access,
 });
 
 export const toTacticBoardAccessRequestDto = ({
@@ -147,6 +168,18 @@ export const fromTacticBoardAccessEntryResponseDto = ({
   createdAt,
 });
 
+export const toLegacyTacticBoardAccessEntryResponse = ({
+  user,
+  tacticBoardId,
+  access,
+  createdAt,
+}: TacticBoardAccessEntry): TacticBoardAccessEntryResponseDto => ({
+  user: { _id: user._id, name: user.name },
+  tacticboard: tacticBoardId,
+  access,
+  createdAt,
+});
+
 export const fromTacticBoardAccessMutationResponseDto = ({
   user,
   tacticboard,
@@ -159,56 +192,28 @@ export const fromTacticBoardAccessMutationResponseDto = ({
   createdAt,
 });
 
+export const toLegacyTacticBoardAccessMutationResponse = ({
+  userId,
+  tacticBoardId,
+  access,
+  createdAt,
+}: TacticBoardAccessMutationResponse): TacticBoardAccessMutationResponseDto => ({
+  user: userId,
+  tacticboard: tacticBoardId,
+  access,
+  createdAt,
+});
+
+export const fromLegacyTacticBoardAccessDeleteRequest = ({
+  tacticboardId,
+  userId,
+}: LegacyTacticBoardAccessDeleteRequest): TacticBoardAccessDeleteRequest => ({
+  tacticBoardId: tacticboardId,
+  userId,
+});
+
 export const toTacticBoardAccessDeleteRequestDto = ({
   userId,
 }: TacticBoardAccessDeleteRequest): TacticBoardAccessDeleteRequestDto => ({
   userId,
-});
-
-export const toExerciseBlockDto = ({
-  _id,
-  video_url,
-  description,
-  coaching_points,
-  tacticBoardId,
-  time_min,
-}: ExerciseBlock): ExerciseBlockDto => ({
-  _id,
-  video_url,
-  description,
-  coaching_points,
-  tactics_board: tacticBoardId,
-  time_min,
-});
-
-export const fromExerciseBlockDto = ({
-  _id,
-  video_url,
-  description,
-  coaching_points,
-  tactics_board,
-  time_min,
-}: ExerciseBlockDto): ExerciseBlock => ({
-  _id,
-  video_url,
-  description,
-  coaching_points,
-  tacticBoardId: tactics_board,
-  time_min,
-});
-
-export const toTacticBoardRequestDto = ({
-  name,
-  isPrivate,
-  tags,
-  pages,
-  description,
-  coaching_points,
-}: TacticBoardRequest): TacticBoardRequestDto => ({
-  name,
-  isPrivate,
-  tags,
-  pages,
-  description,
-  coaching_points,
 });

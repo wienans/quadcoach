@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import request from "supertest";
+import Exercise from "../../models/exercise";
 import TacticBoard from "../../models/tacticboard";
 import { app } from "../setup";
 import { authHeader, createVerifiedUser } from "../utils/auth";
@@ -9,6 +10,35 @@ import {
 } from "../utils/fieldAssertions";
 
 describe("TacticBoard permanent legacy HTTP contracts", () => {
+  it("does not accept canonical aliases for embedded Exercise TacticBoards", async () => {
+    const { Authorization } = await authHeader();
+    const tacticBoard = await TacticBoard.create({
+      name: "Canonical Alias Board",
+      isPrivate: false,
+      pages: [],
+    });
+
+    const response = await request(app)
+      .post("/api/exercises")
+      .set("Authorization", Authorization)
+      .set("X-Forwarded-For", "192.0.2.9")
+      .send({
+        name: "Canonical Alias Exercise",
+        persons: 1,
+        descriptionBlocks: [
+          { tacticBoardId: tacticBoard.id, description: "Must be ignored" },
+        ],
+      });
+    const persisted = await Exercise.findById(response.body._id).lean();
+
+    expect(response.status).toBe(201);
+    expect(persisted?.description_blocks).toEqual([]);
+    expectForbiddenFields(response.body, [
+      "descriptionBlocks",
+      "description_blocks.tacticBoardId",
+    ]);
+  });
+
   it("preserves list and header envelopes without canonical key leakage", async () => {
     const ownerId = new mongoose.Types.ObjectId();
     await TacticBoard.create({
@@ -151,6 +181,26 @@ describe("TacticBoard permanent legacy HTTP contracts", () => {
       ],
       ["tacticBoard", "tacticBoardId"],
     );
+
+    const accessDeleteResponse = await request(app)
+      .delete(`/api/tacticboards/${tacticBoard.id}/access`)
+      .set("Authorization", Authorization)
+      .set("X-Forwarded-For", "192.0.2.25")
+      .send({ userId: viewer.id });
+    const favoriteDeleteResponse = await request(app)
+      .delete("/api/favorites/tacticboards")
+      .set("Authorization", Authorization)
+      .set("X-Forwarded-For", "192.0.2.26")
+      .send({ userId: owner.id, tacticboardId: tacticBoard.id });
+
+    expect(accessDeleteResponse.status).toBe(200);
+    expect(favoriteDeleteResponse.status).toBe(200);
+    expect(accessDeleteResponse.body).toEqual({
+      message: "Access removed successfully",
+    });
+    expect(favoriteDeleteResponse.body).toEqual({
+      message: "Favorite removed successfully",
+    });
   });
 
   it("preserves the API share path and returned browser path", async () => {
@@ -169,6 +219,13 @@ describe("TacticBoard permanent legacy HTTP contracts", () => {
     const sharedReadResponse = await request(app)
       .get(`/api/tacticboards/share/${shareResponse.body.token}`)
       .set("X-Forwarded-For", "192.0.2.31");
+    const deleteShareResponse = await request(app)
+      .delete(`/api/tacticboards/${tacticBoard.id}/share-link`)
+      .set("Authorization", Authorization)
+      .set("X-Forwarded-For", "192.0.2.32");
+    const deletedShareReadResponse = await request(app)
+      .get(`/api/tacticboards/share/${shareResponse.body.token}`)
+      .set("X-Forwarded-For", "192.0.2.33");
 
     expect(shareResponse.status).toBe(201);
     expectExactFields(shareResponse.body, ["message", "token", "shareLink"]);
@@ -176,7 +233,23 @@ describe("TacticBoard permanent legacy HTTP contracts", () => {
       `https://quadcoach.app/tacticboards/share/${shareResponse.body.token}`,
     );
     expect(sharedReadResponse.status).toBe(200);
-    expect(sharedReadResponse.body._id).toBe(tacticBoard.id);
+    expectExactFields(sharedReadResponse.body, [
+      "_id",
+      "name",
+      "isPrivate",
+      "tags",
+      "pages",
+      "user",
+      "shareToken",
+      "createdAt",
+      "updatedAt",
+      "__v",
+    ]);
+    expect(deleteShareResponse.status).toBe(200);
+    expect(deleteShareResponse.body).toEqual({
+      message: "Share link removed",
+    });
+    expect(deletedShareReadResponse.status).toBe(404);
     expectForbiddenFields(shareResponse.body, ["tacticBoard", "tacticBoardId"]);
   });
 
@@ -242,6 +315,7 @@ describe("TacticBoard permanent legacy HTTP contracts", () => {
       .set("Authorization", Authorization)
       .set("X-Forwarded-For", "192.0.2.52")
       .send({ name: "Updated Route Board" });
+    expect(updateResponse.status).toBe(200);
     expectExactFields(updateResponse.body, ["message"]);
 
     const pageResponse = await request(app)
@@ -249,6 +323,7 @@ describe("TacticBoard permanent legacy HTTP contracts", () => {
       .set("Authorization", Authorization)
       .set("X-Forwarded-For", "192.0.2.53")
       .send({ _id: pageId, version: "5.4.0", objects: [] });
+    expect(pageResponse.status).toBe(200);
     expectExactFields(pageResponse.body, ["message"]);
 
     const newPageResponse = await request(app)
@@ -256,6 +331,7 @@ describe("TacticBoard permanent legacy HTTP contracts", () => {
       .set("Authorization", Authorization)
       .set("X-Forwarded-For", "192.0.2.54")
       .send({ version: "5.4.0", objects: [] });
+    expect(newPageResponse.status).toBe(200);
     expectExactFields(newPageResponse.body, ["message"]);
 
     const insertPageResponse = await request(app)
@@ -263,12 +339,14 @@ describe("TacticBoard permanent legacy HTTP contracts", () => {
       .set("Authorization", Authorization)
       .set("X-Forwarded-For", "192.0.2.55")
       .send({ version: "5.4.0", objects: [] });
+    expect(insertPageResponse.status).toBe(200);
     expectExactFields(insertPageResponse.body, ["message"]);
 
     const deletePageResponse = await request(app)
       .delete(`/api/tacticboards/${tacticBoard.id}/pages/${pageId}`)
       .set("Authorization", Authorization)
       .set("X-Forwarded-For", "192.0.2.56");
+    expect(deletePageResponse.status).toBe(200);
     expectExactFields(deletePageResponse.body, ["message"]);
 
     const metaResponse = await request(app)
@@ -282,12 +360,14 @@ describe("TacticBoard permanent legacy HTTP contracts", () => {
         description: "Metadata description",
         coaching_points: "Metadata coaching points",
       });
+    expect(metaResponse.status).toBe(200);
     expectExactFields(metaResponse.body, ["message"]);
 
     const authorizationResponse = await request(app)
       .get(`/api/tacticboards/${tacticBoard.id}/checkAccess`)
       .set("Authorization", Authorization)
       .set("X-Forwarded-For", "192.0.2.58");
+    expect(authorizationResponse.status).toBe(200);
     expectExactFields(authorizationResponse.body, [
       "hasAccess",
       "type",
@@ -299,18 +379,21 @@ describe("TacticBoard permanent legacy HTTP contracts", () => {
       .set("Authorization", Authorization)
       .set("X-Forwarded-For", "192.0.2.59")
       .send({ email: target.email, access: "view" });
+    expect(namedShareResponse.status).toBe(201);
     expectExactFields(namedShareResponse.body, ["message"]);
 
     const duplicateResponse = await request(app)
       .post(`/api/tacticboards/${tacticBoard.id}/duplicate`)
       .set("Authorization", Authorization)
       .set("X-Forwarded-For", "192.0.2.60");
+    expect(duplicateResponse.status).toBe(201);
     expectExactFields(duplicateResponse.body, ["message", "_id"]);
 
     const deleteResponse = await request(app)
       .delete(`/api/tacticboards/${tacticBoard.id}`)
       .set("Authorization", Authorization)
       .set("X-Forwarded-For", "192.0.2.61");
+    expect(deleteResponse.status).toBe(200);
     expectExactFields(deleteResponse.body, ["message"]);
 
     expectForbiddenFields(

@@ -1,5 +1,5 @@
 import TacticBoard from "../../models/tacticboard";
-import TacticboardAccess from "../../models/tacticboardAccess";
+import TacticBoardAccess from "../../models/tacticboardAccess";
 import { createVerifiedUser, getAccessToken } from "../utils/auth";
 
 export type TacticBoardVisibilityScenarioName =
@@ -88,12 +88,12 @@ export async function createTacticBoardVisibilityFixture(): Promise<TacticBoardV
   ]);
 
   await Promise.all([
-    TacticboardAccess.create({
+    TacticBoardAccess.create({
       user: viewer._id,
       tacticboard: viewBoard._id,
       access: "view",
     }),
-    TacticboardAccess.create({
+    TacticBoardAccess.create({
       user: editor._id,
       tacticboard: editBoard._id,
       access: "edit",

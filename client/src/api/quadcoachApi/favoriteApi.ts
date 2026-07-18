@@ -4,15 +4,15 @@ import { ExerciseHeader } from "./domain/Exercise";
 import {
   ExerciseFavorite,
   PracticePlanFavorite,
+  TacticBoardFavorite,
   ExerciseFavoriteWithOutId,
   PracticePlanFavoriteWithOutId,
+  TacticBoardFavoriteWithOutId,
 } from "./domain/Favorits";
 import { TacticBoardHeader } from "./domain/TacticBoard";
 import {
-  TacticBoardFavorite,
-  TacticBoardFavoriteRequest,
-  TacticBoardFavoriteResponseDto,
-  fromTacticBoardFavoriteResponseDto,
+  LegacyTacticBoardFavoriteRequest,
+  fromLegacyTacticBoardFavoriteRequest,
   toTacticBoardFavoriteRequestDto,
 } from "./compatibility/tacticBoardWire";
 
@@ -23,6 +23,8 @@ type FavoriteRequest = {
 type ExerciseFavoriteRequest = FavoriteRequest & {
   exerciseId: string;
 };
+
+type TacticboardFavoriteRequest = LegacyTacticBoardFavoriteRequest;
 
 type PracticePlanFavoriteRequest = FavoriteRequest & {
   practicePlanId: string;
@@ -82,8 +84,6 @@ export const favoriteApiSlice = quadcoachApi.injectEndpoints({
         method: "get",
         data: request,
       }),
-      transformResponse: (response: TacticBoardFavoriteResponseDto[]) =>
-        response.map(fromTacticBoardFavoriteResponseDto),
       providesTags: [TagType.favorite],
     }),
     getFavoriteTacticboardsHeaders: builder.query<
@@ -98,27 +98,29 @@ export const favoriteApiSlice = quadcoachApi.injectEndpoints({
       providesTags: [TagType.favorite],
     }),
     addFavoriteTacticboard: builder.mutation<
-      TacticBoardFavorite,
-      TacticBoardFavoriteRequest
+      TacticBoardFavoriteWithOutId,
+      TacticboardFavoriteRequest
     >({
       query: (request) => ({
         url: "/api/favorites/tacticboards",
         method: "post",
-        data: toTacticBoardFavoriteRequestDto(request),
+        data: toTacticBoardFavoriteRequestDto(
+          fromLegacyTacticBoardFavoriteRequest(request),
+        ),
       }),
-      transformResponse: (response: TacticBoardFavoriteResponseDto) =>
-        fromTacticBoardFavoriteResponseDto(response),
       invalidatesTags: [TagType.favorite],
     }),
 
     removeFavoriteTacticboard: builder.mutation<
       void,
-      TacticBoardFavoriteRequest
+      TacticboardFavoriteRequest
     >({
       query: (request) => ({
         url: "/api/favorites/tacticboards",
         method: "delete",
-        data: toTacticBoardFavoriteRequestDto(request),
+        data: toTacticBoardFavoriteRequestDto(
+          fromLegacyTacticBoardFavoriteRequest(request),
+        ),
       }),
       invalidatesTags: [TagType.favorite],
     }),

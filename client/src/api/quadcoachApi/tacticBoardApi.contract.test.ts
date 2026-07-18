@@ -75,12 +75,14 @@ describe("TacticBoard RTK Query contracts", () => {
         _id: "favorite-1",
         user: "user-1",
         tacticboard: "board-1",
+        createdAt: "2026-07-17T10:00:00.000Z",
+        __v: 0,
       },
     });
-    await store.dispatch(
+    const favoriteResult = await store.dispatch(
       favoriteApiSlice.endpoints.addFavoriteTacticboard.initiate({
         userId: "user-1",
-        tacticBoardId: "board-1",
+        tacticboardId: "board-1",
       }),
     );
 
@@ -89,9 +91,16 @@ describe("TacticBoard RTK Query contracts", () => {
       method: "post",
       data: { userId: "user-1", tacticboardId: "board-1" },
     });
+    expect(favoriteResult.data).toEqual({
+      _id: "favorite-1",
+      user: "user-1",
+      tacticboard: "board-1",
+      createdAt: "2026-07-17T10:00:00.000Z",
+      __v: 0,
+    });
   });
 
-  it("maps permanent relationship DTO keys before values enter the cache", async () => {
+  it("preserves permanent relationship DTO keys in the cache", async () => {
     baseQueryMock.mockResolvedValueOnce({
       data: [
         {
@@ -100,6 +109,7 @@ describe("TacticBoard RTK Query contracts", () => {
           tacticboard: "board-1",
           access: "view",
           createdAt: "2026-07-17T10:00:00.000Z",
+          __v: 0,
         },
       ],
     });
@@ -113,12 +123,50 @@ describe("TacticBoard RTK Query contracts", () => {
 
     expect(result.data).toEqual([
       {
+        _id: "access-1",
         user: { _id: "user-1", name: "Coach" },
-        tacticBoardId: "board-1",
+        tacticboard: "board-1",
         access: "view",
         createdAt: "2026-07-17T10:00:00.000Z",
+        __v: 0,
       },
     ]);
+  });
+
+  it("preserves legacy Access mutation arguments and cached response keys", async () => {
+    baseQueryMock.mockResolvedValueOnce({
+      data: {
+        _id: "access-1",
+        user: "user-1",
+        tacticboard: "board-1",
+        access: "edit",
+        createdAt: "2026-07-17T10:00:00.000Z",
+        __v: 0,
+      },
+    });
+    const store = createApiStore();
+
+    const result = await store.dispatch(
+      tacticBoardApiSlice.endpoints.setTacticboardAccess.initiate({
+        tacticboardId: "board-1",
+        userId: "user-1",
+        access: "edit",
+      }),
+    );
+
+    expect(lastBaseQueryRequest()).toEqual({
+      url: "/api/tacticboards/board-1/access",
+      method: "post",
+      data: { userId: "user-1", access: "edit" },
+    });
+    expect(result.data).toEqual({
+      _id: "access-1",
+      user: "user-1",
+      tacticboard: "board-1",
+      access: "edit",
+      createdAt: "2026-07-17T10:00:00.000Z",
+      __v: 0,
+    });
   });
 
   it("preserves the actual browser Share Link path", () => {
