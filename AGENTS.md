@@ -2,9 +2,9 @@
 
 ## Build/Test Commands
 
-- **Client**: `cd client && npm run dev` (development), `npm run build` (production), `npm run lint` (ESLint), `npm run lint:fix` (auto-fix)
-- **Server**: `cd server && npm run dev` (development), `npm run build` (production)
-- **No test framework configured** - verify functionality manually or add testing setup
+- **Client**: `cd client && npm run dev` (development), `npm run build` (production), `npm run lint` (ESLint), `npm run lint:fix` (auto-fix), `npm test` (Vitest once), `npm run test:watch` (Vitest watch mode)
+- **Server**: `cd server && npm run dev` (development), `npm run build` (production), `npm test` (Jest), `npm run verify` (tests, build, and clean-artifact verification)
+
 
 ## Code Style Guidelines
 
