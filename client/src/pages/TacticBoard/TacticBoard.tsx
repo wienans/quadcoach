@@ -10,15 +10,17 @@ import {
   useCreateTacticBoardPageMutation,
   useDeleteTacticBoardMutation,
   useDeleteTacticBoardPageMutation,
-  useCheckTacticboardAccessQuery,
+  useCheckTacticBoardAccessQuery,
   useGetTacticBoardQuery,
   useInsertTacticBoardPageMutation,
   useUpdateTacticBoardPageMutation,
-} from "../../api/quadcoachApi/tacticboardApi";
+} from "../../api/quadcoachApi/tacticBoardApi";
 import "../fullscreen.css";
 import {
   canEditResource,
   canManageResource,
+} from "../../api/quadcoachApi/domain";
+import type {
   TacticBoard,
   TacticPage,
 } from "../../api/quadcoachApi/domain";
@@ -26,7 +28,7 @@ import {
   useTacticBoardCanvas,
   useTacticBoardData,
   useKeyboardShortcuts,
-} from "../../hooks/taticBoard";
+} from "../../hooks/tacticBoard";
 import { TacticBoardProvider } from "../../contexts/tacticBoard";
 import { animateObjectsToTargets } from "../../contexts/tacticBoard/animation";
 import Navbar from "../../components/Navbar";
@@ -35,9 +37,9 @@ import { useAppSelector } from "../../store/hooks";
 import TacticBoardTopMenu from "./TacticBoardTopMenu/TacticBoardTopMenu";
 import TacticBoardTopItemsMenu from "./TacticBoardTopItemsMenu";
 import { useAuth } from "../../store/hooks";
-import useVideoRecording from "../../hooks/taticBoard/useVideoRecording";
+import useVideoRecording from "../../hooks/tacticBoard/useVideoRecording";
 
-const TacticsBoard = (): JSX.Element => {
+const TacticBoard = (): JSX.Element => {
   const { t } = useTranslation("TacticBoard");
   const { id: tacticBoardId } = useParams();
   const {
@@ -90,7 +92,7 @@ const TacticsBoard = (): JSX.Element => {
   const isEditMode = useAppSelector((state) => state.tacticBoard.isEditMode);
 
   const { id: userId } = useAuth();
-  const { data: authorization } = useCheckTacticboardAccessQuery(
+  const { data: authorization } = useCheckTacticBoardAccessQuery(
     tacticBoardId || "",
     { skip: !tacticBoardId || !userId },
   );
@@ -123,12 +125,12 @@ const TacticsBoard = (): JSX.Element => {
             ...getAllObjectsJson(),
           } as TacticPage;
           updateTacticBoardPage({
-            tacticboardId: tacticBoard._id,
+            tacticBoardId: tacticBoard._id,
             pageId: updatedTacticBoard.pages[page - 2]._id,
             pageData: getAllObjectsJson(),
           });
           createTacticBoardPage({
-            tacticboardId: tacticBoard._id,
+            tacticBoardId: tacticBoard._id,
             pageData: getAllObjectsJson(),
           });
         } else if (insertPage) {
@@ -143,14 +145,14 @@ const TacticsBoard = (): JSX.Element => {
           } as TacticPage;
 
           updateTacticBoardPage({
-            tacticboardId: tacticBoard._id,
+            tacticBoardId: tacticBoard._id,
             pageId: updatedTacticBoard.pages[page - 1]._id,
             pageData: currentPageData,
           });
 
           // Insert the duplicated page
           insertTacticBoardPage({
-            tacticboardId: tacticBoard._id,
+            tacticBoardId: tacticBoard._id,
             position: insertPosition,
             pageData: currentPageData,
           });
@@ -174,7 +176,7 @@ const TacticsBoard = (): JSX.Element => {
           const pageToDelete = updatedTacticBoard.pages[currentPageIndex];
 
           deleteTacticBoardPage({
-            tacticboardId: tacticBoard._id,
+            tacticBoardId: tacticBoard._id,
             pageId: pageToDelete._id,
           });
 
@@ -204,7 +206,7 @@ const TacticsBoard = (): JSX.Element => {
             ...getAllObjectsJson(),
           } as TacticPage;
           updateTacticBoardPage({
-            tacticboardId: tacticBoard._id,
+            tacticBoardId: tacticBoard._id,
             pageId: updatedTacticBoard.pages[page - 2]._id,
             pageData: updatedTacticBoard.pages[page - 2],
           });
@@ -216,7 +218,7 @@ const TacticsBoard = (): JSX.Element => {
             ...getAllObjectsJson(),
           } as TacticPage;
           updateTacticBoardPage({
-            tacticboardId: tacticBoard._id,
+            tacticBoardId: tacticBoard._id,
             pageId: updatedTacticBoard.pages[page]._id,
             pageData: updatedTacticBoard.pages[page],
           });
@@ -256,7 +258,7 @@ const TacticsBoard = (): JSX.Element => {
       ...getAllObjectsJson(),
     } as TacticPage;
     updateTacticBoardPage({
-      tacticboardId: tacticBoard._id,
+      tacticBoardId: tacticBoard._id,
       pageId: updatedTacticBoard.pages[currentPage - 1]._id,
       pageData: getAllObjectsJson(),
     });
@@ -320,7 +322,7 @@ const TacticsBoard = (): JSX.Element => {
     } else {
       stopRecording();
       downloadVideo(
-        tacticBoard.name ? `${tacticBoard.name}.mp4` : "tacticboard.mp4",
+        tacticBoard.name ? `${tacticBoard.name}.mp4` : "tactic-board.mp4",
       );
     }
   };
@@ -414,7 +416,7 @@ const TacticsBoard = (): JSX.Element => {
           if (prevPage === tacticBoard.pages.length && newPage === 1) {
             stopRecording();
             downloadVideo(
-              tacticBoard.name ? `${tacticBoard.name}.mp4` : "tacticboard.mp4",
+              tacticBoard.name ? `${tacticBoard.name}.mp4` : "tactic-board.mp4",
             );
           }
 
@@ -576,12 +578,12 @@ const TacticsBoard = (): JSX.Element => {
   );
 };
 
-const TacticsBoardWrapper = (): JSX.Element => {
+const TacticBoardWrapper = (): JSX.Element => {
   return (
     <TacticBoardProvider heightFirstResizing={true}>
-      <TacticsBoard />
+      <TacticBoard />
     </TacticBoardProvider>
   );
 };
 
-export default TacticsBoardWrapper;
+export default TacticBoardWrapper;

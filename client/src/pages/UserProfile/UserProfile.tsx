@@ -45,12 +45,12 @@ import {
   useUpdateUserMutation,
   useGetOnlineUsersCountQuery,
   useGetUserExercisesQuery,
-  useGetUserTacticboardsQuery,
+  useGetUserTacticBoardsQuery,
 } from "../userApi";
 import { UserPartialId } from "../../api/quadcoachApi/domain";
 import {
   useGetFavoriteExercisesHeadersQuery,
-  useGetFavoriteTacticboardsHeadersQuery,
+  useGetFavoriteTacticBoardsHeadersQuery,
 } from "../../api/quadcoachApi/favoriteApi";
 import { useSendLogoutMutation } from "../authApi";
 
@@ -85,7 +85,7 @@ const UserProfile = () => {
   const { data: favoriteExercises } = useGetFavoriteExercisesHeadersQuery({
     userId: userViewId ?? "",
   });
-  const { data: favoriteTacticBoards } = useGetFavoriteTacticboardsHeadersQuery(
+  const { data: favoriteTacticBoards } = useGetFavoriteTacticBoardsHeadersQuery(
     {
       userId: userViewId ?? "",
     },
@@ -100,11 +100,11 @@ const UserProfile = () => {
     skip: !isCurrentUserAdmin,
   });
 
-  // Fetch user's owned and accessible exercises and tacticboards
+  // Fetch the user's owned and accessible exercises and Tactic Boards.
   const { data: userExercises } = useGetUserExercisesQuery(userViewId ?? "", {
     skip: !userViewId,
   });
-  const { data: userTacticboards } = useGetUserTacticboardsQuery(
+  const { data: userTacticBoards } = useGetUserTacticBoardsQuery(
     userViewId ?? "",
     {
       skip: !userViewId,
@@ -369,7 +369,7 @@ const UserProfile = () => {
               {Boolean(favoriteTacticBoards) && (
                 <Accordion>
                   <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                    {t("UserProfile:favoriteTacticboardsList")}
+                    {t("UserProfile:favoriteTacticBoardsList")}
                   </AccordionSummary>
                   <AccordionDetails sx={{ ml: 1 }}>
                     <List>
@@ -465,14 +465,14 @@ const UserProfile = () => {
                   </AccordionDetails>
                 </Accordion>
               )}
-              {Boolean(userTacticboards?.owned?.length) && (
+              {Boolean(userTacticBoards?.owned?.length) && (
                 <Accordion>
                   <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                    {t("UserProfile:ownedTacticboardsList")}
+                    {t("UserProfile:ownedTacticBoardsList")}
                   </AccordionSummary>
                   <AccordionDetails sx={{ ml: 1 }}>
                     <List>
-                      {userTacticboards?.owned?.map((tacticBoard) => (
+                      {userTacticBoards?.owned?.map((tacticBoard) => (
                         <ListItemButton
                           key={tacticBoard._id}
                           href={`/tacticboards/${tacticBoard._id}`}
@@ -498,14 +498,14 @@ const UserProfile = () => {
                   </AccordionDetails>
                 </Accordion>
               )}
-              {Boolean(userTacticboards?.accessible?.length) && (
+              {Boolean(userTacticBoards?.accessible?.length) && (
                 <Accordion>
                   <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                    {t("UserProfile:accessibleTacticboardsList")}
+                    {t("UserProfile:accessibleTacticBoardsList")}
                   </AccordionSummary>
                   <AccordionDetails sx={{ ml: 1 }}>
                     <List>
-                      {userTacticboards?.accessible?.map((tacticBoard) => (
+                      {userTacticBoards?.accessible?.map((tacticBoard) => (
                         <ListItemButton
                           key={tacticBoard._id}
                           href={`/tacticboards/${tacticBoard._id}`}

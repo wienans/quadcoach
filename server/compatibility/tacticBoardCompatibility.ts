@@ -95,7 +95,12 @@ export interface ExerciseDto extends Record<string, unknown> {
 }
 
 function fromLegacyExercise(exercise: LegacyExercise): ExerciseDto {
-  const { description_blocks: descriptionBlocks, ...fields } = exercise;
+  const {
+    description_blocks: descriptionBlocks,
+    descriptionBlocks: _canonicalDescriptionBlocks,
+    ...fields
+  } = exercise;
+  void _canonicalDescriptionBlocks;
   if (descriptionBlocks === undefined) {
     return fields;
   }
@@ -103,7 +108,12 @@ function fromLegacyExercise(exercise: LegacyExercise): ExerciseDto {
   return {
     ...fields,
     descriptionBlocks: descriptionBlocks.map((block) => {
-      const { tactics_board: tacticBoardId, ...blockFields } = block;
+      const {
+        tactics_board: tacticBoardId,
+        tacticBoardId: _canonicalTacticBoardId,
+        ...blockFields
+      } = block;
+      void _canonicalTacticBoardId;
       return tacticBoardId === undefined
         ? blockFields
         : { ...blockFields, tacticBoardId };

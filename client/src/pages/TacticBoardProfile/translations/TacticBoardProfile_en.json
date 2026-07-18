@@ -38,7 +38,7 @@
     }
   },
   "shareDialog": {
-    "title": "Share tacticboard",
+    "title": "Share Tactic Board",
     "copy": "Copy link",
     "delete": "Delete share",
     "close": "Close"
@@ -60,10 +60,10 @@
   },
   "description": "Description",
   "coaching_points": "Coaching points",
-  "deleteTacticBoard": "Delete tacticboard",
-  "errorDuplicatingTacticBoard": "An error occurred while duplicating the tacticboard.",
+  "deleteTacticBoard": "Delete Tactic Board",
+  "errorDuplicatingTacticBoard": "An error occurred while duplicating the Tactic Board.",
   "usedInExercises": "Used in exercises:",
-  "editTacticBoardMeta": "Edit / Save tacticboard metadata",
-  "favoriteTacticBoard": "Favorite tacticboard",
-  "errorUpdatingTacticBoard": "Error updating tacticboard"
+  "editTacticBoardMeta": "Edit / Save Tactic Board metadata",
+  "favoriteTacticBoard": "Favorite Tactic Board",
+  "errorUpdatingTacticBoard": "Error updating Tactic Board"
 }

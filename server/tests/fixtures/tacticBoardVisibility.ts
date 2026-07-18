@@ -1,5 +1,5 @@
-import TacticBoard from "../../models/tacticboard";
-import TacticBoardAccess from "../../models/tacticboardAccess";
+import TacticBoard from "../../models/tacticBoard";
+import TacticBoardAccess from "../../models/tacticBoardAccess";
 import { createVerifiedUser, getAccessToken } from "../utils/auth";
 
 export type TacticBoardVisibilityScenarioName =
@@ -46,13 +46,13 @@ export async function createTacticBoardVisibilityFixture(): Promise<TacticBoardV
   await admin.save();
 
   const [
-    publicBoard,
-    ownerBoard,
-    viewBoard,
-    editBoard,
-    hiddenBoard,
-    legacyBoard,
-    adminBoard,
+    publicTacticBoard,
+    ownerTacticBoard,
+    viewTacticBoard,
+    editTacticBoard,
+    hiddenTacticBoard,
+    legacyTacticBoard,
+    adminTacticBoard,
   ] = await Promise.all([
     TacticBoard.create({
       name: "Anonymous Board",
@@ -90,12 +90,12 @@ export async function createTacticBoardVisibilityFixture(): Promise<TacticBoardV
   await Promise.all([
     TacticBoardAccess.create({
       user: viewer._id,
-      tacticboard: viewBoard._id,
+      tacticboard: viewTacticBoard._id,
       access: "view",
     }),
     TacticBoardAccess.create({
       user: editor._id,
-      tacticboard: editBoard._id,
+      tacticboard: editTacticBoard._id,
       access: "edit",
     }),
   ]);
@@ -118,54 +118,54 @@ export async function createTacticBoardVisibilityFixture(): Promise<TacticBoardV
     scenarios: [
       {
         name: "anonymous",
-        tacticBoardId: publicBoard.id,
-        tacticBoardName: publicBoard.name ?? "",
+        tacticBoardId: publicTacticBoard.id,
+        tacticBoardName: publicTacticBoard.name ?? "",
         expectedStatus: 200,
         ipAddress: "198.51.100.10",
       },
       {
         name: "Owner",
-        tacticBoardId: ownerBoard.id,
-        tacticBoardName: ownerBoard.name ?? "",
+        tacticBoardId: ownerTacticBoard.id,
+        tacticBoardName: ownerTacticBoard.name ?? "",
         authorization: ownerAuthorization,
         expectedStatus: 200,
         ipAddress: "198.51.100.11",
       },
       {
         name: "view-granted",
-        tacticBoardId: viewBoard.id,
-        tacticBoardName: viewBoard.name ?? "",
+        tacticBoardId: viewTacticBoard.id,
+        tacticBoardName: viewTacticBoard.name ?? "",
         authorization: viewerAuthorization,
         expectedStatus: 200,
         ipAddress: "198.51.100.12",
       },
       {
         name: "edit-granted",
-        tacticBoardId: editBoard.id,
-        tacticBoardName: editBoard.name ?? "",
+        tacticBoardId: editTacticBoard.id,
+        tacticBoardName: editTacticBoard.name ?? "",
         authorization: editorAuthorization,
         expectedStatus: 200,
         ipAddress: "198.51.100.13",
       },
       {
         name: "hidden Private",
-        tacticBoardId: hiddenBoard.id,
-        tacticBoardName: hiddenBoard.name ?? "",
+        tacticBoardId: hiddenTacticBoard.id,
+        tacticBoardName: hiddenTacticBoard.name ?? "",
         authorization: hiddenAuthorization,
         expectedStatus: 403,
         ipAddress: "198.51.100.14",
       },
       {
         name: "legacy missing-isPrivate",
-        tacticBoardId: legacyBoard.id,
-        tacticBoardName: legacyBoard.name ?? "",
+        tacticBoardId: legacyTacticBoard.id,
+        tacticBoardName: legacyTacticBoard.name ?? "",
         expectedStatus: 200,
         ipAddress: "198.51.100.15",
       },
       {
         name: "mixed-case Admin",
-        tacticBoardId: adminBoard.id,
-        tacticBoardName: adminBoard.name ?? "",
+        tacticBoardId: adminTacticBoard.id,
+        tacticBoardName: adminTacticBoard.name ?? "",
         authorization: adminAuthorization,
         expectedStatus: 200,
         ipAddress: "198.51.100.16",

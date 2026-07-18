@@ -87,11 +87,11 @@ const routes = [
               type: RouteHandleType.tacticBoardProfile,
             },
             async lazy() {
-              const TacticsBoardProfileRoot = (
+              const TacticBoardProfileRoot = (
                 await import("../TacticBoardProfile")
               ).default;
               return {
-                element: <TacticsBoardProfileRoot />,
+                element: <TacticBoardProfileRoot />,
               };
             },
           },
@@ -101,10 +101,10 @@ const routes = [
               type: RouteHandleType.tacticBoard,
             },
             async lazy() {
-              const TacticsBoardWrapper = (await import("../TacticBoard"))
+              const TacticBoardWrapper = (await import("../TacticBoard"))
                 .default;
               return {
-                element: <TacticsBoardWrapper />,
+                element: <TacticBoardWrapper />,
               };
             },
           },

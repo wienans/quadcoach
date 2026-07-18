@@ -15,7 +15,7 @@ import CircleIcon from "@mui/icons-material/Circle";
 import { BallType } from "../../../contexts/tacticBoard/TacticBoardFabricJsContext/types";
 import { useTranslation } from "react-i18next";
 import { v4 as uuidv4 } from "uuid";
-import { useTacticBoardCanvas } from "../../../hooks/taticBoard";
+import { useTacticBoardCanvas } from "../../../hooks/tacticBoard";
 import {
   createExtendedCircle,
   setUuid,

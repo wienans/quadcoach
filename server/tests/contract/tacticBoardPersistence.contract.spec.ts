@@ -8,9 +8,9 @@ import {
   toLegacyTacticBoardListResponse,
 } from "../../compatibility/tacticBoardCompatibility";
 import Exercise from "../../models/exercise";
-import TacticBoard from "../../models/tacticboard";
-import TacticBoardAccess from "../../models/tacticboardAccess";
-import TacticBoardFavorite from "../../models/tacticboardFav";
+import TacticBoard from "../../models/tacticBoard";
+import TacticBoardAccess from "../../models/tacticBoardAccess";
+import TacticBoardFavorite from "../../models/tacticBoardFav";
 import {
   expectExactFields,
   expectForbiddenFields,

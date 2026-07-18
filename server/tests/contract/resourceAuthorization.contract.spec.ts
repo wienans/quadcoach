@@ -1,8 +1,8 @@
 import request from "supertest";
 import Exercise from "../../models/exercise";
 import ExerciseAccess from "../../models/exerciseAccess";
-import TacticBoard from "../../models/tacticboard";
-import TacticboardAccess from "../../models/tacticboardAccess";
+import TacticBoard from "../../models/tacticBoard";
+import TacticBoardAccess from "../../models/tacticBoardAccess";
 import { PracticePlan } from "../../models/practicePlan";
 import PracticePlanAccess from "../../models/practicePlanAccess";
 import { app } from "../setup";
@@ -90,7 +90,7 @@ describe("resource authorization HTTP mapping", () => {
       isPrivate: true,
       pages: [],
     });
-    await TacticboardAccess.create({
+    await TacticBoardAccess.create({
       user: editor._id,
       tacticboard: tacticBoard._id,
       access: "edit",
@@ -122,7 +122,7 @@ describe("resource authorization HTTP mapping", () => {
       isPrivate: true,
       pages: [],
     });
-    await TacticboardAccess.create({
+    await TacticBoardAccess.create({
       user: editor._id,
       tacticboard: tacticBoard._id,
       access: "edit",
@@ -211,7 +211,7 @@ describe("resource authorization HTTP mapping", () => {
         exercise: exercise._id,
         access: "edit",
       }),
-      TacticboardAccess.create({
+      TacticBoardAccess.create({
         user: editor._id,
         tacticboard: tacticBoard._id,
         access: "edit",
@@ -272,7 +272,7 @@ describe("resource authorization HTTP mapping", () => {
         exercise: exercise._id,
         access: "edit",
       }),
-      TacticboardAccess.create({
+      TacticBoardAccess.create({
         user: editor._id,
         tacticboard: tacticBoard._id,
         access: "edit",

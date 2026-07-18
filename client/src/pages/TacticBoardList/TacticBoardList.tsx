@@ -33,7 +33,7 @@ import {
 import {
   useAddTacticBoardMutation,
   useLazyGetTacticBoardHeadersQuery,
-} from "../../api/quadcoachApi/tacticboardApi";
+} from "../../api/quadcoachApi/tacticBoardApi";
 import { TacticPageWithOutId } from "../../api/quadcoachApi/domain/TacticPage";
 import { useTranslation } from "react-i18next";
 import FilterAltIcon from "@mui/icons-material/FilterAlt";
@@ -233,15 +233,15 @@ const TacticBoardList = () => {
     }
   }, [tacticBoardsData, tacticBoardFilter.page]);
 
-  // Update effect to accumulate loaded tacticboards
+  // Update effect to accumulate loaded Tactic Boards.
   useEffect(() => {
-    if (tacticBoardsData?.tacticboards) {
+    if (tacticBoardsData?.tacticBoards) {
       setLoadedTacticBoards((prev) => {
         const newTacticBoardIds = new Set(
-          tacticBoardsData.tacticboards.map((t) => t._id),
+          tacticBoardsData.tacticBoards.map((t) => t._id),
         );
         const filteredPrev = prev.filter((t) => !newTacticBoardIds.has(t._id));
-        return [...filteredPrev, ...tacticBoardsData.tacticboards];
+        return [...filteredPrev, ...tacticBoardsData.tacticBoards];
       });
     }
   }, [tacticBoardsData]);

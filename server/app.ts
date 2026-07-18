@@ -9,13 +9,13 @@ import logger from "./middleware/logger";
 import errorHandler from "./middleware/errorHandler";
 
 import userRoutes from "./routes/userRoutes";
-import tacticboardRoutes from "./routes/tacticboardRoutes";
+import tacticBoardRoutes from "./routes/tacticBoardRoutes";
 import exerciseRoutes from "./routes/exerciseRoutes";
 import authRoutes from "./routes/authRoutes";
 import favoriteRoutes from "./routes/favoriteRoutes";
 import practicePlanRoutes from "./routes/practicePlanRoutes";
 import Exercise from "./models/exercise";
-import TacticBoard from "./models/tacticboard";
+import TacticBoard from "./models/tacticBoard";
 
 const app = express();
 app.set("trust proxy", 1);
@@ -30,7 +30,7 @@ app.use(cors(corsOptions));
 // Existing APIs
 app.use("/api/user", userRoutes);
 app.use("/api/auth", authRoutes);
-app.use("/api/tacticboards", tacticboardRoutes);
+app.use("/api/tacticboards", tacticBoardRoutes);
 app.use("/api/exercises", exerciseRoutes);
 app.use("/api/favorites", favoriteRoutes);
 app.use("/api/practice-plans", practicePlanRoutes);

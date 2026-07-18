@@ -1,14 +1,14 @@
 import mongoose, { Types } from "mongoose";
 const Schema = mongoose.Schema;
 
-interface ITacticboardAccess {
+interface ITacticBoardAccess {
   user: Types.ObjectId;
   tacticboard: Types.ObjectId;
   access: "view" | "edit";
   createdAt: Date;
 }
 
-const tacticboardAccessSchema = new Schema<ITacticboardAccess>({
+const tacticBoardAccessSchema = new Schema<ITacticBoardAccess>({
   user: {
     type: Schema.Types.ObjectId,
     ref: "users",
@@ -31,11 +31,11 @@ const tacticboardAccessSchema = new Schema<ITacticboardAccess>({
 });
 
 // Create compound index to prevent duplicate favorites
-tacticboardAccessSchema.index({ user: 1, tacticboard: 1 }, { unique: true });
+tacticBoardAccessSchema.index({ user: 1, tacticboard: 1 }, { unique: true });
 
-const TacticboardAccess = mongoose.model<ITacticboardAccess>(
+const TacticBoardAccess = mongoose.model<ITacticBoardAccess>(
   "tacticboardAccesses",
-  tacticboardAccessSchema
+  tacticBoardAccessSchema
 );
 
-export default TacticboardAccess;
+export default TacticBoardAccess;

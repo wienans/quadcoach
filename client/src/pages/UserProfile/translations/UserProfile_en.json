@@ -16,13 +16,13 @@
   },
   "editUser": "Edit/save Userdata",
   "favoriteExercisesList": "Favorite Exercises",
-  "favoriteTacticboardsList": "Favorite Tacticboards",
+  "favoriteTacticBoardsList": "Favorite Tactic Boards",
   "deleteAccount": "Delete Account",
   "adminInfo": "Admin Information",
   "onlineUsers": "Online Users",
   "onlineUsersDescription": "Users active within the last 15 minutes",
   "ownedExercisesList": "My Exercises",
-  "ownedTacticboardsList": "My Tacticboards",
+  "ownedTacticBoardsList": "My Tactic Boards",
   "accessibleExercisesList": "Exercises (Edit Access)",
-  "accessibleTacticboardsList": "Tacticboards (Edit Access)"
+  "accessibleTacticBoardsList": "Tactic Boards (Edit Access)"
 }

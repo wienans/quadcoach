@@ -31,7 +31,7 @@ const useVideoRecording = () => {
   };
 
   const downloadVideo = useCallback(
-    (fileName: string = "tacticboard.mp4") => {
+    (fileName: string = "tactic-board.mp4") => {
       if (videoChunksRef.current.length === 0) return;
 
       const mimeType = recordingState.mediaRecorder?.mimeType || "video/webm";

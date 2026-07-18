@@ -1,11 +1,11 @@
 import asyncHandler from "express-async-handler";
 import { Request, Response } from "express";
-import TacticBoard from "../models/tacticboard";
+import TacticBoard from "../models/tacticBoard";
 import mongoose from "mongoose";
 import crypto from "crypto";
 import Exercise from "../models/exercise";
-import TacticboardFav from "../models/tacticboardFav";
-import TacticboardAccess from "../models/tacticboardAccess";
+import TacticBoardFavorite from "../models/tacticBoardFav";
+import TacticBoardAccess from "../models/tacticBoardAccess";
 import User from "../models/user";
 import { logEvents } from "../middleware/logger";
 import {
@@ -34,10 +34,10 @@ function isMongoError(error: unknown): error is { code: number } {
   return typeof error === "object" && error !== null && "code" in error;
 }
 
-// @desc    Get all tacticboards
+// @desc    Get all Tactic Boards
 // @route   GET /api/tacticboards
 // @access  Public - Returns only public boards and user's private boards
-export const getAllTacticboards = asyncHandler(
+export const getAllTacticBoards = asyncHandler(
   async (req: RequestWithUser, res: Response) => {
     let queryString: string = JSON.stringify(req.query);
     const page = parseInt(req.query.page as string) || 1;
@@ -73,15 +73,15 @@ export const getAllTacticboards = asyncHandler(
       parseObject.$or.push({ isPrivate: true, user: req.UserInfo.id });
 
       // Only query for access records if user is authenticated
-      const accessTacticboards = await TacticboardAccess.find({
+      const tacticBoardAccessEntries = await TacticBoardAccess.find({
         user: req.UserInfo.id,
       });
 
-      if (accessTacticboards.length > 0) {
+      if (tacticBoardAccessEntries.length > 0) {
         parseObject.$or.push({
           _id: {
-            $in: accessTacticboards.map((tacticboard) =>
-              tacticboard.tacticboard.toString(),
+            $in: tacticBoardAccessEntries.map((tacticBoardAccess) =>
+              tacticBoardAccess.tacticboard.toString(),
             ),
           },
         });
@@ -117,14 +117,14 @@ export const getAllTacticboards = asyncHandler(
     sortObj._id = 1; // Always add _id as a secondary sort to ensure consistent ordering
 
     const totalCount = await TacticBoard.countDocuments(parseObject);
-    const boards = await TacticBoard.find(parseObject)
+    const tacticBoards = await TacticBoard.find(parseObject)
       .sort(sortObj)
       .skip(skip)
       .limit(limit);
 
     res.send(
       toLegacyTacticBoardListResponse({
-        tacticBoards: boards,
+        tacticBoards,
         pagination: {
           total: totalCount,
           page,
@@ -135,10 +135,10 @@ export const getAllTacticboards = asyncHandler(
   },
 );
 
-// @desc    Get all tacticboard headers (minimal data)
+// @desc    Get all Tactic Board headers (minimal data)
 // @route   GET /api/tacticboards/header
 // @access  Public - Returns only public boards and user's private boards
-export const getAllTacticboardHeaders = asyncHandler(
+export const getAllTacticBoardHeaders = asyncHandler(
   async (req: RequestWithUser, res: Response) => {
     let queryString: string = JSON.stringify(req.query);
     const page = parseInt(req.query.page as string) || 1;
@@ -167,15 +167,15 @@ export const getAllTacticboardHeaders = asyncHandler(
       parseObject.$or.push({ isPrivate: true, user: req.UserInfo.id });
 
       // Only query for access records if user is authenticated
-      const accessTacticboards = await TacticboardAccess.find({
+      const tacticBoardAccessEntries = await TacticBoardAccess.find({
         user: req.UserInfo.id,
       });
 
-      if (accessTacticboards.length > 0) {
+      if (tacticBoardAccessEntries.length > 0) {
         parseObject.$or.push({
           _id: {
-            $in: accessTacticboards.map((tacticboard) =>
-              tacticboard.tacticboard.toString(),
+            $in: tacticBoardAccessEntries.map((tacticBoardAccess) =>
+              tacticBoardAccess.tacticboard.toString(),
             ),
           },
         });
@@ -211,7 +211,7 @@ export const getAllTacticboardHeaders = asyncHandler(
     sortObj._id = 1; // Always add _id as a secondary sort to ensure consistent ordering
 
     const totalCount = await TacticBoard.countDocuments(parseObject);
-    const boards = await TacticBoard.find(parseObject)
+    const tacticBoards = await TacticBoard.find(parseObject)
       .select("_id name tags isPrivate creator user")
       .sort(sortObj)
       .skip(skip)
@@ -219,7 +219,7 @@ export const getAllTacticboardHeaders = asyncHandler(
 
     res.send(
       toLegacyTacticBoardListResponse({
-        tacticBoards: boards,
+        tacticBoards,
         pagination: {
           total: totalCount,
           page,
@@ -230,19 +230,20 @@ export const getAllTacticboardHeaders = asyncHandler(
   },
 );
 
-// @desc    Get tacticboard by ID
+// @desc    Get Tactic Board by ID
 // @route   GET /api/tacticboards/:id
 // @access  Public - Returns public board or user's private board
 export const getById = asyncHandler(
   async (req: RequestWithUser, res: Response) => {
-    if (mongoose.isValidObjectId(req.params.id)) {
-      const result = await TacticBoard.findOne({ _id: req.params.id });
+    const { id: tacticBoardId } = req.params;
+    if (mongoose.isValidObjectId(tacticBoardId)) {
+      const result = await TacticBoard.findOne({ _id: tacticBoardId });
       if (result) {
         if (
           !(await requireResourceAuthorization(
             req,
             res,
-            authorizationResourceFor.tacticBoard(req.params.id, result),
+            authorizationResourceFor.tacticBoard(tacticBoardId, result),
             "view",
           ))
         ) {
@@ -259,20 +260,20 @@ export const getById = asyncHandler(
   },
 );
 
-// @desc    Create new tacticboard
+// @desc    Create new Tactic Board
 // @route   POST /api/tacticboards
 // @access  Private - Authenticated users only
-export const createNewTacticboard = asyncHandler(
+export const createNewTacticBoard = asyncHandler(
   async (req: RequestWithUser, res: Response) => {
     if (req.UserInfo?.id) {
-      let tacticboard = new TacticBoard(req.body);
-      const result = await tacticboard.save();
+      const tacticBoard = new TacticBoard(req.body);
+      const result = await tacticBoard.save();
       if (!result) {
-        console.error("Couldn't create Tacticboard");
-        res.send({ message: "Couldn't create Tacticboard" });
+        console.error("Couldn't create Tactic Board");
+        res.send({ message: "Couldn't create Tactic Board" });
       } else {
         res.status(201).send({
-          message: "Tacticboard created successfully",
+          message: "Tactic Board created successfully",
           _id: result._id,
         });
       }
@@ -282,19 +283,20 @@ export const createNewTacticboard = asyncHandler(
   },
 );
 
-// @desc    Update entire tacticboard by ID
+// @desc    Update entire Tactic Board by ID
 // @route   PATCH /api/tacticboards/:id
 // @access  Private - Owner or Admin only
 export const updateById = asyncHandler(
   async (req: RequestWithUser, res: Response) => {
-    if (mongoose.isValidObjectId(req.params.id)) {
-      const findResult = await TacticBoard.findOne({ _id: req.params.id });
+    const { id: tacticBoardId } = req.params;
+    if (mongoose.isValidObjectId(tacticBoardId)) {
+      const findResult = await TacticBoard.findOne({ _id: tacticBoardId });
       if (findResult) {
         if (
           !(await requireResourceAuthorization(
             req,
             res,
-            authorizationResourceFor.tacticBoard(req.params.id, findResult),
+            authorizationResourceFor.tacticBoard(tacticBoardId, findResult),
             "edit",
           ))
         ) {
@@ -306,16 +308,16 @@ export const updateById = asyncHandler(
         delete updates.owner;
 
         const result = await TacticBoard.updateOne(
-          { _id: req.params.id },
+          { _id: tacticBoardId },
           { $set: updates },
         );
         if (result.modifiedCount > 0) {
-          res.json({ message: "Tacticboard updated successfully" });
+          res.json({ message: "Tactic Board updated successfully" });
         } else {
           res.json({ message: "No changes made" });
         }
       } else {
-        res.status(404).json({ message: "TacticBoard not found" });
+        res.status(404).json({ message: "Tactic Board not found" });
       }
     } else {
       res.status(400).json({ message: "Invalid ID format" });
@@ -323,7 +325,7 @@ export const updateById = asyncHandler(
   },
 );
 
-// @desc    Update specific page in tacticboard
+// @desc    Update specific page in Tactic Board
 // @route   PATCH /api/tacticboards/:id/:pageId
 // @access  Private - Owner or Admin only
 export const updatePageById = asyncHandler(
@@ -333,7 +335,7 @@ export const updatePageById = asyncHandler(
       mongoose.isValidObjectId(tacticBoardId) &&
       mongoose.isValidObjectId(pageId)
     ) {
-      const findResult = await TacticBoard.findOne({ _id: req.params.id });
+      const findResult = await TacticBoard.findOne({ _id: tacticBoardId });
       if (findResult) {
         if (
           !(await requireResourceAuthorization(
@@ -364,7 +366,7 @@ export const updatePageById = asyncHandler(
           res.status(404).json({ message: "Page not found" });
         }
       } else {
-        res.status(404).json({ message: "TacticBoard not found" });
+        res.status(404).json({ message: "Tactic Board not found" });
       }
     } else {
       res.status(400).json({ message: "Invalid ID format" });
@@ -372,7 +374,7 @@ export const updatePageById = asyncHandler(
   },
 );
 
-// @desc    Update tacticboard metadata only
+// @desc    Update Tactic Board metadata only
 // @route   PATCH /api/tacticboards/:id/meta
 // @access  Private - Owner or Admin only
 export const updateMetaById = asyncHandler(
@@ -397,19 +399,19 @@ export const updateMetaById = asyncHandler(
         const { name, isPrivate, tags, description, coaching_points } =
           req.body;
         if (isPrivate) {
-          // Check if tacticboard is used in any exercises
-          const exercisesUsingTacticboard = await Exercise.find({
+          // Check if the Tactic Board is used in any exercises
+          const exercisesUsingTacticBoard = await Exercise.find({
             description_blocks: {
               $elemMatch: {
                 tactics_board: tacticBoardId,
               },
             },
           });
-          if (exercisesUsingTacticboard.length > 0) {
+          if (exercisesUsingTacticBoard.length > 0) {
             res.status(400).json({
               message:
-                "Cannot update tacticboard to private - it is being used in exercises",
-              exercises: exercisesUsingTacticboard.map((ex) => ({
+                "Cannot update Tactic Board to private - it is being used in exercises",
+              exercises: exercisesUsingTacticBoard.map((ex) => ({
                 id: ex._id,
                 name: ex.name,
               })),
@@ -417,7 +419,7 @@ export const updateMetaById = asyncHandler(
             return;
           }
         }
-        // Update the tacticboard with the new fields
+        // Update the Tactic Board with the new fields
         const result = await TacticBoard.updateOne(
           { _id: tacticBoardId },
           {
@@ -432,12 +434,12 @@ export const updateMetaById = asyncHandler(
         );
 
         if (result.modifiedCount > 0) {
-          res.json({ message: "TacticBoard updated successfully" });
+          res.json({ message: "Tactic Board updated successfully" });
         } else {
           res.status(404).json({ message: "No changes made" });
         }
       } else {
-        res.status(404).json({ message: "TacticBoard not found" });
+        res.status(404).json({ message: "Tactic Board not found" });
       }
     } else {
       res.status(400).json({ message: "Invalid ID format" });
@@ -445,39 +447,40 @@ export const updateMetaById = asyncHandler(
   },
 );
 
-// @desc    Delete tacticboard by ID
+// @desc    Delete Tactic Board by ID
 // @route   DELETE /api/tacticboards/:id
 // @access  Private - Owner or Admin only
 export const deleteById = asyncHandler(
   async (req: RequestWithUser, res: Response) => {
-    if (mongoose.isValidObjectId(req.params.id)) {
-      const findResult = await TacticBoard.findOne({ _id: req.params.id });
+    const { id: tacticBoardId } = req.params;
+    if (mongoose.isValidObjectId(tacticBoardId)) {
+      const findResult = await TacticBoard.findOne({ _id: tacticBoardId });
 
       if (findResult) {
         if (
           !(await requireResourceAuthorization(
             req,
             res,
-            authorizationResourceFor.tacticBoard(req.params.id, findResult),
+            authorizationResourceFor.tacticBoard(tacticBoardId, findResult),
             "delete",
           ))
         ) {
           return;
         }
 
-        // Check if tacticboard is used in any exercises
-        const exercisesUsingTacticboard = await Exercise.find({
+        // Check if the Tactic Board is used in any exercises
+        const exercisesUsingTacticBoard = await Exercise.find({
           description_blocks: {
             $elemMatch: {
-              tactics_board: req.params.id,
+              tactics_board: tacticBoardId,
             },
           },
         });
-        if (exercisesUsingTacticboard.length > 0) {
+        if (exercisesUsingTacticBoard.length > 0) {
           res.status(400).json({
             message:
-              "Cannot delete tacticboard - it is being used in exercises",
-            exercises: exercisesUsingTacticboard.map((ex) => ({
+              "Cannot delete Tactic Board - it is being used in exercises",
+            exercises: exercisesUsingTacticBoard.map((ex) => ({
               id: ex._id,
               name: ex.name,
             })),
@@ -486,14 +489,14 @@ export const deleteById = asyncHandler(
         }
 
         // Delete Favorite Entries
-        await TacticboardFav.deleteMany({ tacticboard: req.params.id });
-        await TacticboardAccess.deleteMany({ tacticboard: req.params.id });
+        await TacticBoardFavorite.deleteMany({ tacticboard: tacticBoardId });
+        await TacticBoardAccess.deleteMany({ tacticboard: tacticBoardId });
         // If not used in exercises, proceed with deletion
-        const result = await TacticBoard.deleteOne({ _id: req.params.id });
+        const result = await TacticBoard.deleteOne({ _id: tacticBoardId });
         if (result.deletedCount > 0) {
-          res.json({ message: "Tacticboard deleted successfully" });
+          res.json({ message: "Tactic Board deleted successfully" });
         } else {
-          res.status(404).json({ message: "TacticBoard not found" });
+          res.status(404).json({ message: "Tactic Board not found" });
         }
       } else {
         res.status(404).json({ message: "No Record Found" });
@@ -504,7 +507,7 @@ export const deleteById = asyncHandler(
   },
 );
 
-// @desc    Create new page in tacticboard
+// @desc    Create new page in Tactic Board
 // @route   POST /api/tacticboards/:id/newPage
 // @access  Private - Owner or Admin only
 export const createNewPage = asyncHandler(
@@ -537,7 +540,7 @@ export const createNewPage = asyncHandler(
           res.status(404).json({ message: "Failed to add new page" });
         }
       } else {
-        res.status(404).json({ message: "TacticBoard not found" });
+        res.status(404).json({ message: "Tactic Board not found" });
       }
     } else {
       res.status(400).json({ message: "Invalid ID format" });
@@ -545,7 +548,7 @@ export const createNewPage = asyncHandler(
   },
 );
 
-// @desc    Insert page at specific position in tacticboard
+// @desc    Insert page at specific position in Tactic Board
 // @route   POST /api/tacticboards/:id/insertPage/:position
 // @access  Private - Owner or Admin only
 export const insertPageAtPosition = asyncHandler(
@@ -595,7 +598,7 @@ export const insertPageAtPosition = asyncHandler(
           res.status(404).json({ message: "Failed to insert page" });
         }
       } else {
-        res.status(404).json({ message: "TacticBoard not found" });
+        res.status(404).json({ message: "Tactic Board not found" });
       }
     } else {
       res.status(400).json({ message: "Invalid ID format or position" });
@@ -603,7 +606,7 @@ export const insertPageAtPosition = asyncHandler(
   },
 );
 
-// @desc    Delete page from tacticboard
+// @desc    Delete page from Tactic Board
 // @route   DELETE /api/tacticboards/:id/:pageId
 // @access  Private - Owner or Admin only
 export const deletePageById = asyncHandler(
@@ -638,7 +641,7 @@ export const deletePageById = asyncHandler(
           res.status(404).json({ message: "Page not found" });
         }
       } else {
-        res.status(404).json({ message: "TacticBoard not found" });
+        res.status(404).json({ message: "Tactic Board not found" });
       }
     } else {
       res.status(400).json({ message: "Invalid ID format" });
@@ -646,49 +649,51 @@ export const deletePageById = asyncHandler(
   },
 );
 
-// @desc    Check if user has access to a tacticboard
+// @desc    Check if user has access to a Tactic Board
 // @route   GET /api/tacticboards/:id/access
 // @access  Private - Authenticated users only
 export const checkAccess = asyncHandler(
   async (req: RequestWithUser, res: Response) => {
+    const { id: tacticBoardId } = req.params;
     if (!req.UserInfo?.id) {
       res.status(401).json({ message: "Unauthorized" });
       return;
     }
 
-    if (!mongoose.isValidObjectId(req.params.id)) {
-      res.status(400).json({ message: "Invalid tacticboard ID" });
+    if (!mongoose.isValidObjectId(tacticBoardId)) {
+      res.status(400).json({ message: "Invalid Tactic Board ID" });
       return;
     }
 
-    const tacticboard = await TacticBoard.findById(req.params.id);
-    if (!tacticboard) {
-      res.status(404).json({ message: "Tacticboard not found" });
+    const tacticBoard = await TacticBoard.findById(tacticBoardId);
+    if (!tacticBoard) {
+      res.status(404).json({ message: "Tactic Board not found" });
       return;
     }
 
     const decision = await getResourceAuthorization(
       req,
-      authorizationResourceFor.tacticBoard(req.params.id, tacticboard),
+      authorizationResourceFor.tacticBoard(tacticBoardId, tacticBoard),
       "view",
     );
     res.json(serializeResourceAuthorizationDecision(decision));
   },
 );
 
-// @desc    Grant access to a tacticboard for a user
+// @desc    Grant access to a Tactic Board for a user
 // @route   POST /api/tacticboards/:id/access
 // @access  Private - Users with access
 export const setAccess = asyncHandler(
   async (req: RequestWithUser, res: Response) => {
-    if (!mongoose.isValidObjectId(req.params.id)) {
-      res.status(400).json({ message: "Invalid tacticboard ID" });
+    const { id: tacticBoardId } = req.params;
+    if (!mongoose.isValidObjectId(tacticBoardId)) {
+      res.status(400).json({ message: "Invalid Tactic Board ID" });
       return;
     }
 
-    const tacticboard = await TacticBoard.findById(req.params.id);
-    if (!tacticboard) {
-      res.status(404).json({ message: "Tacticboard not found" });
+    const tacticBoard = await TacticBoard.findById(tacticBoardId);
+    if (!tacticBoard) {
+      res.status(404).json({ message: "Tactic Board not found" });
       return;
     }
 
@@ -696,7 +701,7 @@ export const setAccess = asyncHandler(
       !(await requireResourceAuthorization(
         req,
         res,
-        authorizationResourceFor.tacticBoard(req.params.id, tacticboard),
+        authorizationResourceFor.tacticBoard(tacticBoardId, tacticBoard),
         "manageAccess",
       ))
     ) {
@@ -717,14 +722,14 @@ export const setAccess = asyncHandler(
     }
 
     try {
-      const accessEntry = await TacticboardAccess.findOneAndUpdate(
+      const accessEntry = await TacticBoardAccess.findOneAndUpdate(
         toLegacyTacticBoardReferencePersistence({
           userId,
-          tacticBoardId: req.params.id,
+          tacticBoardId,
         }),
         toLegacyTacticBoardAccessPersistence({
           userId,
-          tacticBoardId: req.params.id,
+          tacticBoardId,
           access,
         }),
         { upsert: true, new: true },
@@ -742,19 +747,20 @@ export const setAccess = asyncHandler(
   },
 );
 
-// @desc    Remove access to a tacticboard for a user
+// @desc    Remove access to a Tactic Board for a user
 // @route   DELETE /api/tacticboards/:id/access
 // @access  Private - Users with access
 export const deleteAccess = asyncHandler(
   async (req: RequestWithUser, res: Response) => {
-    if (!mongoose.isValidObjectId(req.params.id)) {
-      res.status(400).json({ message: "Invalid tacticboard ID" });
+    const { id: tacticBoardId } = req.params;
+    if (!mongoose.isValidObjectId(tacticBoardId)) {
+      res.status(400).json({ message: "Invalid Tactic Board ID" });
       return;
     }
 
-    const tacticboard = await TacticBoard.findById(req.params.id);
-    if (!tacticboard) {
-      res.status(404).json({ message: "Tacticboard not found" });
+    const tacticBoard = await TacticBoard.findById(tacticBoardId);
+    if (!tacticBoard) {
+      res.status(404).json({ message: "Tactic Board not found" });
       return;
     }
 
@@ -762,7 +768,7 @@ export const deleteAccess = asyncHandler(
       !(await requireResourceAuthorization(
         req,
         res,
-        authorizationResourceFor.tacticBoard(req.params.id, tacticboard),
+        authorizationResourceFor.tacticBoard(tacticBoardId, tacticBoard),
         "manageAccess",
       ))
     ) {
@@ -775,10 +781,10 @@ export const deleteAccess = asyncHandler(
       return;
     }
 
-    const result = await TacticboardAccess.deleteOne(
+    const result = await TacticBoardAccess.deleteOne(
       toLegacyTacticBoardReferencePersistence({
         userId,
-        tacticBoardId: req.params.id,
+        tacticBoardId,
       }),
     );
 
@@ -791,24 +797,25 @@ export const deleteAccess = asyncHandler(
   },
 );
 
-// @desc    Duplicate tacticboard by ID
+// @desc    Duplicate Tactic Board by ID
 // @route   POST /api/tacticboards/:id/duplicate
 // @access  Private - authenticated users with access to view the board
 export const duplicateById = asyncHandler(
   async (req: RequestWithUser, res: Response) => {
+    const { id: tacticBoardId } = req.params;
     if (!req.UserInfo?.id) {
       res.status(401).json({ message: "Unauthorized" });
       return;
     }
 
-    if (!mongoose.isValidObjectId(req.params.id)) {
+    if (!mongoose.isValidObjectId(tacticBoardId)) {
       res.status(400).json({ message: "Invalid ID format" });
       return;
     }
 
-    const tacticboard = await TacticBoard.findById(req.params.id);
-    if (!tacticboard) {
-      res.status(404).json({ message: "Tacticboard not found" });
+    const tacticBoard = await TacticBoard.findById(tacticBoardId);
+    if (!tacticBoard) {
+      res.status(404).json({ message: "Tactic Board not found" });
       return;
     }
 
@@ -816,14 +823,14 @@ export const duplicateById = asyncHandler(
       !(await requireResourceAuthorization(
         req,
         res,
-        authorizationResourceFor.tacticBoard(req.params.id, tacticboard),
+        authorizationResourceFor.tacticBoard(tacticBoardId, tacticBoard),
         "view",
       ))
     ) {
       return;
     }
 
-    const tacticboardData = tacticboard.toObject() as {
+    const tacticBoardData = tacticBoard.toObject() as {
       isPrivate?: boolean;
       tags?: string[];
       pages?: unknown[];
@@ -845,39 +852,40 @@ export const duplicateById = asyncHandler(
       return obj;
     };
 
-    const duplicatedTacticboard = new TacticBoard({
-      name: `Copy of ${tacticboard.name ?? "Tacticboard"}`,
-      isPrivate: tacticboardData.isPrivate,
-      tags: tacticboardData.tags,
-      pages: stripIds(tacticboardData.pages),
-      description: tacticboardData.description,
-      coaching_points: tacticboardData.coaching_points,
+    const duplicatedTacticBoard = new TacticBoard({
+      name: `Copy of ${tacticBoard.name ?? "Tactic Board"}`,
+      isPrivate: tacticBoardData.isPrivate,
+      tags: tacticBoardData.tags,
+      pages: stripIds(tacticBoardData.pages),
+      description: tacticBoardData.description,
+      coaching_points: tacticBoardData.coaching_points,
       creator: req.UserInfo.name ?? req.UserInfo.id,
       user: req.UserInfo.id,
     });
 
-    const result = await duplicatedTacticboard.save();
+    const result = await duplicatedTacticBoard.save();
 
     res.status(201).json({
-      message: "Tacticboard duplicated successfully",
+      message: "Tactic Board duplicated successfully",
       _id: result._id,
     });
   },
 );
 
-// @desc    Get all users who have access to a tacticboard
+// @desc    Get all users who have access to a Tactic Board
 // @route   GET /api/tacticboards/:id/access
 // @access  Private - Users with access
 export const getAllAccessUsers = asyncHandler(
   async (req: RequestWithUser, res: Response) => {
-    if (!mongoose.isValidObjectId(req.params.id)) {
-      res.status(400).json({ message: "Invalid tacticboard ID" });
+    const { id: tacticBoardId } = req.params;
+    if (!mongoose.isValidObjectId(tacticBoardId)) {
+      res.status(400).json({ message: "Invalid Tactic Board ID" });
       return;
     }
 
-    const tacticboard = await TacticBoard.findById(req.params.id);
-    if (!tacticboard) {
-      res.status(404).json({ message: "Tacticboard not found" });
+    const tacticBoard = await TacticBoard.findById(tacticBoardId);
+    if (!tacticBoard) {
+      res.status(404).json({ message: "Tactic Board not found" });
       return;
     }
 
@@ -885,26 +893,27 @@ export const getAllAccessUsers = asyncHandler(
       !(await requireResourceAuthorization(
         req,
         res,
-        authorizationResourceFor.tacticBoard(req.params.id, tacticboard),
+        authorizationResourceFor.tacticBoard(tacticBoardId, tacticBoard),
         "manageAccess",
       ))
     ) {
       return;
     }
 
-    const accessEntries = await TacticboardAccess.find({
-      tacticboard: req.params.id,
+    const accessEntries = await TacticBoardAccess.find({
+      tacticboard: tacticBoardId,
     }).populate("user", "name");
 
     res.json(accessEntries);
   },
 );
 
-// @desc    Share tacticboard with user by email
+// @desc    Share Tactic Board with user by email
 // @route   POST /api/tacticboards/:id/share
 // @access  Private - Owner or Admin only
 export const shareTacticBoard = asyncHandler(
   async (req: RequestWithUser, res: Response) => {
+    const { id: tacticBoardId } = req.params;
     if (!req.UserInfo?.id) {
       res.status(401).json({ message: "Unauthorized" });
       return;
@@ -921,9 +930,9 @@ export const shareTacticBoard = asyncHandler(
       return;
     }
 
-    const tacticBoard = await TacticBoard.findById(req.params.id);
+    const tacticBoard = await TacticBoard.findById(tacticBoardId);
     if (!tacticBoard) {
-      res.status(404).json({ message: "Tactic board not found" });
+      res.status(404).json({ message: "Tactic Board not found" });
       return;
     }
 
@@ -931,7 +940,7 @@ export const shareTacticBoard = asyncHandler(
       !(await requireResourceAuthorization(
         req,
         res,
-        authorizationResourceFor.tacticBoard(req.params.id, tacticBoard),
+        authorizationResourceFor.tacticBoard(tacticBoardId, tacticBoard),
         "manageAccess",
       ))
     ) {
@@ -946,8 +955,8 @@ export const shareTacticBoard = asyncHandler(
       return;
     }
 
-    const existingAccess = await TacticboardAccess.findOne({
-      tacticboard: req.params.id,
+    const existingAccess = await TacticBoardAccess.findOne({
+      tacticboard: tacticBoardId,
       user: targetUser._id,
     });
 
@@ -956,8 +965,8 @@ export const shareTacticBoard = asyncHandler(
       await existingAccess.save();
       res.json({ message: "Access updated successfully" });
     } else {
-      const newAccess = new TacticboardAccess({
-        tacticboard: req.params.id,
+      const newAccess = new TacticBoardAccess({
+        tacticboard: tacticBoardId,
         user: targetUser._id,
         access,
       });
@@ -972,14 +981,14 @@ const isDuplicateShareTokenError = (error: unknown): boolean => {
 };
 
 const ensureShareTokenWithRetry = async (
-  tacticboard: InstanceType<typeof TacticBoard>,
+  tacticBoard: InstanceType<typeof TacticBoard>,
   maxAttempts: number = 5,
 ): Promise<void> => {
   for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
-    tacticboard.shareToken = crypto.randomUUID();
+    tacticBoard.shareToken = crypto.randomUUID();
 
     try {
-      await tacticboard.save();
+      await tacticBoard.save();
       return;
     } catch (error) {
       if (!isDuplicateShareTokenError(error)) {
@@ -991,24 +1000,25 @@ const ensureShareTokenWithRetry = async (
   throw new Error("Unable to generate unique share token");
 };
 
-// @desc    Create (or return existing) share link for a tacticboard
+// @desc    Create (or return existing) Share Link for a Tactic Board
 // @route   POST /api/tacticboards/:id/share-link
 // @access  Private - users with edit permission
 export const createShareLink = asyncHandler(
   async (req: RequestWithUser, res: Response) => {
+    const { id: tacticBoardId } = req.params;
     if (!req.UserInfo?.id) {
       res.status(401).json({ message: "Unauthorized" });
       return;
     }
 
-    if (!mongoose.isValidObjectId(req.params.id)) {
-      res.status(400).json({ message: "Invalid tacticboard ID" });
+    if (!mongoose.isValidObjectId(tacticBoardId)) {
+      res.status(400).json({ message: "Invalid Tactic Board ID" });
       return;
     }
 
-    const tacticboard = await TacticBoard.findById(req.params.id);
-    if (!tacticboard) {
-      res.status(404).json({ message: "Tacticboard not found" });
+    const tacticBoard = await TacticBoard.findById(tacticBoardId);
+    if (!tacticBoard) {
+      res.status(404).json({ message: "Tactic Board not found" });
       return;
     }
 
@@ -1016,26 +1026,26 @@ export const createShareLink = asyncHandler(
       !(await requireResourceAuthorization(
         req,
         res,
-        authorizationResourceFor.tacticBoard(req.params.id, tacticboard),
+        authorizationResourceFor.tacticBoard(tacticBoardId, tacticBoard),
         "edit",
       ))
     ) {
       return;
     }
     try {
-      if (!tacticboard.shareToken) {
-        await ensureShareTokenWithRetry(tacticboard);
+      if (!tacticBoard.shareToken) {
+        await ensureShareTokenWithRetry(tacticBoard);
       }
       const publicBaseUrl =
         process.env.PUBLIC_BASE_URL || "https://quadcoach.app";
       res.status(201).json({
         message: "Share link available",
-        token: tacticboard.shareToken,
-        shareLink: `${publicBaseUrl}/tacticboards/share/${tacticboard.shareToken}`,
+        token: tacticBoard.shareToken,
+        shareLink: `${publicBaseUrl}/tacticboards/share/${tacticBoard.shareToken}`,
       });
     } catch (e: any) {
       logEvents(
-        `Failed to create share link for tacticboard ${req.params.id}: ${e.message}`,
+        `Failed to create Share Link for Tactic Board ${tacticBoardId}: ${e.message}`,
         "error.log",
       );
       res.status(500).json({ message: "Failed to create share link" });
@@ -1043,24 +1053,25 @@ export const createShareLink = asyncHandler(
   },
 );
 
-// @desc    Delete share link from a tacticboard
+// @desc    Delete Share Link from a Tactic Board
 // @route   DELETE /api/tacticboards/:id/share-link
 // @access  Private - users with edit permission
 export const deleteShareLink = asyncHandler(
   async (req: RequestWithUser, res: Response) => {
+    const { id: tacticBoardId } = req.params;
     if (!req.UserInfo?.id) {
       res.status(401).json({ message: "Unauthorized" });
       return;
     }
 
-    if (!mongoose.isValidObjectId(req.params.id)) {
-      res.status(400).json({ message: "Invalid tacticboard ID" });
+    if (!mongoose.isValidObjectId(tacticBoardId)) {
+      res.status(400).json({ message: "Invalid Tactic Board ID" });
       return;
     }
 
-    const tacticboard = await TacticBoard.findById(req.params.id);
-    if (!tacticboard) {
-      res.status(404).json({ message: "Tacticboard not found" });
+    const tacticBoard = await TacticBoard.findById(tacticBoardId);
+    if (!tacticBoard) {
+      res.status(404).json({ message: "Tactic Board not found" });
       return;
     }
 
@@ -1068,21 +1079,21 @@ export const deleteShareLink = asyncHandler(
       !(await requireResourceAuthorization(
         req,
         res,
-        authorizationResourceFor.tacticBoard(req.params.id, tacticboard),
+        authorizationResourceFor.tacticBoard(tacticBoardId, tacticBoard),
         "edit",
       ))
     ) {
       return;
     }
 
-    tacticboard.shareToken = undefined;
-    await tacticboard.save();
+    tacticBoard.shareToken = undefined;
+    await tacticBoard.save();
 
     res.json({ message: "Share link removed" });
   },
 );
 
-// @desc    Get tacticboard by share token (public)
+// @desc    Get Tactic Board by Share Link token (public)
 // @route   GET /api/tacticboards/share/:token
 // @access  Public
 export const getByShareToken = asyncHandler(
@@ -1094,12 +1105,12 @@ export const getByShareToken = asyncHandler(
       return;
     }
 
-    const tacticboard = await TacticBoard.findOne({ shareToken: token });
-    if (!tacticboard) {
+    const tacticBoard = await TacticBoard.findOne({ shareToken: token });
+    if (!tacticBoard) {
       res.status(404).json({ message: "Share link not found" });
       return;
     }
 
-    res.json(tacticboard);
+    res.json(tacticBoard);
   },
 );

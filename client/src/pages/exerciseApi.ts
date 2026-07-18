@@ -5,6 +5,11 @@ import {
   Exercise,
   ResourceAuthorizationResponse,
 } from "../api/quadcoachApi/domain";
+import {
+  ExerciseResponseDto,
+  fromExerciseResponseDto,
+  toExerciseRequestDto,
+} from "../api/quadcoachApi/compatibility/tacticBoardWire";
 
 export type GetExercisesRequest = {
   nameRegex?: string;
@@ -36,6 +41,10 @@ export type GetExercisesResponse = {
   };
 };
 
+type GetExercisesResponseDto = Omit<GetExercisesResponse, "exercises"> & {
+  exercises: ExerciseResponseDto[];
+};
+
 export type AccessLevel = "edit";
 
 export type ExerciseAccessEntry = {
@@ -55,6 +64,7 @@ export const exerciseApiSlice = quadcoachApi.injectEndpoints({
         url: `/api/exercises/${exerciseId}`,
         method: "get",
       }),
+      transformResponse: fromExerciseResponseDto,
       providesTags: (result) =>
         result
           ? [
@@ -73,7 +83,7 @@ export const exerciseApiSlice = quadcoachApi.injectEndpoints({
         return {
           url: `/api/exercises/${data._id}`,
           method: "put",
-          data,
+          data: toExerciseRequestDto(data),
         };
       },
       invalidatesTags: (result) =>
@@ -110,9 +120,10 @@ export const exerciseApiSlice = quadcoachApi.injectEndpoints({
         return {
           url: "/api/exercises",
           method: "post",
-          data,
+          data: toExerciseRequestDto(data),
         };
       },
+      transformResponse: fromExerciseResponseDto,
       invalidatesTags: (result) =>
         result
           ? [
@@ -133,6 +144,8 @@ export const exerciseApiSlice = quadcoachApi.injectEndpoints({
         url: `/api/exercises/${exerciseId}/relatedExercises`,
         method: "get",
       }),
+      transformResponse: (response: ExerciseResponseDto[]) =>
+        response.map(fromExerciseResponseDto),
       providesTags: (result) =>
         result
           ? result.reduce((allTags, exercise) => {
@@ -274,6 +287,10 @@ export const exerciseApiSlice = quadcoachApi.injectEndpoints({
           method: "get",
         };
       },
+      transformResponse: (response: GetExercisesResponseDto) => ({
+        ...response,
+        exercises: response.exercises.map(fromExerciseResponseDto),
+      }),
       providesTags: (result) =>
         result?.exercises
           ? result.exercises.reduce((allTags, exercise) => {

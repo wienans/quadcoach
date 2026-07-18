@@ -3,7 +3,7 @@ import { useTacticBoardCanvas, useTacticBoardData } from ".";
 import {
   useGetSharedTacticBoardQuery,
   useGetTacticBoardQuery,
-} from "../../api/quadcoachApi/tacticboardApi";
+} from "../../api/quadcoachApi/tacticBoardApi";
 
 export const useLoadTacticBoard = (
   tacticBoardId?: string,

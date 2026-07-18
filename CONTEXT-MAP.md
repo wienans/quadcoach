@@ -64,7 +64,7 @@ _Avoid_: description_block (the storage field name), step
 
 **TacticBoard**:
 A multi-page canvas (built on fabric.js) for drawing Quadball situations with players, balls, accessories, free-draw, and text. A board pulls double duty today: it models both **exercise setups** (how to lay a drill out) and **set plays** (in-game tactics). There is no field that distinguishes the two uses.
-_Avoid_: Tacticboard, TacticsBoard (legacy casing variants in code — treat `TacticBoard` as canonical)
+_Avoid_: legacy casing variants; treat `TacticBoard` as canonical
 
 **Page**:
 A single frame of a TacticBoard. Objects are matched across pages by `uuid` so the board can animate movement between consecutive pages.

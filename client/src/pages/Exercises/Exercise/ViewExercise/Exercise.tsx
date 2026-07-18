@@ -97,7 +97,7 @@ const Exercise = () => {
     video_url: "",
     coaching_points: "",
     time_min: 0,
-    tactics_board: undefined,
+    tacticBoardId: undefined,
   });
 
   const {
@@ -232,7 +232,7 @@ const Exercise = () => {
           time_min: Yup.number()
             .transform((val, orig) => (orig === "" ? NaN : val))
             .min(0, "Exercise:validation.block.time_min.min"),
-          tactics_board: Yup.string(),
+          tacticBoardId: Yup.string(),
         }),
       ),
       related_to: Yup.array().of(Yup.string()),

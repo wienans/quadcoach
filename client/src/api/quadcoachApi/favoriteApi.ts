@@ -7,12 +7,12 @@ import {
   TacticBoardFavorite,
   ExerciseFavoriteWithOutId,
   PracticePlanFavoriteWithOutId,
-  TacticBoardFavoriteWithOutId,
 } from "./domain/Favorits";
 import { TacticBoardHeader } from "./domain/TacticBoard";
 import {
-  LegacyTacticBoardFavoriteRequest,
-  fromLegacyTacticBoardFavoriteRequest,
+  TacticBoardFavoriteRequest,
+  TacticBoardFavoriteResponseDto,
+  fromTacticBoardFavoriteResponseDto,
   toTacticBoardFavoriteRequestDto,
 } from "./compatibility/tacticBoardWire";
 
@@ -23,8 +23,6 @@ type FavoriteRequest = {
 type ExerciseFavoriteRequest = FavoriteRequest & {
   exerciseId: string;
 };
-
-type TacticboardFavoriteRequest = LegacyTacticBoardFavoriteRequest;
 
 type PracticePlanFavoriteRequest = FavoriteRequest & {
   practicePlanId: string;
@@ -74,8 +72,8 @@ export const favoriteApiSlice = quadcoachApi.injectEndpoints({
       invalidatesTags: [TagType.favorite],
     }),
 
-    // Tacticboard Favorites
-    getFavoriteTacticboards: builder.query<
+    // Tactic Board Favorites
+    getFavoriteTacticBoards: builder.query<
       TacticBoardFavorite[],
       FavoriteRequest
     >({
@@ -84,9 +82,11 @@ export const favoriteApiSlice = quadcoachApi.injectEndpoints({
         method: "get",
         data: request,
       }),
+      transformResponse: (response: TacticBoardFavoriteResponseDto[]) =>
+        response.map(fromTacticBoardFavoriteResponseDto),
       providesTags: [TagType.favorite],
     }),
-    getFavoriteTacticboardsHeaders: builder.query<
+    getFavoriteTacticBoardsHeaders: builder.query<
       TacticBoardHeader[],
       FavoriteRequest
     >({
@@ -97,30 +97,28 @@ export const favoriteApiSlice = quadcoachApi.injectEndpoints({
       }),
       providesTags: [TagType.favorite],
     }),
-    addFavoriteTacticboard: builder.mutation<
-      TacticBoardFavoriteWithOutId,
-      TacticboardFavoriteRequest
+    addFavoriteTacticBoard: builder.mutation<
+      TacticBoardFavorite,
+      TacticBoardFavoriteRequest
     >({
       query: (request) => ({
         url: "/api/favorites/tacticboards",
         method: "post",
-        data: toTacticBoardFavoriteRequestDto(
-          fromLegacyTacticBoardFavoriteRequest(request),
-        ),
+        data: toTacticBoardFavoriteRequestDto(request),
       }),
+      transformResponse: (response: TacticBoardFavoriteResponseDto) =>
+        fromTacticBoardFavoriteResponseDto(response),
       invalidatesTags: [TagType.favorite],
     }),
 
-    removeFavoriteTacticboard: builder.mutation<
+    removeFavoriteTacticBoard: builder.mutation<
       void,
-      TacticboardFavoriteRequest
+      TacticBoardFavoriteRequest
     >({
       query: (request) => ({
         url: "/api/favorites/tacticboards",
         method: "delete",
-        data: toTacticBoardFavoriteRequestDto(
-          fromLegacyTacticBoardFavoriteRequest(request),
-        ),
+        data: toTacticBoardFavoriteRequestDto(request),
       }),
       invalidatesTags: [TagType.favorite],
     }),
@@ -173,13 +171,13 @@ export const {
   useAddFavoriteExerciseMutation,
   useRemoveFavoriteExerciseMutation,
 
-  // Tacticboard Favorites
-  useGetFavoriteTacticboardsQuery,
-  useLazyGetFavoriteTacticboardsQuery,
-  useGetFavoriteTacticboardsHeadersQuery,
-  useLazyGetFavoriteTacticboardsHeadersQuery,
-  useAddFavoriteTacticboardMutation,
-  useRemoveFavoriteTacticboardMutation,
+  // Tactic Board Favorites
+  useGetFavoriteTacticBoardsQuery,
+  useLazyGetFavoriteTacticBoardsQuery,
+  useGetFavoriteTacticBoardsHeadersQuery,
+  useLazyGetFavoriteTacticBoardsHeadersQuery,
+  useAddFavoriteTacticBoardMutation,
+  useRemoveFavoriteTacticBoardMutation,
 
   // Practice Plan Favorites
   useGetFavoritePracticePlansQuery,

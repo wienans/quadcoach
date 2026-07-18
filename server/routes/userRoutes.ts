@@ -17,7 +17,7 @@ router
 router.route("/online-count").get(verifyAdmin, usersController.getOnlineUsersCount);
 router.route("/:id").get(usersController.getUserById);
 router.route("/:id/exercises").get(usersController.getUserExercises);
-router.route("/:id/tacticboards").get(usersController.getUserTacticboards);
+router.route("/:id/tacticboards").get(usersController.getUserTacticBoards);
 router.route("/email/:email").get(usersController.getUserByEmail);
 
 export default router;

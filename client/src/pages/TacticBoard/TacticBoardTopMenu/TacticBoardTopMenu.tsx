@@ -26,7 +26,7 @@ import { setIsEditMode } from "../tacticBoardSlice";
 import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import { SoftBox, SoftButton, SoftTypography } from "../../../components";
-import { useTacticBoardCanvas } from "../../../hooks/taticBoard";
+import { useTacticBoardCanvas } from "../../../hooks/tacticBoard";
 import { useNavigate } from "react-router-dom";
 
 type TacticBoardTopMenuProps = {

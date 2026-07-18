@@ -19,13 +19,13 @@ import { useLoadTacticBoard } from "../../hooks";
 import {
   useTacticBoardCanvas,
   useTacticBoardData,
-} from "../../hooks/taticBoard";
+} from "../../hooks/tacticBoard";
 import { FabricJsCanvas, SoftBox } from "../../components";
 import { TacticBoardProvider } from "../../contexts/tacticBoard";
 import { animateObjectsToTargets } from "../../contexts/tacticBoard/animation";
 import { useAuth } from "../../store/hooks";
-import useVideoRecording from "../../hooks/taticBoard/useVideoRecording";
-import { useCheckTacticboardAccessQuery } from "../../api/quadcoachApi/tacticboardApi";
+import useVideoRecording from "../../hooks/tacticBoard/useVideoRecording";
+import { useCheckTacticBoardAccessQuery } from "../../api/quadcoachApi/tacticBoardApi";
 import { canEditResource } from "../../api/quadcoachApi/domain";
 export type TacticBoardInProfileProps = {
   tacticBoardId: string | undefined;
@@ -65,7 +65,7 @@ const TacticBoardInProfile = ({
 
   const { id: userId } = useAuth();
 
-  const { data: authorization } = useCheckTacticboardAccessQuery(
+  const { data: authorization } = useCheckTacticBoardAccessQuery(
     tacticBoardId || "",
     { skip: !tacticBoardId || !userId || Boolean(sharedToken) },
   );
@@ -113,7 +113,7 @@ const TacticBoardInProfile = ({
     } else {
       stopRecording();
       downloadVideo(
-        tacticBoard?.name ? `${tacticBoard.name}.mp4` : "tacticboard.mp4",
+        tacticBoard?.name ? `${tacticBoard.name}.mp4` : "tactic-board.mp4",
       );
     }
   };
@@ -229,7 +229,7 @@ const TacticBoardInProfile = ({
           if (prevPage === tacticBoard.pages.length && newPage === 1) {
             stopRecording();
             downloadVideo(
-              tacticBoard.name ? `${tacticBoard.name}.mp4` : "tacticboard.mp4",
+              tacticBoard.name ? `${tacticBoard.name}.mp4` : "tactic-board.mp4",
             );
           }
 

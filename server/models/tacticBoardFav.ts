@@ -1,13 +1,13 @@
 import mongoose, { Types } from "mongoose";
 const Schema = mongoose.Schema;
 
-interface ITacticboardFav {
+interface ITacticBoardFavorite {
   user: Types.ObjectId;
   tacticboard: Types.ObjectId;
   createdAt: Date;
 }
 
-const tacticboardFavSchema = new Schema<ITacticboardFav>({
+const tacticBoardFavoriteSchema = new Schema<ITacticBoardFavorite>({
   user: {
     type: Schema.Types.ObjectId,
     ref: "users",
@@ -25,11 +25,14 @@ const tacticboardFavSchema = new Schema<ITacticboardFav>({
 });
 
 // Create compound index to prevent duplicate favorites
-tacticboardFavSchema.index({ user: 1, tacticboard: 1 }, { unique: true });
-
-const TacticboardFav = mongoose.model<ITacticboardFav>(
-  "tacticboardFavs",
-  tacticboardFavSchema
+tacticBoardFavoriteSchema.index(
+  { user: 1, tacticboard: 1 },
+  { unique: true }
 );
 
-export default TacticboardFav;
+const TacticBoardFavorite = mongoose.model<ITacticBoardFavorite>(
+  "tacticboardFavs",
+  tacticBoardFavoriteSchema
+);
+
+export default TacticBoardFavorite;

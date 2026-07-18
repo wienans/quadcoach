@@ -12,7 +12,7 @@ import { useLoadTacticBoard } from "../../../../../hooks";
 import {
   useTacticBoardCanvas,
   useTacticBoardData,
-} from "../../../../../hooks/taticBoard";
+} from "../../../../../hooks/tacticBoard";
 import { TacticBoardProvider } from "../../../../../contexts/tacticBoard";
 import { animateObjectsToTargets } from "../../../../../contexts/tacticBoard/animation";
 import { FabricJsCanvas, SoftBox } from "../../../../../components";
@@ -29,7 +29,7 @@ const TacticBoardInBlock = ({
 }: TacticBoardInBlockProps): JSX.Element | undefined => {
   const { t } = useTranslation("Exercise");
 
-  const { tactics_board: tacticBoardId } = block;
+  const { tacticBoardId } = block;
   const { tacticBoard, isTacticBoardError, isTacticBoardLoading } =
     useLoadTacticBoard(tacticBoardId);
   const [currentPage, setPage] = useState<number>(1);
@@ -130,7 +130,7 @@ const TacticBoardInBlock = ({
   if (!tacticBoardId) return;
   if (isTacticBoardError)
     return (
-      <Alert severity="error">{t("Exercise:block.tacticboard.isError")}</Alert>
+      <Alert severity="error">{t("Exercise:block.tacticBoard.isError")}</Alert>
     );
   if (isTacticBoardLoading)
     return <Skeleton variant="rectangular" width="100%" height={60} />;
@@ -138,7 +138,7 @@ const TacticBoardInBlock = ({
   if (!tacticBoard)
     return (
       <Alert severity="warning">
-        {t("Exercise:block.tacticboard.notFound")}
+        {t("Exercise:block.tacticBoard.notFound")}
       </Alert>
     );
 
@@ -185,7 +185,7 @@ const TacticBoardInBlock = ({
           disabled={isTacticBoardLoading || isAnimating}
           onChange={handleChange}
         />
-        <IconButton size="small" href={`/tacticboards/${block.tactics_board}`}>
+        <IconButton size="small" href={`/tacticboards/${block.tacticBoardId}`}>
           <ContentPasteIcon />
         </IconButton>
       </SoftBox>

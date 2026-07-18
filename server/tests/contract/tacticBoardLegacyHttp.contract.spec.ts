@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import request from "supertest";
 import Exercise from "../../models/exercise";
-import TacticBoard from "../../models/tacticboard";
+import TacticBoard from "../../models/tacticBoard";
 import { app } from "../setup";
 import { authHeader, createVerifiedUser } from "../utils/auth";
 import {

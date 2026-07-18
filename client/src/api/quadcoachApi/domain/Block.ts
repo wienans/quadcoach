@@ -3,7 +3,7 @@ type Block = {
   video_url?: string;
   description?: string;
   coaching_points?: string;
-  tactics_board?: string;
+  tacticBoardId?: string;
   time_min: number;
 };
 

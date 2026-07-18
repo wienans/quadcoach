@@ -50,12 +50,12 @@
   "block": {
     "title": "Block {{blockNumber}}",
     "minutes": "Time: {{minutes}} minutes",
-    "tacticboard": {
-      "title": "Tacticboard",
-      "isError": "An error occurred while loading tacticboard.",
-      "notFound": "Connected tacticboard was not found."
+    "tacticBoard": {
+      "title": "Tactic Board",
+      "isError": "An error occurred while loading the Tactic Board.",
+      "notFound": "Connected Tactic Board was not found."
     },
-    "visitTacticboard": "show Tacticboard",
+    "visitTacticBoard": "Show Tactic Board",
     "description": "Description:",
     "coachingPoints": "Coaching points:"
   },

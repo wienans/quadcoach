@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { UIMatch } from "react-router-dom";
-import { useGetSharedTacticBoardQuery } from "../../api/quadcoachApi/tacticboardApi";
+import { useGetSharedTacticBoardQuery } from "../../api/quadcoachApi/tacticBoardApi";
 import { RouteHandle } from "../../pages/routes/routeTypes";
 import BreadcrumbElement from "./BreadcrumbElement";
 

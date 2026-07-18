@@ -1,9 +1,5 @@
-import type { ResourceAccessLevel } from "../domain";
-
-export type LegacyTacticBoardFavoriteRequest = {
-  userId: string;
-  tacticboardId: string;
-};
+import type { Block, Exercise, ResourceAccessLevel } from "../domain";
+import type { TacticBoardFavorite } from "../domain/Favorits";
 
 export type TacticBoardFavoriteRequest = {
   userId: string;
@@ -22,21 +18,8 @@ export type TacticBoardFavoriteResponseDto = {
   createdAt: string | Date;
 };
 
-export type TacticBoardFavorite = {
-  _id: string;
-  user: string;
-  tacticBoardId: string;
-  createdAt: string | Date;
-};
-
 export type TacticBoardAccessRequest = {
   tacticBoardId: string;
-  userId: string;
-  access: ResourceAccessLevel;
-};
-
-export type LegacyTacticBoardAccessRequest = {
-  tacticboardId: string;
   userId: string;
   access: ResourceAccessLevel;
 };
@@ -89,22 +72,9 @@ export type TacticBoardAccessDeleteRequest = {
   userId: string;
 };
 
-export type LegacyTacticBoardAccessDeleteRequest = {
-  tacticboardId: string;
-  userId: string;
-};
-
 export type TacticBoardAccessDeleteRequestDto = {
   userId: string;
 };
-
-export const fromLegacyTacticBoardFavoriteRequest = ({
-  userId,
-  tacticboardId,
-}: LegacyTacticBoardFavoriteRequest): TacticBoardFavoriteRequest => ({
-  userId,
-  tacticBoardId: tacticboardId,
-});
 
 export const toTacticBoardFavoriteRequestDto = ({
   userId,
@@ -124,28 +94,6 @@ export const fromTacticBoardFavoriteResponseDto = ({
   user,
   tacticBoardId: tacticboard,
   createdAt,
-});
-
-export const toLegacyTacticBoardFavoriteResponse = ({
-  _id,
-  user,
-  tacticBoardId,
-  createdAt,
-}: TacticBoardFavorite): TacticBoardFavoriteResponseDto => ({
-  _id,
-  user,
-  tacticboard: tacticBoardId,
-  createdAt,
-});
-
-export const fromLegacyTacticBoardAccessRequest = ({
-  tacticboardId,
-  userId,
-  access,
-}: LegacyTacticBoardAccessRequest): TacticBoardAccessRequest => ({
-  tacticBoardId: tacticboardId,
-  userId,
-  access,
 });
 
 export const toTacticBoardAccessRequestDto = ({
@@ -168,18 +116,6 @@ export const fromTacticBoardAccessEntryResponseDto = ({
   createdAt,
 });
 
-export const toLegacyTacticBoardAccessEntryResponse = ({
-  user,
-  tacticBoardId,
-  access,
-  createdAt,
-}: TacticBoardAccessEntry): TacticBoardAccessEntryResponseDto => ({
-  user: { _id: user._id, name: user.name },
-  tacticboard: tacticBoardId,
-  access,
-  createdAt,
-});
-
 export const fromTacticBoardAccessMutationResponseDto = ({
   user,
   tacticboard,
@@ -192,28 +128,73 @@ export const fromTacticBoardAccessMutationResponseDto = ({
   createdAt,
 });
 
-export const toLegacyTacticBoardAccessMutationResponse = ({
-  userId,
-  tacticBoardId,
-  access,
-  createdAt,
-}: TacticBoardAccessMutationResponse): TacticBoardAccessMutationResponseDto => ({
-  user: userId,
-  tacticboard: tacticBoardId,
-  access,
-  createdAt,
-});
-
-export const fromLegacyTacticBoardAccessDeleteRequest = ({
-  tacticboardId,
-  userId,
-}: LegacyTacticBoardAccessDeleteRequest): TacticBoardAccessDeleteRequest => ({
-  tacticBoardId: tacticboardId,
-  userId,
-});
-
 export const toTacticBoardAccessDeleteRequestDto = ({
   userId,
 }: TacticBoardAccessDeleteRequest): TacticBoardAccessDeleteRequestDto => ({
   userId,
 });
+
+export type TacticBoardCollectionResponseDto<T> = {
+  tacticboards: T[];
+  pagination: {
+    page: number;
+    limit?: number;
+    total: number;
+    pages: number;
+  };
+};
+
+export type TacticBoardCollectionResponse<T> = {
+  tacticBoards: T[];
+  pagination: TacticBoardCollectionResponseDto<T>["pagination"];
+};
+
+export const fromTacticBoardCollectionResponseDto = <T>({
+  tacticboards,
+  pagination,
+}: TacticBoardCollectionResponseDto<T>): TacticBoardCollectionResponse<T> => ({
+  tacticBoards: tacticboards,
+  pagination,
+});
+
+type ExerciseBlockDto = Omit<Block, "tacticBoardId"> & {
+  tactics_board?: string;
+};
+
+export type ExerciseResponseDto = Omit<Exercise, "description_blocks"> & {
+  description_blocks: ExerciseBlockDto[];
+};
+
+const fromExerciseBlockDto = ({
+  tactics_board: tacticBoardId,
+  ...block
+}: ExerciseBlockDto): Block => ({
+  ...block,
+  ...(tacticBoardId === undefined ? {} : { tacticBoardId }),
+});
+
+const toExerciseBlockDto = ({
+  tacticBoardId,
+  ...block
+}: Block): ExerciseBlockDto => ({
+  ...block,
+  ...(tacticBoardId === undefined ? {} : { tactics_board: tacticBoardId }),
+});
+
+export const fromExerciseResponseDto = ({
+  description_blocks,
+  ...exercise
+}: ExerciseResponseDto): Exercise => ({
+  ...exercise,
+  description_blocks: description_blocks.map(fromExerciseBlockDto),
+});
+
+export const toExerciseRequestDto = <T extends Omit<Exercise, "_id"> | Exercise>(
+  exercise: T,
+): Omit<T, "description_blocks"> & { description_blocks: ExerciseBlockDto[] } => {
+  const { description_blocks, ...fields } = exercise;
+  return {
+    ...fields,
+    description_blocks: description_blocks.map(toExerciseBlockDto),
+  };
+};

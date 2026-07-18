@@ -4,7 +4,7 @@ import {
   useCreateTacticBoardPageMutation,
   useDeleteTacticBoardPageMutation,
   useUpdateTacticBoardPageMutation,
-} from "../../api/quadcoachApi/tacticboardApi";
+} from "../../api/quadcoachApi/tacticBoardApi";
 import { useTacticBoardCanvas, useTacticBoardData } from ".";
 import cloneDeep from "lodash/cloneDeep";
 
@@ -88,7 +88,7 @@ export const useTacticBoardPageManager = (
     } as TacticPage;
 
     updateTacticBoardPage({
-      tacticboardId: tacticBoard._id,
+      tacticBoardId: tacticBoard._id,
       pageId: updatedTacticBoard.pages[currentPage - 1]._id,
       pageData: getAllObjectsJson(),
     });
@@ -110,19 +110,19 @@ export const useTacticBoardPageManager = (
           } as TacticPage;
 
           updateTacticBoardPage({
-            tacticboardId: tacticBoard._id,
+            tacticBoardId: tacticBoard._id,
             pageId: updatedTacticBoard.pages[page - 2]._id,
             pageData: getAllObjectsJson(),
           });
 
           createTacticBoardPage({
-            tacticboardId: tacticBoard._id,
+            tacticBoardId: tacticBoard._id,
             pageData: getAllObjectsJson(),
           });
         } else if (removePage) {
           // Remove last page
           deleteTacticBoardPage({
-            tacticboardId: tacticBoard._id,
+            tacticBoardId: tacticBoard._id,
             pageId:
               updatedTacticBoard.pages[updatedTacticBoard.pages.length - 1]._id,
           });
@@ -135,7 +135,7 @@ export const useTacticBoardPageManager = (
           } as TacticPage;
 
           updateTacticBoardPage({
-            tacticboardId: tacticBoard._id,
+            tacticBoardId: tacticBoard._id,
             pageId: updatedTacticBoard.pages[page - 2]._id,
             pageData: updatedTacticBoard.pages[page - 2],
           });
@@ -147,7 +147,7 @@ export const useTacticBoardPageManager = (
           } as TacticPage;
 
           updateTacticBoardPage({
-            tacticboardId: tacticBoard._id,
+            tacticBoardId: tacticBoard._id,
             pageId: updatedTacticBoard.pages[page]._id,
             pageData: updatedTacticBoard.pages[page],
           });

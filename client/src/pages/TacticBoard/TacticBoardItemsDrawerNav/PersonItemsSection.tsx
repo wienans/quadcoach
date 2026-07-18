@@ -17,7 +17,7 @@ import { useTranslation } from "react-i18next";
 import {
   useTacticBoardCanvas,
   useTacticBoardData,
-} from "../../../hooks/taticBoard";
+} from "../../../hooks/tacticBoard";
 import { cloneDeep } from "lodash";
 import {
   createPlayer,

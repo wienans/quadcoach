@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { quadcoachApi } from "..";
 import { favoriteApiSlice } from "./favoriteApi";
-import { tacticBoardApiSlice } from "./tacticboardApi";
+import { tacticBoardApiSlice } from "./tacticBoardApi";
 import routes from "../../pages/routes/routes";
 
 const { baseQueryMock } = vi.hoisted(() => ({
@@ -58,7 +58,7 @@ describe("TacticBoard RTK Query contracts", () => {
     baseQueryMock.mockResolvedValueOnce({ data: { message: "saved" } });
     await store.dispatch(
       tacticBoardApiSlice.endpoints.updateTacticBoardPage.initiate({
-        tacticboardId: "board-1",
+        tacticBoardId: "board-1",
         pageId: "page-1",
         pageData: { version: "5.0.0" },
       }),
@@ -80,9 +80,9 @@ describe("TacticBoard RTK Query contracts", () => {
       },
     });
     const favoriteResult = await store.dispatch(
-      favoriteApiSlice.endpoints.addFavoriteTacticboard.initiate({
+      favoriteApiSlice.endpoints.addFavoriteTacticBoard.initiate({
         userId: "user-1",
-        tacticboardId: "board-1",
+        tacticBoardId: "board-1",
       }),
     );
 
@@ -94,13 +94,12 @@ describe("TacticBoard RTK Query contracts", () => {
     expect(favoriteResult.data).toEqual({
       _id: "favorite-1",
       user: "user-1",
-      tacticboard: "board-1",
+      tacticBoardId: "board-1",
       createdAt: "2026-07-17T10:00:00.000Z",
-      __v: 0,
     });
   });
 
-  it("preserves permanent relationship DTO keys in the cache", async () => {
+  it("maps permanent relationship DTO keys before caching", async () => {
     baseQueryMock.mockResolvedValueOnce({
       data: [
         {
@@ -116,24 +115,22 @@ describe("TacticBoard RTK Query contracts", () => {
     const store = createApiStore();
 
     const result = await store.dispatch(
-      tacticBoardApiSlice.endpoints.getAllTacticboardAccessUsers.initiate(
+      tacticBoardApiSlice.endpoints.getAllTacticBoardAccessUsers.initiate(
         "board-1",
       ),
     );
 
     expect(result.data).toEqual([
       {
-        _id: "access-1",
         user: { _id: "user-1", name: "Coach" },
-        tacticboard: "board-1",
+        tacticBoardId: "board-1",
         access: "view",
         createdAt: "2026-07-17T10:00:00.000Z",
-        __v: 0,
       },
     ]);
   });
 
-  it("preserves legacy Access mutation arguments and cached response keys", async () => {
+  it("keeps Access wire keys behind canonical mutation arguments", async () => {
     baseQueryMock.mockResolvedValueOnce({
       data: {
         _id: "access-1",
@@ -147,8 +144,8 @@ describe("TacticBoard RTK Query contracts", () => {
     const store = createApiStore();
 
     const result = await store.dispatch(
-      tacticBoardApiSlice.endpoints.setTacticboardAccess.initiate({
-        tacticboardId: "board-1",
+      tacticBoardApiSlice.endpoints.setTacticBoardAccess.initiate({
+        tacticBoardId: "board-1",
         userId: "user-1",
         access: "edit",
       }),
@@ -160,12 +157,10 @@ describe("TacticBoard RTK Query contracts", () => {
       data: { userId: "user-1", access: "edit" },
     });
     expect(result.data).toEqual({
-      _id: "access-1",
-      user: "user-1",
-      tacticboard: "board-1",
+      userId: "user-1",
+      tacticBoardId: "board-1",
       access: "edit",
       createdAt: "2026-07-17T10:00:00.000Z",
-      __v: 0,
     });
   });
 

@@ -20,12 +20,12 @@ router
 
 router
   .route("/tacticboards")
-  .get(favoritesController.getFavoriteTacticboards)
-  .post(favoritesController.addFavoriteTacticboard)
-  .delete(favoritesController.removeFavoriteTacticboard);
+  .get(favoritesController.getFavoriteTacticBoards)
+  .post(favoritesController.addFavoriteTacticBoard)
+  .delete(favoritesController.removeFavoriteTacticBoard);
 router
   .route("/tacticboardsHeaders")
-  .get(favoritesController.getFavoriteTacticboardsHeaders);
+  .get(favoritesController.getFavoriteTacticBoardHeaders);
 router
   .route("/practicePlans")
   .get(favoritesController.getFavoritePracticePlans)

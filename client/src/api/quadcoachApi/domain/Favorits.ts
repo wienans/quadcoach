@@ -17,8 +17,8 @@ export type PracticePlanFavorite = {
 export type TacticBoardFavorite = {
   _id: string;
   user: string;
-  tacticboard: string;
-  createdAt: Date;
+  tacticBoardId: string;
+  createdAt: string | Date;
 };
 
 export type ExerciseFavoriteWithOutId = Omit<ExerciseFavorite, "_id">;

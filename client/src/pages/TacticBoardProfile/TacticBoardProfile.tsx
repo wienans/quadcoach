@@ -39,17 +39,17 @@ import {
 import type { HeaderOverflowAction } from "../../components";
 import {
   AccessLevel,
-  useDeleteTacticboardAccessMutation,
+  useDeleteTacticBoardAccessMutation,
   useDeleteTacticBoardMutation,
-  useCreateTacticboardShareLinkMutation,
-  useDeleteTacticboardShareLinkMutation,
+  useCreateTacticBoardShareLinkMutation,
+  useDeleteTacticBoardShareLinkMutation,
   useDuplicateTacticBoardMutation,
-  useGetAllTacticboardAccessUsersQuery,
+  useGetAllTacticBoardAccessUsersQuery,
   useGetTacticBoardQuery,
   useUpdateTacticBoardMetaMutation,
   useShareTacticBoardMutation,
-  useCheckTacticboardAccessQuery,
-} from "../../api/quadcoachApi/tacticboardApi";
+  useCheckTacticBoardAccessQuery,
+} from "../../api/quadcoachApi/tacticBoardApi";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   DashboardLayout,
@@ -85,9 +85,9 @@ import {
 import AddTagDialog from "./AddTagDialog";
 import Footer from "../../components/Footer";
 import {
-  useAddFavoriteTacticboardMutation,
-  useRemoveFavoriteTacticboardMutation,
-  useLazyGetFavoriteTacticboardsQuery,
+  useAddFavoriteTacticBoardMutation,
+  useRemoveFavoriteTacticBoardMutation,
+  useLazyGetFavoriteTacticBoardsQuery,
 } from "../../api/quadcoachApi/favoriteApi";
 const MarkdownRenderer = lazy(
   () => import("../../components/MarkdownRenderer"),
@@ -122,7 +122,7 @@ const TacticBoardProfile = () => {
   } = useGetTacticBoardQuery(tacticBoardId || "", {
     skip: tacticBoardId == null,
   });
-  const { data: authorization } = useCheckTacticboardAccessQuery(
+  const { data: authorization } = useCheckTacticBoardAccessQuery(
     tacticBoardId || "",
     { skip: !tacticBoardId || !userId },
   );
@@ -147,42 +147,42 @@ const TacticBoardProfile = () => {
     },
   ] = useDeleteTacticBoardMutation();
   const [
-    addFavoriteTacticboard,
-    { isLoading: isAddFavoriteTacticboardLoading },
-  ] = useAddFavoriteTacticboardMutation();
+    addFavoriteTacticBoard,
+    { isLoading: isAddFavoriteTacticBoardLoading },
+  ] = useAddFavoriteTacticBoardMutation();
   const [
-    removeFavoriteTacticboard,
-    { isLoading: isRemoveFavoriteTacticboardLoading },
-  ] = useRemoveFavoriteTacticboardMutation();
+    removeFavoriteTacticBoard,
+    { isLoading: isRemoveFavoriteTacticBoardLoading },
+  ] = useRemoveFavoriteTacticBoardMutation();
 
-  const [getFavoriteTacticboards, { data: favoriteTacticboards }] =
-    useLazyGetFavoriteTacticboardsQuery();
+  const [getFavoriteTacticBoards, { data: favoriteTacticBoards }] =
+    useLazyGetFavoriteTacticBoardsQuery();
 
   const [shareTacticBoard, { isLoading: isShareTacticBoardLoading }] =
     useShareTacticBoardMutation();
 
   const [createShareLink, { isLoading: isCreateShareLinkLoading }] =
-    useCreateTacticboardShareLinkMutation();
+    useCreateTacticBoardShareLinkMutation();
   const [deleteShareLink, { isLoading: isDeleteShareLinkLoading }] =
-    useDeleteTacticboardShareLinkMutation();
+    useDeleteTacticBoardShareLinkMutation();
   const [duplicateTacticBoard, { isLoading: isDuplicateTacticBoardLoading }] =
     useDuplicateTacticBoardMutation();
 
-  const { data: accessUsers } = useGetAllTacticboardAccessUsersQuery(
+  const { data: accessUsers } = useGetAllTacticBoardAccessUsersQuery(
     tacticBoardId || "",
     { skip: !tacticBoardId || !canManageResourceActions },
   );
 
   const [
-    deleteTacticboardAccess,
-    { isLoading: isDeleteTacticboardAccessLoading },
-  ] = useDeleteTacticboardAccessMutation();
+    deleteTacticBoardAccess,
+    { isLoading: isDeleteTacticBoardAccessLoading },
+  ] = useDeleteTacticBoardAccessMutation();
 
   useEffect(() => {
     if (userId) {
-      getFavoriteTacticboards({ userId });
+      getFavoriteTacticBoards({ userId });
     }
-  }, [userId, getFavoriteTacticboards]);
+  }, [userId, getFavoriteTacticBoards]);
 
   const formik = useFormik<TacticBoardPartialId>({
     // enableReinitialize : use this flag when initial values needs to be changed
@@ -217,7 +217,7 @@ const TacticBoardProfile = () => {
           coaching_points,
         } = values;
         updateTacticBoardMeta({
-          tacticboardId: tacticBoardId,
+          tacticBoardId,
           metaData: {
             name,
             isPrivate,
@@ -233,15 +233,15 @@ const TacticBoardProfile = () => {
   });
 
   useEffect(() => {
-    if (favoriteTacticboards) {
+    if (favoriteTacticBoards) {
       setIsFavorite(
-        favoriteTacticboards.some(
-          (favoriteTacticboard) =>
-            favoriteTacticboard.tacticboard === tacticBoardId,
+        favoriteTacticBoards.some(
+          (favoriteTacticBoard) =>
+            favoriteTacticBoard.tacticBoardId === tacticBoardId,
         ),
       );
     }
-  }, [favoriteTacticboards, setIsFavorite, tacticBoardId]);
+  }, [favoriteTacticBoards, setIsFavorite, tacticBoardId]);
 
   useEffect(() => {
     return () => {
@@ -299,7 +299,7 @@ const TacticBoardProfile = () => {
 
     try {
       await shareTacticBoard({
-        tacticboardId: tacticBoardId,
+        tacticBoardId,
         email: userEmail.trim(),
         access: accessMode,
       }).unwrap();
@@ -362,7 +362,7 @@ const TacticBoardProfile = () => {
       const response = await duplicateTacticBoard(tacticBoardId).unwrap();
       navigate(`/tacticboards/${response._id}`);
     } catch (error) {
-      console.error("Failed to duplicate tacticboard", error);
+      console.error("Failed to duplicate Tactic Board", error);
       setDuplicateError(t("TacticBoardProfile:errorDuplicatingTacticBoard"));
     }
   };
@@ -475,18 +475,18 @@ const TacticBoardProfile = () => {
                 <Tooltip title={t("TacticBoardProfile:favoriteTacticBoard")}>
                   <IconButton
                     disabled={
-                      isAddFavoriteTacticboardLoading ||
-                      isRemoveFavoriteTacticboardLoading
+                      isAddFavoriteTacticBoardLoading ||
+                      isRemoveFavoriteTacticBoardLoading
                     }
                     onClick={() => {
                       if (isFavorite) {
-                        removeFavoriteTacticboard({
-                          tacticboardId: tacticBoardId,
+                        removeFavoriteTacticBoard({
+                          tacticBoardId,
                           userId: userId,
                         });
                       } else {
-                        addFavoriteTacticboard({
-                          tacticboardId: tacticBoardId,
+                        addFavoriteTacticBoard({
+                          tacticBoardId,
                           userId: userId,
                         });
                       }
@@ -536,18 +536,18 @@ const TacticBoardProfile = () => {
                     <FavoriteIcon color={isFavorite ? "error" : "inherit"} />
                   }
                   disabled={
-                    isAddFavoriteTacticboardLoading ||
-                    isRemoveFavoriteTacticboardLoading
+                    isAddFavoriteTacticBoardLoading ||
+                    isRemoveFavoriteTacticBoardLoading
                   }
                   onClick={() => {
                     if (isFavorite) {
-                      removeFavoriteTacticboard({
-                        tacticboardId: tacticBoardId,
+                      removeFavoriteTacticBoard({
+                        tacticBoardId,
                         userId: userId,
                       });
                     } else {
-                      addFavoriteTacticboard({
-                        tacticboardId: tacticBoardId,
+                      addFavoriteTacticBoard({
+                        tacticBoardId,
                         userId: userId,
                       });
                     }
@@ -907,11 +907,11 @@ const TacticBoardProfile = () => {
                               <Button
                                 size="small"
                                 color="error"
-                                disabled={isDeleteTacticboardAccessLoading}
+                                disabled={isDeleteTacticBoardAccessLoading}
                                 onClick={() => {
                                   if (tacticBoardId) {
-                                    deleteTacticboardAccess({
-                                      tacticboardId: tacticBoardId,
+                                    deleteTacticBoardAccess({
+                                      tacticBoardId,
                                       userId: entry.user._id,
                                     });
                                   }

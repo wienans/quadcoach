@@ -60,10 +60,10 @@ const ExerciseOverviewDialog = ({
             </div>
           </>
         )}
-        {block.tactics_board && (
+        {block.tacticBoardId && (
           <>
             <Typography variant="h5" sx={{ mb: 1 }}>
-              {t("tacticboard")}
+              {t("tacticBoard")}
             </Typography>
             <TacticBoardInBlockWrapper block={block} />
           </>

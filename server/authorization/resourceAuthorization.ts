@@ -1,6 +1,6 @@
 import ExerciseAccess from "../models/exerciseAccess";
 import PracticePlanAccess from "../models/practicePlanAccess";
-import TacticboardAccess from "../models/tacticboardAccess";
+import TacticBoardAccess from "../models/tacticBoardAccess";
 
 export type ResourceType = "exercise" | "tacticBoard" | "practicePlan";
 
@@ -148,7 +148,7 @@ const accessGrantAdapters: AccessGrantAdapters = {
   },
   tacticBoard: {
     async findAccessLevel(userId, resourceId) {
-      const grant = await TacticboardAccess.findOne({
+      const grant = await TacticBoardAccess.findOne({
         user: userId,
         tacticboard: resourceId,
       }).select("access");

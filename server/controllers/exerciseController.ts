@@ -6,13 +6,19 @@ import ExerciseFav from "../models/exerciseFav";
 import ExerciseAccess from "../models/exerciseAccess";
 import User from "../models/user";
 import { PracticePlan } from "../models/practicePlan";
-import TacticBoard from "../models/tacticboard";
+import TacticBoard from "../models/tacticBoard";
 import {
   getResourceAuthorization,
   requireResourceAuthorization,
   serializeResourceAuthorizationDecision,
 } from "./helpers/requireResourceAuthorization";
 import { authorizationResourceFor } from "../authorization/resourceAuthorization";
+import {
+  ExerciseBlockDto,
+  ExerciseDto,
+  fromLegacyExerciseRequest,
+  toLegacyExercisePersistence,
+} from "../compatibility/tacticBoardCompatibility";
 
 interface RequestWithUser extends Request {
   UserInfo?: {
@@ -26,20 +32,16 @@ function isMongoError(error: unknown): error is { code: number } {
   return typeof error === "object" && error !== null && "code" in error;
 }
 
-function extractTacticboardIdsFromBlocks(
-  descriptionBlocks: unknown
+function extractTacticBoardIdsFromBlocks(
+  descriptionBlocks: ExerciseBlockDto[] | undefined
 ): string[] {
-  if (!Array.isArray(descriptionBlocks)) {
+  if (descriptionBlocks === undefined) {
     return [];
   }
 
   return descriptionBlocks
     .map((block) => {
-      if (!block || typeof block !== "object") {
-        return null;
-      }
-
-      const candidate = (block as { tactics_board?: unknown }).tactics_board;
+      const candidate = block.tacticBoardId;
 
       if (typeof candidate === "string" && mongoose.isValidObjectId(candidate)) {
         return candidate;
@@ -61,29 +63,29 @@ function extractTacticboardIdsFromBlocks(
     .filter((id): id is string => id !== null);
 }
 
-async function rejectIfAnyPrivateTacticboard(
-  tacticboardIds: string[],
+async function rejectIfAnyPrivateTacticBoard(
+  tacticBoardIds: string[],
   res: Response
 ): Promise<boolean> {
-  if (tacticboardIds.length === 0) {
+  if (tacticBoardIds.length === 0) {
     return false;
   }
 
-  const privateTacticboards = await TacticBoard.find({
-    _id: { $in: tacticboardIds },
+  const privateTacticBoards = await TacticBoard.find({
+    _id: { $in: tacticBoardIds },
     isPrivate: true,
   }).select("_id name");
 
-  if (privateTacticboards.length === 0) {
+  if (privateTacticBoards.length === 0) {
     return false;
   }
 
   res.status(400).json({
     message:
-      "Private tacticboards cannot be linked to exercises. Please make them public first.",
-    tacticboards: privateTacticboards.map((board) => ({
-      id: board._id,
-      name: board.name,
+      "Private Tactic Boards cannot be linked to exercises. Please make them public first.",
+    tacticboards: privateTacticBoards.map((tacticBoard) => ({
+      id: tacticBoard._id,
+      name: tacticBoard.name,
     })),
   });
 
@@ -194,15 +196,16 @@ export const getById = asyncHandler(async (req: Request, res: Response) => {
 export const createNewExercise = asyncHandler(
   async (req: RequestWithUser, res: Response) => {
     if (req.UserInfo?.id) {
-      const tacticboardIds = Array.from(
-        new Set(extractTacticboardIdsFromBlocks(req.body?.description_blocks)),
+      const exerciseRequest = fromLegacyExerciseRequest(req.body);
+      const tacticBoardIds = Array.from(
+        new Set(extractTacticBoardIdsFromBlocks(exerciseRequest.descriptionBlocks)),
       );
 
-      if (await rejectIfAnyPrivateTacticboard(tacticboardIds, res)) {
+      if (await rejectIfAnyPrivateTacticBoard(tacticBoardIds, res)) {
         return;
       }
 
-      let exercise = new Exercise(req.body);
+      const exercise = new Exercise(toLegacyExercisePersistence(exerciseRequest));
       const result = await exercise.save();
       if (!result) {
         console.error("Couldn't create Exercise");
@@ -233,30 +236,34 @@ export const updateById = asyncHandler(
           return;
         }
 
-        const requestedTacticboardIds = Array.from(
-          new Set(extractTacticboardIdsFromBlocks(req.body?.description_blocks)),
+        const exerciseRequest = fromLegacyExerciseRequest(req.body);
+        const requestedTacticBoardIds = Array.from(
+          new Set(extractTacticBoardIdsFromBlocks(exerciseRequest.descriptionBlocks)),
         );
-        const existingTacticboardIds = Array.from(
+        const existingExercise = fromLegacyExerciseRequest(
+          findResult.toObject() as unknown as Record<string, unknown>,
+        );
+        const existingTacticBoardIds = Array.from(
           new Set(
-            extractTacticboardIdsFromBlocks(findResult.description_blocks ?? [])
+            extractTacticBoardIdsFromBlocks(existingExercise.descriptionBlocks)
           )
         );
 
-        const addedTacticboardIds = requestedTacticboardIds.filter(
-          (id) => !existingTacticboardIds.includes(id)
+        const addedTacticBoardIds = requestedTacticBoardIds.filter(
+          (tacticBoardId) => !existingTacticBoardIds.includes(tacticBoardId)
         );
 
-        if (await rejectIfAnyPrivateTacticboard(addedTacticboardIds, res)) {
+        if (await rejectIfAnyPrivateTacticBoard(addedTacticBoardIds, res)) {
           return;
         }
 
-        const updates = { ...(req.body as Record<string, unknown>) };
+        const updates: ExerciseDto = { ...exerciseRequest };
         delete updates.user;
         delete updates.owner;
 
         const result = await Exercise.updateOne(
           { _id: req.params.id },
-          { $set: updates }
+          { $set: toLegacyExercisePersistence(updates) }
         );
         res.send(result);
       } else {

@@ -2,14 +2,14 @@ import { Types } from "mongoose";
 import { decideResourceAuthorization } from "../../authorization/resourceAuthorization";
 import ExerciseAccess from "../../models/exerciseAccess";
 import PracticePlanAccess from "../../models/practicePlanAccess";
-import TacticboardAccess from "../../models/tacticboardAccess";
+import TacticBoardAccess from "../../models/tacticBoardAccess";
 
 jest.setTimeout(30_000);
 
 describe("resource authorization Access adapters", () => {
   it.each([
     ["exercise", ExerciseAccess, "exercise"],
-    ["tacticBoard", TacticboardAccess, "tacticboard"],
+    ["tacticBoard", TacticBoardAccess, "tacticboard"],
     ["practicePlan", PracticePlanAccess, "practicePlan"],
   ] as const)(
     "loads edit Access for %s",

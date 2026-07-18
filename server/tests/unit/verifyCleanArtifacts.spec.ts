@@ -27,7 +27,7 @@ describe("clean artifact verification", () => {
   it("rejects stale JavaScript after a case or path rename", async () => {
     await Promise.all([
       writeFile(path.join(fixtureRoot, "controllers", "tacticBoard.ts"), ""),
-      writeFile(path.join(fixtureRoot, "controllers", "Tacticboard.js"), ""),
+      writeFile(path.join(fixtureRoot, "controllers", "tacticboard.js"), ""),
       writeFile(
         path.join(fixtureRoot, "controllers", "removedController.js"),
         "",
@@ -35,8 +35,8 @@ describe("clean artifact verification", () => {
     ]);
 
     await expect(findStaleEmittedModules(fixtureRoot)).resolves.toEqual([
-      "controllers/Tacticboard.js",
       "controllers/removedController.js",
+      "controllers/tacticboard.js",
     ]);
   });
 

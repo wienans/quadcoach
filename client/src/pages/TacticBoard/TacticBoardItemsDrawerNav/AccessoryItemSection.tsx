@@ -16,7 +16,7 @@ import { AccessoryType } from "../../../contexts/tacticBoard/TacticBoardFabricJs
 import { useTranslation } from "react-i18next";
 import * as fabric from "fabric";
 import { v4 as uuidv4 } from "uuid";
-import { useTacticBoardCanvas } from "../../../hooks/taticBoard";
+import { useTacticBoardCanvas } from "../../../hooks/tacticBoard";
 import {
   createExtendedGroup,
   setUuid,

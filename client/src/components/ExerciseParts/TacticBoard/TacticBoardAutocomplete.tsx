@@ -1,9 +1,9 @@
 import { Autocomplete, CircularProgress, TextField } from "@mui/material";
 import { FocusEvent, SyntheticEvent, useEffect, useState } from "react";
-import { useLazyGetTacticBoardHeadersQuery } from "../../../api/quadcoachApi/tacticboardApi";
+import { useLazyGetTacticBoardHeadersQuery } from "../../../api/quadcoachApi/tacticBoardApi";
 import { TacticBoardHeader } from "../../../api/quadcoachApi/domain/TacticBoard";
 
-export type TacticboardAutocompleteProps = {
+export type TacticBoardAutocompleteProps = {
   value: string | undefined;
   onChange: (
     event: SyntheticEvent<Element, Event>,
@@ -14,27 +14,27 @@ export type TacticboardAutocompleteProps = {
   publicOnly?: boolean;
 };
 
-const TacticboardAutocomplete = ({
+const TacticBoardAutocomplete = ({
   value,
   onChange,
   onBlur,
   autoFocus,
   publicOnly = false,
-}: TacticboardAutocompleteProps): JSX.Element => {
+}: TacticBoardAutocompleteProps): JSX.Element => {
   const [searchValue, setSearchValue] = useState<string>("");
   const [
-    getTacticboards,
-    { data: tacticboards, isLoading: isTacticboardsLoading },
+    getTacticBoards,
+    { data: tacticBoards, isLoading: isTacticBoardsLoading },
   ] = useLazyGetTacticBoardHeadersQuery();
 
   useEffect(() => {
-    getTacticboards(publicOnly ? { isPrivate: false } : {});
-  }, [getTacticboards, publicOnly]);
+    getTacticBoards(publicOnly ? { isPrivate: false } : {});
+  }, [getTacticBoards, publicOnly]);
 
   return (
     <Autocomplete
       id="related-text"
-      options={(tacticboards?.tacticboards ?? []).filter(
+      options={(tacticBoards?.tacticBoards ?? []).filter(
         (option) => !publicOnly || !option.isPrivate,
       )}
       getOptionLabel={(option) => option.name ?? ""}
@@ -50,13 +50,13 @@ const TacticboardAutocomplete = ({
         setSearchValue(newValue);
       }}
       value={
-        tacticboards?.tacticboards.find(
+        tacticBoards?.tacticBoards.find(
           (obj: TacticBoardHeader) => obj["_id"] === value,
         ) ?? null
       }
       onChange={onChange}
       onBlur={onBlur}
-      loading={isTacticboardsLoading}
+      loading={isTacticBoardsLoading}
       renderInput={(params) => (
         <TextField
           {...params}
@@ -67,7 +67,7 @@ const TacticboardAutocomplete = ({
             ...params.InputProps,
             endAdornment: (
               <>
-                {isTacticboardsLoading ? (
+                {isTacticBoardsLoading ? (
                   <CircularProgress color="inherit" size={20} />
                 ) : null}
                 {params.InputProps.endAdornment}
@@ -80,4 +80,4 @@ const TacticboardAutocomplete = ({
   );
 };
 
-export default TacticboardAutocomplete;
+export default TacticBoardAutocomplete;

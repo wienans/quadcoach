@@ -338,10 +338,10 @@ const ExerciseSearchDialog: React.FC<ExerciseSearchDialogProps> = ({
                       </div>
                     </>
                   )}
-                  {selectedBlock.block.tactics_board && (
+                  {selectedBlock.block.tacticBoardId && (
                     <>
                       <Typography variant="h5" sx={{ mb: 1 }}>
-                        {t("tacticboard", { defaultValue: "Tactic Board" })}
+                        {t("tacticBoard", { defaultValue: "Tactic Board" })}
                       </Typography>
                       <TacticBoardInBlockWrapper block={selectedBlock.block} />
                     </>

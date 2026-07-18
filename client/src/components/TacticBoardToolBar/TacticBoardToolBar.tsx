@@ -11,9 +11,9 @@ import FullscreenIcon from "@mui/icons-material/Fullscreen";
 import {
   useTacticBoardCanvas,
   useTacticBoardDrawing,
-} from "../../hooks/taticBoard";
+} from "../../hooks/tacticBoard";
 
-export type TacticsBoardToolBarProps = {
+export type TacticBoardToolBarProps = {
   editMode: boolean;
   disabled?: boolean;
   setEditMode: (editMode: boolean) => void;
@@ -27,7 +27,7 @@ export type TacticsBoardToolBarProps = {
   handleFullScreen: () => void;
 };
 
-const TacticsBoardToolBar = ({
+const TacticBoardToolBar = ({
   editMode,
   setEditMode,
   setPage,
@@ -38,7 +38,7 @@ const TacticsBoardToolBar = ({
   onLoadPage,
   onDelete,
   handleFullScreen,
-}: TacticsBoardToolBarProps): JSX.Element => {
+}: TacticBoardToolBarProps): JSX.Element => {
   const { setSelection } = useTacticBoardCanvas();
   const { setDrawMode } = useTacticBoardDrawing();
   const handleChange = (_: React.ChangeEvent<unknown>, value: number) => {
@@ -134,4 +134,4 @@ const TacticsBoardToolBar = ({
   );
 };
 
-export default TacticsBoardToolBar;
+export default TacticBoardToolBar;

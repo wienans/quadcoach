@@ -16,7 +16,7 @@ import {
 } from "../../components/LayoutContainers";
 import { SoftBox, SoftTypography } from "../../components";
 import TacticBoardInProfileWrapper from "../TacticBoardProfile/TacticBoardInProfile";
-import { useGetSharedTacticBoardQuery } from "../../api/quadcoachApi/tacticboardApi";
+import { useGetSharedTacticBoardQuery } from "../../api/quadcoachApi/tacticBoardApi";
 import Footer from "../../components/Footer";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { lazy, Suspense } from "react";

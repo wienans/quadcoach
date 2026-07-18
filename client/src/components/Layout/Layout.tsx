@@ -43,7 +43,7 @@ const Layout = () => {
     {
       type: "collapse" as const,
       nameResourceKey: "Layout:routes.tacticBoards",
-      key: "tacticboards",
+      key: "tacticBoards",
       route: "/tacticboards",
       icon: <DeveloperBoardIcon />,
       noCollapse: true,

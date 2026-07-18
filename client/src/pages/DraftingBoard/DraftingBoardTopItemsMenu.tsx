@@ -26,7 +26,7 @@ import { useCallback, useEffect, useState } from "react";
 import {
   useTacticBoardCanvas,
   useTacticBoardDrawing,
-} from "../../hooks/taticBoard";
+} from "../../hooks/tacticBoard";
 import { ChromePicker, ColorResult } from "react-color";
 import Popover from "@mui/material/Popover";
 import ColorLensIcon from "@mui/icons-material/ColorLens";

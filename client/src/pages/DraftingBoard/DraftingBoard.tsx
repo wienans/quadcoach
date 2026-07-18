@@ -6,7 +6,7 @@ import {
   useTacticBoardCanvas,
   useTacticBoardData,
   useKeyboardShortcuts,
-} from "../../hooks/taticBoard";
+} from "../../hooks/tacticBoard";
 import { TacticBoardProvider } from "../../contexts/tacticBoard";
 import Navbar from "../../components/Navbar";
 import TacticBoardItemsDrawerNav from "../TacticBoard/TacticBoardItemsDrawerNav";

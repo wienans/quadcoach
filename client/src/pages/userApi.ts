@@ -7,11 +7,10 @@ export type UserExercisesResponse = {
   accessible: Exercise[];
 };
 
-export type UserTacticboardsResponse = {
+export type UserTacticBoardsResponse = {
   owned: TacticBoard[];
   accessible: TacticBoard[];
 };
-
 
 export const userApiSlice = quadcoachApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -68,14 +67,13 @@ export const userApiSlice = quadcoachApi.injectEndpoints({
       }),
       providesTags: () => [TagType.exercise],
     }),
-    getUserTacticboards: builder.query<UserTacticboardsResponse, string>({
+    getUserTacticBoards: builder.query<UserTacticBoardsResponse, string>({
       query: (userId: string) => ({
-        url: `/api/user/${userId}/tacticboards`, 
+        url: `/api/user/${userId}/tacticboards`,
         method: "get",
       }),
-      providesTags: () => [TagType.tacticboard],
+      providesTags: () => [TagType.tacticBoard],
     }),
-
   }),
 });
 
@@ -86,5 +84,5 @@ export const {
   useAddUserMutation,
   useGetOnlineUsersCountQuery,
   useGetUserExercisesQuery,
-  useGetUserTacticboardsQuery,
+  useGetUserTacticBoardsQuery,
 } = userApiSlice;

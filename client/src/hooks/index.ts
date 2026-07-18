@@ -1,2 +1,2 @@
-export * from "./taticBoard";
+export * from "./tacticBoard";
 export * from "./useAutoRefreshToken";

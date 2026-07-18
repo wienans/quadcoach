@@ -12,7 +12,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import UniversalMediaPlayer from "../../../../../components/UniversalMediaPlayer";
 import TacticBoardInBlockWrapper from "./TacticBoardInBlock";
 import { lazy, Suspense } from "react";
-import { TacticboardAutocomplete } from "../../../../../components/ExerciseParts";
+import { TacticBoardAutocomplete } from "../../../../../components/ExerciseParts";
 import { FormikProps, FieldArray, FieldArrayRenderProps } from "formik";
 import { ExercisePartialId } from "../../../../../api/quadcoachApi/domain";
 import {
@@ -184,11 +184,11 @@ const ExerciseBlock = ({
         </Accordion>
       )}
 
-      {/* Tacticboard Section */}
-      {Boolean(currentBlock.tactics_board) && !isEditMode && (
+      {/* Tactic Board Section */}
+      {Boolean(currentBlock.tacticBoardId) && !isEditMode && (
         <Accordion defaultExpanded>
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-            Tacticboard
+            Tactic Board
           </AccordionSummary>
           <AccordionDetails
             sx={{
@@ -201,25 +201,25 @@ const ExerciseBlock = ({
         </Accordion>
       )}
 
-      {/* Tacticboard Edit Mode */}
+      {/* Tactic Board Edit Mode */}
       {isEditMode && (
         <Accordion defaultExpanded>
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-            Tacticboard
+            Tactic Board
           </AccordionSummary>
           <AccordionDetails>
-            <TacticboardAutocomplete
-              value={currentBlock.tactics_board}
+            <TacticBoardAutocomplete
+              value={currentBlock.tacticBoardId}
               publicOnly
               onChange={(_event, value) => {
                 formik.setFieldValue(
-                  `description_blocks.${blockIndex}.tactics_board`,
+                  `description_blocks.${blockIndex}.tacticBoardId`,
                   value?._id || undefined,
                 );
               }}
               onBlur={() => {}}
             />
-            {Boolean(currentBlock.tactics_board) && (
+            {Boolean(currentBlock.tacticBoardId) && (
               <div style={{ marginTop: 16 }}>
                 <TacticBoardInBlockWrapper block={currentBlock} />
               </div>

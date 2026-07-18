@@ -1,11 +1,11 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 import ExerciseFav from "../models/exerciseFav";
-import TacticboardFav from "../models/tacticboardFav";
+import TacticBoardFavorite from "../models/tacticBoardFav";
 import PracticePlanFav from "../models/practicePlanFav";
 import mongoose from "mongoose";
 import Exercise, { IExercise } from "../models/exercise";
-import TacticBoard, { ITacticBoard } from "../models/tacticboard";
+import TacticBoard, { ITacticBoard } from "../models/tacticBoard";
 import {
   fromLegacyTacticBoardFavoriteRequest,
   toLegacyTacticBoardFavoritePersistence,
@@ -141,14 +141,14 @@ export const removeFavoriteExercise = asyncHandler(
   }
 );
 
-// Tacticboard Favorites
-export const getFavoriteTacticboards = asyncHandler(
+// Tactic Board Favorites
+export const getFavoriteTacticBoards = asyncHandler(
   async (req: RequestWithUser, res: Response) => {
     if (!mongoose.isValidObjectId(req.UserInfo?.id)) {
       res.status(400).json({ message: "Invalid user ID" });
       return;
     }
-    const favorites = await TacticboardFav.find({
+    const favorites = await TacticBoardFavorite.find({
       user: req.UserInfo?.id,
     }).sort({ createdAt: -1 });
 
@@ -156,35 +156,35 @@ export const getFavoriteTacticboards = asyncHandler(
   }
 );
 
-export const getFavoriteTacticboardsHeaders = asyncHandler(
+export const getFavoriteTacticBoardHeaders = asyncHandler(
   async (req: RequestWithUser, res: Response) => {
     if (!mongoose.isValidObjectId(req.UserInfo?.id)) {
       res.status(400).json({ message: "Invalid user ID" });
       return;
     }
-    const favorites = await TacticboardFav.find({
+    const favorites = await TacticBoardFavorite.find({
       user: req.UserInfo?.id,
     }).sort({
       createdAt: -1,
     });
-    const tacticboardHeaders: ITacticBoard[] = [];
+    const tacticBoardHeaders: ITacticBoard[] = [];
 
     await Promise.all(
       favorites.map(async (favorite) => {
-        const tacticboard = await TacticBoard.findById(
+        const tacticBoard = await TacticBoard.findById(
           favorite.tacticboard
         ).select("_id name");
-        if (tacticboard) {
-          tacticboardHeaders.push(tacticboard);
+        if (tacticBoard) {
+          tacticBoardHeaders.push(tacticBoard);
         }
       })
     );
 
-    res.json(tacticboardHeaders);
+    res.json(tacticBoardHeaders);
   }
 );
 
-export const addFavoriteTacticboard = asyncHandler(
+export const addFavoriteTacticBoard = asyncHandler(
   async (req: RequestWithUser, res: Response) => {
     const { userId, tacticBoardId } = fromLegacyTacticBoardFavoriteRequest(
       req.body,
@@ -202,12 +202,12 @@ export const addFavoriteTacticboard = asyncHandler(
       !mongoose.isValidObjectId(userId) ||
       !mongoose.isValidObjectId(tacticBoardId)
     ) {
-      res.status(400).json({ message: "Invalid tacticboard ID or User ID" });
+      res.status(400).json({ message: "Invalid Tactic Board ID or User ID" });
       return;
     }
 
     try {
-      const favorite = await TacticboardFav.create(
+      const favorite = await TacticBoardFavorite.create(
         toLegacyTacticBoardFavoritePersistence({ userId, tacticBoardId }),
       );
 
@@ -222,7 +222,7 @@ export const addFavoriteTacticboard = asyncHandler(
   }
 );
 
-export const removeFavoriteTacticboard = asyncHandler(
+export const removeFavoriteTacticBoard = asyncHandler(
   async (req: RequestWithUser, res: Response) => {
     const { userId, tacticBoardId } = fromLegacyTacticBoardFavoriteRequest(
       req.body,
@@ -240,11 +240,11 @@ export const removeFavoriteTacticboard = asyncHandler(
       !mongoose.isValidObjectId(userId) ||
       !mongoose.isValidObjectId(tacticBoardId)
     ) {
-      res.status(400).json({ message: "Invalid tacticboard ID or User ID" });
+      res.status(400).json({ message: "Invalid Tactic Board ID or User ID" });
       return;
     }
 
-    const result = await TacticboardFav.deleteOne(
+    const result = await TacticBoardFavorite.deleteOne(
       toLegacyTacticBoardFavoritePersistence({ userId, tacticBoardId }),
     );
 

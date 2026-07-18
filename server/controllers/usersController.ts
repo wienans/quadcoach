@@ -2,13 +2,13 @@ import User from "../models/user";
 import asyncHandler from "express-async-handler";
 import bcrypt from "bcrypt";
 import { Request, Response } from "express";
-import TacticBoard from "../models/tacticboard";
+import TacticBoard from "../models/tacticBoard";
 import Exercise from "../models/exercise";
 import mongoose from "mongoose";
 import ExerciseFav from "../models/exerciseFav";
-import TacticboardFav from "../models/tacticboardFav";
+import TacticBoardFavorite from "../models/tacticBoardFav";
 import ExerciseAccess from "../models/exerciseAccess";
-import TacticboardAccess from "../models/tacticboardAccess";
+import TacticBoardAccess from "../models/tacticBoardAccess";
 
 interface UserInfo {
   id?: string;
@@ -214,12 +214,12 @@ export const deleteUser = asyncHandler(
       res.status(400).json({ message: "User ID Required" });
       return;
     }
-    // const boards = await TacticBoard.findOne({ user: id }).lean().exec();
+    // const tacticBoard = await TacticBoard.findOne({ user: id }).lean().exec();
     // const exercises = await Exercise.findOne({ user: id }).lean().exec();
-    // if (boards || exercises) {
+    // if (tacticBoard || exercises) {
     //   res
     //     .status(400)
-    //     .json({ message: "User has assigned Exercises or Tacticboards" });
+    //     .json({ message: "User has assigned Exercises or Tactic Boards" });
     //   return;
     // }
     const user = await User.findById(id).exec();
@@ -228,7 +228,7 @@ export const deleteUser = asyncHandler(
       return;
     }
     await ExerciseFav.deleteMany({ user: id }).exec();
-    await TacticboardFav.deleteMany({ user: id }).exec();
+    await TacticBoardFavorite.deleteMany({ user: id }).exec();
     await user.deleteOne();
     const reply = `Username ${user.email} with ID ${user._id} deleted`;
     res.json({ message: reply });
@@ -283,10 +283,10 @@ export const getUserExercises = asyncHandler(
   },
 );
 
-// @desc    Get user's owned and accessible tacticboards
+// @desc    Get user's owned and accessible Tactic Boards
 // @route   GET /api/user/:id/tacticboards
 // @access  Private - User themselves or Admin
-export const getUserTacticboards = asyncHandler(
+export const getUserTacticBoards = asyncHandler(
   async (req: RequestWithUser, res: Response) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       res.status(400).json({ message: "Invalid user ID" });
@@ -303,13 +303,13 @@ export const getUserTacticboards = asyncHandler(
 
     const userId = req.params.id;
     const selectFields = "_id name description tags created updated isPrivate";
-    // Get owned tacticboards
-    const ownedTacticboards = await TacticBoard.find({ user: userId })
+    // Get owned Tactic Boards
+    const ownedTacticBoards = await TacticBoard.find({ user: userId })
       .select(selectFields)
       .lean();
 
-    // Get tacticboards with edit access
-    const accessEntries = await TacticboardAccess.find({
+    // Get Tactic Boards with edit access
+    const accessEntries = await TacticBoardAccess.find({
       user: userId,
       access: "edit",
     })
@@ -319,13 +319,13 @@ export const getUserTacticboards = asyncHandler(
       })
       .lean();
 
-    const accessibleTacticboards = accessEntries
+    const accessibleTacticBoards = accessEntries
       .map((entry) => entry.tacticboard)
-      .filter((tacticboard) => tacticboard != null);
+      .filter((tacticBoard) => tacticBoard != null);
 
     res.json({
-      owned: ownedTacticboards,
-      accessible: accessibleTacticboards,
+      owned: ownedTacticBoards,
+      accessible: accessibleTacticBoards,
     });
   },
 );
