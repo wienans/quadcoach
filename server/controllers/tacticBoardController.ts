@@ -30,6 +30,34 @@ interface RequestWithUser extends Request {
   UserInfo?: UserInfo;
 }
 
+const TACTIC_BOARD_CREATE_FIELDS = [
+  "name",
+  "isPrivate",
+  "tags",
+  "pages",
+  "creator",
+  "description",
+  "coaching_points",
+] as const;
+
+const TACTIC_BOARD_UPDATE_FIELDS = TACTIC_BOARD_CREATE_FIELDS;
+
+function allowlistedFields(
+  body: unknown,
+  fields: readonly string[],
+): Record<string, unknown> {
+  if (typeof body !== "object" || body === null || Array.isArray(body)) {
+    return {};
+  }
+
+  const source = body as Record<string, unknown>;
+  return Object.fromEntries(
+    fields
+      .filter((field) => source[field] !== undefined)
+      .map((field) => [field, source[field]]),
+  );
+}
+
 function isMongoError(error: unknown): error is { code: number } {
   return typeof error === "object" && error !== null && "code" in error;
 }
@@ -266,7 +294,10 @@ export const getById = asyncHandler(
 export const createNewTacticBoard = asyncHandler(
   async (req: RequestWithUser, res: Response) => {
     if (req.UserInfo?.id) {
-      const tacticBoard = new TacticBoard(req.body);
+      const tacticBoard = new TacticBoard({
+        ...allowlistedFields(req.body, TACTIC_BOARD_CREATE_FIELDS),
+        user: req.UserInfo.id,
+      });
       const result = await tacticBoard.save();
       if (!result) {
         console.error("Couldn't create Tactic Board");
@@ -303,9 +334,7 @@ export const updateById = asyncHandler(
           return;
         }
 
-        const updates = { ...(req.body as Record<string, unknown>) };
-        delete updates.user;
-        delete updates.owner;
+        const updates = allowlistedFields(req.body, TACTIC_BOARD_UPDATE_FIELDS);
 
         const result = await TacticBoard.updateOne(
           { _id: tacticBoardId },

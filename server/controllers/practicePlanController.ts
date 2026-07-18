@@ -24,6 +24,50 @@ interface RequestWithUser extends Request {
     roles: string[];
   };
 }
+
+const PRACTICE_PLAN_CREATE_FIELDS = [
+  "name",
+  "description",
+  "tags",
+  "sections",
+] as const;
+
+const PRACTICE_PLAN_UPDATE_FIELDS = [
+  ...PRACTICE_PLAN_CREATE_FIELDS,
+  "isPrivate",
+] as const;
+
+interface PracticePlanCreateFields {
+  name?: unknown;
+  description?: string;
+  tags?: string[];
+  sections?: ISection[];
+}
+
+interface PracticePlanUpdateFields {
+  name?: unknown;
+  description?: unknown;
+  tags?: unknown;
+  sections?: unknown;
+  isPrivate?: unknown;
+}
+
+function allowlistedFields<T extends object>(
+  body: unknown,
+  fields: readonly (keyof T & string)[],
+): Partial<T> {
+  if (typeof body !== "object" || body === null || Array.isArray(body)) {
+    return {};
+  }
+
+  const source = body as Record<string, unknown>;
+  return Object.fromEntries(
+    fields
+      .filter((field) => source[field] !== undefined)
+      .map((field) => [field, source[field]]),
+  ) as Partial<T>;
+}
+
 function isMongoError(error: unknown): error is { code: number } {
   return typeof error === "object" && error !== null && "code" in error;
 }
@@ -140,7 +184,11 @@ export const createPracticePlan = async (
   try {
     const userId = req.UserInfo?.id;
     if (!userId) return res.status(401).json({ message: "Unauthorized" });
-    const { name, description, tags, sections } = req.body || {};
+    const { name, description, tags, sections } =
+      allowlistedFields<PracticePlanCreateFields>(
+        req.body,
+        PRACTICE_PLAN_CREATE_FIELDS,
+      );
     if (!isNonEmptyName(name))
       return res.status(400).json({ message: "Name required" });
 
@@ -209,26 +257,30 @@ export const patchPracticePlan = async (
         return;
       }
 
-      const updates: any = {};
-      if (req.body.name !== undefined) {
-        if (!isNonEmptyName(req.body.name))
+      const requestUpdates = allowlistedFields<PracticePlanUpdateFields>(
+        req.body,
+        PRACTICE_PLAN_UPDATE_FIELDS,
+      );
+      const updates: Record<string, unknown> = {};
+      if (requestUpdates.name !== undefined) {
+        if (!isNonEmptyName(requestUpdates.name))
           return res.status(400).json({ message: "Invalid name" });
-        updates.name = req.body.name.trim();
+        updates.name = requestUpdates.name.trim();
       }
-      if (req.body.description !== undefined)
-        updates.description = req.body.description;
-      if (req.body.tags !== undefined) updates.tags = req.body.tags;
-      if (req.body.isPrivate !== undefined)
-        updates.isPrivate = req.body.isPrivate;
-      if (req.body.sections !== undefined) {
-        const durationErrors = validateNonNegativeDurations(req.body);
+      if (requestUpdates.description !== undefined)
+        updates.description = requestUpdates.description;
+      if (requestUpdates.tags !== undefined) updates.tags = requestUpdates.tags;
+      if (requestUpdates.isPrivate !== undefined)
+        updates.isPrivate = requestUpdates.isPrivate;
+      if (requestUpdates.sections !== undefined) {
+        const durationErrors = validateNonNegativeDurations(requestUpdates);
         if (durationErrors.length)
           return sendValidation(
             res,
             "Duration validation failed",
             durationErrors,
           );
-        updates.sections = req.body.sections;
+        updates.sections = requestUpdates.sections;
       }
       updates.updatedAt = new Date();
       const updated = await PracticePlan.findByIdAndUpdate(
