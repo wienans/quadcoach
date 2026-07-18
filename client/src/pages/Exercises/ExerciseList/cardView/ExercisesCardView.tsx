@@ -9,7 +9,7 @@ import {
   Theme,
   useMediaQuery,
 } from "@mui/material";
-import { Exercise } from "../../../../api/quadcoachApi/domain";
+import { ExerciseSummary } from "../../../../api/quadcoachApi/domain";
 import { useTranslation } from "react-i18next";
 import ExerciseLoadingCard from "./ExerciseLoadingCard";
 import ExerciseCard from "./ExerciseCard";
@@ -20,7 +20,7 @@ import { setMiniSideNav } from "../../../../components/Layout/layoutSlice";
 import { useAuth } from "../../../../store/hooks";
 
 export type ExercisesCardViewProps = {
-  exercises?: Exercise[];
+  exercises?: ExerciseSummary[];
   isExercisesLoading: boolean;
   onOpenExerciseClick: (exerciseId: string) => void;
   scrollTrigger: boolean;

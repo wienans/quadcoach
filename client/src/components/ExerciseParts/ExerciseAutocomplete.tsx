@@ -1,12 +1,12 @@
 import { Autocomplete, CircularProgress, TextField } from "@mui/material";
 import { useState } from "react";
 import { useGetExercisesQuery } from "../../pages/exerciseApi";
-import { Exercise } from "../../api/quadcoachApi/domain";
+import { ExerciseReference } from "../../api/quadcoachApi/domain";
 
 export type ExerciseAutocompleteProps = {
-  selectedExercises: Exercise[];
-  onExercisesSelectedChange: (selectedExercises: Exercise[]) => void;
-  alreadyAddedExercises: Exercise[];
+  selectedExercises: ExerciseReference[];
+  onExercisesSelectedChange: (selectedExercises: ExerciseReference[]) => void;
+  alreadyAddedExercises: ExerciseReference[];
 };
 
 const ExerciseAutocomplete = ({
@@ -17,7 +17,7 @@ const ExerciseAutocomplete = ({
   const [searchValue, setSearchValue] = useState<string>("");
   const { data: exercises, isLoading: isExercisesLoading } =
     useGetExercisesQuery({
-      nameRegex: searchValue !== "" ? searchValue : undefined,
+      search: searchValue !== "" ? searchValue : undefined,
     });
 
   return (
@@ -25,7 +25,7 @@ const ExerciseAutocomplete = ({
       id="related-text"
       multiple
       options={
-        exercises?.exercises.filter(
+        exercises?.items.filter(
           (ex) => !alreadyAddedExercises.some((al) => al._id === ex._id),
         ) ?? []
       }

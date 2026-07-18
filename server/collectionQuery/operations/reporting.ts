@@ -1,3 +1,7 @@
+/// <reference types="node" />
+
+import process from "node:process";
+
 import { mongo } from "mongoose";
 
 export interface ExplainSummary {
@@ -27,18 +31,49 @@ function numericMaximum(value: unknown, key: string): number {
   );
 }
 
-export function summarizeExplain(explain: unknown): ExplainSummary {
-  const stages = valuesFor(explain, "stage").filter(
-    (stage): stage is string => typeof stage === "string",
+function objectValuesFor(value: unknown, key: string): object[] {
+  return valuesFor(value, key).filter(
+    (entry): entry is object => entry !== null && typeof entry === "object",
   );
+}
+
+export function summarizeExplain(explain: unknown): ExplainSummary {
+  const queryPlanners = objectValuesFor(explain, "queryPlanner") as {
+    readonly winningPlan?: unknown;
+  }[];
+  const executionReports = objectValuesFor(explain, "executionStats") as {
+    readonly executionStages?: unknown;
+  }[];
+  const planEvidence = [
+    ...queryPlanners.map((planner) => planner.winningPlan),
+    ...executionReports.map((execution) => execution.executionStages),
+  ];
+  const stages = planEvidence
+    .flatMap((value) => valuesFor(value, "stage"))
+    .filter((stage): stage is string => typeof stage === "string");
+  const executedPipelineSorts = valuesFor(explain, "stages")
+    .filter((value): value is unknown[] => Array.isArray(value))
+    .flatMap((pipeline) =>
+      pipeline.filter(
+        (stage): stage is Record<string, unknown> =>
+          stage !== null &&
+          typeof stage === "object" &&
+          Object.prototype.hasOwnProperty.call(stage, "$sort"),
+      ),
+    )
+    .map((stage) => stage.$sort);
   return {
     winningStages: [...new Set(stages)].sort(),
-    totalDocsExamined: numericMaximum(explain, "totalDocsExamined"),
-    totalKeysExamined: numericMaximum(explain, "totalKeysExamined"),
-    returned: numericMaximum(explain, "nReturned"),
+    totalDocsExamined: numericMaximum(executionReports, "totalDocsExamined"),
+    totalKeysExamined: numericMaximum(executionReports, "totalKeysExamined"),
+    returned: numericMaximum(executionReports, "nReturned"),
     collectionScan: stages.includes("COLLSCAN"),
-    blockingSort: stages.includes("SORT"),
-    spilled: valuesFor(explain, "usedDisk").includes(true),
+    blockingSort: stages.includes("SORT") || executedPipelineSorts.length > 0,
+    spilled:
+      valuesFor(executionReports, "usedDisk").includes(true) ||
+      executedPipelineSorts.some((sort) =>
+        valuesFor(sort, "usedDisk").includes(true),
+      ),
   };
 }
 

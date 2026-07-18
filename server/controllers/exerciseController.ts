@@ -19,6 +19,15 @@ import {
   fromLegacyExerciseRequest,
   toLegacyExercisePersistence,
 } from "../compatibility/tacticBoardCompatibility";
+import {
+  browse,
+  CollectionQueryInfrastructureError,
+  CollectionQueryValidationError,
+  listFacet,
+  parseCollectionFacetQuery,
+  parseCollectionQuery,
+} from "../collectionQuery";
+import { collectionVisibility } from "../collectionQuery/types";
 
 interface RequestWithUser extends Request {
   UserInfo?: {
@@ -92,85 +101,60 @@ async function rejectIfAnyPrivateTacticBoard(
   return true;
 }
 
-// @desc    Get all exercises
+function sendCollectionQueryError(error: unknown, res: Response): boolean {
+  if (error instanceof CollectionQueryValidationError) {
+    res.status(error.statusCode).json(error.serialize());
+    return true;
+  }
+  if (error instanceof CollectionQueryInfrastructureError) {
+    res.status(error.statusCode).json({ message: error.message });
+    return true;
+  }
+  return false;
+}
+
+// @desc    Browse exercises
 // @route   GET /api/exercises
 // @access  Public
 export const getAllExercises = asyncHandler(
   async (req: Request, res: Response) => {
-    let queryString: string = JSON.stringify(req.query);
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 50;
-    const skip = (page - 1) * limit;
-    const sortBy = (req.query.sortBy as string) || "name";
-    const sortOrder = (req.query.sortOrder as string) || "asc";
-
-    // Remove pagination and sorting params from the query string
-    const queryObj = JSON.parse(queryString);
-    delete queryObj.page;
-    delete queryObj.limit;
-    delete queryObj.sortBy;
-    delete queryObj.sortOrder;
-    queryString = JSON.stringify(queryObj);
-
-    queryString = queryString.replace(
-      /\b(gte|gt|lte|lt|eq|ne|regex|options|in|nin|all)\b/g,
-      (match) => `$${match}`
-    );
-
-    queryString = queryString.replace(
-      /"?\$all"?\s*:\s*"([^"]+)"/g,
-      (_, match) =>
-        `"$all": [${match.split(",").map((item: string) => `"${item}"`)}]`
-    );
-
-    const query = JSON.parse(queryString);
-
-    // Create sort object
-    const sortObj: { [key: string]: 1 | -1 } = {};
-    const sortDirection = sortOrder === "desc" ? -1 : 1;
-
-    // Map frontend sort fields to database fields
-    switch (sortBy) {
-      case "name":
-        sortObj.name = sortDirection;
-        break;
-      case "time":
-        sortObj.time_min = sortDirection;
-        break;
-      case "persons":
-        sortObj.persons = sortDirection;
-        break;
-      case "created":
-        sortObj.createdAt = sortDirection;
-        break;
-      case "updated":
-        sortObj.updatedAt = sortDirection;
-        break;
-      default:
-        sortObj.name = 1; // Default sort by name ascending
+    try {
+      const intent = parseCollectionQuery("exercise", req.query);
+      res.json(
+        await browse({ intent, visibility: collectionVisibility.all() }),
+      );
+    } catch (error) {
+      if (!sendCollectionQueryError(error, res)) throw error;
     }
+  },
+);
 
-    sortObj._id = 1; // Always add _id as a secondary sort to ensure consistent ordering
-
-    // Get total count for pagination
-    const total = await Exercise.countDocuments(query);
-
-    // Execute query with pagination and sorting
-    const exercises = await Exercise.find(query)
-      .sort(sortObj)
-      .skip(skip)
-      .limit(limit);
-
-    res.send({
-      exercises,
-      pagination: {
-        page,
-        limit,
-        total,
-        pages: Math.ceil(total / limit),
-      },
-    });
+async function getExerciseFacet(
+  req: Request,
+  res: Response,
+  facet: "tags" | "materials",
+): Promise<void> {
+  try {
+    parseCollectionFacetQuery(req.query);
+    res.json(
+      await listFacet({
+        resource: "exercise",
+        facet,
+        visibility: collectionVisibility.all(),
+      }),
+    );
+  } catch (error) {
+    if (!sendCollectionQueryError(error, res)) throw error;
   }
+}
+
+export const getExerciseTags = asyncHandler(
+  async (req: Request, res: Response) => getExerciseFacet(req, res, "tags"),
+);
+
+export const getExerciseMaterials = asyncHandler(
+  async (req: Request, res: Response) =>
+    getExerciseFacet(req, res, "materials"),
 );
 
 // @desc    Get exercise by ID

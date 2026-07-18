@@ -9,6 +9,24 @@ export type ExerciseHeader = {
   user?: string;
 };
 
+export type ExerciseSummary = {
+  _id: string;
+  name: string;
+  tags: string[];
+  creator?: string;
+  user?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  materials: string[];
+  durationMinutes: number | null;
+  persons: number | null;
+  beaters: number | null;
+  chasers: number | null;
+  relatedTo: string[];
+};
+
+export type ExerciseReference = Pick<ExerciseSummary, "_id" | "name">;
+
 type Exercise = {
   _id: string;
   name: string;

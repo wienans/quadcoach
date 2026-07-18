@@ -14,8 +14,11 @@ import exerciseRoutes from "./routes/exerciseRoutes";
 import authRoutes from "./routes/authRoutes";
 import favoriteRoutes from "./routes/favoriteRoutes";
 import practicePlanRoutes from "./routes/practicePlanRoutes";
-import Exercise from "./models/exercise";
 import TacticBoard from "./models/tacticBoard";
+import {
+  getExerciseMaterials,
+  getExerciseTags,
+} from "./controllers/exerciseController";
 
 const app = express();
 app.set("trust proxy", 1);
@@ -35,60 +38,16 @@ app.use("/api/exercises", exerciseRoutes);
 app.use("/api/favorites", favoriteRoutes);
 app.use("/api/practice-plans", practicePlanRoutes);
 
-app.get("/api/materials", async (req, res) => {
-  let queryString: string = JSON.stringify(req.query);
+app.get("/api/materials", getExerciseMaterials);
 
-  // Rebuild querry string
-  queryString = queryString.replace(
-    /\b(gte|gt|lte|lt|eq|ne|regex|options|in|nin)\b/g,
-    (match) => `$${match}`
-  );
-  let querry = JSON.parse(queryString);
-  // gets all distinct values of tags
-  const result: string[] = await Exercise.distinct("materials");
-  if (querry["materialName"] != undefined) {
-    // Apply Regex, "i" for case insensitive
-    let regex: RegExp = new RegExp(
-      querry["materialName"]["$regex"],
-      querry["materialName"]["$options"]
-    );
-    let filtered: string[] = result.filter((item) => item.match(regex));
-    res.send(filtered);
-  } else {
-    res.send(result);
-  }
-});
-
-app.get("/api/tags/exercises", async (req, res) => {
-  let queryString: string = JSON.stringify(req.query);
-
-  // Rebuild querry string
-  queryString = queryString.replace(
-    /\b(gte|gt|lte|lt|eq|ne|regex|options|in|nin)\b/g,
-    (match) => `$${match}`
-  );
-  let querry = JSON.parse(queryString);
-  // gets all distinct values of tags
-  const result: string[] = await Exercise.distinct("tags");
-  if (querry["tagName"] != undefined) {
-    // Apply Regex, "i" for case insensitive
-    let regex: RegExp = new RegExp(
-      querry["tagName"]["$regex"],
-      querry["tagName"]["$options"]
-    );
-    let filtered: string[] = result.filter((item) => item.match(regex));
-    res.send(filtered);
-  } else {
-    res.send(result);
-  }
-});
+app.get("/api/tags/exercises", getExerciseTags);
 
 app.get("/api/tags/tacticboards", async (req, res) => {
   let queryString: string = JSON.stringify(req.query);
   // Rebuild querry string
   queryString = queryString.replace(
     /\b(gte|gt|lte|lt|eq|ne|regex|options|in|nin)\b/g,
-    (match) => `$${match}`
+    (match) => `$${match}`,
   );
   let querry = JSON.parse(queryString);
   // gets all distinct values of tags
@@ -98,7 +57,7 @@ app.get("/api/tags/tacticboards", async (req, res) => {
     // Apply Regex, "i" for case insensitive
     let regex: RegExp = new RegExp(
       querry["tagName"]["$regex"],
-      querry["tagName"]["$options"]
+      querry["tagName"]["$options"],
     );
     let filtered: string[] = result.filter((item) => item.match(regex));
     res.send(filtered);

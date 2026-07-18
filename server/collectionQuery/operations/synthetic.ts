@@ -1,4 +1,3 @@
-import { performance } from "node:perf_hooks";
 import { mongo } from "mongoose";
 
 import { loadAllCollectionGrantIds } from "../../authorization/collectionGrantIds";
@@ -6,7 +5,35 @@ import { browse, listFacet } from "../index";
 import { runWithCollectionDatabase } from "../internal/databaseContext";
 import { parseCollectionQuery } from "../parser";
 import { collectionVisibility } from "../types";
-import { ExplainSummary } from "./reporting";
+import {
+  ExerciseSyntheticEvidence,
+  EXERCISE_DATABASE_WORKLOAD_NAMES,
+  EXERCISE_INDEX_NAMES,
+  EXERCISE_WORKLOAD_NAMES,
+  measureExerciseSynthetic,
+  operationDurations,
+  percentile95,
+} from "./exerciseSynthetic";
+import { ExplainSummary, summarizeExplain } from "./reporting";
+
+export {
+  ExerciseSyntheticEvidence,
+  EXERCISE_APPROVED_SORTS,
+  EXERCISE_DATABASE_WORKLOADS,
+  EXERCISE_DATABASE_WORKLOAD_NAMES,
+  EXERCISE_INDEX_NAMES,
+  EXERCISE_SORT_COVERAGE,
+  EXERCISE_WORKLOAD_NAMES,
+  exerciseBrowseWorkloadCorrect,
+  isExerciseSyntheticSummary,
+  syntheticExerciseDocument,
+} from "./exerciseSynthetic";
+
+const EXERCISE_COLLATION = {
+  locale: "en",
+  strength: 2,
+  numericOrdering: true,
+} as const;
 
 export interface ObservedMaxima {
   readonly resources: number;
@@ -41,6 +68,7 @@ export interface SyntheticMeasurements {
   readonly grantIdsAreStrings: boolean;
   readonly publicResourceCount: number;
   readonly browseVisibleTotal: number;
+  readonly exercise?: ExerciseSyntheticEvidence;
 }
 
 export interface SyntheticGateReport {
@@ -59,6 +87,7 @@ export function evaluateSyntheticGates(
 ): SyntheticGateReport {
   const explain = measurements.defaultPageExplain;
   const scanLimit = measurements.skip + measurements.limit + 100;
+  const exercise = measurements.exercise;
   const gates = [
     {
       name: "count warm p95",
@@ -132,6 +161,173 @@ export function evaluateSyntheticGates(
       observed: measurements.grantIdsBytes,
       required: "<1048576 bytes",
     },
+    {
+      name: "Exercise evidence present",
+      passed: exercise !== undefined,
+      observed: exercise !== undefined,
+      required: "true",
+    },
+    ...(exercise
+      ? [
+          {
+            name: "Exercise dataset scale",
+            passed:
+              exercise.generatedDocuments >= 20_000 &&
+              exercise.generatedDocuments === measurements.exercise?.generatedDocuments,
+            observed: exercise.generatedDocuments,
+            required: ">=20000 documents",
+          },
+          {
+            name: "Exercise legacy metrics represented",
+            passed: exercise.documentsWithMissingLegacyMetrics > 0,
+            observed: exercise.documentsWithMissingLegacyMetrics,
+            required: ">0 documents",
+          },
+          {
+            name: "Exercise deterministic ties represented",
+            passed: exercise.deterministicTieDocuments > 1,
+            observed: exercise.deterministicTieDocuments,
+            required: ">1 documents",
+          },
+          {
+            name: "Exercise Blocks excluded from summaries",
+            passed:
+              exercise.documentsWithBlocks > 0 && exercise.summaryOmitsBlocks,
+            observed: exercise.summaryOmitsBlocks,
+            required: "true",
+          },
+          {
+            name: "Exercise 100-item response",
+            passed: exercise.response100Bytes <= 256 * 1024,
+            observed: exercise.response100Bytes,
+            required: "<=262144 bytes",
+          },
+          {
+            name: "Exercise workload coverage",
+            passed: EXERCISE_WORKLOAD_NAMES.every((name) =>
+              exercise.operations.some((operation) => operation.name === name),
+            ),
+            observed: exercise.operations.length,
+            required: `${EXERCISE_WORKLOAD_NAMES.length} named workloads`,
+          },
+          {
+            name: "Exercise database operation coverage",
+            passed:
+              exercise.databaseOperations.length ===
+                EXERCISE_DATABASE_WORKLOAD_NAMES.length &&
+              EXERCISE_DATABASE_WORKLOAD_NAMES.every((name) =>
+                exercise.databaseOperations.some(
+                  (operation) => operation.name === name,
+                ),
+              ),
+            observed: exercise.databaseOperations.length,
+            required: `${EXERCISE_DATABASE_WORKLOAD_NAMES.length} representative count/page paths`,
+          },
+          {
+            name: "Exercise planner coverage",
+            passed:
+              exercise.planners.length ===
+                EXERCISE_DATABASE_WORKLOAD_NAMES.length &&
+              EXERCISE_DATABASE_WORKLOAD_NAMES.every((name) =>
+                exercise.planners.some((planner) => planner.name === name),
+              ),
+            observed: exercise.planners.length,
+            required: `${EXERCISE_DATABASE_WORKLOAD_NAMES.length} representative indexed paths`,
+          },
+          {
+            name: "Exercise index coverage",
+            passed: EXERCISE_INDEX_NAMES.every((name) =>
+              exercise.indexes.some((index) => index.name === name),
+            ),
+            observed: exercise.indexes.length,
+            required: `${EXERCISE_INDEX_NAMES.length} approved cq_exercises_* indexes`,
+          },
+          ...exercise.operations.map((operation) => ({
+            name: `${operation.name} correctness`,
+            passed: operation.correct,
+            observed: operation.correct,
+            required: "true",
+          })),
+          ...exercise.operations.map((operation) => ({
+            name: `${operation.name} warm p95`,
+            passed:
+              operation.warmP95Ms <
+              (operation.operation === "facet" ? 1_000 : 500),
+            observed: operation.warmP95Ms,
+            required:
+              operation.operation === "facet" ? "<1000ms" : "<500ms",
+          })),
+          ...exercise.operations.map((operation) => ({
+            name: `${operation.name} database budget`,
+            passed:
+              operation.maximumMs <=
+              (operation.operation === "facet" ? 2_000 : 1_000),
+            observed: operation.maximumMs,
+            required:
+              operation.operation === "facet" ? "<=2000ms" : "<=1000ms",
+          })),
+          ...exercise.databaseOperations.flatMap((operation) => [
+            {
+              name: `${operation.name} count warm p95`,
+              passed: operation.countWarmP95Ms < 250,
+              observed: operation.countWarmP95Ms,
+              required: "<250ms",
+            },
+            {
+              name: `${operation.name} page warm p95`,
+              passed: operation.pageWarmP95Ms < 250,
+              observed: operation.pageWarmP95Ms,
+              required: "<250ms",
+            },
+            {
+              name: `${operation.name} database budget`,
+              passed: operation.maximumMs <= 1_000,
+              observed: operation.maximumMs,
+              required: "<=1000ms",
+            },
+          ]),
+          ...exercise.planners
+            .filter((planner) => planner.strictDefault)
+            .flatMap((planner) => [
+              {
+                name: `${planner.name} selects ${planner.expectedIndex}`,
+                passed: planner.selected,
+                observed: planner.selected,
+                required: "true",
+              },
+              {
+                name: `${planner.name} avoids COLLSCAN`,
+                passed: !planner.explain.collectionScan,
+                observed: planner.explain.collectionScan,
+                required: "false",
+              },
+              {
+                name: `${planner.name} avoids blocking sort`,
+                passed: !planner.explain.blockingSort,
+                observed: planner.explain.blockingSort,
+                required: "false",
+              },
+              {
+                name: `${planner.name} avoids spill`,
+                passed: !planner.explain.spilled,
+                observed: planner.explain.spilled,
+                required: "false",
+              },
+              {
+                name: `${planner.name} documents examined`,
+                passed: planner.explain.totalDocsExamined <= 200,
+                observed: planner.explain.totalDocsExamined,
+                required: "<=200",
+              },
+            ]),
+          ...exercise.indexes.map((index) => ({
+            name: `${index.name} planner verification`,
+            passed: index.selected,
+            observed: index.selected,
+            required: "true",
+          })),
+        ]
+      : []),
   ];
   return {
     activation: gates.every((gate) => gate.passed) ? "proceed" : "pause",
@@ -141,25 +337,6 @@ export function evaluateSyntheticGates(
       "Low-selectivity facets are time-bounded but exempt from default-page scan and sort gates.",
     ],
   };
-}
-
-function percentile95(values: readonly number[]): number {
-  const ordered = [...values].sort((left, right) => left - right);
-  return ordered[Math.max(0, Math.ceil(ordered.length * 0.95) - 1)] ?? 0;
-}
-
-async function durations(
-  iterations: number,
-  operation: () => Promise<unknown>,
-): Promise<number[]> {
-  const measured: number[] = [];
-  await operation();
-  for (let iteration = 0; iteration < iterations; iteration += 1) {
-    const started = performance.now();
-    await operation();
-    measured.push(performance.now() - started);
-  }
-  return measured;
 }
 
 export async function measureSynthetic(
@@ -203,10 +380,7 @@ export async function measureSynthetic(
   }
   await resources.createIndex(
     { name: 1, _id: 1 },
-    {
-      name: "cq_tacticboards_name",
-      collation: { locale: "en", strength: 2, numericOrdering: true },
-    },
+    { name: "cq_tacticboards_name", collation: EXERCISE_COLLATION },
   );
   await accesses.createIndex(
     { user: 1, tacticboard: 1 },
@@ -240,45 +414,79 @@ export async function measureSynthetic(
   const cursor = () =>
     resources
       .find(match)
-      .collation({ locale: "en", strength: 2, numericOrdering: true })
+      .collation(EXERCISE_COLLATION)
       .sort({ name: 1, _id: 1 })
       .limit(100)
       .project({ _id: 1, name: 1, tags: 1, isPrivate: 1 });
-  const countTimes = await durations(10, () =>
+  const countTimes = await operationDurations(() =>
     resources.countDocuments(match, { maxTimeMS: 1_000 }),
   );
-  const pageTimes = await durations(10, () => cursor().toArray());
+  const pageTimes = await operationDurations(() => cursor().toArray());
   const intent = parseCollectionQuery("tacticBoard", { limit: "100" });
   const explain = await cursor().explain("executionStats");
-  const { summarizeExplain } = await import("./reporting");
-  return runWithCollectionDatabase(database, async () => {
-    const browseTimes = await durations(10, () =>
-      browse({ intent, visibility }),
-    );
-    const facetTimes = await durations(10, () =>
-      listFacet({ resource: "tacticBoard", facet: "tags", visibility }),
-    );
-    const page = await browse({ intent, visibility });
-    return {
-      countWarmP95Ms: percentile95(countTimes),
-      pageWarmP95Ms: percentile95(pageTimes),
-      browseWarmP95Ms: percentile95(browseTimes),
-      facetWarmP95Ms: percentile95(facetTimes),
-      maximumBrowseDatabaseMs: Math.max(...countTimes, ...pageTimes),
-      maximumFacetDatabaseMs: Math.max(...facetTimes),
-      defaultPageExplain: summarizeExplain(explain),
-      skip: 0,
-      limit: 100,
-      response100Bytes: mongo.BSON.calculateObjectSize(page),
-      grantIdsBytes: mongo.BSON.calculateObjectSize({
-        ids: visibility.grantedResourceIds,
-      }),
-      grantIdsLoaded: visibility.grantedResourceIds.length,
-      grantIdsAreStrings: visibility.grantedResourceIds.every(
-        (id) => typeof id === "string",
-      ),
-      publicResourceCount,
-      browseVisibleTotal: page.pagination.total,
-    };
-  });
+  const tacticBoardMeasurements = await runWithCollectionDatabase(
+    database,
+    async () => {
+      const browseTimes = await operationDurations(() =>
+        browse({ intent, visibility }),
+      );
+      const facetTimes = await operationDurations(() =>
+        listFacet({ resource: "tacticBoard", facet: "tags", visibility }),
+      );
+      const page = await browse({ intent, visibility });
+      return { browseTimes, facetTimes, page };
+    },
+  );
+  const exercise = await measureExerciseSynthetic(database, scale);
+  const exerciseBrowse = exercise.operations.filter(
+    (operation) => operation.operation === "browse",
+  );
+  const exerciseFacets = exercise.operations.filter(
+    (operation) => operation.operation === "facet",
+  );
+  return {
+    countWarmP95Ms: Math.max(
+      percentile95(countTimes),
+      ...exercise.databaseOperations.map((operation) => operation.countWarmP95Ms),
+    ),
+    pageWarmP95Ms: Math.max(
+      percentile95(pageTimes),
+      ...exercise.databaseOperations.map((operation) => operation.pageWarmP95Ms),
+    ),
+    browseWarmP95Ms: Math.max(
+      percentile95(tacticBoardMeasurements.browseTimes),
+      ...exerciseBrowse.map((operation) => operation.warmP95Ms),
+    ),
+    facetWarmP95Ms: Math.max(
+      percentile95(tacticBoardMeasurements.facetTimes),
+      ...exerciseFacets.map((operation) => operation.warmP95Ms),
+    ),
+    maximumBrowseDatabaseMs: Math.max(
+      ...countTimes,
+      ...pageTimes,
+      ...exercise.databaseOperations.map((operation) => operation.maximumMs),
+      ...exerciseBrowse.map((operation) => operation.maximumMs),
+    ),
+    maximumFacetDatabaseMs: Math.max(
+      ...tacticBoardMeasurements.facetTimes,
+      ...exerciseFacets.map((operation) => operation.maximumMs),
+    ),
+    defaultPageExplain: summarizeExplain(explain),
+    skip: 0,
+    limit: 100,
+    response100Bytes: Math.max(
+      mongo.BSON.calculateObjectSize(tacticBoardMeasurements.page),
+      exercise.response100Bytes,
+    ),
+    grantIdsBytes: mongo.BSON.calculateObjectSize({
+      ids: visibility.grantedResourceIds,
+    }),
+    grantIdsLoaded: visibility.grantedResourceIds.length,
+    grantIdsAreStrings: visibility.grantedResourceIds.every(
+      (id) => typeof id === "string",
+    ),
+    publicResourceCount,
+    browseVisibleTotal: tacticBoardMeasurements.page.pagination.total,
+    exercise,
+  };
 }

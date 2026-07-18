@@ -1,4 +1,9 @@
-import type { Block, Exercise, ResourceAccessLevel } from "../domain";
+import type {
+  Block,
+  Exercise,
+  ExerciseSummary,
+  ResourceAccessLevel,
+} from "../domain";
 import type { TacticBoardFavorite } from "../domain/Favorits";
 
 export type TacticBoardFavoriteRequest = {
@@ -189,9 +194,59 @@ export const fromExerciseResponseDto = ({
   description_blocks: description_blocks.map(fromExerciseBlockDto),
 });
 
-export const toExerciseRequestDto = <T extends Omit<Exercise, "_id"> | Exercise>(
+export type ExerciseSummaryResponseDto = {
+  _id: string;
+  name: string;
+  tags?: string[];
+  creator?: string;
+  user?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  materials?: string[];
+  durationMinutes: number | null;
+  persons: number | null;
+  beaters: number | null;
+  chasers: number | null;
+  relatedTo?: string[];
+};
+
+export const fromExerciseSummaryResponseDto = ({
+  _id,
+  name,
+  tags,
+  creator,
+  user,
+  createdAt,
+  updatedAt,
+  materials,
+  durationMinutes,
+  persons,
+  beaters,
+  chasers,
+  relatedTo,
+}: ExerciseSummaryResponseDto): ExerciseSummary => ({
+  _id,
+  name,
+  tags: tags ?? [],
+  creator,
+  user,
+  createdAt,
+  updatedAt,
+  materials: materials ?? [],
+  durationMinutes,
+  persons,
+  beaters,
+  chasers,
+  relatedTo: relatedTo ?? [],
+});
+
+export const toExerciseRequestDto = <
+  T extends Omit<Exercise, "_id"> | Exercise,
+>(
   exercise: T,
-): Omit<T, "description_blocks"> & { description_blocks: ExerciseBlockDto[] } => {
+): Omit<T, "description_blocks"> & {
+  description_blocks: ExerciseBlockDto[];
+} => {
   const { description_blocks, ...fields } = exercise;
   return {
     ...fields,

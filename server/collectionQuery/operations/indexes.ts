@@ -187,11 +187,21 @@ export function winningPlanUsesIndex(
   explanation: unknown,
   name: string,
 ): boolean {
-  if (!explanation || typeof explanation !== "object") return false;
-  const queryPlanner = (explanation as { queryPlanner?: unknown }).queryPlanner;
-  if (!queryPlanner || typeof queryPlanner !== "object") return false;
-  const winningPlan = (queryPlanner as { winningPlan?: unknown }).winningPlan;
-  return planUsesIndex(winningPlan, name);
+  return valuesForQueryPlanner(explanation).some((queryPlanner) =>
+    planUsesIndex(queryPlanner.winningPlan, name),
+  );
+}
+
+function valuesForQueryPlanner(
+  value: unknown,
+): { readonly winningPlan?: unknown }[] {
+  if (!value || typeof value !== "object") return [];
+  return Object.entries(value).flatMap(([key, nested]) => [
+    ...(key === "queryPlanner" && nested && typeof nested === "object"
+      ? [nested as { readonly winningPlan?: unknown }]
+      : []),
+    ...valuesForQueryPlanner(nested),
+  ]);
 }
 
 export async function verifyCollectionIndex(database: mongo.Db, name: string) {

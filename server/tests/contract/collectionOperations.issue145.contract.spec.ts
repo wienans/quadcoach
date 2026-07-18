@@ -7,6 +7,7 @@ import {
   winningPlanUsesIndex,
 } from "../../collectionQuery/operations/indexes";
 import { collectPreflight } from "../../collectionQuery/operations/preflight";
+import { summarizeExplain } from "../../collectionQuery/operations/reporting";
 import {
   evaluateSyntheticGates,
   measureSynthetic,
@@ -163,6 +164,52 @@ describe("collection-query operations", () => {
         "cq_tacticboards_name",
       ),
     ).toBe(true);
+    expect(
+      winningPlanUsesIndex(
+        {
+          stages: [
+            {
+              $cursor: {
+                queryPlanner: {
+                  winningPlan: {
+                    stage: "IXSCAN",
+                    indexName: "cq_exercises_duration",
+                  },
+                  rejectedPlans: [{ indexName: "unrelated" }],
+                },
+              },
+            },
+          ],
+        },
+        "cq_exercises_duration",
+      ),
+    ).toBe(true);
+  });
+
+  it("reports only executed planner and aggregate sort stages", () => {
+    const optimized = summarizeExplain({
+      command: { pipeline: [{ $sort: { name: 1 } }] },
+      queryPlanner: { winningPlan: { stage: "IXSCAN" } },
+      executionStats: {
+        totalDocsExamined: 50,
+        executionStages: { stage: "IXSCAN" },
+      },
+    });
+    expect(optimized).toMatchObject({
+      blockingSort: false,
+      collectionScan: false,
+      totalDocsExamined: 50,
+    });
+
+    const blocking = summarizeExplain({
+      stages: [{ $sort: { usedDisk: true } }],
+      rejectedPlans: [{ stage: "COLLSCAN" }],
+    });
+    expect(blocking).toMatchObject({
+      blockingSort: true,
+      spilled: true,
+      collectionScan: false,
+    });
   });
 
   it("runs synthetic browse and facet measurements against an isolated native database", async () => {
@@ -233,7 +280,13 @@ describe("collection-query operations", () => {
       publicResourceCount: 15_000,
       browseVisibleTotal: 16_000,
     };
-    expect(evaluateSyntheticGates(passing).activation).toBe("proceed");
+    const missingExerciseEvidence = evaluateSyntheticGates(passing);
+    expect(missingExerciseEvidence.activation).toBe("pause");
+    expect(
+      missingExerciseEvidence.gates
+        .filter((gate) => gate.name !== "Exercise evidence present")
+        .every((gate) => gate.passed),
+    ).toBe(true);
     const failed = evaluateSyntheticGates({
       ...passing,
       grantIdsBytes: 1024 * 1024,

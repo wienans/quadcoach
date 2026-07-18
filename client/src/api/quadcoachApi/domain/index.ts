@@ -3,6 +3,8 @@ export type {
   default as Exercise,
   ExerciseWithOutId,
   ExercisePartialId,
+  ExerciseReference,
+  ExerciseSummary,
 } from "./Exercise";
 export type { default as TacticPage } from "./TacticPage";
 export type {

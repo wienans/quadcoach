@@ -1,3 +1,7 @@
+/// <reference types="node" />
+
+import process from "node:process";
+
 import {
   createCollectionIndex,
   dropCollectionIndex,
@@ -26,10 +30,8 @@ async function main(): Promise<void> {
   }
 }
 
-if (require.main === module) {
-  void main().catch((error: unknown) => {
-    void error;
-    console.error("Collection index operation failed");
-    process.exitCode = 1;
-  });
-}
+void main().catch((error: unknown) => {
+  void error;
+  console.error("Collection index operation failed");
+  process.exitCode = 1;
+});

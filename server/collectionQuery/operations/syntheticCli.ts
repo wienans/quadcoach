@@ -1,3 +1,7 @@
+/// <reference types="node" />
+
+import process from "node:process";
+
 import { MongoMemoryServer } from "mongodb-memory-server";
 import { mongo } from "mongoose";
 
@@ -47,10 +51,8 @@ async function main(): Promise<void> {
   }
 }
 
-if (require.main === module) {
-  void main().catch((error: unknown) => {
-    void error;
-    console.error("Collection synthetic validation failed");
-    process.exitCode = 1;
-  });
-}
+void main().catch((error: unknown) => {
+  void error;
+  console.error("Collection synthetic validation failed");
+  process.exitCode = 1;
+});

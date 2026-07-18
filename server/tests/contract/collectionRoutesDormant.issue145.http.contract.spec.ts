@@ -4,7 +4,6 @@ import { app } from "../setup";
 
 describe("issue 145 leaves active collection contracts dormant", () => {
   it.each([
-    ["/api/exercises", "exercises", { page: 1, limit: 50, total: 0, pages: 0 }],
     ["/api/tacticboards", "tacticboards", { total: 0, page: 1, pages: 0 }],
     [
       "/api/practice-plans",

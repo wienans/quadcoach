@@ -19,14 +19,18 @@ const MaterialAutocomplete = ({
 
   useEffect(() => {
     // Load initial data
-    getMaterials(undefined);
+    getMaterials();
   }, [getMaterials]);
 
   const filteredOptions = [
-    ...(materials?.filter(
-      (material) => !alreadyAddedMaterials.some((rel) => rel === material),
+    ...(materials?.items.filter(
+      (material) =>
+        !alreadyAddedMaterials.some((rel) => rel === material) &&
+        material.toLocaleLowerCase().includes(searchValue.toLocaleLowerCase()),
     ) ?? []),
-    ...(searchValue && !materials?.includes(searchValue) ? [searchValue] : []),
+    ...(searchValue && !materials?.items.includes(searchValue)
+      ? [searchValue]
+      : []),
   ];
 
   return (

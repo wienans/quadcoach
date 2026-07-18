@@ -1,5 +1,5 @@
 import { Avatar, Tooltip } from "@mui/material";
-import { Exercise } from "../../../../api/quadcoachApi/domain";
+import { ExerciseSummary } from "../../../../api/quadcoachApi/domain";
 import { useTranslation } from "react-i18next";
 import {
   ExerciseType,
@@ -7,7 +7,7 @@ import {
 } from "../../../../helpers/exerciseHelpers";
 
 export type ExerciseAvatarProps = {
-  exercise: Exercise;
+  exercise: ExerciseSummary;
   exerciseType?: ExerciseType;
 };
 
@@ -47,8 +47,8 @@ const ExerciseAvatar = ({
           }),
         }}
       >
-        {exercise.beaters > 0 && "B"}
-        {exercise.chasers > 0 && "C"}
+        {(exercise.beaters ?? 0) > 0 && "B"}
+        {(exercise.chasers ?? 0) > 0 && "C"}
       </Avatar>
     </Tooltip>
   );

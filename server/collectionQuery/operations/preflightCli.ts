@@ -1,3 +1,7 @@
+/// <reference types="node" />
+
+import process from "node:process";
+
 import { collectPreflight } from "./preflight";
 import { connectForOperations } from "./reporting";
 
@@ -10,10 +14,8 @@ async function main(): Promise<void> {
   }
 }
 
-if (require.main === module) {
-  void main().catch((error: unknown) => {
-    void error;
-    console.error("Collection preflight failed");
-    process.exitCode = 1;
-  });
-}
+void main().catch((error: unknown) => {
+  void error;
+  console.error("Collection preflight failed");
+  process.exitCode = 1;
+});

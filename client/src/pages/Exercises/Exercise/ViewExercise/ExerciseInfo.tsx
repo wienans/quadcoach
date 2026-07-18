@@ -13,7 +13,10 @@ import {
   Skeleton,
   Chip,
 } from "@mui/material";
-import { Exercise } from "../../../../api/quadcoachApi/domain";
+import {
+  Exercise,
+  ExerciseReference,
+} from "../../../../api/quadcoachApi/domain";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useTranslation } from "react-i18next";
@@ -46,18 +49,18 @@ const ExerciseInfo = ({
 
   // Local state for selecting new related exercises (transient before adding to formik)
   const [selectedRelatedExercises, setSelectedRelatedExercises] = useState<
-    Exercise[]
+    ExerciseReference[]
   >([]);
   // Cache of exercises added so their names are available even before API refetch updates relatedExercises prop
   const [cachedRelatedExercises, setCachedRelatedExercises] = useState<
-    Exercise[]
+    ExerciseReference[]
   >([]);
 
   const relatedExercisesFromFormik = useMemo(() => {
     const ids = formik.values.related_to || [];
 
     // Gather map from available relatedExercises (query) plus any transient selected ones and cached ones
-    const byId = new Map<string, Exercise>();
+    const byId = new Map<string, ExerciseReference>();
     relatedExercises?.forEach((ex) => byId.set(ex._id, ex));
     cachedRelatedExercises.forEach((ex) => {
       if (!byId.has(ex._id)) byId.set(ex._id, ex);
@@ -70,15 +73,7 @@ const ExerciseInfo = ({
       .map((id) => {
         if (byId.has(id)) return byId.get(id)!;
         // Fallback minimal placeholder (will be replaced when query refetches after save)
-        return {
-          _id: id,
-          name: id,
-          time_min: 0,
-          beaters: 0,
-          chasers: 0,
-          persons: 0,
-          description_blocks: [],
-        } as Exercise;
+        return { _id: id, name: id };
       })
       .filter(Boolean);
   }, [

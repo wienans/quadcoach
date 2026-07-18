@@ -1,4 +1,4 @@
-import { Exercise } from "../api/quadcoachApi/domain";
+import { ExerciseSummary } from "../api/quadcoachApi/domain";
 
 export enum ExerciseType {
   general = "general",
@@ -7,11 +7,13 @@ export enum ExerciseType {
   chaser = "chaser",
 }
 
-export const getExerciseType = (exercise: Exercise): ExerciseType =>
-  exercise.beaters > 0 && exercise.chasers > 0
+export const getExerciseType = (
+  exercise: Pick<ExerciseSummary, "beaters" | "chasers">,
+): ExerciseType =>
+  (exercise.beaters ?? 0) > 0 && (exercise.chasers ?? 0) > 0
     ? ExerciseType.all
-    : exercise.beaters > 0 && exercise.chasers === 0
-    ? ExerciseType.beater
-    : exercise.beaters === 0 && exercise.chasers > 0
-    ? ExerciseType.chaser
-    : ExerciseType.general;
+    : (exercise.beaters ?? 0) > 0 && (exercise.chasers ?? 0) === 0
+      ? ExerciseType.beater
+      : (exercise.beaters ?? 0) === 0 && (exercise.chasers ?? 0) > 0
+        ? ExerciseType.chaser
+        : ExerciseType.general;

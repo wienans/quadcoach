@@ -52,7 +52,7 @@ import { DashboardLayout } from "../../../components/LayoutContainers";
 import { useAuth } from "../../../store/hooks";
 import Footer from "../../../components/Footer";
 import debounce from "lodash/debounce";
-import { Exercise } from "../../../api/quadcoachApi/domain";
+import { Exercise, ExerciseSummary } from "../../../api/quadcoachApi/domain";
 
 const maxPersons = 20; // Maximum number of persons for filtering
 const maxTime = 60; // Maximum time in minutes
@@ -63,18 +63,18 @@ type ExerciseFilter = {
   searchValue: string;
   minPersons: number;
   maxPersons: number;
-  tagRegex: string;
-  tagList: string[];
-  materialRegex: string;
-  materialList: string[];
+  tagInput: string;
+  tags: string[];
+  materialInput: string;
+  materials: string[];
   minTime: number;
   maxTime: number;
   minBeaters: number;
   maxBeaters: number;
   minChasers: number;
   maxChasers: number;
-  sortBy: "name" | "time" | "persons" | "created" | "updated";
-  sortOrder: "asc" | "desc";
+  sort: "name" | "duration" | "persons" | "created" | "updated";
+  direction: "asc" | "desc";
   page: number;
   limit: number;
 };
@@ -83,18 +83,18 @@ const defaultExerciseFilter: ExerciseFilter = {
   maxPersons: maxPersons,
   minPersons: 0,
   searchValue: "",
-  tagRegex: "",
-  tagList: [],
-  materialRegex: "",
-  materialList: [],
+  tagInput: "",
+  tags: [],
+  materialInput: "",
+  materials: [],
   minTime: 0,
   maxTime: maxTime,
   minBeaters: 0,
   maxBeaters: maxBeaters,
   minChasers: 0,
   maxChasers: maxChasers,
-  sortBy: "name",
-  sortOrder: "asc",
+  sort: "name",
+  direction: "asc",
   page: 1,
   limit: 50,
 };
@@ -109,7 +109,7 @@ const ExerciseList = () => {
     null,
   );
   const { id: userId, name: userName, status: userStatus } = useAuth();
-  const [loadedExercises, setLoadedExercises] = useState<Exercise[]>([]);
+  const [loadedExercises, setLoadedExercises] = useState<ExerciseSummary[]>([]);
   const [openAddDialog, setOpenAddDialog] = useState(false);
   const [newExerciseName, setNewExerciseName] = useState("");
 
@@ -129,13 +129,13 @@ const ExerciseList = () => {
     };
 
   const handleTagKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === "Enter" && exerciseFilter.tagRegex.trim() !== "") {
+    if (event.key === "Enter" && exerciseFilter.tagInput.trim() !== "") {
       event.preventDefault();
       setLoadedExercises([]);
       setExerciseFilter({
         ...exerciseFilter,
-        tagList: [...exerciseFilter.tagList, exerciseFilter.tagRegex.trim()],
-        tagRegex: "",
+        tags: [...exerciseFilter.tags, exerciseFilter.tagInput.trim()],
+        tagInput: "",
         page: 1,
       });
     }
@@ -145,22 +145,22 @@ const ExerciseList = () => {
     setLoadedExercises([]);
     setExerciseFilter({
       ...exerciseFilter,
-      tagList: exerciseFilter.tagList.filter((tag) => tag !== tagToDelete),
+      tags: exerciseFilter.tags.filter((tag) => tag !== tagToDelete),
       page: 1,
     });
   };
 
   const handleMaterialKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === "Enter" && exerciseFilter.materialRegex.trim() !== "") {
+    if (event.key === "Enter" && exerciseFilter.materialInput.trim() !== "") {
       event.preventDefault();
       setLoadedExercises([]);
       setExerciseFilter({
         ...exerciseFilter,
-        materialList: [
-          ...exerciseFilter.materialList,
-          exerciseFilter.materialRegex.trim(),
+        materials: [
+          ...exerciseFilter.materials,
+          exerciseFilter.materialInput.trim(),
         ],
-        materialRegex: "",
+        materialInput: "",
         page: 1,
       });
     }
@@ -170,7 +170,7 @@ const ExerciseList = () => {
     setLoadedExercises([]);
     setExerciseFilter({
       ...exerciseFilter,
-      materialList: exerciseFilter.materialList.filter(
+      materials: exerciseFilter.materials.filter(
         (material) => material !== materialToDelete,
       ),
       page: 1,
@@ -197,25 +197,24 @@ const ExerciseList = () => {
   const debouncedGetExercises = useCallback(
     debounce((filter: ExerciseFilter) => {
       getExercises({
-        // Treat selecting the UI maximum as "no upper bound" (infinite)
-        maxPersons:
+        personsMax:
           filter.maxPersons === maxPersons ? undefined : filter.maxPersons,
-        minPersons: filter.minPersons,
-        nameRegex: filter.searchValue,
-        tagRegex: filter.tagRegex,
-        tagList: filter.tagList,
-        materialRegex: filter.materialRegex,
-        materialList: filter.materialList,
-        minTime: filter.minTime,
-        maxTime: filter.maxTime === maxTime ? undefined : filter.maxTime,
-        minBeaters: filter.minBeaters,
-        maxBeaters:
+        personsMin: filter.minPersons === 0 ? undefined : filter.minPersons,
+        search: filter.searchValue,
+        tags: filter.tags,
+        tagMode: "all",
+        materials: filter.materials,
+        materialMode: "all",
+        durationMin: filter.minTime === 0 ? undefined : filter.minTime,
+        durationMax: filter.maxTime === maxTime ? undefined : filter.maxTime,
+        beatersMin: filter.minBeaters === 0 ? undefined : filter.minBeaters,
+        beatersMax:
           filter.maxBeaters === maxBeaters ? undefined : filter.maxBeaters,
-        minChasers: filter.minChasers,
-        maxChasers:
+        chasersMin: filter.minChasers === 0 ? undefined : filter.minChasers,
+        chasersMax:
           filter.maxChasers === maxChasers ? undefined : filter.maxChasers,
-        sortBy: filter.sortBy,
-        sortOrder: filter.sortOrder,
+        sort: filter.sort,
+        direction: filter.direction,
         page: filter.page,
         limit: filter.limit,
       });
@@ -232,13 +231,11 @@ const ExerciseList = () => {
   }, [exerciseFilter, debouncedGetExercises]);
 
   useEffect(() => {
-    if (exercisesData?.exercises) {
+    if (exercisesData?.items) {
       setLoadedExercises((prev) => {
-        const newExerciseIds = new Set(
-          exercisesData.exercises.map((e) => e._id),
-        );
+        const newExerciseIds = new Set(exercisesData.items.map((e) => e._id));
         const filteredPrev = prev.filter((e) => !newExerciseIds.has(e._id));
-        return [...filteredPrev, ...exercisesData.exercises];
+        return [...filteredPrev, ...exercisesData.items];
       });
     }
   }, [exercisesData]);
@@ -323,13 +320,28 @@ const ExerciseList = () => {
           })}
         >
           <CardHeader
+            sx={(theme) => ({
+              [theme.breakpoints.down("md")]: {
+                alignItems: "stretch",
+                flexDirection: "column",
+                "& .MuiCardHeader-action": {
+                  alignSelf: "auto",
+                  margin: theme.spacing(1, 0, 0),
+                },
+              },
+            })}
             title={
               <SoftTypography variant="h3">
                 {t("ExerciseList:title")}
               </SoftTypography>
             }
             action={
-              <SoftBox display="flex" flexDirection="row" alignItems="center">
+              <SoftBox
+                display="flex"
+                flexDirection="row"
+                alignItems="center"
+                justifyContent={{ xs: "flex-end", md: "initial" }}
+              >
                 {isUpMd && (
                   <SoftInput
                     id="outlined-basic"
@@ -351,15 +363,15 @@ const ExerciseList = () => {
                   </InputLabel>
                   <Select
                     labelId="sort-select-label"
-                    value={exerciseFilter.sortBy}
+                    value={exerciseFilter.sort}
                     label={t("ExerciseList:filter.sort.name")}
                     onChange={(event) => {
                       setLoadedExercises([]);
                       setExerciseFilter({
                         ...exerciseFilter,
-                        sortBy: event.target.value as
+                        sort: event.target.value as
                           | "name"
-                          | "time"
+                          | "duration"
                           | "persons"
                           | "created"
                           | "updated",
@@ -370,7 +382,7 @@ const ExerciseList = () => {
                     <MenuItem value="name">
                       {t("ExerciseList:filter.sort.by_name")}
                     </MenuItem>
-                    <MenuItem value="time">
+                    <MenuItem value="duration">
                       {t("ExerciseList:filter.sort.by_timeInMinutes")}
                     </MenuItem>
                     <MenuItem value="persons">
@@ -385,14 +397,14 @@ const ExerciseList = () => {
                   </Select>
                 </FormControl>
                 <ToggleButton
-                  value={exerciseFilter.sortOrder}
-                  selected={exerciseFilter.sortOrder === "desc"}
+                  value={exerciseFilter.direction}
+                  selected={exerciseFilter.direction === "desc"}
                   onChange={() => {
                     setLoadedExercises([]);
                     setExerciseFilter({
                       ...exerciseFilter,
-                      sortOrder:
-                        exerciseFilter.sortOrder === "asc" ? "desc" : "asc",
+                      direction:
+                        exerciseFilter.direction === "asc" ? "desc" : "asc",
                       page: 1,
                     });
                   }}
@@ -592,8 +604,8 @@ const ExerciseList = () => {
                   <SoftInput
                     id="tags-filter"
                     placeholder={t("ExerciseList:filter.tags.placeholder")}
-                    value={exerciseFilter.tagRegex}
-                    onChange={onExerciseFilterValueChange("tagRegex")}
+                    value={exerciseFilter.tagInput}
+                    onChange={onExerciseFilterValueChange("tagInput")}
                     onKeyDown={handleTagKeyDown}
                     sx={{ width: "100%" }}
                     endAdornment={
@@ -601,7 +613,7 @@ const ExerciseList = () => {
                         <KeyboardReturnIcon
                           sx={{
                             fontSize: 20,
-                            opacity: exerciseFilter.tagRegex != "" ? 1 : 0.4,
+                            opacity: exerciseFilter.tagInput != "" ? 1 : 0.4,
                           }}
                         />
                       </InputAdornment>
@@ -610,7 +622,7 @@ const ExerciseList = () => {
                   <SoftBox
                     sx={{ display: "flex", flexWrap: "wrap", gap: 1, mt: 1 }}
                   >
-                    {exerciseFilter.tagList.map((tag) => (
+                    {exerciseFilter.tags.map((tag) => (
                       <Chip
                         key={tag}
                         label={tag}
@@ -629,8 +641,8 @@ const ExerciseList = () => {
                   <SoftInput
                     id="materials-filter"
                     placeholder={t("ExerciseList:filter.materials.placeholder")}
-                    value={exerciseFilter.materialRegex}
-                    onChange={onExerciseFilterValueChange("materialRegex")}
+                    value={exerciseFilter.materialInput}
+                    onChange={onExerciseFilterValueChange("materialInput")}
                     onKeyDown={handleMaterialKeyDown}
                     sx={{ width: "100%" }}
                     endAdornment={
@@ -639,7 +651,7 @@ const ExerciseList = () => {
                           sx={{
                             fontSize: 20,
                             opacity:
-                              exerciseFilter.materialRegex !== "" ? 1 : 0.4,
+                              exerciseFilter.materialInput !== "" ? 1 : 0.4,
                           }}
                         />
                       </InputAdornment>
@@ -648,7 +660,7 @@ const ExerciseList = () => {
                   <SoftBox
                     sx={{ display: "flex", flexWrap: "wrap", gap: 1, mt: 1 }}
                   >
-                    {exerciseFilter.materialList.map((material) => (
+                    {exerciseFilter.materials.map((material) => (
                       <Chip
                         key={material}
                         label={material}

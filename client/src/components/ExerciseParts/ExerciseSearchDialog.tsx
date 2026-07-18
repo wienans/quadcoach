@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -13,11 +13,17 @@ import {
   FormControlLabel,
   CircularProgress,
   Grid,
+  Alert,
 } from "@mui/material";
 import { lazy, Suspense } from "react";
 import { useTranslation } from "react-i18next";
-import { Exercise, Block } from "../../api/quadcoachApi/domain";
+import {
+  Exercise,
+  Block,
+  ExerciseReference,
+} from "../../api/quadcoachApi/domain";
 import ExerciseAutocomplete from "./ExerciseAutocomplete";
+import { useLazyGetExerciseQuery } from "../../pages/exerciseApi";
 import UniversalMediaPlayer from "../UniversalMediaPlayer";
 import TacticBoardInBlockWrapper from "../../pages/Exercises/Exercise/ViewExercise/ExerciseBlock/TacticBoardInBlock";
 const MarkdownRenderer = lazy(() => import("../MarkdownRenderer"));
@@ -42,6 +48,9 @@ const ExerciseSearchDialog: React.FC<ExerciseSearchDialogProps> = ({
 }) => {
   const { t } = useTranslation("Exercise");
   const [selectedExercises, setSelectedExercises] = useState<Exercise[]>([]);
+  const [selectedExerciseReferences, setSelectedExerciseReferences] = useState<
+    ExerciseReference[]
+  >([]);
   const [selectedBlocks, setSelectedBlocks] = useState<
     Record<string, string[]>
   >({});
@@ -50,24 +59,52 @@ const ExerciseSearchDialog: React.FC<ExerciseSearchDialogProps> = ({
     block: Block;
   } | null>(null);
   const [isAdding, setIsAdding] = useState(false);
+  const [isLoadingDetails, setIsLoadingDetails] = useState(false);
+  const [detailLoadError, setDetailLoadError] = useState(false);
+  const selectionVersion = useRef(0);
+  const [getExercise] = useLazyGetExerciseQuery();
 
-  const handleExerciseSelectionChange = (exercises: Exercise[]) => {
-    setSelectedExercises(exercises);
+  const handleExerciseSelectionChange = async (
+    exerciseReferences: ExerciseReference[],
+  ) => {
+    const version = ++selectionVersion.current;
+    setSelectedExerciseReferences(exerciseReferences);
+    const loadedById = new Map(
+      selectedExercises.map((exercise) => [exercise._id, exercise]),
+    );
+    const exercisesToLoad = exerciseReferences.filter(
+      ({ _id }) => !loadedById.has(_id),
+    );
 
-    // Reset block selections when exercises change
-    const newSelectedBlocks: Record<string, string[]> = {};
-    exercises.forEach((exercise) => {
-      // Keep existing block selections for exercises that remain selected
-      if (selectedBlocks[exercise._id]) {
-        newSelectedBlocks[exercise._id] = selectedBlocks[exercise._id];
-      } else {
-        // Default to selecting all blocks for newly selected exercises
-        newSelectedBlocks[exercise._id] = exercise.description_blocks.map(
-          (block) => block._id,
-        );
+    setDetailLoadError(false);
+    setIsLoadingDetails(exercisesToLoad.length > 0);
+    const results = await Promise.allSettled(
+      exercisesToLoad.map(({ _id }) => getExercise(_id).unwrap()),
+    );
+    if (version !== selectionVersion.current) return;
+
+    results.forEach((result) => {
+      if (result.status === "fulfilled") {
+        loadedById.set(result.value._id, result.value);
       }
     });
-    setSelectedBlocks(newSelectedBlocks);
+    const exercises = exerciseReferences.flatMap((reference) => {
+      const exercise = loadedById.get(reference._id);
+      return exercise ? [exercise] : [];
+    });
+    setSelectedExercises(exercises);
+    setSelectedExerciseReferences(exercises);
+    setSelectedBlocks((currentSelectedBlocks) => {
+      const nextSelectedBlocks: Record<string, string[]> = {};
+      exercises.forEach((exercise) => {
+        nextSelectedBlocks[exercise._id] =
+          currentSelectedBlocks[exercise._id] ??
+          exercise.description_blocks.map((block) => block._id);
+      });
+      return nextSelectedBlocks;
+    });
+    setDetailLoadError(results.some((result) => result.status === "rejected"));
+    setIsLoadingDetails(false);
   };
 
   const handleBlockToggle = (exerciseId: string, blockId: string) => {
@@ -133,13 +170,18 @@ const ExerciseSearchDialog: React.FC<ExerciseSearchDialogProps> = ({
   };
 
   const handleClose = () => {
+    selectionVersion.current += 1;
     setSelectedExercises([]);
+    setSelectedExerciseReferences([]);
     setSelectedBlocks({});
     setSelectedBlock(null);
+    setDetailLoadError(false);
+    setIsLoadingDetails(false);
     onClose();
   };
 
   const isAddDisabled =
+    isLoadingDetails ||
     selectedExercises.length === 0 ||
     selectedExercises.every(
       (exercise) => !selectedBlocks[exercise._id]?.length,
@@ -169,10 +211,28 @@ const ExerciseSearchDialog: React.FC<ExerciseSearchDialogProps> = ({
               </Typography>
 
               <ExerciseAutocomplete
-                selectedExercises={selectedExercises}
+                selectedExercises={selectedExerciseReferences}
                 onExercisesSelectedChange={handleExerciseSelectionChange}
                 alreadyAddedExercises={[]}
               />
+              {isLoadingDetails && (
+                <Box display="flex" alignItems="center" gap={1} sx={{ mt: 1 }}>
+                  <CircularProgress size={16} />
+                  <Typography variant="body2" color="text.secondary">
+                    {t("loadingExerciseDetails", {
+                      defaultValue: "Loading exercise details...",
+                    })}
+                  </Typography>
+                </Box>
+              )}
+              {detailLoadError && (
+                <Alert severity="error" sx={{ mt: 1 }}>
+                  {t("errorLoadingExerciseDetails", {
+                    defaultValue:
+                      "Some exercise details could not be loaded. Please try again.",
+                  })}
+                </Alert>
+              )}
             </Box>
 
             <Box sx={{ flex: 1, overflow: "auto", pr: 1 }}>

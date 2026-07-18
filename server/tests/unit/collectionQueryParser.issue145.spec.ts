@@ -1,5 +1,6 @@
 import {
   CollectionQueryValidationError,
+  parseCollectionFacetQuery,
   parseCollectionQuery,
 } from "../../collectionQuery";
 
@@ -170,5 +171,19 @@ describe("collection query transport parser", () => {
     expect(() => {
       (intent.persons as { minimum?: number }).minimum = 0;
     }).toThrow(TypeError);
+  });
+
+  it("accepts only an empty facet query", () => {
+    expect(parseCollectionFacetQuery({})).toBeUndefined();
+    expect(() =>
+      parseCollectionFacetQuery({ regex: ".*", search: "cone" }),
+    ).toThrow(
+      expect.objectContaining({
+        errors: [
+          { field: "regex", code: "unknown" },
+          { field: "search", code: "unknown" },
+        ],
+      }),
+    );
   });
 });

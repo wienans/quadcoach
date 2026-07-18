@@ -40,6 +40,13 @@ export class CollectionQueryValidationError extends Error {
   }
 }
 
+export function parseCollectionFacetQuery(query: Query): void {
+  const errors = Object.keys(query)
+    .sort()
+    .map((field) => ({ field, code: "unknown" as const }));
+  if (errors.length) throw new CollectionQueryValidationError(errors);
+}
+
 const commonFields = new Set([
   "search",
   "tags",

@@ -3,36 +3,39 @@ import { quadcoachApi } from "../api";
 import { TagType } from "../api/enum";
 import {
   Exercise,
+  ExerciseSummary,
   ResourceAuthorizationResponse,
 } from "../api/quadcoachApi/domain";
 import {
   ExerciseResponseDto,
+  ExerciseSummaryResponseDto,
   fromExerciseResponseDto,
+  fromExerciseSummaryResponseDto,
   toExerciseRequestDto,
 } from "../api/quadcoachApi/compatibility/tacticBoardWire";
 
 export type GetExercisesRequest = {
-  nameRegex?: string;
-  minPersons?: number;
-  maxPersons?: number;
-  tagRegex?: string;
-  tagList?: string[];
-  materialRegex?: string;
-  materialList?: string[];
-  minTime?: number;
-  maxTime?: number;
-  minBeaters?: number;
-  maxBeaters?: number;
-  minChasers?: number;
-  maxChasers?: number;
-  sortBy?: "name" | "time" | "persons" | "created" | "updated";
-  sortOrder?: "asc" | "desc";
+  search?: string;
+  tags?: string[];
+  tagMode?: "all" | "any";
+  materials?: string[];
+  materialMode?: "all" | "any";
+  personsMin?: number;
+  personsMax?: number;
+  durationMin?: number;
+  durationMax?: number;
+  beatersMin?: number;
+  beatersMax?: number;
+  chasersMin?: number;
+  chasersMax?: number;
+  sort?: "name" | "duration" | "persons" | "created" | "updated";
+  direction?: "asc" | "desc";
   page?: number;
   limit?: number;
 };
 
 export type GetExercisesResponse = {
-  exercises: Exercise[];
+  items: ExerciseSummary[];
   pagination: {
     page: number;
     limit: number;
@@ -41,9 +44,13 @@ export type GetExercisesResponse = {
   };
 };
 
-type GetExercisesResponseDto = Omit<GetExercisesResponse, "exercises"> & {
-  exercises: ExerciseResponseDto[];
+type GetExercisesResponseDto = Omit<GetExercisesResponse, "items"> & {
+  items: ExerciseSummaryResponseDto[];
 };
+
+export type ExerciseFacetResponse = { items: string[] };
+
+const EXERCISE_LIST_TAG = "LIST";
 
 export type AccessLevel = "edit";
 
@@ -86,20 +93,16 @@ export const exerciseApiSlice = quadcoachApi.injectEndpoints({
           data: toExerciseRequestDto(data),
         };
       },
-      invalidatesTags: (result) =>
-        result
-          ? [
-              TagType.tag,
-              TagType.material,
-              { type: TagType.exercise, id: result._id },
-              ...(result.description_blocks
-                ? result.description_blocks.map((block) => ({
-                    type: TagType.block,
-                    id: block._id,
-                  }))
-                : [TagType.block]),
-            ]
-          : [TagType.exercise, TagType.block, TagType.tag, TagType.material],
+      invalidatesTags: (_result, _error, exercise) => [
+        TagType.tag,
+        TagType.material,
+        { type: TagType.exercise, id: EXERCISE_LIST_TAG },
+        { type: TagType.exercise, id: exercise._id },
+        ...exercise.description_blocks.map((block) => ({
+          type: TagType.block,
+          id: block._id,
+        })),
+      ],
     }),
     deleteExercise: builder.mutation<void, string>({
       query(exerciseId) {
@@ -110,6 +113,7 @@ export const exerciseApiSlice = quadcoachApi.injectEndpoints({
       },
       invalidatesTags: (_result, _error, exerciseId) => [
         { type: TagType.exercise, id: exerciseId },
+        { type: TagType.exercise, id: EXERCISE_LIST_TAG },
         TagType.block,
         TagType.tag,
         TagType.material,
@@ -129,6 +133,7 @@ export const exerciseApiSlice = quadcoachApi.injectEndpoints({
           ? [
               TagType.tag,
               TagType.material,
+              { type: TagType.exercise, id: EXERCISE_LIST_TAG },
               { type: TagType.exercise, id: result._id },
               ...(result.description_blocks
                 ? result.description_blocks.map((block) => ({
@@ -161,44 +166,18 @@ export const exerciseApiSlice = quadcoachApi.injectEndpoints({
             }, new Array<TagDescription<TagType>>())
           : [TagType.exercise, TagType.block],
     }),
-    getAllTags: builder.query<string[], string | undefined>({
-      query: (tagRegex) => {
-        const urlParams = new URLSearchParams();
-
-        if (tagRegex != null && tagRegex !== "") {
-          urlParams.append("tagName[regex]", tagRegex);
-          urlParams.append("tagName[options]", "i");
-        }
-
-        const urlParamsString = urlParams.toString();
-
-        return {
-          url: `/api/tags/exercises${
-            urlParamsString === "" ? "" : `?${urlParamsString}`
-          }`,
-          method: "get",
-        };
-      },
+    getAllTags: builder.query<ExerciseFacetResponse, void>({
+      query: () => ({
+        url: "/api/tags/exercises",
+        method: "get",
+      }),
       providesTags: () => [TagType.tag],
     }),
-    getAllMaterials: builder.query<string[], string | undefined>({
-      query: (materialRegex) => {
-        const urlParams = new URLSearchParams();
-
-        if (materialRegex != null && materialRegex !== "") {
-          urlParams.append("materialName[regex]", materialRegex);
-          urlParams.append("materialName[options]", "i");
-        }
-
-        const urlParamsString = urlParams.toString();
-
-        return {
-          url: `/api/materials${
-            urlParamsString === "" ? "" : `?${urlParamsString}`
-          }`,
-          method: "get",
-        };
-      },
+    getAllMaterials: builder.query<ExerciseFacetResponse, void>({
+      query: () => ({
+        url: "/api/materials",
+        method: "get",
+      }),
       providesTags: () => [TagType.material],
     }),
     getExercises: builder.query<
@@ -207,77 +186,54 @@ export const exerciseApiSlice = quadcoachApi.injectEndpoints({
     >({
       query: (request) => {
         const {
-          maxPersons,
-          minPersons,
-          nameRegex,
-          tagRegex,
-          tagList,
-          materialRegex,
-          materialList,
-          minTime,
-          maxTime,
-          minBeaters,
-          maxBeaters,
-          minChasers,
-          maxChasers,
-          sortBy,
-          sortOrder,
-          page = 1,
-          limit = 50,
+          search,
+          tags,
+          tagMode,
+          materials,
+          materialMode,
+          personsMin,
+          personsMax,
+          durationMin,
+          durationMax,
+          beatersMin,
+          beatersMax,
+          chasersMin,
+          chasersMax,
+          sort,
+          direction,
+          page,
+          limit,
         } = request || {};
         const urlParams = new URLSearchParams();
 
-        urlParams.append("page", page.toString());
-        urlParams.append("limit", limit.toString());
-
-        if (nameRegex != null && nameRegex !== "") {
-          urlParams.append("name[regex]", nameRegex);
-          urlParams.append("name[options]", "i");
+        if (search) urlParams.append("search", search);
+        tags?.forEach((tag) => urlParams.append("tags", tag));
+        if (tags?.length && tagMode) urlParams.append("tagMode", tagMode);
+        materials?.forEach((material) =>
+          urlParams.append("materials", material),
+        );
+        if (materials?.length && materialMode) {
+          urlParams.append("materialMode", materialMode);
         }
-        if (minPersons != null) {
-          urlParams.append("persons[gte]", minPersons.toString());
-        }
-        if (maxPersons != null) {
-          urlParams.append("persons[lte]", maxPersons.toString());
-        }
-        if (tagList != null && tagList.length > 0) {
-          urlParams.append("tags[all]", tagList.join(","));
-        }
-        if (tagRegex != null && tagRegex !== "") {
-          urlParams.append("tags[regex]", tagRegex);
-          urlParams.append("tags[options]", "i");
-        }
-        if (materialList != null && materialList.length > 0) {
-          urlParams.append("materials[all]", materialList.join(","));
-        }
-        if (materialRegex != null && materialRegex !== "") {
-          urlParams.append("materials[regex]", materialRegex);
-          urlParams.append("materials[options]", "i");
-        }
-        if (minTime != null) {
-          urlParams.append("time_min[gte]", minTime.toString());
-        }
-        if (maxTime != null) {
-          urlParams.append("time_min[lte]", maxTime.toString());
-        }
-        if (minBeaters != null) {
-          urlParams.append("beaters[gte]", minBeaters.toString());
-        }
-        if (maxBeaters != null) {
-          urlParams.append("beaters[lte]", maxBeaters.toString());
-        }
-        if (minChasers != null) {
-          urlParams.append("chasers[gte]", minChasers.toString());
-        }
-        if (maxChasers != null) {
-          urlParams.append("chasers[lte]", maxChasers.toString());
-        }
-        if (sortBy != null) {
-          urlParams.append("sortBy", sortBy);
-        }
-        if (sortOrder != null) {
-          urlParams.append("sortOrder", sortOrder);
-        }
+        const ranges = {
+          personsMin,
+          personsMax,
+          durationMin,
+          durationMax,
+          beatersMin,
+          beatersMax,
+          chasersMin,
+          chasersMax,
+        };
+        Object.entries(ranges).forEach(([field, value]) => {
+          if (value != null && (!field.endsWith("Min") || value > 0)) {
+            urlParams.append(field, value.toString());
+          }
+        });
+        if (sort) urlParams.append("sort", sort);
+        if (direction) urlParams.append("direction", direction);
+        if (page != null) urlParams.append("page", page.toString());
+        if (limit != null) urlParams.append("limit", limit.toString());
 
         const urlParamsString = urlParams.toString();
         return {
@@ -289,22 +245,18 @@ export const exerciseApiSlice = quadcoachApi.injectEndpoints({
       },
       transformResponse: (response: GetExercisesResponseDto) => ({
         ...response,
-        exercises: response.exercises.map(fromExerciseResponseDto),
+        items: response.items.map(fromExerciseSummaryResponseDto),
       }),
       providesTags: (result) =>
-        result?.exercises
-          ? result.exercises.reduce((allTags, exercise) => {
-              return allTags.concat([
-                { type: TagType.exercise, id: exercise._id },
-                ...(exercise.description_blocks
-                  ? exercise.description_blocks.map((block) => ({
-                      type: TagType.block,
-                      id: block._id,
-                    }))
-                  : [TagType.block]),
-              ]);
-            }, new Array<TagDescription<TagType>>())
-          : [TagType.exercise, TagType.block],
+        result
+          ? [
+              { type: TagType.exercise, id: EXERCISE_LIST_TAG },
+              ...result.items.map((exercise) => ({
+                type: TagType.exercise as const,
+                id: exercise._id,
+              })),
+            ]
+          : [{ type: TagType.exercise, id: EXERCISE_LIST_TAG }],
     }),
     checkExerciseAccess: builder.query<ResourceAuthorizationResponse, string>({
       query: (exerciseId) => ({
@@ -368,6 +320,7 @@ export const exerciseApiSlice = quadcoachApi.injectEndpoints({
 
 export const {
   useGetExerciseQuery,
+  useLazyGetExerciseQuery,
   useDeleteExerciseMutation,
   useUpdateExerciseMutation,
   useAddExerciseMutation,

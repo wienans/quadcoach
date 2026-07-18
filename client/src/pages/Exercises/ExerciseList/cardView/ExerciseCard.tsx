@@ -31,7 +31,7 @@ import {
   ExerciseType,
   getExerciseType,
 } from "../../../../helpers/exerciseHelpers";
-import { Exercise } from "../../../../api/quadcoachApi/domain";
+import { ExerciseSummary } from "../../../../api/quadcoachApi/domain";
 
 interface ExpandMoreProps extends IconButtonProps {
   expand: boolean;
@@ -50,7 +50,7 @@ const ExpandMore = styled((props: ExpandMoreProps) => {
 }));
 
 export type ExerciseCardProps = {
-  exercise: Exercise;
+  exercise: ExerciseSummary;
   onOpenExerciseClick: () => void;
 };
 
@@ -117,7 +117,7 @@ const ExerciseCard = ({
         <Tooltip title={t("ExerciseList:cardView.personAmount")}>
           <Chip
             avatar={<PeopleIcon />}
-            label={exercise.persons}
+            label={exercise.persons ?? "-"}
             sx={{ mr: 1 }}
           />
         </Tooltip>
@@ -132,7 +132,7 @@ const ExerciseCard = ({
                     <CircleIcon sx={{ color: "black.main" }} />
                   </Avatar>
                 }
-                label={exercise.beaters}
+                label={exercise.beaters ?? "-"}
                 sx={{ mr: 1 }}
               />
             </Tooltip>
@@ -145,14 +145,17 @@ const ExerciseCard = ({
                     <CircleIcon sx={{ color: "white.main" }} />
                   </Avatar>
                 }
-                label={exercise.chasers}
+                label={exercise.chasers ?? "-"}
                 sx={{ mr: 1 }}
               />
             </Tooltip>
           </>
         )}
         <Tooltip title={t("ExerciseList:cardView.timeInMinutes")}>
-          <Chip avatar={<TimelapseIcon />} label={exercise.time_min} />
+          <Chip
+            avatar={<TimelapseIcon />}
+            label={exercise.durationMinutes ?? "-"}
+          />
         </Tooltip>
         <ExpandMore
           expand={moreInformationExpanded}
@@ -173,7 +176,7 @@ const ExerciseCard = ({
                 </Avatar>
               </ListItemAvatar>
               <ListItemText
-                primary={exercise.persons}
+                primary={exercise.persons ?? "-"}
                 secondary={t("ExerciseList:cardView.personsAmount")}
               />
             </ListItem>
@@ -238,7 +241,7 @@ const ExerciseCard = ({
                       textOverflow: "ellipsis",
                     }}
                   >
-                    {exercise.related_to?.length ?? 0}
+                    {exercise.relatedTo.length}
                   </SoftTypography>
                 }
                 secondary={t("ExerciseList:cardView.relatedExercises")}

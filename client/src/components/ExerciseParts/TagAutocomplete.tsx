@@ -19,13 +19,16 @@ const TagAutocomplete = ({
 
   useEffect(() => {
     // Load initial data
-    getTags(undefined);
+    getTags();
   }, [getTags]);
 
   const filteredOptions = [
-    ...(tags?.filter((tag) => !alreadyAddedTags.some((rel) => rel === tag)) ??
-      []),
-    ...(searchValue && !tags?.includes(searchValue) ? [searchValue] : []),
+    ...(tags?.items.filter(
+      (tag) =>
+        !alreadyAddedTags.some((rel) => rel === tag) &&
+        tag.toLocaleLowerCase().includes(searchValue.toLocaleLowerCase()),
+    ) ?? []),
+    ...(searchValue && !tags?.items.includes(searchValue) ? [searchValue] : []),
   ];
 
   return (
