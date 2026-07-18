@@ -2,12 +2,10 @@ import asyncHandler from "express-async-handler";
 import { Request, Response } from "express";
 import TacticBoard from "../models/tacticBoard";
 import mongoose from "mongoose";
-import crypto from "crypto";
 import Exercise from "../models/exercise";
 import TacticBoardFavorite from "../models/tacticBoardFav";
 import TacticBoardAccess from "../models/tacticBoardAccess";
 import User from "../models/user";
-import { logEvents } from "../middleware/logger";
 import {
   getResourceAuthorization,
   requireResourceAuthorization,
@@ -20,6 +18,12 @@ import {
   toLegacyTacticBoardListResponse,
   toLegacyTacticBoardReferencePersistence,
 } from "../compatibility/tacticBoardCompatibility";
+import {
+  manageShareLink,
+  publishShareLink,
+  resolveShareLink,
+} from "../shareLinks/shareLinkHttp";
+import { parseTacticBoardPublishMetadata } from "./helpers/publishMetadata";
 
 interface UserInfo {
   id?: string;
@@ -131,6 +135,7 @@ export const getAllTacticBoards = asyncHandler(
 
     const totalCount = await TacticBoard.countDocuments(parseObject);
     const tacticBoards = await TacticBoard.find(parseObject)
+      .select("-shareToken")
       .sort(sortObj)
       .skip(skip)
       .limit(limit);
@@ -250,7 +255,9 @@ export const getById = asyncHandler(
   async (req: RequestWithUser, res: Response) => {
     const { id: tacticBoardId } = req.params;
     if (mongoose.isValidObjectId(tacticBoardId)) {
-      const result = await TacticBoard.findOne({ _id: tacticBoardId });
+      const result = await TacticBoard.findOne({ _id: tacticBoardId }).select(
+        "-shareToken",
+      );
       if (result) {
         if (
           !(await requireResourceAuthorization(
@@ -323,6 +330,31 @@ export const updateById = asyncHandler(
           req.body,
           TACTIC_BOARD_UPDATE_FIELDS,
         );
+
+        if (
+          updates.isPrivate !== undefined &&
+          typeof updates.isPrivate !== "boolean"
+        ) {
+          res.status(400).json({ message: "Invalid privacy value" });
+          return;
+        }
+        if (updates.isPrivate === false) {
+          const publishUpdates = parseTacticBoardPublishMetadata(updates);
+          if (!publishUpdates) {
+            res.status(400).json({ message: "Invalid Tactic Board content" });
+            return;
+          }
+          const published = await publishShareLink(
+            req,
+            res,
+            "tacticBoard",
+            tacticBoardId,
+            publishUpdates,
+          );
+          if (!published) return;
+          res.json({ message: "Tactic Board updated successfully" });
+          return;
+        }
 
         const result = await TacticBoard.updateOne(
           { _id: tacticBoardId },
@@ -414,7 +446,17 @@ export const updateMetaById = asyncHandler(
 
         // Destructure the fields to be updated from req.body, excluding `pages`
         const { name, isPrivate, tags, description, coaching_points } =
-          req.body;
+          allowlistedRequestFields(req.body, [
+            "name",
+            "isPrivate",
+            "tags",
+            "description",
+            "coaching_points",
+          ] as const);
+        if (isPrivate !== undefined && typeof isPrivate !== "boolean") {
+          res.status(400).json({ message: "Invalid privacy value" });
+          return;
+        }
         if (isPrivate) {
           // Check if the Tactic Board is used in any exercises
           const exercisesUsingTacticBoard = await Exercise.find({
@@ -436,6 +478,29 @@ export const updateMetaById = asyncHandler(
             return;
           }
         }
+        if (isPrivate === false) {
+          const publishUpdates = parseTacticBoardPublishMetadata({
+            name,
+            tags,
+            description,
+            coaching_points,
+          });
+          if (!publishUpdates) {
+            res.status(400).json({ message: "Invalid Tactic Board metadata" });
+            return;
+          }
+          const published = await publishShareLink(
+            req,
+            res,
+            "tacticBoard",
+            tacticBoardId,
+            publishUpdates,
+          );
+          if (!published) return;
+          res.json({ message: "Tactic Board updated successfully" });
+          return;
+        }
+
         // Update the Tactic Board with the new fields
         const result = await TacticBoard.updateOne(
           { _id: tacticBoardId },
@@ -993,141 +1058,36 @@ export const shareTacticBoard = asyncHandler(
   },
 );
 
-const isDuplicateShareTokenError = (error: unknown): boolean => {
-  return isMongoError(error) && error.code === 11000;
-};
-
-const ensureShareTokenWithRetry = async (
-  tacticBoard: InstanceType<typeof TacticBoard>,
-  maxAttempts: number = 5,
-): Promise<void> => {
-  for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
-    tacticBoard.shareToken = crypto.randomUUID();
-
-    try {
-      await tacticBoard.save();
-      return;
-    } catch (error) {
-      if (!isDuplicateShareTokenError(error)) {
-        throw error;
-      }
-    }
-  }
-
-  throw new Error("Unable to generate unique share token");
-};
+export const getShareLink = asyncHandler(
+  async (req: RequestWithUser, res: Response) =>
+    manageShareLink(req, res, "tacticBoard", { type: "status" }),
+);
 
 // @desc    Create (or return existing) Share Link for a Tactic Board
 // @route   POST /api/tacticboards/:id/share-link
 // @access  Private - users with edit permission
 export const createShareLink = asyncHandler(
-  async (req: RequestWithUser, res: Response) => {
-    const { id: tacticBoardId } = req.params;
-    if (!req.UserInfo?.id) {
-      res.status(401).json({ message: "Unauthorized" });
-      return;
-    }
+  async (req: RequestWithUser, res: Response) =>
+    manageShareLink(req, res, "tacticBoard", { type: "ensure" }),
+);
 
-    if (!mongoose.isValidObjectId(tacticBoardId)) {
-      res.status(400).json({ message: "Invalid Tactic Board ID" });
-      return;
-    }
-
-    const tacticBoard = await TacticBoard.findById(tacticBoardId);
-    if (!tacticBoard) {
-      res.status(404).json({ message: "Tactic Board not found" });
-      return;
-    }
-
-    if (
-      !(await requireResourceAuthorization(
-        req,
-        res,
-        authorizationResourceFor.tacticBoard(tacticBoardId, tacticBoard),
-        "edit",
-      ))
-    ) {
-      return;
-    }
-    try {
-      if (!tacticBoard.shareToken) {
-        await ensureShareTokenWithRetry(tacticBoard);
-      }
-      const publicBaseUrl =
-        process.env.PUBLIC_BASE_URL || "https://quadcoach.app";
-      res.status(201).json({
-        message: "Share link available",
-        token: tacticBoard.shareToken,
-        shareLink: `${publicBaseUrl}/tacticboards/share/${tacticBoard.shareToken}`,
-      });
-    } catch (e: any) {
-      logEvents(
-        `Failed to create Share Link for Tactic Board ${tacticBoardId}: ${e.message}`,
-        "error.log",
-      );
-      res.status(500).json({ message: "Failed to create share link" });
-    }
-  },
+export const rotateShareLink = asyncHandler(
+  async (req: RequestWithUser, res: Response) =>
+    manageShareLink(req, res, "tacticBoard", { type: "rotate" }),
 );
 
 // @desc    Delete Share Link from a Tactic Board
 // @route   DELETE /api/tacticboards/:id/share-link
 // @access  Private - users with edit permission
 export const deleteShareLink = asyncHandler(
-  async (req: RequestWithUser, res: Response) => {
-    const { id: tacticBoardId } = req.params;
-    if (!req.UserInfo?.id) {
-      res.status(401).json({ message: "Unauthorized" });
-      return;
-    }
-
-    if (!mongoose.isValidObjectId(tacticBoardId)) {
-      res.status(400).json({ message: "Invalid Tactic Board ID" });
-      return;
-    }
-
-    const tacticBoard = await TacticBoard.findById(tacticBoardId);
-    if (!tacticBoard) {
-      res.status(404).json({ message: "Tactic Board not found" });
-      return;
-    }
-
-    if (
-      !(await requireResourceAuthorization(
-        req,
-        res,
-        authorizationResourceFor.tacticBoard(tacticBoardId, tacticBoard),
-        "edit",
-      ))
-    ) {
-      return;
-    }
-
-    tacticBoard.shareToken = undefined;
-    await tacticBoard.save();
-
-    res.json({ message: "Share link removed" });
-  },
+  async (req: RequestWithUser, res: Response) =>
+    manageShareLink(req, res, "tacticBoard", { type: "revoke" }),
 );
 
 // @desc    Get Tactic Board by Share Link token (public)
 // @route   GET /api/tacticboards/share/:token
 // @access  Public
 export const getByShareToken = asyncHandler(
-  async (req: Request, res: Response) => {
-    const { token } = req.params;
-
-    if (!token || token.trim() === "") {
-      res.status(400).json({ message: "Invalid share token" });
-      return;
-    }
-
-    const tacticBoard = await TacticBoard.findOne({ shareToken: token });
-    if (!tacticBoard) {
-      res.status(404).json({ message: "Share link not found" });
-      return;
-    }
-
-    res.json(tacticBoard);
-  },
+  async (req: Request, res: Response) =>
+    resolveShareLink(req, res, "tacticBoard"),
 );

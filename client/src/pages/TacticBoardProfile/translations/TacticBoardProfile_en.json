@@ -38,15 +38,18 @@
     }
   },
   "shareDialog": {
-    "title": "Share Tactic Board",
+    "title": "Manage Share Link",
+    "inactive": "This tactic board does not have an active Share Link.",
+    "error": "The Share Link could not be updated. Please try again.",
+    "create": "Create link",
     "copy": "Copy link",
-    "delete": "Delete share",
+    "rotate": "Rotate link",
+    "revoke": "Revoke link",
     "close": "Close"
   },
   "menu": {
     "more": "More actions",
-    "share": "Share",
-    "unshare": "Unshare",
+    "manageShareLink": "Manage Share Link",
     "duplicate": "Duplicate",
     "delete": "Delete"
   },

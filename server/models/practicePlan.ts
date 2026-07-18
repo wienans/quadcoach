@@ -71,7 +71,15 @@ const PracticePlanSchema = new Schema<IPracticePlan>(
     isPrivate: { type: Boolean, default: false, required: true },
     shareToken: { type: String, default: undefined },
   },
-  { timestamps: true },
+  {
+    timestamps: true,
+    toJSON: {
+      transform: (_document, value) => {
+        delete value.shareToken;
+        return value;
+      },
+    },
+  },
 );
 
 PracticePlanSchema.index(

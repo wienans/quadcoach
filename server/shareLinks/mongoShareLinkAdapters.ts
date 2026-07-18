@@ -27,17 +27,85 @@ export {
   SharedTacticBoardPage,
 } from "./shareLinkProjections";
 
+export interface TacticBoardObjectInput {
+  uuid?: string;
+  type: string;
+  left: number;
+  top: number;
+  x1?: number;
+  y1?: number;
+  x2?: number;
+  y2?: number;
+  width?: number;
+  height?: number;
+  fill?: string;
+  stroke?: string;
+  strokeWidth?: number;
+  strokeDashArray?: number[];
+  strokeLineCap?: string;
+  strokeDashOffset?: number;
+  strokeLineJoin?: string;
+  strokeUniform?: boolean;
+  strokeMiterLimit?: number;
+  scaleX?: number;
+  scaleY?: number;
+  angle?: number;
+  opacity?: number;
+  objects?: TacticBoardObjectInput[];
+  visible?: boolean;
+  backgroundColor?: string;
+  radius?: number;
+  startAngle?: number;
+  endAngle?: number;
+  path?: (string | number)[][];
+  text?: string;
+  originX?: string;
+  originY?: string;
+  fontFamily?: string;
+  fontSize?: number;
+  textAlign?: string;
+  objectType?: string;
+}
+
+export interface TacticBoardPageInput {
+  version?: string;
+  objects?: TacticBoardObjectInput[];
+  backgroundImage?: {
+    type?: string;
+    width?: number;
+    height?: number;
+    src?: string;
+  };
+}
+
 export interface TacticBoardPublishMetadata {
   name?: string;
-  tags?: readonly string[];
+  tags?: string[];
+  pages?: TacticBoardPageInput[];
+  creator?: string;
   description?: string;
   coaching_points?: string;
+}
+
+export interface PracticePlanItemInput {
+  kind: "exercise" | "break";
+  description?: string;
+  exerciseId?: string | mongoose.Types.ObjectId;
+  blockId?: string | mongoose.Types.ObjectId;
+  duration?: number;
+}
+
+export interface PracticePlanSectionInput {
+  name: string;
+  targetDuration: number;
+  groups: { name: string; items: PracticePlanItemInput[] }[];
 }
 
 export interface PracticePlanPublishMetadata {
   name?: string;
   description?: string;
-  tags?: readonly string[];
+  tags?: string[];
+  sections?: PracticePlanSectionInput[];
 }
 
 export type ProductionShareLinkResourceTypes = {
@@ -159,7 +227,10 @@ const createAdapter = <Metadata extends object, SharedResource>(
         if (installed) return { outcome: "created", token: candidateToken };
       } catch (error) {
         if (
-          isRelevantShareTokenDuplicateKeyError(error, operations.collectionName)
+          isRelevantShareTokenDuplicateKeyError(
+            error,
+            operations.collectionName,
+          )
         ) {
           return { outcome: "collision" };
         }
@@ -195,7 +266,10 @@ const createAdapter = <Metadata extends object, SharedResource>(
         if (replaced) return { outcome: "rotated", token: candidateToken };
       } catch (error) {
         if (
-          isRelevantShareTokenDuplicateKeyError(error, operations.collectionName)
+          isRelevantShareTokenDuplicateKeyError(
+            error,
+            operations.collectionName,
+          )
         ) {
           return { outcome: "collision" };
         }
@@ -247,133 +321,135 @@ const stateProjection = {
   shareToken: 1,
 };
 
-export const createTacticBoardShareLinkAdapter = (): ShareLinkPersistenceAdapter<
-  TacticBoardPublishMetadata,
-  SharedTacticBoard
-> =>
-  createAdapter<TacticBoardPublishMetadata, SharedTacticBoard>(
-    {
-      collectionName: TacticBoard.collection.collectionName,
-      inspect: (id) =>
-        TacticBoard.findById(id).select(stateProjection).lean().exec(),
-      install: (id, candidateToken) =>
-        TacticBoard.findOneAndUpdate(
-          { _id: id, isPrivate: true, ...inactiveTokenFilter },
-          { $set: { shareToken: candidateToken } },
-          {
-            returnDocument: "after",
-            projection: { _id: 1 },
-            runValidators: true,
-          },
-        )
-          .lean()
-          .exec(),
-      replace: (id, expectedToken, candidateToken) =>
-        TacticBoard.findOneAndUpdate(
-          { _id: id, isPrivate: true, shareToken: expectedToken },
-          { $set: { shareToken: candidateToken } },
-          {
-            returnDocument: "after",
-            projection: { _id: 1 },
-            runValidators: true,
-          },
-        )
-          .lean()
-          .exec(),
-      remove: (id) =>
-        TacticBoard.updateOne(
-          { _id: id, isPrivate: true },
-          { $unset: { shareToken: 1 } },
-        ).exec(),
-      makePublic: (id, metadata) =>
-        TacticBoard.updateOne(
-          { _id: id, isPrivate: true },
-          {
-            $set: { ...metadata, isPrivate: false },
-            $unset: { shareToken: 1 },
-          },
-          { runValidators: true },
-        ).exec(),
-      resolve: (token) =>
-        TacticBoard.findOne({ isPrivate: true, shareToken: token })
-          .select({
-            _id: 0,
-            name: 1,
-            tags: 1,
-            pages: 1,
-            creator: 1,
-            description: 1,
-            coaching_points: 1,
-          })
-          .lean()
-          .exec(),
-      project: projectTacticBoard,
-    },
-    ["name", "tags", "description", "coaching_points"],
-  );
+export const createTacticBoardShareLinkAdapter =
+  (): ShareLinkPersistenceAdapter<
+    TacticBoardPublishMetadata,
+    SharedTacticBoard
+  > =>
+    createAdapter<TacticBoardPublishMetadata, SharedTacticBoard>(
+      {
+        collectionName: TacticBoard.collection.collectionName,
+        inspect: (id) =>
+          TacticBoard.findById(id).select(stateProjection).lean().exec(),
+        install: (id, candidateToken) =>
+          TacticBoard.findOneAndUpdate(
+            { _id: id, isPrivate: true, ...inactiveTokenFilter },
+            { $set: { shareToken: candidateToken } },
+            {
+              returnDocument: "after",
+              projection: { _id: 1 },
+              runValidators: true,
+            },
+          )
+            .lean()
+            .exec(),
+        replace: (id, expectedToken, candidateToken) =>
+          TacticBoard.findOneAndUpdate(
+            { _id: id, isPrivate: true, shareToken: expectedToken },
+            { $set: { shareToken: candidateToken } },
+            {
+              returnDocument: "after",
+              projection: { _id: 1 },
+              runValidators: true,
+            },
+          )
+            .lean()
+            .exec(),
+        remove: (id) =>
+          TacticBoard.updateOne(
+            { _id: id, isPrivate: true },
+            { $unset: { shareToken: 1 } },
+          ).exec(),
+        makePublic: (id, metadata) =>
+          TacticBoard.updateOne(
+            { _id: id },
+            {
+              $set: { ...metadata, isPrivate: false },
+              $unset: { shareToken: 1 },
+            },
+            { runValidators: true },
+          ).exec(),
+        resolve: (token) =>
+          TacticBoard.findOne({ isPrivate: true, shareToken: token })
+            .select({
+              _id: 0,
+              name: 1,
+              tags: 1,
+              pages: 1,
+              creator: 1,
+              description: 1,
+              coaching_points: 1,
+            })
+            .lean()
+            .exec(),
+        project: projectTacticBoard,
+      },
+      ["name", "tags", "pages", "creator", "description", "coaching_points"],
+    );
 
-export const createPracticePlanShareLinkAdapter = (): ShareLinkPersistenceAdapter<
-  PracticePlanPublishMetadata,
-  SharedPracticePlan
-> =>
-  createAdapter<PracticePlanPublishMetadata, SharedPracticePlan>(
-    {
-      collectionName: PracticePlan.collection.collectionName,
-      inspect: (id) =>
-        PracticePlan.findById(id).select(stateProjection).lean().exec(),
-      install: (id, candidateToken) =>
-        PracticePlan.findOneAndUpdate(
-          { _id: id, isPrivate: true, ...inactiveTokenFilter },
-          { $set: { shareToken: candidateToken } },
-          {
-            returnDocument: "after",
-            projection: { _id: 1 },
-            runValidators: true,
-          },
-        )
-          .lean()
-          .exec(),
-      replace: (id, expectedToken, candidateToken) =>
-        PracticePlan.findOneAndUpdate(
-          { _id: id, isPrivate: true, shareToken: expectedToken },
-          { $set: { shareToken: candidateToken } },
-          {
-            returnDocument: "after",
-            projection: { _id: 1 },
-            runValidators: true,
-          },
-        )
-          .lean()
-          .exec(),
-      remove: (id) =>
-        PracticePlan.updateOne(
-          { _id: id, isPrivate: true },
-          { $unset: { shareToken: 1 } },
-        ).exec(),
-      makePublic: (id, metadata) =>
-        PracticePlan.updateOne(
-          { _id: id, isPrivate: true },
-          {
-            $set: { ...metadata, isPrivate: false },
-            $unset: { shareToken: 1 },
-          },
-          { runValidators: true },
-        ).exec(),
-      resolve: (token) =>
-        PracticePlan.findOne({ isPrivate: true, shareToken: token })
-          .select({
-            _id: 0,
-            name: 1,
-            description: 1,
-            tags: 1,
-            sections: 1,
-          })
-          .lean()
-          .exec(),
-      project: projectPracticePlan,
-    },
-    ["name", "description", "tags"],
-  );
+export const createPracticePlanShareLinkAdapter =
+  (): ShareLinkPersistenceAdapter<
+    PracticePlanPublishMetadata,
+    SharedPracticePlan
+  > =>
+    createAdapter<PracticePlanPublishMetadata, SharedPracticePlan>(
+      {
+        collectionName: PracticePlan.collection.collectionName,
+        inspect: (id) =>
+          PracticePlan.findById(id).select(stateProjection).lean().exec(),
+        install: (id, candidateToken) =>
+          PracticePlan.findOneAndUpdate(
+            { _id: id, isPrivate: true, ...inactiveTokenFilter },
+            { $set: { shareToken: candidateToken } },
+            {
+              returnDocument: "after",
+              projection: { _id: 1 },
+              runValidators: true,
+            },
+          )
+            .lean()
+            .exec(),
+        replace: (id, expectedToken, candidateToken) =>
+          PracticePlan.findOneAndUpdate(
+            { _id: id, isPrivate: true, shareToken: expectedToken },
+            { $set: { shareToken: candidateToken } },
+            {
+              returnDocument: "after",
+              projection: { _id: 1 },
+              runValidators: true,
+            },
+          )
+            .lean()
+            .exec(),
+        remove: (id) =>
+          PracticePlan.updateOne(
+            { _id: id, isPrivate: true },
+            { $unset: { shareToken: 1 } },
+          ).exec(),
+        makePublic: (id, metadata) =>
+          PracticePlan.updateOne(
+            { _id: id },
+            {
+              $set: { ...metadata, isPrivate: false },
+              $unset: { shareToken: 1 },
+            },
+            { runValidators: true },
+          ).exec(),
+        resolve: (token) =>
+          PracticePlan.findOne({ isPrivate: true, shareToken: token })
+            .select({
+              _id: 0,
+              name: 1,
+              description: 1,
+              tags: 1,
+              sections: 1,
+            })
+            .lean()
+            .exec(),
+        project: projectPracticePlan,
+      },
+      ["name", "description", "tags", "sections"],
+    );
 
 export const createMongoShareLinkPersistenceAdapters = () => ({
   tacticBoard: createTacticBoardShareLinkAdapter(),

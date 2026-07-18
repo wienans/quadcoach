@@ -41,16 +41,19 @@
   "share": {
     "tooltip": "Freigabelink erstellen oder verwalten",
     "dialog": {
-      "title": "Trainingsplan teilen",
+      "title": "Share-Link verwalten",
+      "inactive": "Dieser Trainingsplan hat keinen aktiven Share-Link.",
+      "error": "Der Share-Link konnte nicht aktualisiert werden. Bitte versuche es erneut.",
+      "create": "Link erstellen",
       "copy": "Link kopieren",
-      "delete": "Freigabe löschen",
+      "rotate": "Link erneuern",
+      "revoke": "Link widerrufen",
       "close": "Schließen"
     }
   },
   "menu": {
     "more": "Weitere Aktionen",
-    "share": "Teilen",
-    "unshare": "Freigabe aufheben",
+    "manageShareLink": "Share-Link verwalten",
     "delete": "Löschen"
   },
   "validation": {

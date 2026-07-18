@@ -42,21 +42,14 @@ export type EnsureShareLinkResult =
 export type RotateShareLinkResult =
   | { outcome: "rotated"; token: string }
   | {
-      outcome:
-        | "collision"
-        | "conflict"
-        | "inactive"
-        | "missing"
-        | "public";
+      outcome: "collision" | "conflict" | "inactive" | "missing" | "public";
     };
 
 export type RevokeShareLinkResult =
-  | { outcome: "revoked" | "inactive" }
-  | { outcome: "missing" | "public" };
+  { outcome: "revoked" | "inactive" } | { outcome: "missing" | "public" };
 
 export type PublishShareLinkResult =
-  | { outcome: "published" }
-  | { outcome: "missing" | "public" };
+  { outcome: "published" } | { outcome: "missing" | "public" };
 
 export interface ShareLinkPersistenceAdapter<
   ValidatedPublishMetadata,
@@ -228,7 +221,8 @@ export function createShareLinks<ResourceTypes extends ShareLinkResourceTypes>(
     request: ManageShareLinkRequest<ResourceTypes, Kind>,
   ): Promise<ShareLinkManagementResult> => {
     const adapter = dependencies.persistence[request.resource.kind];
-    if (!adapter.isValidId(request.resource.id)) return fail("invalidResourceId");
+    if (!adapter.isValidId(request.resource.id))
+      return fail("invalidResourceId");
 
     const state = await adapter.inspect(request.resource.id);
     if (!state) return fail("resourceNotFound");
@@ -242,7 +236,9 @@ export function createShareLinks<ResourceTypes extends ShareLinkResourceTypes>(
       },
     });
     if (!authorityDecision.allowed) return fail(authorityDecision.reason);
-    if (!state.isPrivate) return fail("privateResourceRequired");
+    if (!state.isPrivate && request.command.type !== "publish") {
+      return fail("privateResourceRequired");
+    }
 
     switch (request.command.type) {
       case "status": {
@@ -327,9 +323,8 @@ export function createShareLinks<ResourceTypes extends ShareLinkResourceTypes>(
     token: string,
   ): Promise<ResourceTypes[Kind]["sharedResource"]> => {
     if (!token) return fail("shareLinkNotFound");
-    const resource = await dependencies.persistence[
-      kind
-    ].resolveActivePrivate(token);
+    const resource =
+      await dependencies.persistence[kind].resolveActivePrivate(token);
     if (!resource) return fail("shareLinkNotFound");
     return resource;
   };

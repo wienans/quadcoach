@@ -32,8 +32,18 @@ describe("permanent /api/tacticboards route inventory", () => {
         expectedStatus: 401,
       },
       {
+        method: "get",
+        path: `/api/tacticboards/${tacticBoardId}/share-link`,
+        expectedStatus: 401,
+      },
+      {
         method: "post",
         path: `/api/tacticboards/${tacticBoardId}/access`,
+        expectedStatus: 401,
+      },
+      {
+        method: "put",
+        path: `/api/tacticboards/${tacticBoardId}/share-link`,
         expectedStatus: 401,
       },
       {
@@ -93,7 +103,7 @@ describe("permanent /api/tacticboards route inventory", () => {
       },
     ];
 
-    expect(routes).toHaveLength(18);
+    expect(routes).toHaveLength(20);
     for (const [index, route] of routes.entries()) {
       const response = await request(app)
         [route.method](route.path)

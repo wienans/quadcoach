@@ -38,15 +38,18 @@
     }
   },
   "shareDialog": {
-    "title": "Taktik Tafel teilen",
+    "title": "Share-Link verwalten",
+    "inactive": "Diese Taktik Tafel hat keinen aktiven Share-Link.",
+    "error": "Der Share-Link konnte nicht aktualisiert werden. Bitte versuche es erneut.",
+    "create": "Link erstellen",
     "copy": "Link kopieren",
-    "delete": "Share löschen",
+    "rotate": "Link erneuern",
+    "revoke": "Link widerrufen",
     "close": "Schließen"
   },
   "menu": {
     "more": "Weitere Aktionen",
-    "share": "Teilen",
-    "unshare": "Freigabe aufheben",
+    "manageShareLink": "Share-Link verwalten",
     "duplicate": "Duplizieren",
     "delete": "Löschen"
   },

@@ -35,7 +35,7 @@ export interface TacticBoardObject {
   radius?: number;
   startAngle?: number;
   endAngle?: number;
-  path?: string | [[string | number]]; // Support both formats
+  path?: string | (string | number)[][]; // Support both formats
   text?: string;
   originX?: string;
   originY?: string;

@@ -10,6 +10,14 @@ import type {
   ResourceAccessLevel,
   ResourceAuthorizationResponse,
 } from "./domain";
+import type {
+  SharedPracticePlanDto,
+  ShareLinkEnsureResponse,
+  ShareLinkRevokeResponse,
+  ShareLinkRotateResponse,
+  ShareLinkStatusResponse,
+} from "./shareLink";
+import { PRACTICE_PLAN_SHARED_READ_TAG_ID } from "./shareLink";
 
 export type AccessLevel = ResourceAccessLevel;
 
@@ -35,12 +43,6 @@ export type PracticePlanAccessEntry = {
   practicePlan: string;
   access: AccessLevel;
   createdAt: string;
-};
-
-export type ShareLinkResponse = {
-  message: string;
-  token: string;
-  shareLink: string;
 };
 
 export type GetPracticePlanRequest = {
@@ -150,18 +152,14 @@ export const practicePlansApiSlice = quadcoachApi.injectEndpoints({
             ]
           : [TagType.practiceplan],
     }),
-    getSharedPracticePlan: builder.query<PracticePlanEntity, string>({
+    getSharedPracticePlan: builder.query<SharedPracticePlanDto, string>({
       query: (token) => ({
-        url: `/api/practice-plans/share/${token}`,
+        url: `/api/practice-plans/share/${encodeURIComponent(token)}`,
         method: "get",
       }),
-      providesTags: (result) =>
-        result
-          ? [
-              { type: TagType.practiceplan, id: result._id },
-              TagType.practiceplan,
-            ]
-          : [TagType.practiceplan],
+      providesTags: [
+        { type: TagType.shareLink, id: PRACTICE_PLAN_SHARED_READ_TAG_ID },
+      ],
     }),
     patchPracticePlan: builder.mutation<
       PracticePlanEntity,
@@ -174,6 +172,8 @@ export const practicePlansApiSlice = quadcoachApi.injectEndpoints({
       }),
       invalidatesTags: (_result, _error, data) => [
         { type: TagType.practiceplan, id: data._id },
+        { type: TagType.shareLink, id: `practiceplan-${data._id}` },
+        { type: TagType.shareLink, id: PRACTICE_PLAN_SHARED_READ_TAG_ID },
       ],
     }),
     deletePracticePlan: builder.mutation<{ message?: string }, string>({
@@ -181,7 +181,11 @@ export const practicePlansApiSlice = quadcoachApi.injectEndpoints({
         url: `/api/practice-plans/${id}`,
         method: "delete",
       }),
-      invalidatesTags: [TagType.practiceplan],
+      invalidatesTags: (_result, _error, id) => [
+        TagType.practiceplan,
+        { type: TagType.shareLink, id: `practiceplan-${id}` },
+        { type: TagType.shareLink, id: PRACTICE_PLAN_SHARED_READ_TAG_ID },
+      ],
     }),
     checkPracticePlanAccess: builder.query<
       ResourceAuthorizationResponse,
@@ -246,22 +250,55 @@ export const practicePlansApiSlice = quadcoachApi.injectEndpoints({
         { type: TagType.practiceplan, id: `${practicePlan}-access` },
       ],
     }),
-    createPracticePlanShareLink: builder.mutation<ShareLinkResponse, string>({
+    getPracticePlanShareLinkStatus: builder.query<
+      ShareLinkStatusResponse,
+      string
+    >({
+      query: (practicePlanId) => ({
+        url: `/api/practice-plans/${practicePlanId}/share-link`,
+        method: "get",
+      }),
+      providesTags: (_result, _error, practicePlanId) => [
+        { type: TagType.shareLink, id: `practiceplan-${practicePlanId}` },
+      ],
+    }),
+    ensurePracticePlanShareLink: builder.mutation<
+      ShareLinkEnsureResponse,
+      string
+    >({
       query: (practicePlanId) => ({
         url: `/api/practice-plans/${practicePlanId}/share-link`,
         method: "post",
       }),
       invalidatesTags: (_result, _error, practicePlanId) => [
-        { type: TagType.practiceplan, id: practicePlanId },
+        { type: TagType.shareLink, id: `practiceplan-${practicePlanId}` },
+        { type: TagType.shareLink, id: PRACTICE_PLAN_SHARED_READ_TAG_ID },
       ],
     }),
-    deletePracticePlanShareLink: builder.mutation<{ message: string }, string>({
+    rotatePracticePlanShareLink: builder.mutation<
+      ShareLinkRotateResponse,
+      string
+    >({
+      query: (practicePlanId) => ({
+        url: `/api/practice-plans/${practicePlanId}/share-link`,
+        method: "put",
+      }),
+      invalidatesTags: (_result, _error, practicePlanId) => [
+        { type: TagType.shareLink, id: `practiceplan-${practicePlanId}` },
+        { type: TagType.shareLink, id: PRACTICE_PLAN_SHARED_READ_TAG_ID },
+      ],
+    }),
+    revokePracticePlanShareLink: builder.mutation<
+      ShareLinkRevokeResponse,
+      string
+    >({
       query: (practicePlanId) => ({
         url: `/api/practice-plans/${practicePlanId}/share-link`,
         method: "delete",
       }),
       invalidatesTags: (_result, _error, practicePlanId) => [
-        { type: TagType.practiceplan, id: practicePlanId },
+        { type: TagType.shareLink, id: `practiceplan-${practicePlanId}` },
+        { type: TagType.shareLink, id: PRACTICE_PLAN_SHARED_READ_TAG_ID },
       ],
     }),
   }),
@@ -280,6 +317,8 @@ export const {
   useAddPracticePlanAccessMutation,
   useRemovePracticePlanAccessMutation,
   useSharePracticePlanMutation,
-  useCreatePracticePlanShareLinkMutation,
-  useDeletePracticePlanShareLinkMutation,
+  useGetPracticePlanShareLinkStatusQuery,
+  useEnsurePracticePlanShareLinkMutation,
+  useRotatePracticePlanShareLinkMutation,
+  useRevokePracticePlanShareLinkMutation,
 } = practicePlansApiSlice;

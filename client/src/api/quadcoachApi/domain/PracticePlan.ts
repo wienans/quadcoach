@@ -39,7 +39,6 @@ export type PracticePlanEntity = {
   sections: PracticePlanSection[];
   user: string; // owner id
   isPrivate: boolean;
-  shareToken?: string | null;
   createdAt?: string;
   updatedAt?: string;
 };

@@ -36,7 +36,6 @@ interface ResourceMatrixCase<Kind extends ResourceKind> {
   expectedPublishedMetadata: Record<string, unknown>;
   expectedProjectionKeys: readonly string[];
   expectedNestedKeys: readonly string[];
-  forbiddenPublishField: "pages" | "sections";
 }
 
 type AnyResourceMatrixCase = {
@@ -107,12 +106,38 @@ const cases = [
       tags: ["published"],
       description: "Published board description",
       coaching_points: "Published coaching points",
+      creator: "Published Coach",
+      pages: [
+        {
+          version: "7.0.0",
+          objects: [],
+          backgroundImage: {
+            type: "image",
+            width: 200,
+            height: 100,
+            src: "published-court.svg",
+          },
+        },
+      ],
     },
     expectedPublishedMetadata: {
       name: "Published Board",
       tags: ["published"],
       description: "Published board description",
       coaching_points: "Published coaching points",
+      creator: "Published Coach",
+      pages: [
+        {
+          version: "7.0.0",
+          objects: [],
+          backgroundImage: {
+            type: "image",
+            width: 200,
+            height: 100,
+            src: "published-court.svg",
+          },
+        },
+      ],
     },
     expectedProjectionKeys: [
       "coaching_points",
@@ -135,7 +160,6 @@ const cases = [
       "uuid",
       "width",
     ],
-    forbiddenPublishField: "pages",
   },
   {
     kind: "practicePlan",
@@ -183,11 +207,25 @@ const cases = [
       name: "Published Practice",
       description: "Published practice description",
       tags: ["published"],
+      sections: [
+        {
+          name: "Published Main",
+          targetDuration: 30,
+          groups: [],
+        },
+      ],
     },
     expectedPublishedMetadata: {
       name: "Published Practice",
       description: "Published practice description",
       tags: ["published"],
+      sections: [
+        {
+          name: "Published Main",
+          targetDuration: 30,
+          groups: [],
+        },
+      ],
     },
     expectedProjectionKeys: [
       "description",
@@ -197,7 +235,6 @@ const cases = [
       "tags",
     ],
     expectedNestedKeys: ["groups", "name", "targetDuration"],
-    forbiddenPublishField: "sections",
   },
 ] as const satisfies readonly AnyResourceMatrixCase[];
 
@@ -479,7 +516,6 @@ describe.each(cases)("Mongo Share Link matrix: $kind", (testCase) => {
       owner: forgedOwner,
       isPrivate: true,
       shareToken: "forged-token",
-      [testCase.forbiddenPublishField]: [],
       arbitrary: "hidden",
     };
     await expect(
@@ -501,7 +537,6 @@ describe.each(cases)("Mongo Share Link matrix: $kind", (testCase) => {
     expect(published).not.toHaveProperty("shareToken");
     expect(published).not.toHaveProperty("owner");
     expect(published).not.toHaveProperty("arbitrary");
-    expect(published?.[testCase.forbiddenPublishField]).not.toEqual([]);
     await expect(
       service.resolve(testCase.kind, "publish-token"),
     ).rejects.toMatchObject({ code: "shareLinkNotFound" });

@@ -11,10 +11,6 @@ import {
   BottomNavigationAction,
   Card,
   Checkbox,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
   FormControlLabel,
   FormGroup,
   IconButton,
@@ -38,8 +34,10 @@ import {
   useGetAllPracticePlanAccessUsersQuery,
   useDeletePracticePlanMutation,
   useSharePracticePlanMutation,
-  useCreatePracticePlanShareLinkMutation,
-  useDeletePracticePlanShareLinkMutation,
+  useEnsurePracticePlanShareLinkMutation,
+  useGetPracticePlanShareLinkStatusQuery,
+  useRevokePracticePlanShareLinkMutation,
+  useRotatePracticePlanShareLinkMutation,
   useRemovePracticePlanAccessMutation,
   useCheckPracticePlanAccessQuery,
   AccessLevel,
@@ -63,7 +61,6 @@ import EditIcon from "@mui/icons-material/Edit";
 import SaveIcon from "@mui/icons-material/Save";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ShareIcon from "@mui/icons-material/IosShare";
-import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import AddIcon from "@mui/icons-material/Add";
@@ -77,10 +74,12 @@ import {
   canManageResource,
 } from "../../api/quadcoachApi/domain";
 import PracticeSection from "./PracticeSection";
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useMemo } from "react";
 import MDEditor from "@uiw/react-md-editor";
 import "@uiw/react-md-editor/markdown-editor.css";
 import "@uiw/react-markdown-preview/markdown.css";
+import { toReadOnlyPracticePlan } from "../../api/quadcoachApi/shareLink";
+import ShareLinkDialog from "../../components/ShareLinkDialog/ShareLinkDialog";
 
 const MarkdownRenderer = lazy(
   () => import("../../components/MarkdownRenderer"),
@@ -110,12 +109,6 @@ const PracticePlanner = ({
   const [userEmail, setUserEmail] = useState<string>("");
   const [emailError, setEmailError] = useState<string>("");
   const [isShareDialogOpen, setIsShareDialogOpen] = useState<boolean>(false);
-  const [shareLink, setShareLink] = useState<string>("");
-  const [isCopyHighlightActive, setIsCopyHighlightActive] =
-    useState<boolean>(false);
-  const copyHighlightTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
-    null,
-  );
 
   const { planId, token } = useParams<{ planId: string; token: string }>();
   const effectiveSharedToken = sharedToken || token || "";
@@ -137,7 +130,11 @@ const PracticePlanner = ({
     skip: !isSharedMode,
   });
 
-  const plan = isSharedMode ? sharedPlan : ownPlan;
+  const readOnlySharedPlan = useMemo(
+    () => (sharedPlan ? toReadOnlyPracticePlan(sharedPlan) : undefined),
+    [sharedPlan],
+  );
+  const plan = isSharedMode ? readOnlySharedPlan : ownPlan;
   const isPlanLoading = isSharedMode ? isSharedPlanLoading : isOwnPlanLoading;
   const isPlanError = isSharedMode ? isSharedPlanError : isOwnPlanError;
   const currentPlanId = planId || plan?._id;
@@ -147,6 +144,16 @@ const PracticePlanner = ({
   );
   const canEdit = canEditResource(authorization);
   const canManageResourceActions = canManageResource(authorization);
+  const {
+    data: shareLinkStatus,
+    isLoading: isShareLinkStatusLoading,
+    isFetching: isShareLinkStatusFetching,
+    isError: isShareLinkStatusError,
+  } = useGetPracticePlanShareLinkStatusQuery(currentPlanId || "", {
+    skip: !currentPlanId || !canEdit || !plan?.isPrivate || isSharedMode,
+  });
+  const isShareLinkStatusPending =
+    isShareLinkStatusLoading || isShareLinkStatusFetching;
   const [
     updatePlan,
     { isLoading: isUpdatePlanLoading, isSuccess: isUpdatePlanSuccess },
@@ -154,8 +161,8 @@ const PracticePlanner = ({
   const [deletePlan, { isLoading: isDeletePlanLoading }] =
     useDeletePracticePlanMutation();
   const onDeletePlanClick = () => {
-    if (!plan) return;
-    deletePlan(plan._id);
+    if (!currentPlanId) return;
+    deletePlan(currentPlanId);
     navigate("/practice-plans");
   };
 
@@ -175,10 +182,12 @@ const PracticePlanner = ({
   const [sharePracticePlan, { isLoading: isSharePracticePlanLoading }] =
     useSharePracticePlanMutation();
 
-  const [createShareLink, { isLoading: isCreateShareLinkLoading }] =
-    useCreatePracticePlanShareLinkMutation();
-  const [deleteShareLink, { isLoading: isDeleteShareLinkLoading }] =
-    useDeletePracticePlanShareLinkMutation();
+  const [ensureShareLink, { isLoading: isEnsureShareLinkLoading }] =
+    useEnsurePracticePlanShareLinkMutation();
+  const [rotateShareLink, { isLoading: isRotateShareLinkLoading }] =
+    useRotatePracticePlanShareLinkMutation();
+  const [revokeShareLink, { isLoading: isRevokeShareLinkLoading }] =
+    useRevokePracticePlanShareLinkMutation();
 
   const [
     removePracticePlanAccess,
@@ -200,18 +209,6 @@ const PracticePlanner = ({
       );
     }
   }, [favoritePlans, setIsFavorite, currentPlanId]);
-  useEffect(() => {
-    if (plan?.shareToken) {
-      setShareLink(
-        `${
-          import.meta.env.PUBLIC_BASE_URL || "https://quadcoach.app"
-        }/practice-plans/share/${plan.shareToken}`,
-      );
-    } else {
-      setShareLink("");
-    }
-  }, [plan?.shareToken]);
-
   // When plan data first loads (or changes) and not in edit mode, sync form values manually
   useEffect(() => {
     if (plan && !isEditMode) {
@@ -399,14 +396,6 @@ const PracticePlanner = ({
     }
   }, [isUpdatePlanSuccess]);
 
-  useEffect(() => {
-    return () => {
-      if (copyHighlightTimeoutRef.current) {
-        clearTimeout(copyHighlightTimeoutRef.current);
-      }
-    };
-  }, []);
-
   const handleAddAccess = async () => {
     if (!planId || !userEmail.trim()) {
       setEmailError("Email is required");
@@ -432,43 +421,8 @@ const PracticePlanner = ({
     }
   };
 
-  const onShareClick = async () => {
-    if (!currentPlanId) return;
-
-    try {
-      const response = await createShareLink(currentPlanId).unwrap();
-      setShareLink(response.shareLink);
-      setIsShareDialogOpen(true);
-    } catch (error) {
-      console.error("Failed to create share link", error);
-    }
-  };
-
-  const onCopyShareLinkClick = async () => {
-    if (!shareLink) return;
-    try {
-      await navigator.clipboard.writeText(shareLink);
-      setIsCopyHighlightActive(true);
-      if (copyHighlightTimeoutRef.current) {
-        clearTimeout(copyHighlightTimeoutRef.current);
-      }
-      copyHighlightTimeoutRef.current = setTimeout(() => {
-        setIsCopyHighlightActive(false);
-      }, 1000);
-    } catch (error) {
-      console.error("Failed to copy share link", error);
-    }
-  };
-
-  const onDeleteShareClick = async () => {
-    if (!currentPlanId) return;
-    try {
-      await deleteShareLink(currentPlanId).unwrap();
-      setShareLink("");
-      setIsShareDialogOpen(false);
-    } catch (error) {
-      console.error("Failed to delete share link", error);
-    }
+  const onShareClick = () => {
+    setIsShareDialogOpen(true);
   };
 
   if (isPlanLoading) {
@@ -504,10 +458,13 @@ const PracticePlanner = ({
   if (canEdit && plan.isPrivate) {
     practicePlanMenuActions.push({
       key: "share",
-      label: t(plan.shareToken ? "menu.unshare" : "menu.share"),
+      label: t("menu.manageShareLink"),
       onClick: onShareClick,
       icon: <ShareIcon fontSize="small" />,
-      disabled: isCreateShareLinkLoading || isDeleteShareLinkLoading,
+      disabled:
+        isEnsureShareLinkLoading ||
+        isRotateShareLinkLoading ||
+        isRevokeShareLinkLoading,
     });
   }
 
@@ -911,55 +868,30 @@ const PracticePlanner = ({
                 </SoftBox>
               )}
             />
-            <Dialog
+            <ShareLinkDialog
               open={isShareDialogOpen}
-              onClose={() => {
-                setIsShareDialogOpen(false);
-                setIsCopyHighlightActive(false);
+              onClose={() => setIsShareDialogOpen(false)}
+              resourceId={currentPlanId || ""}
+              status={shareLinkStatus}
+              isStatusPending={isShareLinkStatusPending}
+              isStatusError={isShareLinkStatusError}
+              isEnsurePending={isEnsureShareLinkLoading}
+              isRotatePending={isRotateShareLinkLoading}
+              isRevokePending={isRevokeShareLinkLoading}
+              ensure={ensureShareLink}
+              rotate={rotateShareLink}
+              revoke={revokeShareLink}
+              labels={{
+                title: t("share.dialog.title"),
+                error: t("share.dialog.error"),
+                inactive: t("share.dialog.inactive"),
+                copy: t("share.dialog.copy"),
+                close: t("share.dialog.close"),
+                create: t("share.dialog.create"),
+                rotate: t("share.dialog.rotate"),
+                revoke: t("share.dialog.revoke"),
               }}
-              fullWidth
-              maxWidth="sm"
-            >
-              <DialogTitle>{t("share.dialog.title")}</DialogTitle>
-              <DialogContent>
-                <Box
-                  sx={{ mt: 1, display: "flex", alignItems: "center", gap: 1 }}
-                >
-                  <SoftInput
-                    readOnly
-                    fullWidth
-                    value={shareLink}
-                    sx={{
-                      flex: 1,
-                      minWidth: 0,
-                    }}
-                  />
-                  <Tooltip title={t("share.dialog.copy")}>
-                    <span>
-                      <IconButton
-                        onClick={onCopyShareLinkClick}
-                        disabled={!shareLink}
-                        color={isCopyHighlightActive ? "info" : "inherit"}
-                      >
-                        <ContentCopyIcon />
-                      </IconButton>
-                    </span>
-                  </Tooltip>
-                </Box>
-              </DialogContent>
-              <DialogActions>
-                <SoftButton onClick={() => setIsShareDialogOpen(false)}>
-                  {t("share.dialog.close")}
-                </SoftButton>
-                <SoftButton
-                  color="error"
-                  onClick={onDeleteShareClick}
-                  disabled={!shareLink || isDeleteShareLinkLoading}
-                >
-                  {t("share.dialog.delete")}
-                </SoftButton>
-              </DialogActions>
-            </Dialog>
+            />
           </>
         </FormikProvider>
       )}

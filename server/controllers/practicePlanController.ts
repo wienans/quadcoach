@@ -2,7 +2,6 @@
 import asyncHandler from "express-async-handler";
 import { Request, Response } from "express";
 import mongoose from "mongoose";
-import crypto from "crypto";
 import { PracticePlan } from "../models/practicePlan";
 import PracticePlanAccess from "../models/practicePlanAccess";
 import {
@@ -11,13 +10,18 @@ import {
 } from "./helpers/practicePlanValidation";
 import { allowlistedRequestFields } from "./helpers/allowlistedRequestFields";
 import User from "../models/user";
-import { logEvents } from "../middleware/logger";
 import {
   getResourceAuthorization,
   requireResourceAuthorization,
   serializeResourceAuthorizationDecision,
 } from "./helpers/requireResourceAuthorization";
 import { authorizationResourceFor } from "../authorization/resourceAuthorization";
+import {
+  manageShareLink,
+  publishShareLink,
+  resolveShareLink,
+} from "../shareLinks/shareLinkHttp";
+import { parsePracticePlanPublishMetadata } from "./helpers/publishMetadata";
 
 interface RequestWithUser extends Request {
   UserInfo?: {
@@ -180,7 +184,9 @@ export const getPracticePlan = async (req: RequestWithUser, res: Response) => {
       res.status(400).json({ message: "Invalid ID format" });
       return;
     }
-    const result = await PracticePlan.findOne({ _id: req.params.id });
+    const result = await PracticePlan.findOne({ _id: req.params.id }).select(
+      "-shareToken",
+    );
     if (result) {
       if (
         !(await requireResourceAuthorization(
@@ -239,7 +245,11 @@ export const patchPracticePlan = async (
         updates.description = requestUpdates.description;
       if (requestUpdates.tags !== undefined) updates.tags = requestUpdates.tags;
       if (requestUpdates.isPrivate !== undefined)
-        updates.isPrivate = requestUpdates.isPrivate;
+        if (typeof requestUpdates.isPrivate !== "boolean") {
+          return res.status(400).json({ message: "Invalid privacy value" });
+        } else {
+          updates.isPrivate = requestUpdates.isPrivate;
+        }
       if (requestUpdates.sections !== undefined) {
         const durationErrors = validateNonNegativeDurations(requestUpdates);
         if (durationErrors.length)
@@ -251,11 +261,31 @@ export const patchPracticePlan = async (
         updates.sections = requestUpdates.sections;
       }
       updates.updatedAt = new Date();
+      if (updates.isPrivate === false) {
+        const publishUpdates = parsePracticePlanPublishMetadata(updates);
+        if (!publishUpdates) {
+          return res
+            .status(400)
+            .json({ message: "Invalid Practice Plan content" });
+        }
+        const published = await publishShareLink(
+          req,
+          res,
+          "practicePlan",
+          req.params.id,
+          publishUpdates,
+        );
+        if (!published) return;
+        const publishedPlan = await PracticePlan.findById(req.params.id).select(
+          "-shareToken",
+        );
+        return res.json(publishedPlan);
+      }
       const updated = await PracticePlan.findByIdAndUpdate(
         req.params.id,
         updates,
         { new: true },
-      );
+      ).select("-shareToken");
       return res.json(updated);
     } else {
       res.status(404).json({ message: "Practice Plan not found" });
@@ -535,139 +565,36 @@ export const sharePracticePlan = asyncHandler(
   },
 );
 
-const isDuplicateShareTokenError = (error: unknown): boolean => {
-  return isMongoError(error) && error.code === 11000;
-};
-
-const ensureShareTokenWithRetry = async (
-  practicePlan: InstanceType<typeof PracticePlan>,
-  maxAttempts: number = 5,
-): Promise<void> => {
-  for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
-    practicePlan.shareToken = crypto.randomUUID();
-
-    try {
-      await practicePlan.save();
-      return;
-    } catch (error) {
-      if (!isDuplicateShareTokenError(error)) {
-        throw error;
-      }
-    }
-  }
-
-  throw new Error("Unable to generate unique share token");
-};
+export const getShareLink = asyncHandler(
+  async (req: RequestWithUser, res: Response) =>
+    manageShareLink(req, res, "practicePlan", { type: "status" }),
+);
 
 // @desc    Create (or return existing) share link for a practice plan
 // @route   POST /api/practice-plans/:id/share-link
 // @access  Private - users with edit permission
 export const createShareLink = asyncHandler(
-  async (req: RequestWithUser, res: Response) => {
-    if (!req.UserInfo?.id) {
-      res.status(401).json({ message: "Unauthorized" });
-      return;
-    }
+  async (req: RequestWithUser, res: Response) =>
+    manageShareLink(req, res, "practicePlan", { type: "ensure" }),
+);
 
-    if (!mongoose.isValidObjectId(req.params.id)) {
-      res.status(400).json({ message: "Invalid practice plan ID" });
-      return;
-    }
-
-    const practicePlan = await PracticePlan.findById(req.params.id);
-    if (!practicePlan) {
-      res.status(404).json({ message: "Practice Plan not found" });
-      return;
-    }
-
-    if (
-      !(await requireResourceAuthorization(
-        req,
-        res,
-        authorizationResourceFor.practicePlan(req.params.id, practicePlan),
-        "edit",
-      ))
-    ) {
-      return;
-    }
-    try {
-      if (!practicePlan.shareToken) {
-        await ensureShareTokenWithRetry(practicePlan);
-      }
-      const publicBaseUrl =
-        process.env.PUBLIC_BASE_URL || "https://quadcoach.app";
-      res.status(201).json({
-        message: "Share link available",
-        token: practicePlan.shareToken,
-        shareLink: `${publicBaseUrl}/practice-plans/share/${practicePlan.shareToken}`,
-      });
-    } catch (e: any) {
-      logEvents(
-        `Failed to create share link for practice plan ${req.params.id}: ${e.message}`,
-        "error.log",
-      );
-      res.status(500).json({ message: "Failed to create share link" });
-    }
-  },
+export const rotateShareLink = asyncHandler(
+  async (req: RequestWithUser, res: Response) =>
+    manageShareLink(req, res, "practicePlan", { type: "rotate" }),
 );
 
 // @desc    Delete share link from a practice plan
 // @route   DELETE /api/practice-plans/:id/share-link
 // @access  Private - users with edit permission
 export const deleteShareLink = asyncHandler(
-  async (req: RequestWithUser, res: Response) => {
-    if (!req.UserInfo?.id) {
-      res.status(401).json({ message: "Unauthorized" });
-      return;
-    }
-
-    if (!mongoose.isValidObjectId(req.params.id)) {
-      res.status(400).json({ message: "Invalid practice plan ID" });
-      return;
-    }
-
-    const practicePlan = await PracticePlan.findById(req.params.id);
-    if (!practicePlan) {
-      res.status(404).json({ message: "Practice Plan not found" });
-      return;
-    }
-
-    if (
-      !(await requireResourceAuthorization(
-        req,
-        res,
-        authorizationResourceFor.practicePlan(req.params.id, practicePlan),
-        "edit",
-      ))
-    ) {
-      return;
-    }
-
-    practicePlan.shareToken = undefined;
-    await practicePlan.save();
-
-    res.json({ message: "Share link removed" });
-  },
+  async (req: RequestWithUser, res: Response) =>
+    manageShareLink(req, res, "practicePlan", { type: "revoke" }),
 );
 
 // @desc    Get practice plan by share token (public)
 // @route   GET /api/practice-plans/share/:token
 // @access  Public
 export const getByShareToken = asyncHandler(
-  async (req: Request, res: Response) => {
-    const { token } = req.params;
-
-    if (!token || token.trim() === "") {
-      res.status(400).json({ message: "Invalid share token" });
-      return;
-    }
-
-    const practicePlan = await PracticePlan.findOne({ shareToken: token });
-    if (!practicePlan) {
-      res.status(404).json({ message: "Share link not found" });
-      return;
-    }
-
-    res.json(practicePlan);
-  },
+  async (req: Request, res: Response) =>
+    resolveShareLink(req, res, "practicePlan"),
 );

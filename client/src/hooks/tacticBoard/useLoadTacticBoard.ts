@@ -1,9 +1,10 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useTacticBoardCanvas, useTacticBoardData } from ".";
 import {
   useGetSharedTacticBoardQuery,
   useGetTacticBoardQuery,
 } from "../../api/quadcoachApi/tacticBoardApi";
+import { toRenderableTacticBoard } from "../../api/quadcoachApi/shareLink";
 
 export const useLoadTacticBoard = (
   tacticBoardId?: string,
@@ -28,7 +29,14 @@ export const useLoadTacticBoard = (
     skip: sharedToken == null || sharedToken === "",
   });
 
-  const boardToUse = sharedToken ? sharedTacticBoard : tacticBoard;
+  const renderableSharedBoard = useMemo(
+    () =>
+      sharedTacticBoard && sharedToken
+        ? toRenderableTacticBoard(sharedTacticBoard, sharedToken)
+        : undefined,
+    [sharedTacticBoard, sharedToken],
+  );
+  const boardToUse = sharedToken ? renderableSharedBoard : tacticBoard;
   const isError = sharedToken ? isSharedTacticBoardError : isTacticBoardError;
   const isLoading = sharedToken
     ? isSharedTacticBoardLoading

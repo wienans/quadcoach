@@ -27,6 +27,14 @@ import {
   toTacticBoardAccessDeleteRequestDto,
   toTacticBoardAccessRequestDto,
 } from "./compatibility/tacticBoardWire";
+import type {
+  SharedTacticBoardDto,
+  ShareLinkEnsureResponse,
+  ShareLinkRevokeResponse,
+  ShareLinkRotateResponse,
+  ShareLinkStatusResponse,
+} from "./shareLink";
+import { TACTIC_BOARD_SHARED_READ_TAG_ID } from "./shareLink";
 
 export type { GetTacticBoardRequest } from "./tacticBoardCollectionRequest";
 
@@ -36,12 +44,6 @@ export type GetTacticBoardHeadersResponse =
 export type GetTacticBoardResponse = TacticBoardCollectionResponse<TacticBoard>;
 
 export type AccessLevel = ResourceAccessLevel;
-
-export type ShareLinkResponse = {
-  message: string;
-  token: string;
-  shareLink: string;
-};
 
 export type DuplicateTacticBoardResponse = {
   message: string;
@@ -61,15 +63,14 @@ export const tacticBoardApiSlice = quadcoachApi.injectEndpoints({
           ? [{ type: TagType.tacticBoard, id: result._id }, TagType.tacticBoard]
           : [TagType.tacticBoard],
     }),
-    getSharedTacticBoard: builder.query<TacticBoard, string>({
+    getSharedTacticBoard: builder.query<SharedTacticBoardDto, string>({
       query: (token: string) => ({
-        url: `/api/tacticboards/share/${token}`,
+        url: `/api/tacticboards/share/${encodeURIComponent(token)}`,
         method: "get",
       }),
-      providesTags: (result) =>
-        result
-          ? [{ type: TagType.tacticBoard, id: result._id }, TagType.tacticBoard]
-          : [TagType.tacticBoard],
+      providesTags: [
+        { type: TagType.shareLink, id: TACTIC_BOARD_SHARED_READ_TAG_ID },
+      ],
     }),
     updateTacticBoard: builder.mutation<{ message: string }, TacticBoard>({
       query(data) {
@@ -82,6 +83,8 @@ export const tacticBoardApiSlice = quadcoachApi.injectEndpoints({
       invalidatesTags: (_result, _error, data) => [
         { type: TagType.tacticBoard, id: data._id },
         TagType.tacticBoardTag,
+        { type: TagType.shareLink, id: `tacticboard-${data._id}` },
+        { type: TagType.shareLink, id: TACTIC_BOARD_SHARED_READ_TAG_ID },
       ],
     }),
     updateTacticBoardPage: builder.mutation<
@@ -97,6 +100,7 @@ export const tacticBoardApiSlice = quadcoachApi.injectEndpoints({
       },
       invalidatesTags: (_result, _error, { tacticBoardId }) => [
         { type: TagType.tacticBoard, id: tacticBoardId },
+        { type: TagType.shareLink, id: TACTIC_BOARD_SHARED_READ_TAG_ID },
       ],
     }),
     deleteTacticBoard: builder.mutation<{ message: string }, string>({
@@ -110,6 +114,8 @@ export const tacticBoardApiSlice = quadcoachApi.injectEndpoints({
         { type: TagType.tacticBoard, id: tacticBoardId },
         TagType.tacticBoard,
         TagType.tacticBoardTag,
+        { type: TagType.shareLink, id: `tacticboard-${tacticBoardId}` },
+        { type: TagType.shareLink, id: TACTIC_BOARD_SHARED_READ_TAG_ID },
       ],
     }),
     duplicateTacticBoard: builder.mutation<
@@ -198,6 +204,7 @@ export const tacticBoardApiSlice = quadcoachApi.injectEndpoints({
       },
       invalidatesTags: (_result, _error, { tacticBoardId }) => [
         { type: TagType.tacticBoard, id: tacticBoardId },
+        { type: TagType.shareLink, id: TACTIC_BOARD_SHARED_READ_TAG_ID },
       ],
     }),
     insertTacticBoardPage: builder.mutation<
@@ -213,6 +220,7 @@ export const tacticBoardApiSlice = quadcoachApi.injectEndpoints({
       },
       invalidatesTags: (_result, _error, { tacticBoardId }) => [
         { type: TagType.tacticBoard, id: tacticBoardId },
+        { type: TagType.shareLink, id: TACTIC_BOARD_SHARED_READ_TAG_ID },
       ],
     }),
     deleteTacticBoardPage: builder.mutation<
@@ -225,6 +233,7 @@ export const tacticBoardApiSlice = quadcoachApi.injectEndpoints({
       }),
       invalidatesTags: (_result, _error, { tacticBoardId }) => [
         { type: TagType.tacticBoard, id: tacticBoardId },
+        { type: TagType.shareLink, id: TACTIC_BOARD_SHARED_READ_TAG_ID },
       ],
     }),
     updateTacticBoardMeta: builder.mutation<
@@ -253,6 +262,8 @@ export const tacticBoardApiSlice = quadcoachApi.injectEndpoints({
       invalidatesTags: (_result, _error, { tacticBoardId }) => [
         { type: TagType.tacticBoard, id: tacticBoardId },
         TagType.tacticBoardTag,
+        { type: TagType.shareLink, id: `tacticboard-${tacticBoardId}` },
+        { type: TagType.shareLink, id: TACTIC_BOARD_SHARED_READ_TAG_ID },
       ],
     }),
     getTacticBoardHeaders: builder.query<
@@ -353,22 +364,55 @@ export const tacticBoardApiSlice = quadcoachApi.injectEndpoints({
         { type: TagType.tacticBoard, id: `${tacticBoardId}-access` },
       ],
     }),
-    createTacticBoardShareLink: builder.mutation<ShareLinkResponse, string>({
+    getTacticBoardShareLinkStatus: builder.query<
+      ShareLinkStatusResponse,
+      string
+    >({
+      query: (tacticBoardId) => ({
+        url: `/api/tacticboards/${tacticBoardId}/share-link`,
+        method: "get",
+      }),
+      providesTags: (_result, _error, tacticBoardId) => [
+        { type: TagType.shareLink, id: `tacticboard-${tacticBoardId}` },
+      ],
+    }),
+    ensureTacticBoardShareLink: builder.mutation<
+      ShareLinkEnsureResponse,
+      string
+    >({
       query: (tacticBoardId) => ({
         url: `/api/tacticboards/${tacticBoardId}/share-link`,
         method: "post",
       }),
       invalidatesTags: (_result, _error, tacticBoardId) => [
-        { type: TagType.tacticBoard, id: tacticBoardId },
+        { type: TagType.shareLink, id: `tacticboard-${tacticBoardId}` },
+        { type: TagType.shareLink, id: TACTIC_BOARD_SHARED_READ_TAG_ID },
       ],
     }),
-    deleteTacticBoardShareLink: builder.mutation<{ message: string }, string>({
+    rotateTacticBoardShareLink: builder.mutation<
+      ShareLinkRotateResponse,
+      string
+    >({
+      query: (tacticBoardId) => ({
+        url: `/api/tacticboards/${tacticBoardId}/share-link`,
+        method: "put",
+      }),
+      invalidatesTags: (_result, _error, tacticBoardId) => [
+        { type: TagType.shareLink, id: `tacticboard-${tacticBoardId}` },
+        { type: TagType.shareLink, id: TACTIC_BOARD_SHARED_READ_TAG_ID },
+      ],
+    }),
+    revokeTacticBoardShareLink: builder.mutation<
+      ShareLinkRevokeResponse,
+      string
+    >({
       query: (tacticBoardId) => ({
         url: `/api/tacticboards/${tacticBoardId}/share-link`,
         method: "delete",
       }),
       invalidatesTags: (_result, _error, tacticBoardId) => [
-        { type: TagType.tacticBoard, id: tacticBoardId },
+        { type: TagType.shareLink, id: `tacticboard-${tacticBoardId}` },
+        { type: TagType.shareLink, id: TACTIC_BOARD_SHARED_READ_TAG_ID },
       ],
     }),
   }),
@@ -397,6 +441,8 @@ export const {
   useSetTacticBoardAccessMutation,
   useDeleteTacticBoardAccessMutation,
   useShareTacticBoardMutation,
-  useCreateTacticBoardShareLinkMutation,
-  useDeleteTacticBoardShareLinkMutation,
+  useGetTacticBoardShareLinkStatusQuery,
+  useEnsureTacticBoardShareLinkMutation,
+  useRotateTacticBoardShareLinkMutation,
+  useRevokeTacticBoardShareLinkMutation,
 } = tacticBoardApiSlice;

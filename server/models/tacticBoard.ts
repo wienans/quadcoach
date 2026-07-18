@@ -236,7 +236,15 @@ const tacticBoardSchema = new Schema<ITacticBoard>(
       default: undefined,
     },
   },
-  { timestamps: true },
+  {
+    timestamps: true,
+    toJSON: {
+      transform: (_document, value) => {
+        delete value.shareToken;
+        return value;
+      },
+    },
+  },
 );
 
 tacticBoardSchema.index(

@@ -3,6 +3,7 @@ import * as tacticBoardController from "../controllers/tacticBoardController";
 import verifyJWT from "../middleware/verifyJWT";
 import verifyJWTOptional from "../middleware/verifyJWTOptional";
 import { ddosLimiter } from "../middleware/rateLimiter";
+import { malformedShareTokenPath } from "../shareLinks/shareLinkHttp";
 const router = express.Router();
 
 // Apply optional JWT verification globally - allows public access to GET endpoints
@@ -12,6 +13,7 @@ router.use(ddosLimiter);
 // Public GET endpoints - no additional auth required
 router.route("/header").get(tacticBoardController.getAllTacticBoardHeaders);
 router.route("/share/:token").get(tacticBoardController.getByShareToken);
+router.use(malformedShareTokenPath);
 
 router
   .route("/")
@@ -43,7 +45,9 @@ router
   .post(verifyJWT, tacticBoardController.duplicateById);
 router
   .route("/:id/share-link")
+  .get(verifyJWT, tacticBoardController.getShareLink)
   .post(verifyJWT, tacticBoardController.createShareLink)
+  .put(verifyJWT, tacticBoardController.rotateShareLink)
   .delete(verifyJWT, tacticBoardController.deleteShareLink);
 
 // All page mutation endpoints require authentication

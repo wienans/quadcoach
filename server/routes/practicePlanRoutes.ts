@@ -10,7 +10,9 @@ import {
   deleteAccess,
   getAllAccessUsers,
   sharePracticePlan,
+  getShareLink,
   createShareLink,
+  rotateShareLink,
   deleteShareLink,
   getByShareToken,
   checkAccess,
@@ -18,6 +20,7 @@ import {
 import verifyJWT from "../middleware/verifyJWT";
 import verifyJWTOptional from "../middleware/verifyJWTOptional";
 import { ddosLimiter } from "../middleware/rateLimiter";
+import { malformedShareTokenPath } from "../shareLinks/shareLinkHttp";
 
 const router = Router();
 // Apply optional JWT verification globally - allows public access to GET endpoints
@@ -27,6 +30,7 @@ router.use(ddosLimiter);
 // Public GET endpoints - no additional auth required
 router.get("/", getPracticePlans);
 router.get("/share/:token", getByShareToken);
+router.use(malformedShareTokenPath);
 router.get("/:id", getPracticePlan);
 
 // All mutation endpoints require authentication
@@ -42,7 +46,9 @@ router.get("/:id/checkAccess", verifyJWT, checkAccess);
 router.route("/:id/share").post(verifyJWT, sharePracticePlan);
 router
   .route("/:id/share-link")
+  .get(verifyJWT, getShareLink)
   .post(verifyJWT, createShareLink)
+  .put(verifyJWT, rotateShareLink)
   .delete(verifyJWT, deleteShareLink);
 
 export default router;

@@ -216,38 +216,35 @@ describe("TacticBoard permanent legacy HTTP contracts", () => {
       .post(`/api/tacticboards/${tacticBoard.id}/share-link`)
       .set("Authorization", Authorization)
       .set("X-Forwarded-For", "192.0.2.30");
+    const token = decodeURIComponent(
+      new URL(shareResponse.body.shareLink).pathname.split("/").at(-1) ?? "",
+    );
     const sharedReadResponse = await request(app)
-      .get(`/api/tacticboards/share/${shareResponse.body.token}`)
+      .get(`/api/tacticboards/share/${encodeURIComponent(token)}`)
       .set("X-Forwarded-For", "192.0.2.31");
     const deleteShareResponse = await request(app)
       .delete(`/api/tacticboards/${tacticBoard.id}/share-link`)
       .set("Authorization", Authorization)
       .set("X-Forwarded-For", "192.0.2.32");
     const deletedShareReadResponse = await request(app)
-      .get(`/api/tacticboards/share/${shareResponse.body.token}`)
+      .get(`/api/tacticboards/share/${encodeURIComponent(token)}`)
       .set("X-Forwarded-For", "192.0.2.33");
 
     expect(shareResponse.status).toBe(201);
-    expectExactFields(shareResponse.body, ["message", "token", "shareLink"]);
+    expectExactFields(shareResponse.body, ["status", "shareLink"]);
     expect(shareResponse.body.shareLink).toBe(
-      `https://quadcoach.app/tacticboards/share/${shareResponse.body.token}`,
+      `https://quadcoach.app/tacticboards/share/${encodeURIComponent(token)}`,
     );
     expect(sharedReadResponse.status).toBe(200);
     expectExactFields(sharedReadResponse.body, [
-      "_id",
+      "kind",
       "name",
-      "isPrivate",
       "tags",
       "pages",
-      "user",
-      "shareToken",
-      "createdAt",
-      "updatedAt",
-      "__v",
     ]);
     expect(deleteShareResponse.status).toBe(200);
     expect(deleteShareResponse.body).toEqual({
-      message: "Share link removed",
+      status: "inactive",
     });
     expect(deletedShareReadResponse.status).toBe(404);
     expectForbiddenFields(shareResponse.body, ["tacticBoard", "tacticBoardId"]);

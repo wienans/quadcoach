@@ -10,6 +10,7 @@ export enum TagType {
   material = "material",
   tacticBoard = "tacticBoard",
   tacticBoardTag = "tacticBoardTag",
+  shareLink = "shareLink",
   favorite = "favorite",
   practiceplan = "practiceplan",
 }

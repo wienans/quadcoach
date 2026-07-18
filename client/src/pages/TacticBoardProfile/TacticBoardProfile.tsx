@@ -12,10 +12,6 @@ import {
   FormGroup,
   Grid,
   IconButton,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
   ListItem,
   List,
   Skeleton,
@@ -32,7 +28,6 @@ import * as Yup from "yup";
 import {
   HeaderOverflowMenu,
   SoftBox,
-  SoftButton,
   SoftInput,
   SoftTypography,
 } from "../../components";
@@ -41,8 +36,10 @@ import {
   AccessLevel,
   useDeleteTacticBoardAccessMutation,
   useDeleteTacticBoardMutation,
-  useCreateTacticBoardShareLinkMutation,
-  useDeleteTacticBoardShareLinkMutation,
+  useEnsureTacticBoardShareLinkMutation,
+  useGetTacticBoardShareLinkStatusQuery,
+  useRevokeTacticBoardShareLinkMutation,
+  useRotateTacticBoardShareLinkMutation,
   useDuplicateTacticBoardMutation,
   useGetAllTacticBoardAccessUsersQuery,
   useGetTacticBoardQuery,
@@ -63,7 +60,7 @@ import ShareIcon from "@mui/icons-material/IosShare";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { useTranslation } from "react-i18next";
-import { lazy, Suspense, useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { useAuth } from "../../store/hooks";
 import TacticBoardInProfileWrapper from "./TacticBoardInProfile";
 import MDEditor from "@uiw/react-md-editor";
@@ -89,6 +86,7 @@ import {
   useRemoveFavoriteTacticBoardMutation,
   useLazyGetFavoriteTacticBoardsQuery,
 } from "../../api/quadcoachApi/favoriteApi";
+import ShareLinkDialog from "../../components/ShareLinkDialog/ShareLinkDialog";
 const MarkdownRenderer = lazy(
   () => import("../../components/MarkdownRenderer"),
 );
@@ -106,13 +104,7 @@ const TacticBoardProfile = () => {
   const [userEmail, setUserEmail] = useState<string>("");
   const [emailError, setEmailError] = useState<string>("");
   const [isShareDialogOpen, setIsShareDialogOpen] = useState<boolean>(false);
-  const [shareLink, setShareLink] = useState<string>("");
   const [duplicateError, setDuplicateError] = useState<string>("");
-  const [isCopyHighlightActive, setIsCopyHighlightActive] =
-    useState<boolean>(false);
-  const copyHighlightTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
-    null,
-  );
   const { id: userId } = useAuth();
 
   const {
@@ -128,6 +120,16 @@ const TacticBoardProfile = () => {
   );
   const canEdit = canEditResource(authorization);
   const canManageResourceActions = canManageResource(authorization);
+  const {
+    data: shareLinkStatus,
+    isLoading: isShareLinkStatusLoading,
+    isFetching: isShareLinkStatusFetching,
+    isError: isShareLinkStatusError,
+  } = useGetTacticBoardShareLinkStatusQuery(tacticBoardId || "", {
+    skip: !tacticBoardId || !canEdit || !tacticBoard?.isPrivate,
+  });
+  const isShareLinkStatusPending =
+    isShareLinkStatusLoading || isShareLinkStatusFetching;
 
   const [
     updateTacticBoardMeta,
@@ -161,10 +163,12 @@ const TacticBoardProfile = () => {
   const [shareTacticBoard, { isLoading: isShareTacticBoardLoading }] =
     useShareTacticBoardMutation();
 
-  const [createShareLink, { isLoading: isCreateShareLinkLoading }] =
-    useCreateTacticBoardShareLinkMutation();
-  const [deleteShareLink, { isLoading: isDeleteShareLinkLoading }] =
-    useDeleteTacticBoardShareLinkMutation();
+  const [ensureShareLink, { isLoading: isEnsureShareLinkLoading }] =
+    useEnsureTacticBoardShareLinkMutation();
+  const [rotateShareLink, { isLoading: isRotateShareLinkLoading }] =
+    useRotateTacticBoardShareLinkMutation();
+  const [revokeShareLink, { isLoading: isRevokeShareLinkLoading }] =
+    useRevokeTacticBoardShareLinkMutation();
   const [duplicateTacticBoard, { isLoading: isDuplicateTacticBoardLoading }] =
     useDuplicateTacticBoardMutation();
 
@@ -243,26 +247,6 @@ const TacticBoardProfile = () => {
     }
   }, [favoriteTacticBoards, setIsFavorite, tacticBoardId]);
 
-  useEffect(() => {
-    return () => {
-      if (copyHighlightTimeoutRef.current) {
-        clearTimeout(copyHighlightTimeoutRef.current);
-      }
-    };
-  }, []);
-
-  useEffect(() => {
-    if (tacticBoard?.shareToken) {
-      setShareLink(
-        `${
-          import.meta.env.PUBLIC_BASE_URL || "https://quadcoach.app"
-        }/tacticboards/share/${tacticBoard.shareToken}`,
-      );
-    } else {
-      setShareLink("");
-    }
-  }, [tacticBoard?.shareToken]);
-
   const onDeleteTacticBoardClick = () => {
     if (!tacticBoard) return;
     deleteTacticBoard(tacticBoard._id);
@@ -314,43 +298,8 @@ const TacticBoardProfile = () => {
     }
   };
 
-  const onShareClick = async () => {
-    if (!tacticBoardId) return;
-
-    try {
-      const response = await createShareLink(tacticBoardId).unwrap();
-      setShareLink(response.shareLink);
-      setIsShareDialogOpen(true);
-    } catch (error) {
-      console.error("Failed to create share link", error);
-    }
-  };
-
-  const onCopyShareLinkClick = async () => {
-    if (!shareLink) return;
-    try {
-      await navigator.clipboard.writeText(shareLink);
-      setIsCopyHighlightActive(true);
-      if (copyHighlightTimeoutRef.current) {
-        clearTimeout(copyHighlightTimeoutRef.current);
-      }
-      copyHighlightTimeoutRef.current = setTimeout(() => {
-        setIsCopyHighlightActive(false);
-      }, 1000);
-    } catch (error) {
-      console.error("Failed to copy share link", error);
-    }
-  };
-
-  const onDeleteShareClick = async () => {
-    if (!tacticBoardId) return;
-    try {
-      await deleteShareLink(tacticBoardId).unwrap();
-      setShareLink("");
-      setIsShareDialogOpen(false);
-    } catch (error) {
-      console.error("Failed to delete share link", error);
-    }
+  const onShareClick = () => {
+    setIsShareDialogOpen(true);
   };
 
   const onDuplicateTacticBoardClick = async () => {
@@ -411,14 +360,13 @@ const TacticBoardProfile = () => {
   if (canEdit && tacticBoard.isPrivate) {
     tacticBoardMenuActions.push({
       key: "share",
-      label: t(
-        tacticBoard.shareToken
-          ? "TacticBoardProfile:menu.unshare"
-          : "TacticBoardProfile:menu.share",
-      ),
+      label: t("TacticBoardProfile:menu.manageShareLink"),
       onClick: onShareClick,
       icon: <ShareIcon fontSize="small" />,
-      disabled: isCreateShareLinkLoading || isDeleteShareLinkLoading,
+      disabled:
+        isEnsureShareLinkLoading ||
+        isRotateShareLinkLoading ||
+        isRevokeShareLinkLoading,
     });
   }
 
@@ -935,57 +883,30 @@ const TacticBoardProfile = () => {
               )}
             </Card>
             <Footer />
-            <Dialog
+            <ShareLinkDialog
               open={isShareDialogOpen}
-              onClose={() => {
-                setIsShareDialogOpen(false);
-                setIsCopyHighlightActive(false);
+              onClose={() => setIsShareDialogOpen(false)}
+              resourceId={tacticBoardId || ""}
+              status={shareLinkStatus}
+              isStatusPending={isShareLinkStatusPending}
+              isStatusError={isShareLinkStatusError}
+              isEnsurePending={isEnsureShareLinkLoading}
+              isRotatePending={isRotateShareLinkLoading}
+              isRevokePending={isRevokeShareLinkLoading}
+              ensure={ensureShareLink}
+              rotate={rotateShareLink}
+              revoke={revokeShareLink}
+              labels={{
+                title: t("TacticBoardProfile:shareDialog.title"),
+                error: t("TacticBoardProfile:shareDialog.error"),
+                inactive: t("TacticBoardProfile:shareDialog.inactive"),
+                copy: t("TacticBoardProfile:shareDialog.copy"),
+                close: t("TacticBoardProfile:shareDialog.close"),
+                create: t("TacticBoardProfile:shareDialog.create"),
+                rotate: t("TacticBoardProfile:shareDialog.rotate"),
+                revoke: t("TacticBoardProfile:shareDialog.revoke"),
               }}
-              fullWidth
-              maxWidth="sm"
-            >
-              <DialogTitle>
-                {t("TacticBoardProfile:shareDialog.title")}
-              </DialogTitle>
-              <DialogContent>
-                <Box
-                  sx={{ mt: 1, display: "flex", alignItems: "center", gap: 1 }}
-                >
-                  <SoftInput
-                    fullWidth
-                    readOnly
-                    value={shareLink}
-                    sx={{
-                      flex: 1,
-                      minWidth: 0,
-                    }}
-                  />
-                  <Tooltip title={t("TacticBoardProfile:shareDialog.copy")}>
-                    <span>
-                      <IconButton
-                        onClick={onCopyShareLinkClick}
-                        disabled={!shareLink}
-                        color={isCopyHighlightActive ? "info" : "inherit"}
-                      >
-                        <ContentCopyIcon />
-                      </IconButton>
-                    </span>
-                  </Tooltip>
-                </Box>
-              </DialogContent>
-              <DialogActions>
-                <SoftButton onClick={() => setIsShareDialogOpen(false)}>
-                  {t("TacticBoardProfile:shareDialog.close")}
-                </SoftButton>
-                <SoftButton
-                  color="error"
-                  onClick={onDeleteShareClick}
-                  disabled={!shareLink || isDeleteShareLinkLoading}
-                >
-                  {t("TacticBoardProfile:shareDialog.delete")}
-                </SoftButton>
-              </DialogActions>
-            </Dialog>
+            />
           </>
         )}
       </ProfileLayout>
