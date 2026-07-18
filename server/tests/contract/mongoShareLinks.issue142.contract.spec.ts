@@ -6,22 +6,21 @@ import TacticBoard from "../../models/tacticBoard";
 import {
   createMongoShareLinkPersistenceAdapters,
   isRelevantShareTokenDuplicateKeyError,
-  PracticePlanPublishMetadata,
   ProductionShareLinkResourceTypes,
-  TacticBoardPublishMetadata,
 } from "../../shareLinks/mongoShareLinkAdapters";
 import { createProductionShareLinks } from "../../shareLinks/productionShareLinks";
-import { ShareLinkActor, ShareLinkError } from "../../shareLinks/shareLinks";
+import {
+  ShareLinkActor,
+  ShareLinkCommand,
+  ShareLinkError,
+} from "../../shareLinks/shareLinks";
 
 jest.setTimeout(30_000);
 
 type ResourceKind = keyof ProductionShareLinkResourceTypes;
-type PublishMetadata =
-  | TacticBoardPublishMetadata
-  | PracticePlanPublishMetadata;
 
-interface ResourceMatrixCase {
-  kind: ResourceKind;
+interface ResourceMatrixCase<Kind extends ResourceKind> {
+  kind: Kind;
   collectionName: "tacticboards" | "practiceplans";
   sharePath: string;
   create(
@@ -33,14 +32,18 @@ interface ResourceMatrixCase {
     resourceId: string,
     access: "view" | "edit",
   ): Promise<void>;
-  publishMetadata: PublishMetadata;
+  publishMetadata: ProductionShareLinkResourceTypes[Kind]["publishMetadata"];
   expectedPublishedMetadata: Record<string, unknown>;
   expectedProjectionKeys: readonly string[];
   expectedNestedKeys: readonly string[];
   forbiddenPublishField: "pages" | "sections";
 }
 
-const cases: readonly ResourceMatrixCase[] = [
+type AnyResourceMatrixCase = {
+  [Kind in ResourceKind]: ResourceMatrixCase<Kind>;
+}[ResourceKind];
+
+const cases = [
   {
     kind: "tacticBoard",
     collectionName: "tacticboards",
@@ -196,7 +199,7 @@ const cases: readonly ResourceMatrixCase[] = [
     expectedNestedKeys: ["groups", "name", "targetDuration"],
     forbiddenPublishField: "sections",
   },
-] as const;
+] as const satisfies readonly AnyResourceMatrixCase[];
 
 const actor = (id: Types.ObjectId, roles: string[] = ["user"]): ShareLinkActor =>
   ({ id: id.toString(), roles });
@@ -218,23 +221,23 @@ const serviceFor = (
     maxTokenAttempts,
   });
 
-const manage = (
+const manage = <Kind extends ResourceKind>(
   service: ReturnType<typeof serviceFor>,
-  kind: ResourceKind,
+  kind: Kind,
   id: string,
-  command:
-    | { type: "status" | "ensure" | "rotate" | "revoke" }
-    | { type: "publish"; validatedMetadata: PublishMetadata },
+  command: ShareLinkCommand<
+    ProductionShareLinkResourceTypes[Kind]["publishMetadata"]
+  >,
   managementActor?: ShareLinkActor,
 ) =>
-  service.manage({
+  service.manage<Kind>({
     actor: managementActor,
     resource: { kind, id },
-    command: command as never,
+    command,
   });
 
 const collectionDocument = async (
-  testCase: ResourceMatrixCase,
+  testCase: AnyResourceMatrixCase,
   id: string,
 ) =>
   mongoose.connection
@@ -247,7 +250,6 @@ const expectNoPersistenceMetadata = (value: unknown): void => {
     return;
   }
   if (typeof value !== "object" || value === null) return;
-  const record = value as Record<string, unknown>;
   [
     "_id",
     "__v",
@@ -258,8 +260,8 @@ const expectNoPersistenceMetadata = (value: unknown): void => {
     "owner",
     "isPrivate",
     "persistenceOnly",
-  ].forEach((field) => expect(record).not.toHaveProperty(field));
-  Object.values(record).forEach(expectNoPersistenceMetadata);
+  ].forEach((field) => expect(value).not.toHaveProperty(field));
+  Object.values(value).forEach(expectNoPersistenceMetadata);
 };
 
 beforeAll(async () => {
@@ -402,7 +404,9 @@ describe.each(cases)("Mongo Share Link matrix: $kind", (testCase) => {
     const ownerId = new Types.ObjectId();
     await testCase.create(ownerId, { shareToken: "rotation-collision" });
     const resource = await testCase.create(ownerId, { shareToken: "old-token" });
-    const service = serviceFor(tokensFrom("rotation-collision", "new-token"));
+    const service = serviceFor(
+      tokensFrom("old-token", "rotation-collision", "new-token"),
+    );
 
     await expect(
       manage(service, testCase.kind, resource.id, { type: "rotate" }, actor(ownerId)),
@@ -413,6 +417,12 @@ describe.each(cases)("Mongo Share Link matrix: $kind", (testCase) => {
     });
     await expect(service.resolve(testCase.kind, "old-token")).rejects.toMatchObject({
       code: "shareLinkNotFound",
+    });
+    await expect(
+      service.resolve(testCase.kind, "new-token"),
+    ).resolves.toMatchObject({ kind: testCase.kind });
+    expect(await collectionDocument(testCase, resource.id)).toMatchObject({
+      shareToken: "new-token",
     });
 
     const inactive = await testCase.create(ownerId);
@@ -471,7 +481,7 @@ describe.each(cases)("Mongo Share Link matrix: $kind", (testCase) => {
       shareToken: "forged-token",
       [testCase.forbiddenPublishField]: [],
       arbitrary: "hidden",
-    } as unknown as PublishMetadata;
+    };
     await expect(
       manage(
         service,
@@ -535,14 +545,80 @@ describe.each(cases)("Mongo Share Link matrix: $kind", (testCase) => {
       [...testCase.expectedProjectionKeys].sort(),
     );
     const nested =
-      testCase.kind === "tacticBoard"
-        ? (projection as ProductionShareLinkResourceTypes["tacticBoard"]["sharedResource"])
-            .pages?.[0]?.objects?.[0]
-        : (projection as ProductionShareLinkResourceTypes["practicePlan"]["sharedResource"])
-            .sections[0];
+      projection.kind === "tacticBoard"
+        ? projection.pages?.[0]?.objects?.[0]
+        : projection.sections[0];
     expect(Object.keys(nested ?? {}).sort()).toEqual(
       [...testCase.expectedNestedKeys].sort(),
     );
+    if (projection.kind === "tacticBoard") {
+      expect(projection).toMatchObject({
+        name: "Issue 142 Board",
+        tags: ["original"],
+        creator: "Display Coach",
+        description: "Board description",
+        coaching_points: "Board coaching points",
+        pages: [
+          {
+            version: "6.0.0",
+            backgroundImage: {
+              type: "image",
+              width: 100,
+              height: 50,
+              src: "court.svg",
+            },
+            objects: [
+              {
+                uuid: "outer-object",
+                type: "group",
+                left: 10,
+                top: 20,
+                width: 30,
+                height: 40,
+                fill: "red",
+                objects: [
+                  {
+                    type: "text",
+                    left: 1,
+                    top: 2,
+                    width: 3,
+                    height: 4,
+                    text: "Nested content",
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      });
+    } else {
+      expect(projection).toMatchObject({
+        name: "Issue 142 Practice",
+        description: "Practice description",
+        tags: ["original"],
+        sections: [
+          {
+            name: "Main",
+            targetDuration: 45,
+            groups: [
+              {
+                name: "Chasers",
+                items: [
+                  {
+                    kind: "exercise",
+                    description: "Passing progression",
+                    duration: 15,
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      });
+      const item = projection.sections[0]?.groups[0]?.items[0];
+      expect(item?.exerciseId).toMatch(/^[a-f\d]{24}$/);
+      expect(item?.blockId).toMatch(/^[a-f\d]{24}$/);
+    }
     expectNoPersistenceMetadata(projection);
 
     const wrongKind: ResourceKind =
@@ -555,12 +631,18 @@ describe.each(cases)("Mongo Share Link matrix: $kind", (testCase) => {
       .catch((error: unknown) => error);
     expect(wrongKindError).toBeInstanceOf(ShareLinkError);
     expect(unknownError).toBeInstanceOf(ShareLinkError);
+    if (
+      !(wrongKindError instanceof ShareLinkError) ||
+      !(unknownError instanceof ShareLinkError)
+    ) {
+      throw new Error("Expected typed Share Link errors");
+    }
     expect({
-      code: (wrongKindError as ShareLinkError).code,
-      message: (wrongKindError as ShareLinkError).message,
+      code: wrongKindError.code,
+      message: wrongKindError.message,
     }).toEqual({
-      code: (unknownError as ShareLinkError).code,
-      message: (unknownError as ShareLinkError).message,
+      code: unknownError.code,
+      message: unknownError.message,
     });
 
     await mongoose.connection.collection(testCase.collectionName).updateOne(

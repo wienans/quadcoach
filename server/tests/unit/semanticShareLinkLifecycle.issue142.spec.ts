@@ -406,6 +406,59 @@ describe("semantic Share Link lifecycle core", () => {
     expect(rejected?.reason).toMatchObject({ code: "shareLinkConflict" });
   });
 
+  it.each(["tacticBoard", "practicePlan"] as const)(
+    "retries the active %s token candidate and invalidates it after rotation",
+    async (kind) => {
+      const harness = createHarness();
+      harness.seed(kind, "valid-resource", { token: "old-token" });
+      harness.candidates.splice(0, 1, "old-token", "replacement-token");
+      const rotateSpy = jest.spyOn(harness.persistence[kind], "rotate");
+
+      await expect(
+        harness.shareLinks.manage({
+          actor: owner,
+          resource: { kind, id: "valid-resource" },
+          command: { type: "rotate" },
+        }),
+      ).resolves.toEqual({
+        state: "active",
+        outcome: "rotated",
+        url:
+          kind === "tacticBoard"
+            ? "https://quadcoach.test/tacticboards/share/replacement-token"
+            : "https://quadcoach.test/practice-plans/share/replacement-token",
+      });
+      expect(rotateSpy).toHaveBeenCalledTimes(1);
+      expect(rotateSpy).toHaveBeenCalledWith(
+        "valid-resource",
+        "old-token",
+        "replacement-token",
+      );
+      await expect(
+        harness.shareLinks.resolve(kind, "old-token"),
+      ).rejects.toMatchObject({ code: "shareLinkNotFound" });
+      await expect(
+        harness.shareLinks.resolve(kind, "replacement-token"),
+      ).resolves.toMatchObject({ kind });
+    },
+  );
+
+  it("exhausts normally when rotation repeatedly generates the active token", async () => {
+    const harness = createHarness();
+    harness.seed("tacticBoard", "valid-resource", { token: "old-token" });
+    harness.candidates.splice(0, 1, "old-token", "old-token", "old-token");
+    const rotateSpy = jest.spyOn(harness.persistence.tacticBoard, "rotate");
+
+    await expect(
+      harness.shareLinks.manage({
+        actor: owner,
+        resource: { kind: "tacticBoard", id: "valid-resource" },
+        command: { type: "rotate" },
+      }),
+    ).rejects.toMatchObject({ code: "tokenGenerationExhausted" });
+    expect(rotateSpy).not.toHaveBeenCalled();
+  });
+
   it("rejects rotation when no link is active", async () => {
     const harness = createHarness();
     harness.seed("tacticBoard", "valid-resource");

@@ -279,10 +279,12 @@ export function createShareLinks<ResourceTypes extends ShareLinkResourceTypes>(
         const expectedToken = state.activeToken;
         if (!expectedToken) return fail("shareLinkInactive");
         for (let attempt = 0; attempt < maxTokenAttempts; attempt += 1) {
+          const candidateToken = dependencies.tokens.next();
+          if (candidateToken === expectedToken) continue;
           const result = await adapter.rotate(
             request.resource.id,
             expectedToken,
-            dependencies.tokens.next(),
+            candidateToken,
           );
           if (result.outcome === "rotated") {
             return {

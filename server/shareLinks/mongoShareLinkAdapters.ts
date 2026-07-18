@@ -2,6 +2,12 @@ import mongoose from "mongoose";
 import { PracticePlan } from "../models/practicePlan";
 import TacticBoard from "../models/tacticBoard";
 import {
+  projectPracticePlan,
+  projectTacticBoard,
+  SharedPracticePlan,
+  SharedTacticBoard,
+} from "./shareLinkProjections";
+import {
   EnsureShareLinkResult,
   PublishShareLinkResult,
   RevokeShareLinkResult,
@@ -9,6 +15,17 @@ import {
   ShareLinkPersistenceAdapter,
   ShareLinkResourceState,
 } from "./shareLinks";
+
+export {
+  SharedPracticePlan,
+  SharedPracticePlanGroup,
+  SharedPracticePlanItem,
+  SharedPracticePlanSection,
+  SharedTacticBoard,
+  SharedTacticBoardBackgroundImage,
+  SharedTacticBoardObject,
+  SharedTacticBoardPage,
+} from "./shareLinkProjections";
 
 export interface TacticBoardPublishMetadata {
   name?: string;
@@ -21,98 +38,6 @@ export interface PracticePlanPublishMetadata {
   name?: string;
   description?: string;
   tags?: readonly string[];
-}
-
-export interface SharedTacticBoardObject {
-  uuid?: string;
-  type: string;
-  left: number;
-  top: number;
-  x1?: number;
-  y1?: number;
-  x2?: number;
-  y2?: number;
-  width?: number;
-  height?: number;
-  fill?: string;
-  stroke?: string;
-  strokeWidth?: number;
-  strokeDashArray?: readonly number[];
-  strokeLineCap?: string;
-  strokeDashOffset?: number;
-  strokeLineJoin?: string;
-  strokeUniform?: boolean;
-  strokeMiterLimit?: number;
-  scaleX?: number;
-  scaleY?: number;
-  angle?: number;
-  opacity?: number;
-  objects?: readonly SharedTacticBoardObject[];
-  visible?: boolean;
-  backgroundColor?: string;
-  radius?: number;
-  startAngle?: number;
-  endAngle?: number;
-  path?: readonly (readonly (string | number)[])[];
-  text?: string;
-  originX?: string;
-  originY?: string;
-  fontFamily?: string;
-  fontSize?: number;
-  textAlign?: string;
-  objectType?: string;
-}
-
-export interface SharedTacticBoardBackgroundImage {
-  type?: string;
-  width?: number;
-  height?: number;
-  src?: string;
-}
-
-export interface SharedTacticBoardPage {
-  version?: string;
-  objects?: readonly SharedTacticBoardObject[];
-  backgroundImage?:
-    | SharedTacticBoardBackgroundImage
-    | readonly SharedTacticBoardBackgroundImage[];
-}
-
-export interface SharedTacticBoard {
-  kind: "tacticBoard";
-  name?: string;
-  tags?: readonly string[];
-  pages?: readonly SharedTacticBoardPage[];
-  creator?: string;
-  description?: string;
-  coaching_points?: string;
-}
-
-export interface SharedPracticePlanItem {
-  kind: "exercise" | "break";
-  description?: string;
-  exerciseId?: string;
-  blockId?: string;
-  duration?: number;
-}
-
-export interface SharedPracticePlanGroup {
-  name: string;
-  items: readonly SharedPracticePlanItem[];
-}
-
-export interface SharedPracticePlanSection {
-  name: string;
-  targetDuration: number;
-  groups: readonly SharedPracticePlanGroup[];
-}
-
-export interface SharedPracticePlan {
-  kind: "practicePlan";
-  name: string;
-  description?: string;
-  tags: readonly string[];
-  sections: readonly SharedPracticePlanSection[];
 }
 
 export type ProductionShareLinkResourceTypes = {
@@ -145,204 +70,27 @@ const ownDefinedFields = (
       .map((field) => [field, source[field]]),
   );
 
-const TACTIC_BOARD_OBJECT_FIELDS = [
-  "uuid",
-  "type",
-  "left",
-  "top",
-  "x1",
-  "y1",
-  "x2",
-  "y2",
-  "width",
-  "height",
-  "fill",
-  "stroke",
-  "strokeWidth",
-  "strokeDashArray",
-  "strokeLineCap",
-  "strokeDashOffset",
-  "strokeLineJoin",
-  "strokeUniform",
-  "strokeMiterLimit",
-  "scaleX",
-  "scaleY",
-  "angle",
-  "opacity",
-  "visible",
-  "backgroundColor",
-  "radius",
-  "startAngle",
-  "endAngle",
-  "path",
-  "text",
-  "originX",
-  "originY",
-  "fontFamily",
-  "fontSize",
-  "textAlign",
-  "objectType",
-] as const;
-
-const projectTacticBoardObject = (
-  value: unknown,
-): SharedTacticBoardObject | null => {
-  if (!isRecord(value)) return null;
-  const projected = ownDefinedFields(value, TACTIC_BOARD_OBJECT_FIELDS);
-  if (Array.isArray(value.objects)) {
-    projected.objects = value.objects
-      .map(projectTacticBoardObject)
-      .filter((item): item is SharedTacticBoardObject => item !== null);
-  }
-  return projected as unknown as SharedTacticBoardObject;
-};
-
-const projectBackgroundImage = (
-  value: unknown,
-): SharedTacticBoardBackgroundImage | null => {
-  if (!isRecord(value)) return null;
-  return ownDefinedFields(value, [
-    "type",
-    "width",
-    "height",
-    "src",
-  ]) as SharedTacticBoardBackgroundImage;
-};
-
-const projectTacticBoardPage = (
-  value: unknown,
-): SharedTacticBoardPage | null => {
-  if (!isRecord(value)) return null;
-  const projected = ownDefinedFields(value, ["version"]);
-  if (Array.isArray(value.objects)) {
-    projected.objects = value.objects
-      .map(projectTacticBoardObject)
-      .filter((item): item is SharedTacticBoardObject => item !== null);
-  }
-  if (Array.isArray(value.backgroundImage)) {
-    projected.backgroundImage = value.backgroundImage
-      .map(projectBackgroundImage)
-      .filter(
-        (item): item is SharedTacticBoardBackgroundImage => item !== null,
-      );
-  } else {
-    const backgroundImage = projectBackgroundImage(value.backgroundImage);
-    if (backgroundImage) projected.backgroundImage = backgroundImage;
-  }
-  return projected as SharedTacticBoardPage;
-};
-
-const projectTacticBoard = (value: unknown): SharedTacticBoard | null => {
-  if (!isRecord(value)) return null;
-  const projected: UnknownRecord = {
-    kind: "tacticBoard",
-    ...ownDefinedFields(value, [
-      "name",
-      "tags",
-      "creator",
-      "description",
-      "coaching_points",
-    ]),
-  };
-  if (Array.isArray(value.pages)) {
-    projected.pages = value.pages
-      .map(projectTacticBoardPage)
-      .filter((page): page is SharedTacticBoardPage => page !== null);
-  }
-  return projected as unknown as SharedTacticBoard;
-};
-
-const projectPracticePlanItem = (
-  value: unknown,
-): SharedPracticePlanItem | null => {
-  if (!isRecord(value)) return null;
-  const projected = ownDefinedFields(value, ["kind", "description", "duration"]);
-  if (value.exerciseId !== undefined) {
-    projected.exerciseId = String(value.exerciseId);
-  }
-  if (value.blockId !== undefined) projected.blockId = String(value.blockId);
-  return projected as unknown as SharedPracticePlanItem;
-};
-
-const projectPracticePlanGroup = (
-  value: unknown,
-): SharedPracticePlanGroup | null => {
-  if (!isRecord(value)) return null;
-  return {
-    ...(ownDefinedFields(value, ["name"]) as { name: string }),
-    items: Array.isArray(value.items)
-      ? value.items
-          .map(projectPracticePlanItem)
-          .filter((item): item is SharedPracticePlanItem => item !== null)
-      : [],
-  };
-};
-
-const projectPracticePlanSection = (
-  value: unknown,
-): SharedPracticePlanSection | null => {
-  if (!isRecord(value)) return null;
-  return {
-    ...(ownDefinedFields(value, ["name", "targetDuration"]) as {
-      name: string;
-      targetDuration: number;
-    }),
-    groups: Array.isArray(value.groups)
-      ? value.groups
-          .map(projectPracticePlanGroup)
-          .filter((group): group is SharedPracticePlanGroup => group !== null)
-      : [],
-  };
-};
-
-const projectPracticePlan = (value: unknown): SharedPracticePlan | null => {
-  if (!isRecord(value)) return null;
-  return {
-    kind: "practicePlan",
-    ...(ownDefinedFields(value, ["name", "description", "tags"]) as {
-      name: string;
-      description?: string;
-      tags: string[];
-    }),
-    sections: Array.isArray(value.sections)
-      ? value.sections
-          .map(projectPracticePlanSection)
-          .filter(
-            (section): section is SharedPracticePlanSection => section !== null,
-          )
-      : [],
-  };
-};
-
-interface MongoDuplicateKeyError {
-  code?: unknown;
-  keyPattern?: unknown;
-  keyValue?: unknown;
-  ns?: unknown;
-}
-
 export function isRelevantShareTokenDuplicateKeyError(
   error: unknown,
   collectionName: string,
 ): boolean {
   if (!isRecord(error)) return false;
-  const duplicate = error as MongoDuplicateKeyError;
-  if (duplicate.code !== 11000) return false;
-  if (!isRecord(duplicate.keyPattern) || !isRecord(duplicate.keyValue)) {
+  if (error.code !== 11000) return false;
+  if (!isRecord(error.keyPattern) || !isRecord(error.keyValue)) {
     return false;
   }
   if (
-    Object.keys(duplicate.keyPattern).length !== 1 ||
-    duplicate.keyPattern.shareToken !== 1 ||
-    Object.keys(duplicate.keyValue).length !== 1 ||
-    !Object.prototype.hasOwnProperty.call(duplicate.keyValue, "shareToken")
+    Object.keys(error.keyPattern).length !== 1 ||
+    error.keyPattern.shareToken !== 1 ||
+    Object.keys(error.keyValue).length !== 1 ||
+    !Object.prototype.hasOwnProperty.call(error.keyValue, "shareToken")
   ) {
     return false;
   }
   return (
-    typeof duplicate.ns !== "string" ||
-    duplicate.ns === collectionName ||
-    duplicate.ns.endsWith(`.${collectionName}`)
+    typeof error.ns !== "string" ||
+    error.ns === collectionName ||
+    error.ns.endsWith(`.${collectionName}`)
   );
 }
 
@@ -474,10 +222,9 @@ const createAdapter = <Metadata extends object, SharedResource>(
       }
     },
     async publish(id, metadata): Promise<PublishShareLinkResult> {
-      const allowedMetadata = ownDefinedFields(
-        metadata as UnknownRecord,
-        publishFields,
-      );
+      const allowedMetadata = isRecord(metadata)
+        ? ownDefinedFields(metadata, publishFields)
+        : {};
       while (true) {
         const result = await operations.makePublic(id, allowedMetadata);
         if (result.matchedCount > 0) return { outcome: "published" };

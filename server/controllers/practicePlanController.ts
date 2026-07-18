@@ -3,7 +3,7 @@ import asyncHandler from "express-async-handler";
 import { Request, Response } from "express";
 import mongoose from "mongoose";
 import crypto from "crypto";
-import { ISection, PracticePlan } from "../models/practicePlan";
+import { PracticePlan } from "../models/practicePlan";
 import PracticePlanAccess from "../models/practicePlanAccess";
 import {
   isNonEmptyName,
@@ -37,25 +37,10 @@ const PRACTICE_PLAN_UPDATE_FIELDS = [
   "isPrivate",
 ] as const;
 
-interface PracticePlanCreateFields {
-  name?: unknown;
-  description?: string;
-  tags?: string[];
-  sections?: ISection[];
-}
-
-interface PracticePlanUpdateFields {
-  name?: unknown;
-  description?: unknown;
-  tags?: unknown;
-  sections?: unknown;
-  isPrivate?: unknown;
-}
-
-function allowlistedFields<T extends object>(
+function allowlistedFields(
   body: unknown,
-  fields: readonly (keyof T & string)[],
-): Partial<T> {
+  fields: readonly string[],
+): Record<string, unknown> {
   if (typeof body !== "object" || body === null || Array.isArray(body)) {
     return {};
   }
@@ -65,7 +50,7 @@ function allowlistedFields<T extends object>(
     fields
       .filter((field) => source[field] !== undefined)
       .map((field) => [field, source[field]]),
-  ) as Partial<T>;
+  );
 }
 
 function isMongoError(error: unknown): error is { code: number } {
@@ -184,19 +169,17 @@ export const createPracticePlan = async (
   try {
     const userId = req.UserInfo?.id;
     if (!userId) return res.status(401).json({ message: "Unauthorized" });
-    const { name, description, tags, sections } =
-      allowlistedFields<PracticePlanCreateFields>(
-        req.body,
-        PRACTICE_PLAN_CREATE_FIELDS,
-      );
-    if (!isNonEmptyName(name))
+    const fields = allowlistedFields(
+      req.body,
+      PRACTICE_PLAN_CREATE_FIELDS,
+    );
+    if (!isNonEmptyName(fields.name))
       return res.status(400).json({ message: "Name required" });
 
+    fields.name = fields.name.trim();
+    fields.tags = fields.tags || [];
     const plan = await PracticePlan.create({
-      name: name.trim(),
-      description,
-      tags: tags || [],
-      sections,
+      ...fields,
       user: userId,
       isPrivate: false,
     });
@@ -257,7 +240,7 @@ export const patchPracticePlan = async (
         return;
       }
 
-      const requestUpdates = allowlistedFields<PracticePlanUpdateFields>(
+      const requestUpdates = allowlistedFields(
         req.body,
         PRACTICE_PLAN_UPDATE_FIELDS,
       );
