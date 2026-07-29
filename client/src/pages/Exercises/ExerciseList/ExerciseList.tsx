@@ -201,6 +201,7 @@ const ExerciseList = () => {
           filter.maxPersons === maxPersons ? undefined : filter.maxPersons,
         personsMin: filter.minPersons === 0 ? undefined : filter.minPersons,
         search: filter.searchValue,
+        tagSearch: filter.tagInput.trim() || undefined,
         tags: filter.tags,
         tagMode: "all",
         materials: filter.materials,

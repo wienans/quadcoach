@@ -39,6 +39,7 @@ describe("Exercise collection API contract", () => {
     await store.dispatch(
       exerciseApiSlice.endpoints.getExercises.initiate({
         search: "Press .* [one]",
+        tagSearch: "WaRm .* [up]",
         tags: ["Defense", "Fast play"],
         tagMode: "any",
         materials: ["Hoops", "Cones"],
@@ -59,7 +60,7 @@ describe("Exercise collection API contract", () => {
     );
 
     expect(lastRequest()).toEqual({
-      url: "/api/exercises?search=Press+.*+%5Bone%5D&tags=Defense&tags=Fast+play&tagMode=any&materials=Hoops&materials=Cones&materialMode=all&personsMin=2&personsMax=12&durationMin=5&durationMax=30&beatersMin=1&beatersMax=4&chasersMin=3&chasersMax=6&sort=duration&direction=desc&page=3&limit=25",
+      url: "/api/exercises?search=Press+.*+%5Bone%5D&tagSearch=WaRm+.*+%5Bup%5D&tags=Defense&tags=Fast+play&tagMode=any&materials=Hoops&materials=Cones&materialMode=all&personsMin=2&personsMax=12&durationMin=5&durationMax=30&beatersMin=1&beatersMax=4&chasersMin=3&chasersMax=6&sort=duration&direction=desc&page=3&limit=25",
       method: "get",
     });
   });
