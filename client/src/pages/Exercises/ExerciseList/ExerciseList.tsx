@@ -1,9 +1,7 @@
 import "./translations";
 import {
   ChangeEvent,
-  useEffect,
   useState,
-  useCallback,
   KeyboardEvent,
 } from "react";
 import {
@@ -51,36 +49,18 @@ import {
 import { DashboardLayout } from "../../../components/LayoutContainers";
 import { useAuth } from "../../../store/hooks";
 import Footer from "../../../components/Footer";
-import debounce from "lodash/debounce";
-import { Exercise, ExerciseSummary } from "../../../api/quadcoachApi/domain";
-
-const maxPersons = 20; // Maximum number of persons for filtering
-const maxTime = 60; // Maximum time in minutes
-const maxChasers = 10; // Maximum number of chasers
-const maxBeaters = 10; // Maximum number of beaters
-
-type ExerciseFilter = {
-  searchValue: string;
-  minPersons: number;
-  maxPersons: number;
-  tagInput: string;
-  tags: string[];
-  materialInput: string;
-  materials: string[];
-  minTime: number;
-  maxTime: number;
-  minBeaters: number;
-  maxBeaters: number;
-  minChasers: number;
-  maxChasers: number;
-  sort: "name" | "duration" | "persons" | "created" | "updated";
-  direction: "asc" | "desc";
-  page: number;
-  limit: number;
-};
+import { Exercise } from "../../../api/quadcoachApi/domain";
+import {
+  ExerciseFilter,
+  MAX_BEATERS,
+  MAX_CHASERS,
+  MAX_PERSONS,
+  MAX_TIME,
+  useExerciseListQuery,
+} from "./useExerciseListQuery";
 
 const defaultExerciseFilter: ExerciseFilter = {
-  maxPersons: maxPersons,
+  maxPersons: MAX_PERSONS,
   minPersons: 0,
   searchValue: "",
   tagInput: "",
@@ -88,14 +68,13 @@ const defaultExerciseFilter: ExerciseFilter = {
   materialInput: "",
   materials: [],
   minTime: 0,
-  maxTime: maxTime,
+  maxTime: MAX_TIME,
   minBeaters: 0,
-  maxBeaters: maxBeaters,
+  maxBeaters: MAX_BEATERS,
   minChasers: 0,
-  maxChasers: maxChasers,
+  maxChasers: MAX_CHASERS,
   sort: "name",
   direction: "asc",
-  page: 1,
   limit: 50,
 };
 
@@ -109,7 +88,6 @@ const ExerciseList = () => {
     null,
   );
   const { id: userId, name: userName, status: userStatus } = useAuth();
-  const [loadedExercises, setLoadedExercises] = useState<ExerciseSummary[]>([]);
   const [openAddDialog, setOpenAddDialog] = useState(false);
   const [newExerciseName, setNewExerciseName] = useState("");
 
@@ -120,40 +98,33 @@ const ExerciseList = () => {
   const onExerciseFilterValueChange =
     (exerciseFilterProperty: keyof ExerciseFilter) =>
     (event: ChangeEvent<HTMLInputElement>) => {
-      setLoadedExercises([]);
       setExerciseFilter({
         ...exerciseFilter,
         [exerciseFilterProperty]: event.target.value,
-        page: 1,
       });
     };
 
   const handleTagKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Enter" && exerciseFilter.tagInput.trim() !== "") {
       event.preventDefault();
-      setLoadedExercises([]);
       setExerciseFilter({
         ...exerciseFilter,
         tags: [...exerciseFilter.tags, exerciseFilter.tagInput.trim()],
         tagInput: "",
-        page: 1,
       });
     }
   };
 
   const handleDeleteTag = (tagToDelete: string) => {
-    setLoadedExercises([]);
     setExerciseFilter({
       ...exerciseFilter,
       tags: exerciseFilter.tags.filter((tag) => tag !== tagToDelete),
-      page: 1,
     });
   };
 
   const handleMaterialKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Enter" && exerciseFilter.materialInput.trim() !== "") {
       event.preventDefault();
-      setLoadedExercises([]);
       setExerciseFilter({
         ...exerciseFilter,
         materials: [
@@ -161,84 +132,38 @@ const ExerciseList = () => {
           exerciseFilter.materialInput.trim(),
         ],
         materialInput: "",
-        page: 1,
       });
     }
   };
 
   const handleDeleteMaterial = (materialToDelete: string) => {
-    setLoadedExercises([]);
     setExerciseFilter({
       ...exerciseFilter,
       materials: exerciseFilter.materials.filter(
         (material) => material !== materialToDelete,
       ),
-      page: 1,
     });
   };
 
   const handleClearAllFilters = () => {
-    setLoadedExercises([]);
     setExerciseFilter({
       ...defaultExerciseFilter,
     });
   };
 
-  const [
+  const [getExercises] = useLazyGetExercisesQuery();
+  const {
+    exercises: loadedExercises,
+    pagination,
+    status: exerciseQueryStatus,
+    isLoadingMore,
+    loadMore,
+  } = useExerciseListQuery({
+    filter: exerciseFilter,
     getExercises,
-    {
-      data: exercisesData,
-      isError: isExercisesError,
-      isLoading: isExercisesLoading,
-    },
-  ] = useLazyGetExercisesQuery();
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const debouncedGetExercises = useCallback(
-    debounce((filter: ExerciseFilter) => {
-      getExercises({
-        personsMax:
-          filter.maxPersons === maxPersons ? undefined : filter.maxPersons,
-        personsMin: filter.minPersons === 0 ? undefined : filter.minPersons,
-        search: filter.searchValue,
-        tags: filter.tags,
-        tagMode: "all",
-        materials: filter.materials,
-        materialMode: "all",
-        durationMin: filter.minTime === 0 ? undefined : filter.minTime,
-        durationMax: filter.maxTime === maxTime ? undefined : filter.maxTime,
-        beatersMin: filter.minBeaters === 0 ? undefined : filter.minBeaters,
-        beatersMax:
-          filter.maxBeaters === maxBeaters ? undefined : filter.maxBeaters,
-        chasersMin: filter.minChasers === 0 ? undefined : filter.minChasers,
-        chasersMax:
-          filter.maxChasers === maxChasers ? undefined : filter.maxChasers,
-        sort: filter.sort,
-        direction: filter.direction,
-        page: filter.page,
-        limit: filter.limit,
-      });
-    }, 500),
-    [getExercises],
-  );
-
-  useEffect(() => {
-    debouncedGetExercises(exerciseFilter);
-
-    return () => {
-      debouncedGetExercises.cancel();
-    };
-  }, [exerciseFilter, debouncedGetExercises]);
-
-  useEffect(() => {
-    if (exercisesData?.items) {
-      setLoadedExercises((prev) => {
-        const newExerciseIds = new Set(exercisesData.items.map((e) => e._id));
-        const filteredPrev = prev.filter((e) => !newExerciseIds.has(e._id));
-        return [...filteredPrev, ...exercisesData.items];
-      });
-    }
-  }, [exercisesData]);
+  });
+  const isExercisesError = exerciseQueryStatus === "error";
+  const isExercisesLoading = exerciseQueryStatus === "loading";
 
   const [createExercise, { isLoading: isCreatingExercise }] =
     useAddExerciseMutation();
@@ -271,23 +196,6 @@ const ExerciseList = () => {
   const onOpenExerciseClick = (exerciseId: string) => {
     navigate(`/exercises/${exerciseId}`);
   };
-
-  // Load more function
-  const loadMore = useCallback(() => {
-    if (exercisesData && exerciseFilter.page < exercisesData.pagination.pages) {
-      setExerciseFilter((prev) => ({
-        ...prev,
-        page: prev.page + 1,
-      }));
-    }
-  }, [exercisesData, exerciseFilter.page]);
-
-  // Add cleanup effect
-  useEffect(() => {
-    return () => {
-      setLoadedExercises([]); // Clear exercises when component unmounts
-    };
-  }, []);
 
   return (
     <DashboardLayout
@@ -366,7 +274,6 @@ const ExerciseList = () => {
                     value={exerciseFilter.sort}
                     label={t("ExerciseList:filter.sort.name")}
                     onChange={(event) => {
-                      setLoadedExercises([]);
                       setExerciseFilter({
                         ...exerciseFilter,
                         sort: event.target.value as
@@ -375,7 +282,6 @@ const ExerciseList = () => {
                           | "persons"
                           | "created"
                           | "updated",
-                        page: 1,
                       });
                     }}
                   >
@@ -400,12 +306,10 @@ const ExerciseList = () => {
                   value={exerciseFilter.direction}
                   selected={exerciseFilter.direction === "desc"}
                   onChange={() => {
-                    setLoadedExercises([]);
                     setExerciseFilter({
                       ...exerciseFilter,
                       direction:
                         exerciseFilter.direction === "asc" ? "desc" : "asc",
-                      page: 1,
                     });
                   }}
                   size="small"
@@ -473,8 +377,8 @@ const ExerciseList = () => {
                     {t("ExerciseList:filter.persons.titleWithNumbers", {
                       minValue: exerciseFilter.minPersons,
                       maxValue:
-                        exerciseFilter.maxPersons === maxPersons
-                          ? `${maxPersons}+`
+                        exerciseFilter.maxPersons === MAX_PERSONS
+                          ? `${MAX_PERSONS}+`
                           : exerciseFilter.maxPersons,
                     })}
                   </SoftTypography>
@@ -486,17 +390,15 @@ const ExerciseList = () => {
                     ]}
                     onChange={(_event: Event, newValue: number | number[]) => {
                       const [newMin, newMax] = newValue as number[];
-                      setLoadedExercises([]);
                       setExerciseFilter((prev) => ({
                         ...prev,
                         maxPersons: newMax,
                         minPersons: newMin,
-                        page: 1,
                       }));
                     }}
                     valueLabelDisplay="auto"
                     getAriaValueText={(value: number) => value.toString()}
-                    max={maxPersons}
+                    max={MAX_PERSONS}
                     min={0}
                   />
                 </Grid>
@@ -506,8 +408,8 @@ const ExerciseList = () => {
                     {t("ExerciseList:filter.timeInMinutes.titleWithNumbers", {
                       minValue: exerciseFilter.minTime,
                       maxValue:
-                        exerciseFilter.maxTime === maxTime
-                          ? `${maxTime}+`
+                        exerciseFilter.maxTime === MAX_TIME
+                          ? `${MAX_TIME}+`
                           : exerciseFilter.maxTime,
                     })}
                   </SoftTypography>
@@ -516,17 +418,15 @@ const ExerciseList = () => {
                     value={[exerciseFilter.minTime, exerciseFilter.maxTime]}
                     onChange={(_event: Event, newValue: number | number[]) => {
                       const [newMin, newMax] = newValue as number[];
-                      setLoadedExercises([]);
                       setExerciseFilter({
                         ...exerciseFilter,
                         minTime: newMin,
                         maxTime: newMax,
-                        page: 1,
                       });
                     }}
                     valueLabelDisplay="auto"
                     getAriaValueText={(value: number) => `${value} minutes`}
-                    max={maxTime}
+                    max={MAX_TIME}
                     min={0}
                   />
                 </Grid>
@@ -536,8 +436,8 @@ const ExerciseList = () => {
                     {t("ExerciseList:filter.beaters.titleWithNumbers", {
                       minValue: exerciseFilter.minBeaters,
                       maxValue:
-                        exerciseFilter.maxBeaters === maxBeaters
-                          ? `${maxBeaters}+`
+                        exerciseFilter.maxBeaters === MAX_BEATERS
+                          ? `${MAX_BEATERS}+`
                           : exerciseFilter.maxBeaters,
                     })}
                   </SoftTypography>
@@ -549,17 +449,15 @@ const ExerciseList = () => {
                     ]}
                     onChange={(_event: Event, newValue: number | number[]) => {
                       const [newMin, newMax] = newValue as number[];
-                      setLoadedExercises([]);
                       setExerciseFilter({
                         ...exerciseFilter,
                         minBeaters: newMin,
                         maxBeaters: newMax,
-                        page: 1,
                       });
                     }}
                     valueLabelDisplay="auto"
                     getAriaValueText={(value: number) => value.toString()}
-                    max={maxBeaters}
+                    max={MAX_BEATERS}
                     min={0}
                   />
                 </Grid>
@@ -569,8 +467,8 @@ const ExerciseList = () => {
                     {t("ExerciseList:filter.chasers.titleWithNumbers", {
                       minValue: exerciseFilter.minChasers,
                       maxValue:
-                        exerciseFilter.maxChasers === maxChasers
-                          ? `${maxChasers}+`
+                        exerciseFilter.maxChasers === MAX_CHASERS
+                          ? `${MAX_CHASERS}+`
                           : exerciseFilter.maxChasers,
                     })}
                   </SoftTypography>
@@ -582,17 +480,15 @@ const ExerciseList = () => {
                     ]}
                     onChange={(_event: Event, newValue: number | number[]) => {
                       const [newMin, newMax] = newValue as number[];
-                      setLoadedExercises([]);
                       setExerciseFilter({
                         ...exerciseFilter,
                         minChasers: newMin,
                         maxChasers: newMax,
-                        page: 1,
                       });
                     }}
                     valueLabelDisplay="auto"
                     getAriaValueText={(value: number) => value.toString()}
-                    max={maxChasers}
+                    max={MAX_CHASERS}
                     min={0}
                   />
                 </Grid>
@@ -757,8 +653,7 @@ const ExerciseList = () => {
                   }}
                 />
               </SoftBox>
-              {exercisesData &&
-                exerciseFilter.page < exercisesData.pagination.pages && (
+              {pagination && pagination.page < pagination.pages && (
                   <SoftBox
                     display="flex"
                     justifyContent="center"
@@ -766,7 +661,7 @@ const ExerciseList = () => {
                   >
                     <SoftButton
                       onClick={loadMore}
-                      disabled={isExercisesLoading}
+                      disabled={isLoadingMore}
                     >
                       {t("ExerciseList:loadMore")}
                     </SoftButton>
