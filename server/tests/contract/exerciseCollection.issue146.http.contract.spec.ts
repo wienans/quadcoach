@@ -99,6 +99,49 @@ describe("issue 146 Exercise collection HTTP contract", () => {
     });
   });
 
+  it("combines exact tags with a literal partial tag over HTTP", async () => {
+    await mongoose.connection.db!.collection("exercises").insertMany([
+      { name: "Combined", tags: ["Warmup", "Defense"] },
+      { name: "Missing exact", tags: ["Defense"] },
+      { name: "Missing partial", tags: ["Warmup", "Attack"] },
+      { name: "Literal", tags: ["Warmup", "Pattern [one].*"] },
+      { name: "Regex-like", tags: ["Warmup", "Pattern onexxx"] },
+    ]);
+
+    const combined = await request(app)
+      .get("/api/exercises")
+      .query({ tags: "warmup", tagMode: "all", tagSearch: "FEN" })
+      .expect(200);
+    expect(
+      combined.body.items.map((item: { name: string }) => item.name),
+    ).toEqual(["Combined"]);
+
+    const literal = await request(app)
+      .get("/api/exercises")
+      .query({ tags: "warmup", tagMode: "all", tagSearch: "[one].*" })
+      .expect(200);
+    expect(literal.body.items.map((item: { name: string }) => item.name)).toEqual([
+      "Literal",
+    ]);
+  });
+
+  it("returns structured partial-tag validation failures", async () => {
+    const response = await request(app)
+      .get("/api/exercises")
+      .query({ tagSearch: ["first", "second"] })
+      .expect(400);
+
+    expect(response.body).toEqual({
+      message: "Invalid collection query",
+      errors: [{ field: "tagSearch", code: "duplicate" }],
+    });
+
+    await request(app)
+      .get("/api/exercises")
+      .query({ tagSearch: "   " })
+      .expect(200);
+  });
+
   it("returns strict validation envelopes for legacy and unknown syntax", async () => {
     const response = await request(app)
       .get("/api/exercises?name%5Bregex%5D=x&sortBy=time&limit=101")

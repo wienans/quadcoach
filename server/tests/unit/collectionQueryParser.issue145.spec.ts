@@ -93,6 +93,38 @@ describe("collection query transport parser", () => {
     ]);
   });
 
+  it("normalizes an exercise-only partial tag search", () => {
+    const intent = parseCollectionQuery("exercise", {
+      tagSearch: "  Fast play  ",
+    });
+
+    expect(intent).toMatchObject({ tagSearch: "Fast play" });
+    expect(Object.isFrozen(intent)).toBe(true);
+    expect(parseCollectionQuery("exercise", { tagSearch: "   " })).not.toHaveProperty(
+      "tagSearch",
+    );
+    expect(errorsFor("tacticBoard", { tagSearch: "fast" }).errors).toEqual([
+      { field: "tagSearch", code: "unknown" },
+    ]);
+  });
+
+  it("rejects invalid partial tag search values", () => {
+    expect(
+      errorsFor("exercise", {
+        tagSearch: ["fast", "play"],
+      }).errors,
+    ).toEqual([{ field: "tagSearch", code: "duplicate" }]);
+    expect(errorsFor("exercise", { tagSearch: { value: "fast" } }).errors).toEqual(
+      [{ field: "tagSearch", code: "malformed" }],
+    );
+    expect(
+      errorsFor("exercise", { tagSearch: "x".repeat(101) }).errors,
+    ).toEqual([{ field: "tagSearch", code: "outOfRange" }]);
+    expect(
+      parseCollectionQuery("exercise", { tagSearch: "x".repeat(100) }),
+    ).toMatchObject({ tagSearch: "x".repeat(100) });
+  });
+
   it("keeps resource vocabularies closed", () => {
     expect(
       errorsFor("tacticBoard", { materials: "cones", privacy: "secret" })

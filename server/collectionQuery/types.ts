@@ -32,6 +32,7 @@ export interface ExerciseIntentInput extends CommonIntent<
   CommonSort | "duration" | "persons"
 > {
   readonly resource: "exercise";
+  readonly tagSearch?: string;
   readonly materials?: ValueSelection;
   readonly persons?: IntegerRange;
   readonly duration?: IntegerRange;

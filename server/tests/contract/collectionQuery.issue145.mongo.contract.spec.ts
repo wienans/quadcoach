@@ -110,6 +110,36 @@ describe("collection query Mongo contract", () => {
     expect(bounded.items[0]).not.toHaveProperty("description_blocks");
   });
 
+  it("matches partial tags literally and combines them with exact tags", async () => {
+    const database = mongoose.connection.db!;
+    await database.collection("exercises").insertMany([
+      { name: "Combined", tags: ["Warmup", "Team Defense"] },
+      { name: "Wrong exact tag", tags: ["Cooldown", "Defense"] },
+      { name: "Wrong partial tag", tags: ["Warmup", "Attack"] },
+      { name: "Literal punctuation", tags: ["Pattern [one].*"] },
+      { name: "Regex-like only", tags: ["Pattern onexxx"] },
+    ]);
+    const visible = collectionVisibility.all();
+
+    const combined = await browse({
+      intent: parseCollectionQuery("exercise", {
+        tags: "warmup",
+        tagMode: "all",
+        tagSearch: "FEN",
+      }),
+      visibility: visible,
+    });
+    expect(combined.items.map((item) => item.name)).toEqual(["Combined"]);
+
+    const literal = await browse({
+      intent: parseCollectionQuery("exercise", { tagSearch: "[one].*" }),
+      visibility: visible,
+    });
+    expect(literal.items.map((item) => item.name)).toEqual([
+      "Literal punctuation",
+    ]);
+  });
+
   it("supports stable pages, successful beyond-end pages, and derived plan summaries", async () => {
     const database = mongoose.connection.db!;
     await database.collection("practiceplans").insertMany([

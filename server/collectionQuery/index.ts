@@ -213,8 +213,21 @@ function rangeMatch(range: IntegerRange): mongo.Document {
 function callerMatch(intent: CollectionIntent): mongo.Filter<mongo.Document> {
   const match: mongo.Filter<mongo.Document> = {};
   if (intent.search) match.name = new RegExp(escapeRegex(intent.search), "i");
-  if (intent.tags) match.tags = selectionMatch(intent.tags);
   if (intent.resource === "exercise") {
+    const tagPredicates: mongo.Document[] = [];
+    if (intent.tags) {
+      tagPredicates.push({ tags: selectionMatch(intent.tags) });
+    }
+    if (intent.tagSearch) {
+      tagPredicates.push({
+        tags: new RegExp(escapeRegex(intent.tagSearch), "i"),
+      });
+    }
+    if (tagPredicates.length === 1) {
+      Object.assign(match, tagPredicates[0]);
+    } else if (tagPredicates.length > 1) {
+      match.$and = tagPredicates;
+    }
     const fields: readonly [
       keyof Pick<
         ExerciseIntent,
@@ -232,8 +245,11 @@ function callerMatch(intent: CollectionIntent): mongo.Filter<mongo.Document> {
       const selectedRange = intent[semanticField];
       if (selectedRange) match[persistenceField] = rangeMatch(selectedRange);
     }
-  } else if (intent.privacy) {
-    match.isPrivate = intent.privacy === "private" ? true : { $ne: true };
+  } else {
+    if (intent.tags) match.tags = selectionMatch(intent.tags);
+    if (intent.privacy) {
+      match.isPrivate = intent.privacy === "private" ? true : { $ne: true };
+    }
   }
   return match;
 }

@@ -58,6 +58,7 @@ const commonFields = new Set([
 ]);
 const exerciseFields = new Set([
   ...commonFields,
+  "tagSearch",
   "materials",
   "materialMode",
   "personsMin",
@@ -81,6 +82,7 @@ function singleton(
   query: Query,
   field: string,
   errors: CollectionQueryError[],
+  blankBehavior: "reject" | "omit" = "reject",
 ): string | undefined {
   const value = query[field];
   if (value === undefined) return undefined;
@@ -95,7 +97,7 @@ function singleton(
   }
   const trimmed = values[0].trim();
   if (!trimmed) {
-    errors.push({ field, code: "blank" });
+    if (blankBehavior === "reject") errors.push({ field, code: "blank" });
     return undefined;
   }
   if (trimmed.length > (field === "search" ? 200 : 100)) {
@@ -246,6 +248,7 @@ export function parseCollectionQuery(
   }
   const direction = rawDirection === "desc" ? "desc" : "asc";
   if (resource === "exercise") {
+    const tagSearch = singleton(query, "tagSearch", errors, "omit");
     const by: ExerciseIntentInput["sort"]["by"] =
       rawSort === "created" ||
       rawSort === "updated" ||
@@ -256,6 +259,7 @@ export function parseCollectionQuery(
     const intent: ExerciseIntentInput = {
       resource,
       search,
+      ...(tagSearch ? { tagSearch } : {}),
       tags,
       materials: selectedValues(query, "materials", "materialMode", errors),
       persons: range(query, "persons", errors),
