@@ -63,6 +63,29 @@ describe("collection query transport parser", () => {
     ]);
   });
 
+  it("normalizes a bounded exercise tag search into frozen semantics", () => {
+    const absent = parseCollectionQuery("exercise", {});
+    expect(absent).toHaveProperty("tagSearch", undefined);
+
+    const boundaryValue = "x".repeat(100);
+    const intent = parseCollectionQuery("exercise", {
+      tagSearch: `  ${boundaryValue}  `,
+    });
+    expect(intent).toMatchObject({ tagSearch: boundaryValue });
+    expect(Object.isFrozen(intent)).toBe(true);
+  });
+
+  it.each([
+    [{ tagSearch: " " }, "blank"],
+    [{ tagSearch: ["first", "second"] }, "duplicate"],
+    [{ tagSearch: { value: "warm" } }, "malformed"],
+    [{ tagSearch: "x".repeat(101) }, "outOfRange"],
+  ] as const)("rejects invalid exercise tag search %#", (query, code) => {
+    expect(errorsFor("exercise", query).errors).toEqual([
+      { field: "tagSearch", code },
+    ]);
+  });
+
   it("accepts repeated unique sets and rejects malformed ranges", () => {
     expect(
       parseCollectionQuery("exercise", {
@@ -111,6 +134,12 @@ describe("collection query transport parser", () => {
     ]);
     expect(errorsFor("exercise", { materialMode: "any" }).errors).toEqual([
       { field: "materialMode", code: "unsupported" },
+    ]);
+    expect(errorsFor("tacticBoard", { tagSearch: "warm" }).errors).toEqual([
+      { field: "tagSearch", code: "unknown" },
+    ]);
+    expect(errorsFor("practicePlan", { tagSearch: "warm" }).errors).toEqual([
+      { field: "tagSearch", code: "unknown" },
     ]);
   });
 

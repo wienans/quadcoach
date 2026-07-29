@@ -58,6 +58,7 @@ const commonFields = new Set([
 ]);
 const exerciseFields = new Set([
   ...commonFields,
+  "tagSearch",
   "materials",
   "materialMode",
   "personsMin",
@@ -256,6 +257,7 @@ export function parseCollectionQuery(
     const intent: ExerciseIntentInput = {
       resource,
       search,
+      tagSearch: singleton(query, "tagSearch", errors),
       tags,
       materials: selectedValues(query, "materials", "materialMode", errors),
       persons: range(query, "persons", errors),

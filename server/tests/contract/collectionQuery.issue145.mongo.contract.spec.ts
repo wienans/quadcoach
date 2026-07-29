@@ -110,6 +110,59 @@ describe("collection query Mongo contract", () => {
     expect(bounded.items[0]).not.toHaveProperty("description_blocks");
   });
 
+  it("matches exercise tag substrings case-insensitively and literally", async () => {
+    const database = mongoose.connection.db!;
+    await database.collection("exercises").insertMany([
+      { name: "Case match", tags: ["PreWARMup"] },
+      { name: "Literal match", tags: ["Pattern .* drill"] },
+      { name: "Regex-only match", tags: ["Pattern broad drill"] },
+    ]);
+    const visible = collectionVisibility.all();
+
+    const caseInsensitive = await browse({
+      intent: parseCollectionQuery("exercise", { tagSearch: "arm" }),
+      visibility: visible,
+    });
+    expect(caseInsensitive.items.map((item) => item.name)).toEqual([
+      "Case match",
+    ]);
+
+    const literal = await browse({
+      intent: parseCollectionQuery("exercise", { tagSearch: ".*" }),
+      visibility: visible,
+    });
+    expect(literal.items.map((item) => item.name)).toEqual(["Literal match"]);
+  });
+
+  it("intersects exact tags with transient text and preserves page totals", async () => {
+    const database = mongoose.connection.db!;
+    await database.collection("exercises").insertMany([
+      { name: "Both A", tags: ["Conditioning", "Warmup"] },
+      { name: "Both B", tags: ["CONDITIONING", "Pre-warm routine"] },
+      { name: "Exact only", tags: ["Conditioning", "Cooldown"] },
+      { name: "Search only", tags: ["Defense", "Warmup"] },
+    ]);
+
+    const result = await browse({
+      intent: parseCollectionQuery("exercise", {
+        tags: "conditioning",
+        tagMode: "all",
+        tagSearch: "WARM",
+        limit: "1",
+        page: "2",
+      }),
+      visibility: collectionVisibility.all(),
+    });
+
+    expect(result.items.map((item) => item.name)).toEqual(["Both B"]);
+    expect(result.pagination).toEqual({
+      page: 2,
+      limit: 1,
+      total: 2,
+      pages: 2,
+    });
+  });
+
   it("supports stable pages, successful beyond-end pages, and derived plan summaries", async () => {
     const database = mongoose.connection.db!;
     await database.collection("practiceplans").insertMany([
