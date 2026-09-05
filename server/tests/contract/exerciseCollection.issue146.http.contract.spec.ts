@@ -99,6 +99,60 @@ describe("issue 146 Exercise collection HTTP contract", () => {
     });
   });
 
+  it("filters by literal tag text and intersects committed tags", async () => {
+    await mongoose.connection.db!.collection("exercises").insertMany([
+      { name: "Both", tags: ["Conditioning", "PreWARMup .* drill"] },
+      { name: "Exact only", tags: ["Conditioning", "Cooldown"] },
+      { name: "Search only", tags: ["Defense", "Warmup .* drill"] },
+      { name: "Regex syntax is literal", tags: ["Conditioning", "Warmup"] },
+    ]);
+
+    const intersection = await request(app)
+      .get("/api/exercises")
+      .query({
+        tagSearch: "  arm  ",
+        tags: "conditioning",
+        tagMode: "all",
+      })
+      .expect(200);
+    expect(
+      intersection.body.items.map((item: { name: string }) => item.name),
+    ).toEqual(["Both", "Regex syntax is literal"]);
+    expect(intersection.body.pagination).toEqual({
+      page: 1,
+      limit: 50,
+      total: 2,
+      pages: 1,
+    });
+
+    const literal = await request(app)
+      .get("/api/exercises")
+      .query({ tagSearch: ".*", tags: "conditioning" })
+      .expect(200);
+    expect(literal.body.items.map((item: { name: string }) => item.name)).toEqual(
+      ["Both"],
+    );
+  });
+
+  it("returns strict validation envelopes for invalid tag searches", async () => {
+    const duplicate = await request(app)
+      .get("/api/exercises?tagSearch=warm&tagSearch=up")
+      .expect(400);
+    expect(duplicate.body).toEqual({
+      message: "Invalid collection query",
+      errors: [{ field: "tagSearch", code: "duplicate" }],
+    });
+
+    const blank = await request(app)
+      .get("/api/exercises")
+      .query({ tagSearch: " " })
+      .expect(400);
+    expect(blank.body).toEqual({
+      message: "Invalid collection query",
+      errors: [{ field: "tagSearch", code: "blank" }],
+    });
+  });
+
   it("returns strict validation envelopes for legacy and unknown syntax", async () => {
     const response = await request(app)
       .get("/api/exercises?name%5Bregex%5D=x&sortBy=time&limit=101")

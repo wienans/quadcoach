@@ -16,6 +16,7 @@ import {
 
 export type GetExercisesRequest = {
   search?: string;
+  tagSearch?: string;
   tags?: string[];
   tagMode?: "all" | "any";
   materials?: string[];
@@ -187,6 +188,7 @@ export const exerciseApiSlice = quadcoachApi.injectEndpoints({
       query: (request) => {
         const {
           search,
+          tagSearch,
           tags,
           tagMode,
           materials,
@@ -207,6 +209,7 @@ export const exerciseApiSlice = quadcoachApi.injectEndpoints({
         const urlParams = new URLSearchParams();
 
         if (search) urlParams.append("search", search);
+        if (tagSearch) urlParams.append("tagSearch", tagSearch);
         tags?.forEach((tag) => urlParams.append("tags", tag));
         if (tags?.length && tagMode) urlParams.append("tagMode", tagMode);
         materials?.forEach((material) =>
