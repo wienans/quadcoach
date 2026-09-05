@@ -88,7 +88,7 @@ export interface SyntheticDatabaseMeasurement {
 export interface SyntheticPlannerMeasurement {
   readonly name: string;
   readonly expectedIndex: string;
-  readonly strictDefault: boolean;
+  readonly activationGate: boolean;
   readonly selected: boolean;
   readonly explain: ExplainSummary;
 }
@@ -119,15 +119,13 @@ interface ExerciseScale {
   readonly resources: number;
 }
 
-type ExerciseQuery = Readonly<
-  Record<string, string | readonly string[]>
->;
+type ExerciseQuery = Readonly<Record<string, string | readonly string[]>>;
 type ExerciseSort = (typeof EXERCISE_APPROVED_SORTS)[number];
 
 interface DatabaseCase {
   readonly name: string;
   readonly expectedIndex: (typeof EXERCISE_INDEX_NAMES)[number];
-  readonly strictDefault?: true;
+  readonly activationGate?: true;
   readonly match: mongo.Filter<ExerciseSyntheticDocument>;
   readonly pipeline: readonly mongo.Document[];
 }
@@ -141,15 +139,27 @@ interface BrowseWorkload {
   };
   readonly query: ExerciseQuery | ((scale: ExerciseScale) => ExerciseQuery);
   readonly correct: (items: readonly ExerciseSyntheticSummary[]) => boolean;
+  readonly expectedTotal?: (scale: ExerciseScale) => number;
   readonly database?: DatabaseCase;
   readonly plannerException?: "unanchored-search";
+}
+
+function countMatching(
+  scale: ExerciseScale,
+  predicate: (number: number) => boolean,
+): number {
+  let total = 0;
+  for (let number = 0; number < scale.resources; number += 1) {
+    if (predicate(number)) total += 1;
+  }
+  return total;
 }
 
 interface FacetWorkload {
   readonly kind: "facet";
   readonly name: string;
   readonly facet: "tags" | "materials";
-  readonly expectedPrefix: "Tag " | "Material ";
+  readonly expectedItems: readonly string[];
   readonly plannerException: "low-selectivity-facet";
 }
 
@@ -169,7 +179,13 @@ function metricPipeline(
         },
       },
     },
-    { $sort: { __collectionQueryMissing: 1, [field]: direction, _id: 1 } },
+    {
+      $sort: {
+        __collectionQueryMissing: 1,
+        [field]: direction,
+        _id: 1,
+      },
+    },
     { $limit: 100 },
     { $project: { _id: 1, name: 1, [field]: 1 } },
   ];
@@ -187,6 +203,51 @@ function indexedSortPipeline(
   ];
 }
 
+const nameCollator = new Intl.Collator("en", {
+  sensitivity: "accent",
+  numeric: true,
+});
+
+function sortedByName(
+  items: readonly ExerciseSyntheticSummary[],
+  direction: "asc" | "desc",
+): boolean {
+  const multiplier = direction === "asc" ? 1 : -1;
+  return items.every((item, index) => {
+    if (index === 0) return true;
+    const previous = items[index - 1];
+    const nameOrder =
+      nameCollator.compare(previous.name, item.name) * multiplier;
+    const idOrder = previous._id.localeCompare(item._id);
+    return nameOrder < 0 || (nameOrder === 0 && idOrder <= 0);
+  });
+}
+
+function sortedByMetric(
+  items: readonly ExerciseSyntheticSummary[],
+  field: "durationMinutes" | "persons",
+  direction: "asc" | "desc",
+): boolean {
+  if (items.length !== 100) return false;
+  const multiplier = direction === "asc" ? 1 : -1;
+  for (let index = 1; index < items.length; index += 1) {
+    const previous = items[index - 1];
+    const current = items[index];
+    const previousValue = previous[field];
+    const currentValue = current[field];
+    if (previousValue === null) {
+      if (currentValue !== null) return false;
+      if (previous._id.localeCompare(current._id) > 0) return false;
+      continue;
+    }
+    if (currentValue === null) continue;
+    const metricOrder = (previousValue - currentValue) * multiplier;
+    const idOrder = previous._id.localeCompare(current._id);
+    if (metricOrder > 0 || (metricOrder === 0 && idOrder > 0)) return false;
+  }
+  return true;
+}
+
 function sortedByDate(
   items: readonly ExerciseSyntheticSummary[],
   field: "createdAt" | "updatedAt",
@@ -199,7 +260,8 @@ function sortedByDate(
     const dateOrder =
       (previous[field].getTime() - current[field].getTime()) *
       (direction === "asc" ? 1 : -1);
-    if (dateOrder > 0 || (dateOrder === 0 && previous._id > current._id)) {
+    const idOrder = previous._id.localeCompare(current._id);
+    if (dateOrder > 0 || (dateOrder === 0 && idOrder > 0)) {
       return false;
     }
   }
@@ -212,11 +274,11 @@ const exerciseWorkloads = [
     name: "exercise default name page",
     sort: { family: "name", direction: "asc" },
     query: { limit: "100" },
-    correct: (items) => items.length === 100,
+    correct: (items) => sortedByName(items, "asc"),
     database: {
       name: "exercise default indexed page",
       expectedIndex: "cq_exercises_name",
-      strictDefault: true,
+      activationGate: true,
       match: {},
       pipeline: indexedSortPipeline("name", 1),
     },
@@ -226,7 +288,13 @@ const exerciseWorkloads = [
     name: "exercise name descending page",
     sort: { family: "name", direction: "desc" },
     query: { sort: "name", direction: "desc", limit: "100" },
-    correct: (items) => items.length === 100,
+    correct: (items) => sortedByName(items, "desc"),
+    database: {
+      name: "exercise name descending indexed page",
+      expectedIndex: "cq_exercises_name",
+      match: {},
+      pipeline: indexedSortPipeline("name", -1),
+    },
   },
   {
     kind: "browse",
@@ -283,9 +351,9 @@ const exerciseWorkloads = [
   {
     kind: "browse",
     name: "exercise literal substring search",
-    query: { search: "Drill 10", limit: "100" },
+    query: { search: "Exercise 10", limit: "100" },
     correct: (items) =>
-      items.length > 0 && items.every((item) => /drill 10/i.test(item.name)),
+      items.length > 0 && items.every((item) => /exercise 10/i.test(item.name)),
     plannerException: "unanchored-search",
   },
   {
@@ -294,7 +362,7 @@ const exerciseWorkloads = [
     sort: { family: "duration", direction: "desc" },
     query: { sort: "duration", direction: "desc", limit: "100" },
     correct: (items) =>
-      items.length === 100 && items.every((item) => item.durationMinutes !== null),
+      items.length === 100 && sortedByMetric(items, "durationMinutes", "desc"),
   },
   {
     kind: "browse",
@@ -308,11 +376,17 @@ const exerciseWorkloads = [
     },
     correct: (items) =>
       items.length > 0 &&
+      sortedByMetric(items, "durationMinutes", "asc") &&
       items.every(
         (item) =>
           item.durationMinutes !== null &&
           item.durationMinutes >= 20 &&
           item.durationMinutes <= 40,
+      ),
+    expectedTotal: (scale) =>
+      countMatching(
+        scale,
+        (number) => number % 13 !== 0 && number % 24 >= 3 && number % 24 <= 7,
       ),
     database: {
       name: "exercise duration ranged page",
@@ -331,14 +405,14 @@ const exerciseWorkloads = [
     query: (scale) => ({
       sort: "duration",
       page: String(
-        Math.floor(
-          (scale.resources - Math.ceil(scale.resources / 13)) / 100,
-        ) + 2,
+        Math.floor((scale.resources - Math.ceil(scale.resources / 13)) / 100) +
+          2,
       ),
       limit: "100",
     }),
     correct: (items) =>
-      items.length === 100 && items.every((item) => item.durationMinutes === null),
+      items.length === 100 &&
+      items.every((item) => item.durationMinutes === null),
   },
   {
     kind: "browse",
@@ -346,7 +420,7 @@ const exerciseWorkloads = [
     sort: { family: "persons", direction: "desc" },
     query: { sort: "persons", direction: "desc", limit: "100" },
     correct: (items) =>
-      items.length === 100 && items.every((item) => item.persons !== null),
+      items.length === 100 && sortedByMetric(items, "persons", "desc"),
   },
   {
     kind: "browse",
@@ -360,18 +434,21 @@ const exerciseWorkloads = [
     },
     correct: (items) =>
       items.length > 0 &&
+      sortedByMetric(items, "persons", "asc") &&
       items.every(
-        (item) => item.persons !== null && item.persons >= 4 && item.persons <= 8,
+        (item) =>
+          item.persons !== null && item.persons >= 4 && item.persons <= 8,
+      ),
+    expectedTotal: (scale) =>
+      countMatching(
+        scale,
+        (number) => number % 13 !== 0 && number % 20 >= 3 && number % 20 <= 7,
       ),
     database: {
       name: "exercise persons ranged page",
       expectedIndex: "cq_exercises_persons",
       match: { persons: { $gte: 4, $lte: 8 } },
-      pipeline: metricPipeline(
-        { persons: { $gte: 4, $lte: 8 } },
-        "persons",
-        1,
-      ),
+      pipeline: metricPipeline({ persons: { $gte: 4, $lte: 8 } }, "persons", 1),
     },
   },
   {
@@ -380,9 +457,8 @@ const exerciseWorkloads = [
     query: (scale) => ({
       sort: "persons",
       page: String(
-        Math.floor(
-          (scale.resources - Math.ceil(scale.resources / 13)) / 100,
-        ) + 2,
+        Math.floor((scale.resources - Math.ceil(scale.resources / 13)) / 100) +
+          2,
       ),
       limit: "100",
     }),
@@ -396,7 +472,13 @@ const exerciseWorkloads = [
     correct: (items) =>
       items.length > 0 &&
       items.every(
-        (item) => item.beaters !== null && item.beaters >= 2 && item.beaters <= 4,
+        (item) =>
+          item.beaters !== null && item.beaters >= 2 && item.beaters <= 4,
+      ),
+    expectedTotal: (scale) =>
+      countMatching(
+        scale,
+        (number) => number % 13 !== 0 && number % 7 >= 2 && number % 7 <= 4,
       ),
   },
   {
@@ -406,14 +488,26 @@ const exerciseWorkloads = [
     correct: (items) =>
       items.length > 0 &&
       items.every(
-        (item) => item.chasers !== null && item.chasers >= 3 && item.chasers <= 6,
+        (item) =>
+          item.chasers !== null && item.chasers >= 3 && item.chasers <= 6,
+      ),
+    expectedTotal: (scale) =>
+      countMatching(
+        scale,
+        (number) => number % 13 !== 0 && number % 9 >= 3 && number % 9 <= 6,
       ),
   },
   {
     kind: "browse",
     name: "exercise tags any",
-    query: { tags: ["Attack", "Defence"], tagMode: "any", limit: "100" },
-    correct: (items) => items.length === 100,
+    query: { tags: ["Attack", "Missing"], tagMode: "any", limit: "100" },
+    correct: (items) =>
+      items.length === 100 &&
+      items.every((item) =>
+        item.tags.some((tag) => tag.toLowerCase() === "attack"),
+      ),
+    expectedTotal: (scale) =>
+      countMatching(scale, (number) => number % 3 === 0),
     database: {
       name: "exercise tags filtered page",
       expectedIndex: "cq_exercises_tags",
@@ -437,16 +531,24 @@ const exerciseWorkloads = [
           item.tags.some((tag) => tag.toLowerCase() === selected),
         ),
       ),
+    expectedTotal: (scale) =>
+      countMatching(scale, (number) => number % 3 === 0),
   },
   {
     kind: "browse",
     name: "exercise materials any",
     query: {
-      materials: ["Cones", "Balls"],
+      materials: ["Cones", "Missing"],
       materialMode: "any",
       limit: "100",
     },
-    correct: (items) => items.length === 100,
+    correct: (items) =>
+      items.length === 100 &&
+      items.every((item) =>
+        item.materials.some((material) => material.toLowerCase() === "cones"),
+      ),
+    expectedTotal: (scale) =>
+      countMatching(scale, (number) => number % 4 === 0),
     database: {
       name: "exercise materials filtered page",
       expectedIndex: "cq_exercises_materials",
@@ -471,22 +573,36 @@ const exerciseWorkloads = [
       items.length > 0 &&
       items.every((item) =>
         ["synthetic", "cones"].every((selected) =>
-          item.materials.some((material) => material.toLowerCase() === selected),
+          item.materials.some(
+            (material) => material.toLowerCase() === selected,
+          ),
         ),
       ),
+    expectedTotal: (scale) =>
+      countMatching(scale, (number) => number % 4 === 0),
   },
   {
     kind: "facet",
     name: "exercise tags facet",
     facet: "tags",
-    expectedPrefix: "Tag ",
+    expectedItems: [
+      "Attack",
+      "Defence",
+      "Synthetic",
+      ...Array.from({ length: 40 }, (_, index) => `Tag ${index}`),
+    ],
     plannerException: "low-selectivity-facet",
   },
   {
     kind: "facet",
     name: "exercise materials facet",
     facet: "materials",
-    expectedPrefix: "Material ",
+    expectedItems: [
+      "Balls",
+      "Cones",
+      ...Array.from({ length: 30 }, (_, index) => `Material ${index}`),
+      "Synthetic",
+    ],
     plannerException: "low-selectivity-facet",
   },
 ] as const satisfies readonly ExerciseWorkload[];
@@ -500,7 +616,9 @@ const facetWorkloads = exerciseWorkloads.filter(
     workload.kind === "facet",
 );
 const databaseWorkloads = browseWorkloads.filter(
-  (workload): workload is (typeof browseWorkloads)[number] & {
+  (
+    workload,
+  ): workload is (typeof browseWorkloads)[number] & {
     readonly database: DatabaseCase;
   } => workload.database !== undefined,
 );
@@ -512,16 +630,14 @@ export const EXERCISE_DATABASE_WORKLOADS = Object.freeze(
   databaseWorkloads.map((workload) => ({
     name: workload.database.name,
     expectedIndex: workload.database.expectedIndex,
-    strictDefault: workload.database.strictDefault === true,
+    activationGate: workload.database.activationGate === true,
   })),
 );
 export const EXERCISE_DATABASE_WORKLOAD_NAMES = Object.freeze(
   EXERCISE_DATABASE_WORKLOADS.map((workload) => workload.name),
 );
 export const EXERCISE_SORT_COVERAGE = Object.freeze(
-  browseWorkloads.flatMap((workload) =>
-    workload.sort ? [workload.sort] : [],
-  ),
+  browseWorkloads.flatMap((workload) => (workload.sort ? [workload.sort] : [])),
 );
 
 function isNullableNumber(value: unknown): value is number | null {
@@ -568,6 +684,20 @@ export function exerciseBrowseWorkloadCorrect(
   );
 }
 
+export function exerciseFacetWorkloadCorrect(
+  workloadName: string,
+  items: readonly string[],
+): boolean {
+  const workload = facetWorkloads.find(
+    (candidate) => candidate.name === workloadName,
+  );
+  return (
+    workload !== undefined &&
+    items.length === workload.expectedItems.length &&
+    items.every((item, index) => item === workload.expectedItems[index])
+  );
+}
+
 export function syntheticExerciseDocument(
   _id: mongo.ObjectId,
   number: number,
@@ -575,7 +705,7 @@ export function syntheticExerciseDocument(
   const missingLegacyMetrics = number % 13 === 0;
   return {
     _id,
-    name: number % 17 === 0 ? "Deterministic Tie" : `Exercise Drill ${number}`,
+    name: number % 17 === 0 ? "Deterministic Tie" : `Exercise ${number}`,
     tags: [
       number % 2 === 0 ? "synthetic" : "Synthetic",
       `Tag ${number % 40}`,
@@ -597,8 +727,12 @@ export function syntheticExerciseDocument(
     creator: `Coach ${number % 100}`,
     user: new mongo.ObjectId(number.toString(16).padStart(24, "0").slice(-24)),
     related_to: [
-      new mongo.ObjectId((number + 1).toString(16).padStart(24, "0").slice(-24)),
-      new mongo.ObjectId((number + 2).toString(16).padStart(24, "0").slice(-24)),
+      new mongo.ObjectId(
+        (number + 1).toString(16).padStart(24, "0").slice(-24),
+      ),
+      new mongo.ObjectId(
+        (number + 2).toString(16).padStart(24, "0").slice(-24),
+      ),
     ],
     description_blocks: [
       {
@@ -680,7 +814,9 @@ export async function measureExerciseSynthetic(
           ? workload.query(scale)
           : workload.query;
       const intent = parseCollectionQuery("exercise", query);
-      const times = await operationDurations(() => browse({ intent, visibility }));
+      const times = await operationDurations(() =>
+        browse({ intent, visibility }),
+      );
       const result = await browse({ intent, visibility });
       if (workload.name === "exercise default name page") {
         response100Bytes = mongo.BSON.calculateObjectSize(result);
@@ -693,7 +829,10 @@ export async function measureExerciseSynthetic(
         warmP95Ms: percentile95(times),
         maximumMs: Math.max(...times),
         resultCount: result.items.length,
-        correct: exerciseBrowseWorkloadCorrect(workload.name, result.items),
+        correct:
+          exerciseBrowseWorkloadCorrect(workload.name, result.items) &&
+          (workload.expectedTotal === undefined ||
+            result.pagination.total === workload.expectedTotal(scale)),
         plannerException: workload.plannerException,
       });
     }
@@ -712,9 +851,7 @@ export async function measureExerciseSynthetic(
         warmP95Ms: percentile95(times),
         maximumMs: Math.max(...times),
         resultCount: result.items.length,
-        correct:
-          result.items.some((item) => item.toLowerCase() === "synthetic") &&
-          result.items.some((item) => item.startsWith(workload.expectedPrefix)),
+        correct: exerciseFacetWorkloadCorrect(workload.name, result.items),
         plannerException: workload.plannerException,
       });
     }
@@ -747,7 +884,7 @@ export async function measureExerciseSynthetic(
     planners.push({
       name: workload.database.name,
       expectedIndex: workload.database.expectedIndex,
-      strictDefault: workload.database.strictDefault === true,
+      activationGate: workload.database.activationGate === true,
       selected: winningPlanUsesIndex(
         explanation,
         workload.database.expectedIndex,

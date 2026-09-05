@@ -3,6 +3,7 @@ import { mongo } from "mongoose";
 import {
   evaluateSyntheticGates,
   exerciseBrowseWorkloadCorrect,
+  exerciseFacetWorkloadCorrect,
   EXERCISE_APPROVED_SORTS,
   EXERCISE_DATABASE_WORKLOADS,
   EXERCISE_INDEX_NAMES,
@@ -26,7 +27,9 @@ const explain = {
 function passingMeasurements(): SyntheticMeasurements {
   const operations = EXERCISE_WORKLOAD_NAMES.map((name) => ({
     name,
-    operation: name.endsWith("facet") ? ("facet" as const) : ("browse" as const),
+    operation: name.endsWith("facet")
+      ? ("facet" as const)
+      : ("browse" as const),
     warmP95Ms: 1,
     maximumMs: 1,
     resultCount: 1,
@@ -70,7 +73,7 @@ function passingMeasurements(): SyntheticMeasurements {
       planners: EXERCISE_DATABASE_WORKLOADS.map((workload) => ({
         name: workload.name,
         expectedIndex: workload.expectedIndex,
-        strictDefault: workload.strictDefault,
+        activationGate: workload.activationGate,
         selected: true,
         explain,
       })),
@@ -131,7 +134,9 @@ describe("issue 146 Exercise synthetic activation evidence", () => {
       }),
     ).toBe(false);
     for (const field of ["description_blocks", "blocks", "Blocks"] as const) {
-      expect(isExerciseSyntheticSummary({ ...summary, [field]: [] })).toBe(false);
+      expect(isExerciseSyntheticSummary({ ...summary, [field]: [] })).toBe(
+        false,
+      );
     }
   });
 
@@ -180,6 +185,52 @@ describe("issue 146 Exercise synthetic activation evidence", () => {
     );
   });
 
+  it("rejects incorrectly ordered browse and facet evidence", () => {
+    const summaries = Array.from({ length: 100 }, (_, index) => ({
+      _id: index.toString().padStart(24, "0"),
+      name: `Exercise ${100 - index}`,
+      tags: ["Attack"],
+      materials: ["Cones"],
+      durationMinutes: index,
+      persons: index,
+      beaters: 1,
+      chasers: 1,
+      relatedTo: [],
+      createdAt: new Date(2026, 0, index + 1),
+      updatedAt: new Date(2026, 0, index + 1),
+    }));
+
+    expect(
+      exerciseBrowseWorkloadCorrect("exercise default name page", summaries),
+    ).toBe(false);
+    expect(
+      exerciseFacetWorkloadCorrect("exercise tags facet", [
+        "Attack",
+        "Synthetic",
+        "Defence",
+      ]),
+    ).toBe(false);
+
+    const sortedMetrics = summaries.map((summary, index) => ({
+      ...summary,
+      durationMinutes: 20 + Math.floor(index / 5),
+    }));
+    expect(
+      exerciseBrowseWorkloadCorrect(
+        "exercise duration range and sort",
+        sortedMetrics,
+      ),
+    ).toBe(true);
+    const brokenTie = [...sortedMetrics];
+    [brokenTie[0], brokenTie[1]] = [brokenTie[1], brokenTie[0]];
+    expect(
+      exerciseBrowseWorkloadCorrect(
+        "exercise duration range and sort",
+        brokenTie,
+      ),
+    ).toBe(false);
+  });
+
   it("covers every approved workload and index without speculative role indexes", () => {
     expect(EXERCISE_WORKLOAD_NAMES).toEqual(
       expect.arrayContaining([
@@ -224,14 +275,14 @@ describe("issue 146 Exercise synthetic activation evidence", () => {
     );
   });
 
-  it("does not gate activation on filtered planner diagnostics", () => {
+  it("does not gate activation on explicitly exempt planner diagnostics", () => {
     const passing = passingMeasurements();
     const filteredDiagnostics = {
       ...passing,
       exercise: {
         ...passing.exercise!,
         planners: passing.exercise!.planners.map((planner) =>
-          planner.strictDefault
+          planner.activationGate
             ? planner
             : {
                 ...planner,
@@ -248,117 +299,144 @@ describe("issue 146 Exercise synthetic activation evidence", () => {
   });
 
   it.each([
-    ["index selection", (measurements: SyntheticMeasurements) => ({
-      ...measurements,
-      exercise: {
-        ...measurements.exercise!,
-        indexes: measurements.exercise!.indexes.map((index) =>
-          index.name === "cq_exercises_created"
-            ? { ...index, selected: false }
-            : index,
-        ),
-      },
-    })],
-    ["created count latency", (measurements: SyntheticMeasurements) => ({
-      ...measurements,
-      exercise: {
-        ...measurements.exercise!,
-        databaseOperations: measurements.exercise!.databaseOperations.map(
-          (operation) =>
-            operation.name === "exercise created ascending indexed page"
-              ? { ...operation, countWarmP95Ms: 250 }
-              : operation,
-        ),
-      },
-    })],
-    ["updated page latency", (measurements: SyntheticMeasurements) => ({
-      ...measurements,
-      exercise: {
-        ...measurements.exercise!,
-        databaseOperations: measurements.exercise!.databaseOperations.map(
-          (operation) =>
-            operation.name === "exercise updated descending indexed page"
-              ? { ...operation, pageWarmP95Ms: 250 }
-              : operation,
-        ),
-      },
-    })],
-    ["default index selection", (measurements: SyntheticMeasurements) => ({
-      ...measurements,
-      exercise: {
-        ...measurements.exercise!,
-        planners: measurements.exercise!.planners.map((planner) =>
-          planner.strictDefault ? { ...planner, selected: false } : planner,
-        ),
-      },
-    })],
-    ["default collection scan", (measurements: SyntheticMeasurements) => ({
-      ...measurements,
-      exercise: {
-        ...measurements.exercise!,
-        planners: measurements.exercise!.planners.map((planner) =>
-          planner.strictDefault
-            ? {
-                ...planner,
-                explain: { ...planner.explain, collectionScan: true },
-              }
-            : planner,
-        ),
-      },
-    })],
-    ["default blocking sort", (measurements: SyntheticMeasurements) => ({
-      ...measurements,
-      exercise: {
-        ...measurements.exercise!,
-        planners: measurements.exercise!.planners.map((planner) =>
-          planner.strictDefault
-            ? {
-                ...planner,
-                explain: { ...planner.explain, blockingSort: true },
-              }
-            : planner,
-        ),
-      },
-    })],
-    ["default spill", (measurements: SyntheticMeasurements) => ({
-      ...measurements,
-      exercise: {
-        ...measurements.exercise!,
-        planners: measurements.exercise!.planners.map((planner) =>
-          planner.strictDefault
-            ? { ...planner, explain: { ...planner.explain, spilled: true } }
-            : planner,
-        ),
-      },
-    })],
-    ["default examination budget", (measurements: SyntheticMeasurements) => ({
-      ...measurements,
-      exercise: {
-        ...measurements.exercise!,
-        planners: measurements.exercise!.planners.map((planner) =>
-          planner.strictDefault
-            ? {
-                ...planner,
-                explain: { ...planner.explain, totalDocsExamined: 201 },
-              }
-            : planner,
-        ),
-      },
-    })],
-    ["default database budget", (measurements: SyntheticMeasurements) => ({
-      ...measurements,
-      exercise: {
-        ...measurements.exercise!,
-        databaseOperations: measurements.exercise!.databaseOperations.map(
-          (operation, position) =>
-            position === 0 ? { ...operation, maximumMs: 1_001 } : operation,
-        ),
-      },
-    })],
+    [
+      "index selection",
+      (measurements: SyntheticMeasurements) => ({
+        ...measurements,
+        exercise: {
+          ...measurements.exercise!,
+          indexes: measurements.exercise!.indexes.map((index) =>
+            index.name === "cq_exercises_created"
+              ? { ...index, selected: false }
+              : index,
+          ),
+        },
+      }),
+    ],
+    [
+      "created count latency",
+      (measurements: SyntheticMeasurements) => ({
+        ...measurements,
+        exercise: {
+          ...measurements.exercise!,
+          databaseOperations: measurements.exercise!.databaseOperations.map(
+            (operation) =>
+              operation.name === "exercise created ascending indexed page"
+                ? { ...operation, countWarmP95Ms: 250 }
+                : operation,
+          ),
+        },
+      }),
+    ],
+    [
+      "updated page latency",
+      (measurements: SyntheticMeasurements) => ({
+        ...measurements,
+        exercise: {
+          ...measurements.exercise!,
+          databaseOperations: measurements.exercise!.databaseOperations.map(
+            (operation) =>
+              operation.name === "exercise updated descending indexed page"
+                ? { ...operation, pageWarmP95Ms: 250 }
+                : operation,
+          ),
+        },
+      }),
+    ],
+    [
+      "default index selection",
+      (measurements: SyntheticMeasurements) => ({
+        ...measurements,
+        exercise: {
+          ...measurements.exercise!,
+          planners: measurements.exercise!.planners.map((planner) =>
+            planner.activationGate ? { ...planner, selected: false } : planner,
+          ),
+        },
+      }),
+    ],
+    [
+      "default collection scan",
+      (measurements: SyntheticMeasurements) => ({
+        ...measurements,
+        exercise: {
+          ...measurements.exercise!,
+          planners: measurements.exercise!.planners.map((planner) =>
+            planner.activationGate
+              ? {
+                  ...planner,
+                  explain: { ...planner.explain, collectionScan: true },
+                }
+              : planner,
+          ),
+        },
+      }),
+    ],
+    [
+      "default blocking sort",
+      (measurements: SyntheticMeasurements) => ({
+        ...measurements,
+        exercise: {
+          ...measurements.exercise!,
+          planners: measurements.exercise!.planners.map((planner) =>
+            planner.activationGate
+              ? {
+                  ...planner,
+                  explain: { ...planner.explain, blockingSort: true },
+                }
+              : planner,
+          ),
+        },
+      }),
+    ],
+    [
+      "default spill",
+      (measurements: SyntheticMeasurements) => ({
+        ...measurements,
+        exercise: {
+          ...measurements.exercise!,
+          planners: measurements.exercise!.planners.map((planner) =>
+            planner.activationGate
+              ? { ...planner, explain: { ...planner.explain, spilled: true } }
+              : planner,
+          ),
+        },
+      }),
+    ],
+    [
+      "default examination budget",
+      (measurements: SyntheticMeasurements) => ({
+        ...measurements,
+        exercise: {
+          ...measurements.exercise!,
+          planners: measurements.exercise!.planners.map((planner) =>
+            planner.activationGate
+              ? {
+                  ...planner,
+                  explain: { ...planner.explain, totalDocsExamined: 201 },
+                }
+              : planner,
+          ),
+        },
+      }),
+    ],
+    [
+      "default database budget",
+      (measurements: SyntheticMeasurements) => ({
+        ...measurements,
+        exercise: {
+          ...measurements.exercise!,
+          databaseOperations: measurements.exercise!.databaseOperations.map(
+            (operation, position) =>
+              position === 0 ? { ...operation, maximumMs: 1_001 } : operation,
+          ),
+        },
+      }),
+    ],
   ] as const)("pauses on failed approved %s gate", (_name, failGate) => {
-    expect(evaluateSyntheticGates(failGate(passingMeasurements())).activation).toBe(
-      "pause",
-    );
+    expect(
+      evaluateSyntheticGates(failGate(passingMeasurements())).activation,
+    ).toBe("pause");
   });
 
   it("proceeds only with complete passing evidence and pauses other failure classes", () => {

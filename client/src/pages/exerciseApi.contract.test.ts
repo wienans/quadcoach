@@ -87,7 +87,7 @@ describe("Exercise collection API contract", () => {
         items: [
           {
             _id: "exercise-1",
-            name: "Legacy drill",
+            name: "Legacy exercise",
             tags: ["Passing"],
             creator: "Coach",
             user: "user-1",
@@ -113,7 +113,7 @@ describe("Exercise collection API contract", () => {
       items: [
         {
           _id: "exercise-1",
-          name: "Legacy drill",
+          name: "Legacy exercise",
           tags: ["Passing"],
           creator: "Coach",
           user: "user-1",
@@ -184,7 +184,7 @@ describe("Exercise collection API contract", () => {
           return Promise.resolve({
             data: {
               _id: "exercise-2",
-              name: "New drill",
+              name: "New exercise",
               time_min: 0,
               persons: 0,
               beaters: 0,
@@ -210,7 +210,7 @@ describe("Exercise collection API contract", () => {
 
     await store.dispatch(
       exerciseApiSlice.endpoints.addExercise.initiate({
-        name: "New drill",
+        name: "New exercise",
         time_min: 0,
         persons: 0,
         beaters: 0,

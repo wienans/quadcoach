@@ -234,6 +234,9 @@ const ExerciseList = () => {
   useEffect(() => {
     if (exercisesData?.items) {
       setLoadedExercises((prev) => {
+        if (exercisesData.pagination.page === 1) {
+          return exercisesData.items;
+        }
         const newExerciseIds = new Set(exercisesData.items.map((e) => e._id));
         const filteredPrev = prev.filter((e) => !newExerciseIds.has(e._id));
         return [...filteredPrev, ...exercisesData.items];

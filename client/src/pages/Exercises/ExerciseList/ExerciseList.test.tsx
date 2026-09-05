@@ -11,8 +11,21 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import ExerciseList from "./ExerciseList";
 
-const { getExercisesMock } = vi.hoisted(() => ({
+const { getExercisesMock, exerciseQueryState } = vi.hoisted(() => ({
   getExercisesMock: vi.fn(),
+  exerciseQueryState: {
+    data: undefined as
+      | {
+          items: Array<{ _id: string; name: string }>;
+          pagination: {
+            page: number;
+            limit: number;
+            total: number;
+            pages: number;
+          };
+        }
+      | undefined,
+  },
 }));
 
 vi.mock("./translations", () => ({}));
@@ -32,7 +45,7 @@ vi.mock("../../../store/hooks", () => ({
 vi.mock("../../exerciseApi", () => ({
   useLazyGetExercisesQuery: () => [
     getExercisesMock,
-    { data: undefined, isError: false, isLoading: false },
+    { data: exerciseQueryState.data, isError: false, isLoading: false },
   ],
   useAddExerciseMutation: () => [
     vi.fn(() => ({ unwrap: vi.fn() })),
@@ -47,7 +60,11 @@ vi.mock("../../../components", () => {
 
   return {
     SoftBox: MockContainer,
-    SoftButton: ({ children, onClick, disabled }: PropsWithChildren<{
+    SoftButton: ({
+      children,
+      onClick,
+      disabled,
+    }: PropsWithChildren<{
       onClick?: () => void;
       disabled?: boolean;
     }>) => (
@@ -106,7 +123,11 @@ vi.mock("../../../components/Footer", () => ({
 }));
 
 vi.mock("./cardView/ExercisesCardView", () => ({
-  default: () => null,
+  default: ({ exercises }: { exercises: Array<{ _id: string }> }) => (
+    <div data-testid="exercise-results">
+      {exercises.map((exercise) => exercise._id).join(",")}
+    </div>
+  ),
 }));
 
 vi.mock("@mui/material", () => {
@@ -118,7 +139,13 @@ vi.mock("@mui/material", () => {
     Alert: MockContainer,
     Button: MockContainer,
     Card: MockContainer,
-    CardHeader: ({ title, action }: { title: ReactNode; action: ReactNode }) => (
+    CardHeader: ({
+      title,
+      action,
+    }: {
+      title: ReactNode;
+      action: ReactNode;
+    }) => (
       <div>
         {title}
         {action}
@@ -154,6 +181,7 @@ describe("ExerciseList live tag filtering", () => {
   beforeEach(() => {
     vi.useFakeTimers();
     getExercisesMock.mockReset();
+    exerciseQueryState.data = undefined;
   });
 
   afterEach(() => {
@@ -193,6 +221,33 @@ describe("ExerciseList live tag filtering", () => {
         tagMode: "all",
         page: 1,
       }),
+    );
+  });
+
+  it("replaces accumulated pages when page one is refreshed", () => {
+    exerciseQueryState.data = {
+      items: [{ _id: "first", name: "First" }],
+      pagination: { page: 1, limit: 1, total: 2, pages: 2 },
+    };
+    const view = render(<ExerciseList />);
+    expect(view.getByTestId("exercise-results").textContent).toBe("first");
+
+    exerciseQueryState.data = {
+      items: [{ _id: "second", name: "Second" }],
+      pagination: { page: 2, limit: 1, total: 2, pages: 2 },
+    };
+    view.rerender(<ExerciseList />);
+    expect(view.getByTestId("exercise-results").textContent).toBe(
+      "first,second",
+    );
+
+    exerciseQueryState.data = {
+      items: [{ _id: "replacement", name: "Replacement" }],
+      pagination: { page: 1, limit: 1, total: 1, pages: 1 },
+    };
+    view.rerender(<ExerciseList />);
+    expect(view.getByTestId("exercise-results").textContent).toBe(
+      "replacement",
     );
   });
 });

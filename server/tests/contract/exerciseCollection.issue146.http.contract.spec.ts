@@ -101,9 +101,9 @@ describe("issue 146 Exercise collection HTTP contract", () => {
 
   it("filters by literal tag text and intersects committed tags", async () => {
     await mongoose.connection.db!.collection("exercises").insertMany([
-      { name: "Both", tags: ["Conditioning", "PreWARMup .* drill"] },
+      { name: "Both", tags: ["Conditioning", "PreWARMup .* exercise"] },
       { name: "Exact only", tags: ["Conditioning", "Cooldown"] },
-      { name: "Search only", tags: ["Defense", "Warmup .* drill"] },
+      { name: "Search only", tags: ["Defense", "Warmup .* exercise"] },
       { name: "Regex syntax is literal", tags: ["Conditioning", "Warmup"] },
     ]);
 

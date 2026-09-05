@@ -25,11 +25,12 @@ export {
   EXERCISE_SORT_COVERAGE,
   EXERCISE_WORKLOAD_NAMES,
   exerciseBrowseWorkloadCorrect,
+  exerciseFacetWorkloadCorrect,
   isExerciseSyntheticSummary,
   syntheticExerciseDocument,
 } from "./exerciseSynthetic";
 
-const EXERCISE_COLLATION = {
+const COLLECTION_COLLATION = {
   locale: "en",
   strength: 2,
   numericOrdering: true,
@@ -173,7 +174,8 @@ export function evaluateSyntheticGates(
             name: "Exercise dataset scale",
             passed:
               exercise.generatedDocuments >= 20_000 &&
-              exercise.generatedDocuments === measurements.exercise?.generatedDocuments,
+              exercise.generatedDocuments ===
+                measurements.exercise?.generatedDocuments,
             observed: exercise.generatedDocuments,
             required: ">=20000 documents",
           },
@@ -254,8 +256,7 @@ export function evaluateSyntheticGates(
               operation.warmP95Ms <
               (operation.operation === "facet" ? 1_000 : 500),
             observed: operation.warmP95Ms,
-            required:
-              operation.operation === "facet" ? "<1000ms" : "<500ms",
+            required: operation.operation === "facet" ? "<1000ms" : "<500ms",
           })),
           ...exercise.operations.map((operation) => ({
             name: `${operation.name} database budget`,
@@ -263,8 +264,7 @@ export function evaluateSyntheticGates(
               operation.maximumMs <=
               (operation.operation === "facet" ? 2_000 : 1_000),
             observed: operation.maximumMs,
-            required:
-              operation.operation === "facet" ? "<=2000ms" : "<=1000ms",
+            required: operation.operation === "facet" ? "<=2000ms" : "<=1000ms",
           })),
           ...exercise.databaseOperations.flatMap((operation) => [
             {
@@ -287,7 +287,7 @@ export function evaluateSyntheticGates(
             },
           ]),
           ...exercise.planners
-            .filter((planner) => planner.strictDefault)
+            .filter((planner) => planner.activationGate)
             .flatMap((planner) => [
               {
                 name: `${planner.name} selects ${planner.expectedIndex}`,
@@ -380,7 +380,7 @@ export async function measureSynthetic(
   }
   await resources.createIndex(
     { name: 1, _id: 1 },
-    { name: "cq_tacticboards_name", collation: EXERCISE_COLLATION },
+    { name: "cq_tacticboards_name", collation: COLLECTION_COLLATION },
   );
   await accesses.createIndex(
     { user: 1, tacticboard: 1 },
@@ -414,7 +414,7 @@ export async function measureSynthetic(
   const cursor = () =>
     resources
       .find(match)
-      .collation(EXERCISE_COLLATION)
+      .collation(COLLECTION_COLLATION)
       .sort({ name: 1, _id: 1 })
       .limit(100)
       .project({ _id: 1, name: 1, tags: 1, isPrivate: 1 });
@@ -447,11 +447,15 @@ export async function measureSynthetic(
   return {
     countWarmP95Ms: Math.max(
       percentile95(countTimes),
-      ...exercise.databaseOperations.map((operation) => operation.countWarmP95Ms),
+      ...exercise.databaseOperations.map(
+        (operation) => operation.countWarmP95Ms,
+      ),
     ),
     pageWarmP95Ms: Math.max(
       percentile95(pageTimes),
-      ...exercise.databaseOperations.map((operation) => operation.pageWarmP95Ms),
+      ...exercise.databaseOperations.map(
+        (operation) => operation.pageWarmP95Ms,
+      ),
     ),
     browseWarmP95Ms: Math.max(
       percentile95(tacticBoardMeasurements.browseTimes),

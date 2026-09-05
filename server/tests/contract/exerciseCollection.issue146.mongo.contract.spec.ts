@@ -55,7 +55,7 @@ describe("issue 146 Exercise collection Mongo contract", () => {
     },
   );
 
-  it("uses ascending IDs as deterministic ties on first and deep pages", async () => {
+  it("uses ascending IDs as deterministic ties across pages", async () => {
     const ids = [
       new mongo.ObjectId("000000000000000000000003"),
       new mongo.ObjectId("000000000000000000000001"),
@@ -73,12 +73,25 @@ describe("issue 146 Exercise collection Mongo contract", () => {
       intent: parseCollectionQuery("exercise", { page: "2", limit: "2" }),
       visibility: collectionVisibility.all(),
     });
+    const descending = await browse({
+      intent: parseCollectionQuery("exercise", {
+        sort: "name",
+        direction: "desc",
+        limit: "3",
+      }),
+      visibility: collectionVisibility.all(),
+    });
 
     expect(first.items.map((item) => item._id)).toEqual([
       "000000000000000000000001",
       "000000000000000000000002",
     ]);
     expect(deep.items.map((item) => item._id)).toEqual([
+      "000000000000000000000003",
+    ]);
+    expect(descending.items.map((item) => item._id)).toEqual([
+      "000000000000000000000001",
+      "000000000000000000000002",
       "000000000000000000000003",
     ]);
     expect(first.pagination.total).toBe(3);
