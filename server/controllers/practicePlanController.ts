@@ -22,6 +22,13 @@ import {
   resolveShareLink,
 } from "../shareLinks/shareLinkHttp";
 import { parsePracticePlanPublishMetadata } from "./helpers/publishMetadata";
+import {
+  browse,
+  listFacet,
+  parseCollectionFacetQuery,
+  parseCollectionQuery,
+} from "../collectionQuery";
+import { decideCollectionVisibility } from "../authorization/collectionVisibility";
 
 interface RequestWithUser extends Request {
   UserInfo?: {
@@ -50,106 +57,40 @@ function sendValidation(res: Response, message: string, errors: string[]) {
   return res.status(400).json({ message, errors });
 }
 
-export const getPracticePlans = async (req: RequestWithUser, res: Response) => {
-  try {
-    let queryString: string = JSON.stringify(req.query);
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 10;
-    const skip = (page - 1) * limit;
-    const sortBy = (req.query.sortBy as string) || "name";
-    const sortOrder = (req.query.sortOrder as string) || "asc";
+async function practicePlanCollectionVisibility(req: RequestWithUser) {
+  const actor = req.UserInfo?.id
+    ? { id: req.UserInfo.id, roles: req.UserInfo.roles ?? [] }
+    : undefined;
+  return decideCollectionVisibility("practicePlan", actor);
+}
 
-    // Remove pagination and sorting params from the query string
-    const queryObj = JSON.parse(queryString);
-    delete queryObj.page;
-    delete queryObj.limit;
-    delete queryObj.sortBy;
-    delete queryObj.sortOrder;
-    queryString = JSON.stringify(queryObj);
-
-    queryString = queryString.replace(
-      /\b(gte|gt|lte|lt|eq|ne|regex|options|in|nin)\b/g,
-      (match) => `$${match}`,
+// @desc    Browse Practice Plans
+// @route   GET /api/practice-plans
+// @access  Public - Returns public, owned, granted, or Admin-visible plans
+export const getPracticePlans = asyncHandler(
+  async (req: RequestWithUser, res: Response) => {
+    const intent = parseCollectionQuery("practicePlan", req.query);
+    res.json(
+      await browse({
+        intent,
+        visibility: await practicePlanCollectionVisibility(req),
+      }),
     );
-    let parseObject = JSON.parse(queryString);
+  },
+);
 
-    parseObject.$or = [{ isPrivate: false }];
-
-    if (req.UserInfo?.id) {
-      parseObject.$or.push({ isPrivate: true, user: req.UserInfo.id });
-
-      // Only query for access records if user is authenticated
-      const accessPracticePlans = await PracticePlanAccess.find({
-        user: req.UserInfo.id,
-      });
-
-      if (accessPracticePlans.length > 0) {
-        parseObject.$or.push({
-          _id: {
-            $in: accessPracticePlans.map((practicePlan) =>
-              practicePlan.practicePlan.toString(),
-            ),
-          },
-        });
-      }
-    }
-
-    if (
-      req.UserInfo?.roles?.includes("Admin") ||
-      req.UserInfo?.roles?.includes("admin")
-    ) {
-      parseObject.$or.push({ isPrivate: true });
-    }
-
-    // Create sort object
-    const sortObj: { [key: string]: 1 | -1 } = {};
-    const sortDirection = sortOrder === "desc" ? -1 : 1;
-
-    // Map frontend sort fields to database fields
-    switch (sortBy) {
-      case "name":
-        sortObj.name = sortDirection;
-        break;
-      case "created":
-        sortObj.createdAt = sortDirection;
-        break;
-      case "updated":
-        sortObj.updatedAt = sortDirection;
-        break;
-      default:
-        sortObj.name = 1; // Default sort by name ascending
-    }
-
-    sortObj._id = 1; // Always add _id as a secondary sort to ensure consistent ordering
-
-    // Get total count for pagination
-    const total = await PracticePlan.countDocuments(parseObject);
-
-    // Get practice plans with pagination
-    const practicePlans = await PracticePlan.find(parseObject)
-      .select(
-        "_id name description tags sections user isPrivate createdAt updatedAt",
-      )
-      .sort(sortObj)
-      .skip(skip)
-      .limit(limit)
-      .lean();
-
-    const pages = Math.ceil(total / limit);
-
-    return res.json({
-      practiceplans: practicePlans,
-      pagination: {
-        page: page,
-        limit: limit,
-        total,
-        pages,
-      },
-    });
-  } catch (e: any) {
-    return res.status(500).json({ message: "Get failed", error: e.message });
-  }
-};
+export const getPracticePlanTags = asyncHandler(
+  async (req: RequestWithUser, res: Response) => {
+    parseCollectionFacetQuery(req.query);
+    res.json(
+      await listFacet({
+        resource: "practicePlan",
+        facet: "tags",
+        visibility: await practicePlanCollectionVisibility(req),
+      }),
+    );
+  },
+);
 
 export const createPracticePlan = async (
   req: RequestWithUser,

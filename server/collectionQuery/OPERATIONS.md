@@ -1,6 +1,6 @@
 # Collection Query Activation Operations
 
-Exercise browsing is an active source contract. TacticBoard browsing is implemented but production activation remains blocked until its archived preflight, synthetic gates, and index verification pass. PracticePlan collection routes remain dormant.
+Exercise browsing is an active source contract. TacticBoard and PracticePlan browsing are implemented but production activation remains blocked until their archived preflight, synthetic gates, and index verification pass.
 
 ## Read-only preflight
 
@@ -31,7 +31,6 @@ Create reports elapsed time and index size where the server exposes it. Verify r
 3. Create and verify only the indexes for the next resource tracer bullet.
 4. Re-run preflight and representative production explains after each index.
 5. Drop only the independently named index if rollback is required.
-6. Keep the unactivated PracticePlan route on its legacy contract until its activation ticket.
 
 ## Exercise deployment and rollback
 
@@ -46,3 +45,11 @@ The TacticBoard activation uses `cq_tacticboards_name`, `cq_tacticboards_created
 Deploy the server and first-party client artifacts together. The browse route now returns the fixed `{ items, pagination }` summary envelope, `/api/tags/tacticboards` returns `{ items }`, and `/api/tacticboards/header` is removed. Artifact rollback must restore both artifacts together. Index rollback remains independent: drop only an index created for this activation with `npm run collection:index:drop -- <name>`.
 
 Before production activation, archive anonymous, Owner, view-granted, edit-granted, and case-insensitive Admin browse and facet evidence. Confirm hidden Private boards and Share Links change neither result totals nor facet values. The repository's Mongo-backed contracts provide local correctness evidence; they do not replace production preflight, index verification, latency, scan/sort/spill, or response-size evidence.
+
+## PracticePlan deployment and rollback
+
+The PracticePlan activation uses `cq_practiceplans_name`, `cq_practiceplans_created`, `cq_practiceplans_updated`, `cq_practiceplans_privacy`, `cq_practiceplans_owner`, and `cq_practiceplans_tags`. Create and verify each justified index separately. Preserve the actor-first `{ user, practicePlan }` Access index because collection authorization loads every grant through it.
+
+Deploy the server and first-party client artifacts together. The browse route now returns the fixed `{ items, pagination }` summary envelope with `description`, `isPrivate`, `sectionCount`, and `durationMinutes` without `sections`, and `/api/tags/practiceplans` returns `{ items }`. Derived `sectionCount` and `durationMinutes` are computed only for selected-page items. Artifact rollback must restore both artifacts together. Index rollback remains independent: drop only an index created for this activation with `npm run collection:index:drop -- <name>`.
+
+Before production activation, archive anonymous, Owner, view-granted, edit-granted, hidden Private, private-only no-match, legacy missing-privacy, and case-insensitive Admin browse and facet evidence. Confirm hidden Private plans and Share Links change neither result totals nor facet values, and that 100-item summaries stay at or below 256 KiB. The repository's Mongo-backed contracts provide local correctness evidence; they do not replace production preflight, index verification, latency, scan/sort/spill, response-size, or grant-memory evidence.

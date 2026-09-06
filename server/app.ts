@@ -19,6 +19,7 @@ import {
   getExerciseTags,
 } from "./controllers/exerciseController";
 import { getTacticBoardTags } from "./controllers/tacticBoardController";
+import { getPracticePlanTags } from "./controllers/practicePlanController";
 import verifyJWTOptional from "./middleware/verifyJWTOptional";
 
 const app = express();
@@ -44,6 +45,8 @@ app.get("/api/materials", getExerciseMaterials);
 app.get("/api/tags/exercises", getExerciseTags);
 
 app.get("/api/tags/tacticboards", verifyJWTOptional, getTacticBoardTags);
+
+app.get("/api/tags/practiceplans", verifyJWTOptional, getPracticePlanTags);
 
 app.get("/api", (req, res) => {
   res.json({ message: "Hello from server!" });

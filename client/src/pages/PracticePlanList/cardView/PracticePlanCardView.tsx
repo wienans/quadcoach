@@ -1,11 +1,11 @@
 import { Alert, Grid } from "@mui/material";
-import { PracticePlanHeader } from "../../../api/quadcoachApi/domain/PracticePlan";
+import { PracticePlanSummary } from "../../../api/quadcoachApi/domain/PracticePlan";
 import { useTranslation } from "react-i18next";
 import PracticePlanLoadingCard from "./PracticePlanLoadingCard";
 import PracticePlanCard from "./PracticePlanCard";
 
 export type PracticePlanCardViewProps = {
-  practicePlans?: PracticePlanHeader[];
+  practicePlans?: PracticePlanSummary[];
   isPracticePlansLoading: boolean;
   onOpenPracticePlanClick: (practicePlanId: string) => void;
 };

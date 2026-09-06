@@ -14,7 +14,7 @@ import {
   Tooltip,
   styled,
 } from "@mui/material";
-import { PracticePlanHeader } from "../../../api/quadcoachApi/domain/PracticePlan";
+import { PracticePlanSummary } from "../../../api/quadcoachApi/domain/PracticePlan";
 import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
@@ -42,7 +42,7 @@ const ExpandMore = styled((props: ExpandMoreProps) => {
 }));
 
 export type PracticePlanCardProps = {
-  practicePlan: PracticePlanHeader;
+  practicePlan: PracticePlanSummary;
   onOpenPracticePlanClick: () => void;
 };
 
@@ -53,13 +53,6 @@ const PracticePlanCard = ({
   const { t } = useTranslation("PracticePlanList");
   const [moreInformationExpanded, setMoreInformationExpanded] =
     useState<boolean>(false);
-
-  const calculateTotalDuration = () => {
-    if (!practicePlan.sections) return 0;
-    return practicePlan.sections.reduce((total, section) => {
-      return total + (section.targetDuration || 0);
-    }, 0);
-  };
 
   const formatDuration = (minutes: number) => {
     const hours = Math.floor(minutes / 60);
@@ -83,8 +76,8 @@ const PracticePlanCard = ({
           </>
         }
         subheader={
-          practicePlan.sections && practicePlan.sections.length > 0
-            ? `${practicePlan.sections.length} ${t(
+          practicePlan.sectionCount > 0
+            ? `${practicePlan.sectionCount} ${t(
                 "PracticePlanList:cardView.sections",
               )}`
             : t("PracticePlanList:cardView.noSections")
@@ -101,7 +94,7 @@ const PracticePlanCard = ({
         <SoftBox sx={{ mt: "auto" }}>
           <SoftTypography variant="caption" color="text">
             <ScheduleIcon sx={{ fontSize: 14, mr: 0.5 }} />
-            {formatDuration(calculateTotalDuration())}
+            {formatDuration(practicePlan.durationMinutes)}
           </SoftTypography>
         </SoftBox>
       </CardContent>

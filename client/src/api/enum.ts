@@ -13,4 +13,5 @@ export enum TagType {
   shareLink = "shareLink",
   favorite = "favorite",
   practiceplan = "practiceplan",
+  practiceplanTag = "practiceplanTag",
 }

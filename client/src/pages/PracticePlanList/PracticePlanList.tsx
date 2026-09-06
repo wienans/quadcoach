@@ -31,8 +31,9 @@ import {
   AddPracticePlanDialog,
 } from "../../components";
 import {
-  useLazyGetPracticePlanHeadersQuery,
+  GetPracticePlanRequest,
   useCreatePracticePlanMutation,
+  useLazyGetPracticePlansQuery,
 } from "../../api/quadcoachApi/practicePlansApi";
 import { useTranslation } from "react-i18next";
 import FilterAltIcon from "@mui/icons-material/FilterAlt";
@@ -42,7 +43,7 @@ import { DashboardLayout } from "../../components/LayoutContainers";
 import { useAuth } from "../../store/hooks";
 import Footer from "../../components/Footer";
 import {
-  PracticePlanHeader,
+  PracticePlanSummary,
   PracticePlanEntity,
   PracticePlanEntityPartialId,
 } from "../../api/quadcoachApi/domain/PracticePlan";
@@ -56,24 +57,23 @@ enum ViewType {
   Cards = "Cards",
 }
 
-type PracticePlanFilter = {
-  searchValue: string;
-  tagRegex: string;
-  tagList: string[];
-  isPrivate: boolean | undefined;
-  sortBy: "name" | "created" | "updated";
-  sortOrder: "asc" | "desc";
+type PracticePlanListRequest = GetPracticePlanRequest & {
+  search: string;
+  tags: string[];
+  tagMode: "all";
+  sort: "name" | "created" | "updated";
+  direction: "asc" | "desc";
   page: number;
   limit: number;
 };
 
-const defaultPracticePlanFilter: PracticePlanFilter = {
-  searchValue: "",
-  tagRegex: "",
-  tagList: [],
-  isPrivate: undefined,
-  sortBy: "name",
-  sortOrder: "asc",
+const defaultPracticePlanRequest: PracticePlanListRequest = {
+  search: "",
+  tags: [],
+  tagMode: "all",
+  privacy: undefined,
+  sort: "name",
+  direction: "asc",
   page: 1,
   limit: 50,
 };
@@ -98,11 +98,25 @@ const PracticePlanList = () => {
   }, [isUpMd]);
 
   const [loadedPracticePlans, setLoadedPracticePlans] = useState<
-    PracticePlanHeader[]
+    PracticePlanSummary[]
   >([]);
 
-  const [practicePlanFilter, setPracticePlanFilter] =
-    useState<PracticePlanFilter>(defaultPracticePlanFilter);
+  const [practicePlanRequest, setPracticePlanRequest] =
+    useState<PracticePlanListRequest>(defaultPracticePlanRequest);
+  const [tagInput, setTagInput] = useState("");
+
+  const updatePracticePlanQueryAndResetResults = (
+    update: (
+      current: PracticePlanListRequest,
+    ) => Partial<PracticePlanListRequest>,
+  ) => {
+    setLoadedPracticePlans([]);
+    setPracticePlanRequest((current) => ({
+      ...current,
+      ...update(current),
+      page: 1,
+    }));
+  };
 
   const [
     getPracticePlans,
@@ -111,45 +125,29 @@ const PracticePlanList = () => {
       isError: isPracticePlansError,
       isLoading: isPracticePlansLoading,
     },
-  ] = useLazyGetPracticePlanHeadersQuery();
+  ] = useLazyGetPracticePlansQuery();
 
   // Create debounced search function
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const debouncedSearch = useCallback(
-    debounce((filter: PracticePlanFilter) => {
-      getPracticePlans({
-        nameRegex: filter.searchValue,
-        tagRegex: filter.tagRegex,
-        tagList: filter.tagList,
-        isPrivate: filter.isPrivate,
-        sortBy: filter.sortBy,
-        sortOrder: filter.sortOrder,
-        page: filter.page,
-        limit: filter.limit,
-      });
+    debounce((request: PracticePlanListRequest) => {
+      getPracticePlans(request);
     }, 300),
     [getPracticePlans],
   );
 
-  // Update the filter change handler
-  const onPracticePlanFilterValueChange =
-    (practicePlanFilterProperty: keyof PracticePlanFilter) =>
-    (event: ChangeEvent<HTMLInputElement>) => {
-      setLoadedPracticePlans([]);
-      setPracticePlanFilter({
-        ...practicePlanFilter,
-        [practicePlanFilterProperty]: event.target.value,
-        page: 1,
-      });
-    };
+  const onSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const search = event.target.value;
+    updatePracticePlanQueryAndResetResults(() => ({ search }));
+  };
 
   // Cleanup
   useEffect(() => {
-    debouncedSearch(practicePlanFilter);
+    debouncedSearch(practicePlanRequest);
     return () => {
       debouncedSearch.cancel();
     };
-  }, [debouncedSearch, practicePlanFilter]);
+  }, [debouncedSearch, practicePlanRequest]);
 
   const [addPracticePlan] = useCreatePracticePlanMutation();
 
@@ -184,52 +182,55 @@ const PracticePlanList = () => {
   };
 
   const handleTagKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === "Enter" && practicePlanFilter.tagRegex.trim() !== "") {
+    if (event.key === "Enter" && tagInput.trim() !== "") {
       event.preventDefault();
-      setLoadedPracticePlans([]);
-      setPracticePlanFilter({
-        ...practicePlanFilter,
-        tagList: [
-          ...practicePlanFilter.tagList,
-          practicePlanFilter.tagRegex.trim(),
-        ],
-        tagRegex: "",
-        page: 1,
-      });
+      const tag = tagInput.trim();
+      if (
+        practicePlanRequest.tags.some(
+          (selected) => selected.toLowerCase() === tag.toLowerCase(),
+        )
+      ) {
+        setTagInput("");
+        return;
+      }
+      updatePracticePlanQueryAndResetResults((current) => ({
+        tags: [...current.tags, tag],
+      }));
+      setTagInput("");
     }
   };
 
   const handleDeleteTag = (tagToDelete: string) => {
-    setLoadedPracticePlans([]);
-    setPracticePlanFilter({
-      ...practicePlanFilter,
-      tagList: practicePlanFilter.tagList.filter((tag) => tag !== tagToDelete),
-      page: 1,
-    });
+    updatePracticePlanQueryAndResetResults((current) => ({
+      tags: current.tags.filter((tag) => tag !== tagToDelete),
+    }));
   };
 
   // Load more function
   const loadMore = useCallback(() => {
     if (
       practicePlansData &&
-      practicePlanFilter.page < practicePlansData.pagination.pages
+      practicePlanRequest.page < practicePlansData.pagination.pages
     ) {
-      setPracticePlanFilter((prev) => ({
+      setPracticePlanRequest((prev) => ({
         ...prev,
         page: prev.page + 1,
       }));
     }
-  }, [practicePlansData, practicePlanFilter.page]);
+  }, [practicePlansData, practicePlanRequest.page]);
 
   // Update effect to accumulate loaded practiceplans
   useEffect(() => {
-    if (practicePlansData?.practiceplans) {
+    if (practicePlansData?.items) {
       setLoadedPracticePlans((prev) => {
+        if (practicePlansData.pagination.page === 1) {
+          return practicePlansData.items;
+        }
         const newPracticePlanIds = new Set(
-          practicePlansData.practiceplans.map((p) => p._id),
+          practicePlansData.items.map((p) => p._id),
         );
         const filteredPrev = prev.filter((p) => !newPracticePlanIds.has(p._id));
-        return [...filteredPrev, ...practicePlansData.practiceplans];
+        return [...filteredPrev, ...practicePlansData.items];
       });
     }
   }, [practicePlansData]);
@@ -276,8 +277,8 @@ const PracticePlanList = () => {
                   <SoftInput
                     id="outlined-basic"
                     placeholder={t("PracticePlanList:filter.name")}
-                    value={practicePlanFilter.searchValue}
-                    onChange={onPracticePlanFilterValueChange("searchValue")}
+                    value={practicePlanRequest.search}
+                    onChange={onSearchChange}
                     sx={(theme) => ({
                       minWidth: "200px",
                       mr: 1,
@@ -293,18 +294,15 @@ const PracticePlanList = () => {
                   </InputLabel>
                   <Select
                     labelId="sort-select-label"
-                    value={practicePlanFilter.sortBy}
+                    value={practicePlanRequest.sort}
                     label={t("PracticePlanList:filter.sort.name")}
                     onChange={(event) => {
-                      setLoadedPracticePlans([]);
-                      setPracticePlanFilter({
-                        ...practicePlanFilter,
-                        sortBy: event.target.value as
+                      updatePracticePlanQueryAndResetResults(() => ({
+                        sort: event.target.value as
                           | "name"
                           | "created"
                           | "updated",
-                        page: 1,
-                      });
+                      }));
                     }}
                   >
                     <MenuItem value="name">
@@ -319,16 +317,13 @@ const PracticePlanList = () => {
                   </Select>
                 </FormControl>
                 <ToggleButton
-                  value={practicePlanFilter.sortOrder}
-                  selected={practicePlanFilter.sortOrder === "desc"}
+                  value={practicePlanRequest.direction}
+                  selected={practicePlanRequest.direction === "desc"}
                   onChange={() => {
-                    setLoadedPracticePlans([]);
-                    setPracticePlanFilter({
-                      ...practicePlanFilter,
-                      sortOrder:
-                        practicePlanFilter.sortOrder === "asc" ? "desc" : "asc",
-                      page: 1,
-                    });
+                    updatePracticePlanQueryAndResetResults((current) => ({
+                      direction:
+                        current.direction === "asc" ? "desc" : "asc",
+                    }));
                   }}
                   size="small"
                   sx={{ mr: 1 }}
@@ -352,8 +347,8 @@ const PracticePlanList = () => {
               <SoftInput
                 id="outlined-basic"
                 placeholder={t("PracticePlanList:filter.name")}
-                value={practicePlanFilter.searchValue}
-                onChange={onPracticePlanFilterValueChange("searchValue")}
+                value={practicePlanRequest.search}
+                onChange={onSearchChange}
               />
             </SoftBox>
           )}
@@ -385,8 +380,8 @@ const PracticePlanList = () => {
               <SoftInput
                 id="outlined-basic"
                 placeholder={t("PracticePlanList:filter.tags.placeholder")}
-                value={practicePlanFilter.tagRegex}
-                onChange={onPracticePlanFilterValueChange("tagRegex")}
+                value={tagInput}
+                onChange={(event) => setTagInput(event.target.value)}
                 onKeyDown={handleTagKeyDown}
                 sx={{ width: "100%" }}
                 endAdornment={
@@ -394,14 +389,14 @@ const PracticePlanList = () => {
                     <KeyboardReturnIcon
                       sx={{
                         fontSize: 20,
-                        opacity: practicePlanFilter.tagRegex != "" ? 1 : 0.4,
+                        opacity: tagInput !== "" ? 1 : 0.4,
                       }}
                     />
                   </InputAdornment>
                 }
               />
               <SoftBox sx={{ display: "flex", flexWrap: "wrap", gap: 1, mt: 1 }}>
-                {practicePlanFilter.tagList.map((tag) => (
+                {practicePlanRequest.tags.map((tag) => (
                   <Chip
                     key={tag}
                     label={tag}
@@ -415,17 +410,14 @@ const PracticePlanList = () => {
                 <FormControlLabel
                   control={
                     <Checkbox
-                      checked={practicePlanFilter.isPrivate === true}
+                      checked={practicePlanRequest.privacy === "private"}
                       onChange={() => {
-                        setLoadedPracticePlans([]);
-                        setPracticePlanFilter({
-                          ...practicePlanFilter,
-                          isPrivate:
-                            practicePlanFilter.isPrivate === true
+                        updatePracticePlanQueryAndResetResults((current) => ({
+                          privacy:
+                            current.privacy === "private"
                               ? undefined
-                              : true,
-                          page: 1,
-                        });
+                              : "private",
+                        }));
                       }}
                     />
                   }
@@ -473,7 +465,7 @@ const PracticePlanList = () => {
                 />
               </SoftBox>
               {practicePlansData &&
-                practicePlanFilter.page <
+                practicePlanRequest.page <
                   practicePlansData.pagination.pages && (
                   <SoftBox
                     display="flex"

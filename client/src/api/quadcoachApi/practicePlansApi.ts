@@ -4,8 +4,12 @@ import type {
   PracticePlanEntity,
   PracticePlanEntityPartialId,
   PracticePlanSection,
-  PracticePlanHeader,
+  PracticePlanSummary,
 } from "./domain/PracticePlan";
+import {
+  GetPracticePlanRequest,
+  serializePracticePlanCollectionRequest,
+} from "./practicePlanCollectionRequest";
 import type {
   ResourceAccessLevel,
   ResourceAuthorizationResponse,
@@ -45,19 +49,10 @@ export type PracticePlanAccessEntry = {
   createdAt: string;
 };
 
-export type GetPracticePlanRequest = {
-  nameRegex?: string;
-  tagRegex?: string;
-  tagList?: string[];
-  isPrivate?: boolean;
-  sortBy?: "name" | "created" | "updated";
-  sortOrder?: "asc" | "desc";
-  page?: number;
-  limit?: number;
-};
+export type { GetPracticePlanRequest } from "./practicePlanCollectionRequest";
 
-export type GetPracticePlanHeadersResponse = {
-  practiceplans: PracticePlanHeader[];
+export type GetPracticePlansResponse = {
+  items: PracticePlanSummary[];
   pagination: {
     page: number;
     limit: number;
@@ -68,48 +63,13 @@ export type GetPracticePlanHeadersResponse = {
 
 export const practicePlansApiSlice = quadcoachApi.injectEndpoints({
   endpoints: (builder) => ({
-    getPracticePlanHeaders: builder.query<
-      GetPracticePlanHeadersResponse,
+    getPracticePlans: builder.query<
+      GetPracticePlansResponse,
       GetPracticePlanRequest | undefined
     >({
       query: (request) => {
-        const {
-          nameRegex,
-          tagRegex,
-          tagList,
-          isPrivate,
-          sortBy,
-          sortOrder,
-          page = 1,
-          limit = 50,
-        } = request || {};
-        const urlParams = new URLSearchParams();
-
-        urlParams.append("page", page.toString());
-        urlParams.append("limit", limit.toString());
-
-        if (nameRegex != null && nameRegex !== "") {
-          urlParams.append("name[regex]", nameRegex);
-          urlParams.append("name[options]", "i");
-        }
-        if (tagList != null && tagList.length > 0) {
-          urlParams.append("tags[in]", tagList.join(","));
-        }
-        if (tagRegex != null && tagRegex !== "") {
-          urlParams.append("tags[regex]", tagRegex);
-          urlParams.append("tags[options]", "i");
-        }
-        if (isPrivate !== undefined) {
-          urlParams.append("isPrivate[eq]", String(isPrivate));
-        }
-        if (sortBy != null) {
-          urlParams.append("sortBy", sortBy);
-        }
-        if (sortOrder != null) {
-          urlParams.append("sortOrder", sortOrder);
-        }
-
-        const urlParamsString = urlParams.toString();
+        const urlParamsString =
+          serializePracticePlanCollectionRequest(request);
         return {
           url: `/api/practice-plans${
             urlParamsString === "" ? "" : `?${urlParamsString}`
@@ -120,13 +80,20 @@ export const practicePlansApiSlice = quadcoachApi.injectEndpoints({
       providesTags: (result) =>
         result
           ? [
-              ...result.practiceplans.map(({ _id }) => ({
+              ...result.items.map(({ _id }) => ({
                 type: TagType.practiceplan as const,
                 id: _id,
               })),
               TagType.practiceplan,
             ]
           : [TagType.practiceplan],
+    }),
+    getAllPracticePlanTags: builder.query<{ items: string[] }, void>({
+      query: () => ({
+        url: "/api/tags/practiceplans",
+        method: "get",
+      }),
+      providesTags: () => [TagType.practiceplanTag],
     }),
     createPracticePlan: builder.mutation<
       PracticePlanEntity,
@@ -137,7 +104,7 @@ export const practicePlansApiSlice = quadcoachApi.injectEndpoints({
         method: "post",
         data,
       }),
-      invalidatesTags: [TagType.practiceplan],
+      invalidatesTags: [TagType.practiceplan, TagType.practiceplanTag],
     }),
     getPracticePlan: builder.query<PracticePlanEntity, string>({
       query: (id) => ({
@@ -172,6 +139,7 @@ export const practicePlansApiSlice = quadcoachApi.injectEndpoints({
       }),
       invalidatesTags: (_result, _error, data) => [
         { type: TagType.practiceplan, id: data._id },
+        TagType.practiceplanTag,
         { type: TagType.shareLink, id: `practiceplan-${data._id}` },
         { type: TagType.shareLink, id: PRACTICE_PLAN_SHARED_READ_TAG_ID },
       ],
@@ -182,7 +150,9 @@ export const practicePlansApiSlice = quadcoachApi.injectEndpoints({
         method: "delete",
       }),
       invalidatesTags: (_result, _error, id) => [
+        { type: TagType.practiceplan, id },
         TagType.practiceplan,
+        TagType.practiceplanTag,
         { type: TagType.shareLink, id: `practiceplan-${id}` },
         { type: TagType.shareLink, id: PRACTICE_PLAN_SHARED_READ_TAG_ID },
       ],
@@ -305,8 +275,10 @@ export const practicePlansApiSlice = quadcoachApi.injectEndpoints({
 });
 
 export const {
-  useGetPracticePlanHeadersQuery,
-  useLazyGetPracticePlanHeadersQuery,
+  useGetPracticePlansQuery,
+  useLazyGetPracticePlansQuery,
+  useGetAllPracticePlanTagsQuery,
+  useLazyGetAllPracticePlanTagsQuery,
   useCreatePracticePlanMutation,
   useGetPracticePlanQuery,
   useGetSharedPracticePlanQuery,
