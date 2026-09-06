@@ -75,8 +75,6 @@ describe("PracticePlan RTK Query contracts", () => {
               isPrivate: false,
               sectionCount: 2,
               durationMinutes: 105,
-              sections: [{ secret: true }],
-              shareToken: "must-not-leak",
             },
           ],
           pagination: { page: 1, limit: 50, total: 1, pages: 1 },
@@ -101,10 +99,20 @@ describe("PracticePlan RTK Query contracts", () => {
         isPrivate: false,
         sectionCount: 2,
         durationMinutes: 105,
-        sections: [{ secret: true }],
-        shareToken: "must-not-leak",
       },
     ]);
+    for (const field of [
+      "sections",
+      "shareToken",
+      "shareLink",
+      "user",
+      "creator",
+      "createdAt",
+      "updatedAt",
+      "__v",
+    ]) {
+      expect(plans.data?.items[0]).not.toHaveProperty(field);
+    }
     expect((plans.data as unknown as { practiceplans?: unknown }).practiceplans).toBeUndefined();
     expect(tags.data).toEqual({ items: ["Attack", "Zone"] });
     expect(baseQueryMock.mock.calls.map(([request]) => request)).toEqual([

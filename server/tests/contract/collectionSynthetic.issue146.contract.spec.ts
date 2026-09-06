@@ -13,6 +13,11 @@ import {
   syntheticExerciseDocument,
   SyntheticMeasurements,
 } from "../../collectionQuery/operations/synthetic";
+import {
+  PRACTICE_PLAN_DATABASE_WORKLOADS,
+  PRACTICE_PLAN_INDEX_NAMES,
+  PRACTICE_PLAN_WORKLOAD_NAMES,
+} from "../../collectionQuery/operations/practicePlanSynthetic";
 
 const explain = {
   winningStages: ["IXSCAN"],
@@ -26,6 +31,21 @@ const explain = {
 
 function passingMeasurements(): SyntheticMeasurements {
   const operations = EXERCISE_WORKLOAD_NAMES.map((name) => ({
+    name,
+    operation: name.endsWith("facet")
+      ? ("facet" as const)
+      : ("browse" as const),
+    warmP95Ms: 1,
+    maximumMs: 1,
+    resultCount: 1,
+    correct: true,
+    ...(name.includes("substring")
+      ? { plannerException: "unanchored-search" as const }
+      : name.endsWith("facet")
+        ? { plannerException: "low-selectivity-facet" as const }
+        : {}),
+  }));
+  const practicePlanOperations = PRACTICE_PLAN_WORKLOAD_NAMES.map((name) => ({
     name,
     operation: name.endsWith("facet")
       ? ("facet" as const)
@@ -78,6 +98,41 @@ function passingMeasurements(): SyntheticMeasurements {
         explain,
       })),
       indexes: EXERCISE_INDEX_NAMES.map((name) => ({
+        name,
+        createDurationMs: 1,
+        sizeBytes: 1,
+        selected: true,
+        explain,
+        dropCommand: `npm run collection:index:drop -- ${name}`,
+      })),
+    },
+    practicePlan: {
+      generatedDocuments: 20_000,
+      documentsWithLegacyMissingPrivacy: 1,
+      documentsWithEmptySections: 1,
+      documentsWithMissingDescription: 1,
+      documentsWithSections: 20_000,
+      deterministicTieDocuments: 2,
+      summaryOmitsSections: true,
+      derivedMetricsAccurate: true,
+      response100Bytes: 1,
+      grantIdsBytes: 1,
+      grantIdsLoaded: 5_000,
+      operations: practicePlanOperations,
+      databaseOperations: PRACTICE_PLAN_DATABASE_WORKLOADS.map((workload) => ({
+        name: workload.name,
+        countWarmP95Ms: 1,
+        pageWarmP95Ms: 1,
+        maximumMs: 1,
+      })),
+      planners: PRACTICE_PLAN_DATABASE_WORKLOADS.map((workload) => ({
+        name: workload.name,
+        expectedIndex: workload.expectedIndex,
+        activationGate: workload.activationGate,
+        selected: true,
+        explain,
+      })),
+      indexes: PRACTICE_PLAN_INDEX_NAMES.map((name) => ({
         name,
         createDurationMs: 1,
         sizeBytes: 1,

@@ -15,7 +15,10 @@
     },
     "tags": {
       "title": "Tags",
-      "placeholder": "Enter tag and press Enter..."
+      "placeholder": "Select or enter tag...",
+      "mode": "Tag match",
+      "matchAll": "All",
+      "matchAny": "Any"
     },
     "isPrivate": "Show only private plans",
     "apply": "Apply filter"
@@ -25,7 +28,6 @@
   "cardView": {
     "openPracticePlan": "Open practice plan",
     "tags": "Tags",
-    "description": "Description",
     "sections": "sections",
     "noSections": "No sections"
   },

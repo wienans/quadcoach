@@ -143,6 +143,46 @@ describe("collection query transport parser", () => {
     ]);
   });
 
+  it("parses practicePlan semantic filters, sorts, and pagination", () => {
+    expect(parseCollectionQuery("practicePlan", {})).toMatchObject({
+      resource: "practicePlan",
+      sort: { by: "name", direction: "asc" },
+      page: 1,
+      limit: 50,
+    });
+    expect(
+      parseCollectionQuery("practicePlan", {
+        search: "[plan].*",
+        tags: ["Attack", "fast"],
+        tagMode: "any",
+        privacy: "public",
+        sort: "updated",
+        direction: "desc",
+        page: "2",
+        limit: "25",
+      }),
+    ).toMatchObject({
+      resource: "practicePlan",
+      search: "[plan].*",
+      tags: { values: ["Attack", "fast"], mode: "any" },
+      privacy: "public",
+      sort: { by: "updated", direction: "desc" },
+      page: 2,
+      limit: 25,
+    });
+    expect(
+      errorsFor("practicePlan", {
+        privacy: "secret",
+        sort: "duration",
+        tagMode: "any",
+      }).errors,
+    ).toEqual([
+      { field: "tagMode", code: "unsupported" },
+      { field: "sort", code: "unsupported" },
+      { field: "privacy", code: "unsupported" },
+    ]);
+  });
+
   it("rejects unsafe page and limit integers as out of range", () => {
     expect(errorsFor("exercise", { page: "9007199254740992" }).errors).toEqual([
       { field: "page", code: "outOfRange" },

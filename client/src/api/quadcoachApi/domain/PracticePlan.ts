@@ -77,13 +77,9 @@ export type PracticePlanEntityPartialId = {
 export type PracticePlanSummary = {
   _id: string;
   name: string;
-  description?: string | null;
+  description: string | null;
   tags: string[];
-  user?: string;
   isPrivate: boolean;
   sectionCount: number;
   durationMinutes: number;
-  creator?: string;
-  createdAt?: string | Date;
-  updatedAt?: string | Date;
 };

@@ -4,18 +4,20 @@ import {
   useEffect,
   useState,
   useCallback,
-  KeyboardEvent,
 } from "react";
 import {
   Alert,
+  Autocomplete,
   Card,
   CardHeader,
   Checkbox,
+  CircularProgress,
   FormControlLabel,
   Theme,
+  TextField,
   ToggleButton,
+  ToggleButtonGroup,
   useMediaQuery,
-  InputAdornment,
   Select,
   MenuItem,
   FormControl,
@@ -33,6 +35,7 @@ import {
 import {
   GetPracticePlanRequest,
   useCreatePracticePlanMutation,
+  useLazyGetAllPracticePlanTagsQuery,
   useLazyGetPracticePlansQuery,
 } from "../../api/quadcoachApi/practicePlansApi";
 import { useTranslation } from "react-i18next";
@@ -48,8 +51,6 @@ import {
   PracticePlanEntityPartialId,
 } from "../../api/quadcoachApi/domain/PracticePlan";
 import debounce from "lodash/debounce";
-import KeyboardReturnIcon from "@mui/icons-material/KeyboardReturn";
-import { Chip } from "@mui/material";
 import SortIcon from "@mui/icons-material/Sort";
 
 enum ViewType {
@@ -60,7 +61,7 @@ enum ViewType {
 type PracticePlanListRequest = GetPracticePlanRequest & {
   search: string;
   tags: string[];
-  tagMode: "all";
+  tagMode: "all" | "any";
   sort: "name" | "created" | "updated";
   direction: "asc" | "desc";
   page: number;
@@ -103,7 +104,6 @@ const PracticePlanList = () => {
 
   const [practicePlanRequest, setPracticePlanRequest] =
     useState<PracticePlanListRequest>(defaultPracticePlanRequest);
-  const [tagInput, setTagInput] = useState("");
 
   const updatePracticePlanQueryAndResetResults = (
     update: (
@@ -126,6 +126,11 @@ const PracticePlanList = () => {
       isLoading: isPracticePlansLoading,
     },
   ] = useLazyGetPracticePlansQuery();
+
+  const [
+    getAllPracticePlanTags,
+    { data: allPracticePlanTagsData, isLoading: isAllPracticePlanTagsLoading },
+  ] = useLazyGetAllPracticePlanTagsQuery();
 
   // Create debounced search function
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -181,29 +186,8 @@ const PracticePlanList = () => {
     setOpenAddPracticePlanDialog(false);
   };
 
-  const handleTagKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === "Enter" && tagInput.trim() !== "") {
-      event.preventDefault();
-      const tag = tagInput.trim();
-      if (
-        practicePlanRequest.tags.some(
-          (selected) => selected.toLowerCase() === tag.toLowerCase(),
-        )
-      ) {
-        setTagInput("");
-        return;
-      }
-      updatePracticePlanQueryAndResetResults((current) => ({
-        tags: [...current.tags, tag],
-      }));
-      setTagInput("");
-    }
-  };
-
-  const handleDeleteTag = (tagToDelete: string) => {
-    updatePracticePlanQueryAndResetResults((current) => ({
-      tags: current.tags.filter((tag) => tag !== tagToDelete),
-    }));
+  const handleTagSelectionChange = (selectedTags: string[]) => {
+    updatePracticePlanQueryAndResetResults(() => ({ tags: selectedTags }));
   };
 
   // Load more function
@@ -334,6 +318,7 @@ const PracticePlanList = () => {
                   value={filterAnchorEl ? "shown" : "hide"}
                   selected={Boolean(filterAnchorEl)}
                   onClick={(e) => {
+                    getAllPracticePlanTags();
                     setFilterAnchorEl(filterAnchorEl ? null : e.currentTarget);
                   }}
                 >
@@ -377,34 +362,62 @@ const PracticePlanList = () => {
               <SoftTypography variant="body2" sx={{ mb: 1 }}>
                 {t("PracticePlanList:filter.tags.title")}
               </SoftTypography>
-              <SoftInput
-                id="outlined-basic"
-                placeholder={t("PracticePlanList:filter.tags.placeholder")}
-                value={tagInput}
-                onChange={(event) => setTagInput(event.target.value)}
-                onKeyDown={handleTagKeyDown}
-                sx={{ width: "100%" }}
-                endAdornment={
-                  <InputAdornment position="end">
-                    <KeyboardReturnIcon
-                      sx={{
-                        fontSize: 20,
-                        opacity: tagInput !== "" ? 1 : 0.4,
-                      }}
-                    />
-                  </InputAdornment>
+              <Autocomplete
+                multiple
+                freeSolo
+                size="small"
+                options={allPracticePlanTagsData?.items ?? []}
+                value={practicePlanRequest.tags}
+                onChange={(_event, newValue) =>
+                  handleTagSelectionChange(newValue)
                 }
-              />
-              <SoftBox sx={{ display: "flex", flexWrap: "wrap", gap: 1, mt: 1 }}>
-                {practicePlanRequest.tags.map((tag) => (
-                  <Chip
-                    key={tag}
-                    label={tag}
-                    onDelete={() => handleDeleteTag(tag)}
-                    color="primary"
-                    variant="outlined"
+                loading={isAllPracticePlanTagsLoading}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    placeholder={t("PracticePlanList:filter.tags.placeholder")}
+                    InputProps={{
+                      ...params.InputProps,
+                      endAdornment: (
+                        <>
+                          {isAllPracticePlanTagsLoading ? (
+                            <CircularProgress
+                              color="inherit"
+                              size={20}
+                            />
+                          ) : null}
+                          {params.InputProps.endAdornment}
+                        </>
+                      ),
+                    }}
                   />
-                ))}
+                )}
+              />
+              <SoftBox
+                sx={{ mt: 2, display: "flex", alignItems: "center", gap: 1 }}
+              >
+                <SoftTypography variant="caption">
+                  {t("PracticePlanList:filter.tags.mode")}
+                </SoftTypography>
+                <ToggleButtonGroup
+                  exclusive
+                  size="small"
+                  value={practicePlanRequest.tagMode}
+                  onChange={(_, value) => {
+                    if (value === "all" || value === "any") {
+                      updatePracticePlanQueryAndResetResults(() => ({
+                        tagMode: value,
+                      }));
+                    }
+                  }}
+                >
+                  <ToggleButton value="all">
+                    {t("PracticePlanList:filter.tags.matchAll")}
+                  </ToggleButton>
+                  <ToggleButton value="any">
+                    {t("PracticePlanList:filter.tags.matchAny")}
+                  </ToggleButton>
+                </ToggleButtonGroup>
               </SoftBox>
               <SoftBox sx={{ mt: 2 }}>
                 <FormControlLabel

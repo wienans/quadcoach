@@ -12,6 +12,7 @@ import {
   CollectionVisibility,
   ExerciseIntent,
   IntegerRange,
+  PracticePlanCollectionSummary,
   PrivateResourceIntent,
   ValueSelection,
 } from "./types";
@@ -37,6 +38,7 @@ interface Adapter {
   readonly projection: Readonly<Record<string, 0 | 1>>;
   readonly sortFields: Readonly<Record<string, string>>;
   readonly facets: readonly Facet[];
+  readonly derivedStages?: readonly mongo.Document[];
   map(document: mongo.Document): CollectionSummary;
 }
 
@@ -144,38 +146,65 @@ const adapters: Readonly<Record<CollectionResource, Adapter>> = Object.freeze({
       resourceField: "practicePlan",
     },
     projection: {
-      ...publicProjection,
-      user: 1,
+      _id: 1,
+      name: 1,
+      tags: 1,
       isPrivate: 1,
       description: 1,
-      sections: 1,
+      sectionCount: 1,
+      durationMinutes: 1,
     },
     sortFields: { name: "name", created: "createdAt", updated: "updatedAt" },
     facets: ["tags"],
-    map(document) {
-      const sections = Array.isArray(document.sections)
-        ? document.sections
-        : [];
+    // Derive card-summary metrics inside Mongo for the selected page
+    // only, so full `sections` arrays never travel Mongo→Node and the
+    // response stays bounded without denormalized persistence.
+    derivedStages: [
+      {
+        $set: {
+          sectionCount: {
+            $cond: [{ $isArray: "$sections" }, { $size: "$sections" }, 0],
+          },
+          durationMinutes: {
+            $sum: {
+              $map: {
+                input: {
+                  $cond: [{ $isArray: "$sections" }, "$sections", []],
+                },
+                as: "section",
+                in: {
+                  $cond: [
+                    { $isNumber: "$$section.targetDuration" },
+                    "$$section.targetDuration",
+                    0,
+                  ],
+                },
+              },
+            },
+          },
+        },
+      },
+    ],
+    map(document): PracticePlanCollectionSummary {
+      if (
+        typeof document.sectionCount !== "number" ||
+        typeof document.durationMinutes !== "number"
+      ) {
+        throw new TypeError(
+          "practicePlan card summary metrics were not derived",
+        );
+      }
       return {
-        ...publicSummary(document),
-        user: idString(document.user),
+        _id: idString(document._id) ?? "",
+        name: typeof document.name === "string" ? document.name : "",
+        tags: textArray(document.tags),
         isPrivate: document.isPrivate === true,
         description:
           typeof document.description === "string"
             ? document.description
             : null,
-        sectionCount: sections.length,
-        durationMinutes: sections.reduce(
-          (total: number, section: unknown) =>
-            total +
-            (section &&
-            typeof section === "object" &&
-            "targetDuration" in section &&
-            typeof section.targetDuration === "number"
-              ? section.targetDuration
-              : 0),
-          0,
-        ),
+        sectionCount: document.sectionCount,
+        durationMinutes: document.durationMinutes,
       };
     },
   },
@@ -367,6 +396,7 @@ function createCollectionQueries(database: mongo.Db): CollectionQueries {
         },
         { $skip: skip },
         { $limit: intent.limit },
+        ...(adapter.derivedStages ?? []),
         { $project: adapter.projection },
       ];
       try {
@@ -493,4 +523,5 @@ export {
   CollectionResource,
   CollectionSummary,
   CollectionVisibility,
+  PracticePlanCollectionSummary,
 } from "./types";

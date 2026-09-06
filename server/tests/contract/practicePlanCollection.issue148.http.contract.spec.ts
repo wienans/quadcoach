@@ -20,6 +20,9 @@ describe("issue 148 PracticePlan collection HTTP contract", () => {
           { name: "Warm Up", targetDuration: 15, groups: [] },
           { name: "Main", targetDuration: 90, groups: [] },
         ],
+        creator: "must-not-leak",
+        createdAt: new Date("2020-01-01T00:00:00Z"),
+        updatedAt: new Date("2020-01-02T00:00:00Z"),
         shareToken: "must-not-leak",
         __v: 7,
       },
@@ -60,7 +63,16 @@ describe("issue 148 PracticePlan collection HTTP contract", () => {
       ],
       pagination: { page: 1, limit: 25, total: 1, pages: 1 },
     });
-    for (const field of ["sections", "shareToken", "shareLink", "__v"]) {
+    for (const field of [
+      "sections",
+      "shareToken",
+      "shareLink",
+      "user",
+      "creator",
+      "createdAt",
+      "updatedAt",
+      "__v",
+    ]) {
       expect(response.body.items[0]).not.toHaveProperty(field);
     }
   });
@@ -132,28 +144,9 @@ describe("issue 148 PracticePlan collection HTTP contract", () => {
       ]),
     );
     expect(anonymous).toHaveLength(2);
-    expect(await browse(124, await getAccessToken(owner))).toEqual(
-      expect.arrayContaining([
-        publicPlan.id,
-        legacyPublic.insertedId.toString(),
-        owned.id,
-      ]),
-    );
-    expect(await browse(125, await getAccessToken(viewer))).toEqual(
-      expect.arrayContaining([
-        publicPlan.id,
-        legacyPublic.insertedId.toString(),
-        viewGranted.id,
-      ]),
-    );
-    expect(await browse(126, await getAccessToken(editor))).toEqual(
-      expect.arrayContaining([
-        publicPlan.id,
-        legacyPublic.insertedId.toString(),
-        editGranted.id,
-      ]),
-    );
-    expect(await browse(127, await getAccessToken(admin))).toEqual(
+    expect(anonymous).not.toContain(hidden.id);
+    const ownerPlans = await browse(124, await getAccessToken(owner));
+    expect(ownerPlans).toEqual(
       expect.arrayContaining([
         publicPlan.id,
         legacyPublic.insertedId.toString(),
@@ -163,6 +156,43 @@ describe("issue 148 PracticePlan collection HTTP contract", () => {
         hidden.id,
       ]),
     );
+    expect(ownerPlans).toHaveLength(6);
+    const viewerPlans = await browse(125, await getAccessToken(viewer));
+    expect(viewerPlans).toEqual(
+      expect.arrayContaining([
+        publicPlan.id,
+        legacyPublic.insertedId.toString(),
+        viewGranted.id,
+      ]),
+    );
+    expect(viewerPlans).toHaveLength(3);
+    expect(viewerPlans).not.toContain(owned.id);
+    expect(viewerPlans).not.toContain(editGranted.id);
+    expect(viewerPlans).not.toContain(hidden.id);
+    const editorPlans = await browse(126, await getAccessToken(editor));
+    expect(editorPlans).toEqual(
+      expect.arrayContaining([
+        publicPlan.id,
+        legacyPublic.insertedId.toString(),
+        editGranted.id,
+      ]),
+    );
+    expect(editorPlans).toHaveLength(3);
+    expect(editorPlans).not.toContain(owned.id);
+    expect(editorPlans).not.toContain(viewGranted.id);
+    expect(editorPlans).not.toContain(hidden.id);
+    const adminPlans = await browse(127, await getAccessToken(admin));
+    expect(adminPlans).toEqual(
+      expect.arrayContaining([
+        publicPlan.id,
+        legacyPublic.insertedId.toString(),
+        owned.id,
+        viewGranted.id,
+        editGranted.id,
+        hidden.id,
+      ]),
+    );
+    expect(adminPlans).toHaveLength(6);
   });
 
   it("narrows the authorized set for private-only requests", async () => {
@@ -264,6 +294,33 @@ describe("issue 148 PracticePlan collection HTTP contract", () => {
         message: "Invalid collection query",
         errors: [{ field: "tagName", code: "unknown" }],
       });
+  });
+
+  it("resolves facet display-casing ties deterministically", async () => {
+    const { user } = await createVerifiedUser({
+      email: "plan_facet_tie@example.com",
+    });
+    await PracticePlan.create([
+      { name: "Tie A", isPrivate: false, user: user._id, tags: ["attack"] },
+      { name: "Tie B", isPrivate: false, user: user._id, tags: ["ATTACK"] },
+      { name: "Tie C", isPrivate: false, user: user._id, tags: ["Zulu"] },
+      { name: "Tie D", isPrivate: false, user: user._id, tags: ["alpha"] },
+    ]);
+
+    const first = await request(app)
+      .get("/api/tags/practiceplans")
+      .set("X-Forwarded-For", forwardedFor(137))
+      .expect(200);
+    const second = await request(app)
+      .get("/api/tags/practiceplans")
+      .set("X-Forwarded-For", forwardedFor(138))
+      .expect(200);
+
+    // Equal-count "attack"/"ATTACK" collapses to one deterministic display form.
+    expect(first.body.items.filter((tag: string) => tag.toLowerCase() === "attack")).toHaveLength(1);
+    expect(first.body).toEqual(second.body);
+    // Distinct equal-count tags sort deterministically.
+    expect(first.body.items.indexOf("alpha") < first.body.items.indexOf("Zulu")).toBe(true);
   });
 
   it("rejects legacy and unsupported syntax with sanitized failures", async () => {

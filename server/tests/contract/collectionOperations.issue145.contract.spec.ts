@@ -284,7 +284,7 @@ describe("collection-query operations", () => {
     expect(missingExerciseEvidence.activation).toBe("pause");
     expect(
       missingExerciseEvidence.gates
-        .filter((gate) => gate.name !== "Exercise evidence present")
+        .filter((gate) => !gate.name.includes("evidence present"))
         .every((gate) => gate.passed),
     ).toBe(true);
     const failed = evaluateSyntheticGates({

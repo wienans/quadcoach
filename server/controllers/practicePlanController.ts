@@ -81,6 +81,9 @@ export const getPracticePlans = asyncHandler(
 
 export const getPracticePlanTags = asyncHandler(
   async (req: RequestWithUser, res: Response) => {
+    // The tags facet is query-free by contract (same as the proven
+    // TacticBoard path): validation rejects any query parameter, and the
+    // facet is always computed over the caller's full visible set.
     parseCollectionFacetQuery(req.query);
     res.json(
       await listFacet({

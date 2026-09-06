@@ -144,8 +144,8 @@ interface BrowseWorkload {
   readonly plannerException?: "unanchored-search";
 }
 
-function countMatching(
-  scale: ExerciseScale,
+export function countMatching(
+  scale: { readonly resources: number },
   predicate: (number: number) => boolean,
 ): number {
   let total = 0;

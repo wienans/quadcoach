@@ -136,6 +136,16 @@ export interface CollectionSummary {
   readonly updatedAt?: Date;
 }
 
+export interface PracticePlanCollectionSummary {
+  readonly _id: string;
+  readonly name: string;
+  readonly tags: readonly string[];
+  readonly isPrivate: boolean;
+  readonly description: string | null;
+  readonly sectionCount: number;
+  readonly durationMinutes: number;
+}
+
 export interface CollectionPage<
   T extends CollectionSummary = CollectionSummary,
 > {

@@ -15,7 +15,10 @@
     },
     "tags": {
       "title": "Tags",
-      "placeholder": "Tag eingeben und Enter drücken..."
+      "placeholder": "Tag auswählen oder eingeben...",
+      "mode": "Tag-Übereinstimmung",
+      "matchAll": "Alle",
+      "matchAny": "Beliebige"
     },
     "isPrivate": "Nur private Pläne anzeigen",
     "apply": "Filter anwenden"
@@ -25,7 +28,6 @@
   "cardView": {
     "openPracticePlan": "Trainingsplan öffnen",
     "tags": "Tags",
-    "description": "Beschreibung",
     "sections": "Abschnitte",
     "noSections": "Keine Abschnitte"
   },

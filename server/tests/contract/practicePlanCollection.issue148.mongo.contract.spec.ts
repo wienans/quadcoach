@@ -27,6 +27,9 @@ describe("issue 148 PracticePlan collection Mongo contract", () => {
         tags: [],
         isPrivate: false,
         sections: [],
+        creator: "must-not-leak",
+        createdAt: new Date("2020-01-01T00:00:00Z"),
+        updatedAt: new Date("2020-01-02T00:00:00Z"),
       },
     ]);
 
@@ -45,9 +48,61 @@ describe("issue 148 PracticePlan collection Mongo contract", () => {
       sectionCount: 0,
       durationMinutes: 0,
     });
-    expect(first.items[0]).not.toHaveProperty("sections");
-    expect(first.items[0]).not.toHaveProperty("shareToken");
+    for (const field of [
+      "sections",
+      "shareToken",
+      "shareLink",
+      "user",
+      "creator",
+      "createdAt",
+      "updatedAt",
+      "__v",
+    ]) {
+      expect(first.items[0]).not.toHaveProperty(field);
+    }
     expect(first.pagination).toEqual({ page: 1, limit: 1, total: 2, pages: 2 });
+
+    const aggregateSpy = jest.spyOn(mongo.Collection.prototype, "aggregate");
+    await browse({
+      intent: parseCollectionQuery("practicePlan", {
+        sort: "name",
+        direction: "asc",
+        limit: "1",
+      }),
+      visibility: collectionVisibility.public(),
+    });
+    // Note: countDocuments runs an internal $match/$group aggregation,
+    // so select the browse pipeline (the one carrying $project).
+    const pipelines = aggregateSpy.mock.calls.map((call) => call[0]) as Record<
+      string,
+      unknown
+    >[][];
+    const pipeline = pipelines.find((stages) =>
+      stages.some((stage) => "$project" in stage),
+    );
+    expect(pipeline?.map((stage) => Object.keys(stage)[0])).toEqual([
+      "$match",
+      "$sort",
+      "$skip",
+      "$limit",
+      "$set",
+      "$project",
+    ]);
+    const project = pipeline?.[pipeline.length - 1]?.["$project"] as
+      | Record<string, unknown>
+      | undefined;
+    expect(project).not.toHaveProperty("shareToken");
+    expect(project).not.toHaveProperty("__v");
+    expect(project).not.toHaveProperty("user");
+    expect(project).not.toHaveProperty("creator");
+    expect(project).not.toHaveProperty("createdAt");
+    expect(project).not.toHaveProperty("updatedAt");
+    // Full sections must not travel Mongo→Node; the card metrics are
+    // derived in-aggregation for the selected page only.
+    expect(project).not.toHaveProperty("sections");
+    expect(project).toHaveProperty("sectionCount");
+    expect(project).toHaveProperty("durationMinutes");
+    aggregateSpy.mockRestore();
 
     const second = await browse({
       intent: parseCollectionQuery("practicePlan", {

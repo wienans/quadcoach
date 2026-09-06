@@ -91,6 +91,22 @@ const PracticePlanCard = ({
         }
       />
       <CardContent sx={{ position: "relative" }}>
+        {practicePlan.description?.trim() ? (
+          <SoftTypography
+            variant="caption"
+            color="text"
+            sx={{
+              display: "-webkit-box",
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: "vertical",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              mb: 1,
+            }}
+          >
+            {practicePlan.description}
+          </SoftTypography>
+        ) : null}
         <SoftBox sx={{ mt: "auto" }}>
           <SoftTypography variant="caption" color="text">
             <ScheduleIcon sx={{ fontSize: 14, mr: 0.5 }} />
