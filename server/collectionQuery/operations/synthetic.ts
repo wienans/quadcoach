@@ -1,6 +1,6 @@
 import { mongo } from "mongoose";
 
-import { loadAllCollectionGrantIds } from "../../authorization/collectionGrantIds";
+import { loadAllCollectionGrantIds } from "..";
 import { browse, listFacet } from "../index";
 import { runWithCollectionDatabase } from "../internal/databaseContext";
 import { parseCollectionQuery } from "../parser";

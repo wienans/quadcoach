@@ -1,5 +1,9 @@
 import { Request, Response, NextFunction } from "express";
 import { logEvents } from "./logger";
+import {
+  CollectionQueryInfrastructureError,
+  CollectionQueryValidationError,
+} from "../collectionQuery";
 
 const errorHandler = (
   err: Error,
@@ -13,8 +17,17 @@ const errorHandler = (
   );
   console.error(err.stack);
 
-  const status = res.statusCode ? res.statusCode : 500; // server error
+  if (err instanceof CollectionQueryValidationError) {
+    res.status(err.statusCode).json(err.serialize());
+    return;
+  }
 
+  if (err instanceof CollectionQueryInfrastructureError) {
+    res.status(err.statusCode).json({ message: err.message });
+    return;
+  }
+
+  const status = res.statusCode >= 400 ? res.statusCode : 500;
   res.status(status).json({ message: err.message });
 };
 

@@ -58,7 +58,7 @@ describe("TacticBoard permanent legacy HTTP contracts", () => {
       .set("X-Forwarded-For", "192.0.2.11");
 
     expect(listResponse.status).toBe(200);
-    expect(headerResponse.status).toBe(400);
+    expect(headerResponse.status).toBe(404);
     expectExactFields(listResponse.body, ["items", "pagination"]);
     expectExactFields(listResponse.body.pagination, [
       "total",

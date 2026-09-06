@@ -25,8 +25,6 @@ import {
 import { parseTacticBoardPublishMetadata } from "./helpers/publishMetadata";
 import {
   browse,
-  CollectionQueryInfrastructureError,
-  CollectionQueryValidationError,
   listFacet,
   parseCollectionFacetQuery,
   parseCollectionQuery,
@@ -59,18 +57,6 @@ function isMongoError(error: unknown): error is { code: number } {
   return typeof error === "object" && error !== null && "code" in error;
 }
 
-function sendCollectionQueryError(error: unknown, res: Response): boolean {
-  if (error instanceof CollectionQueryValidationError) {
-    res.status(error.statusCode).json(error.serialize());
-    return true;
-  }
-  if (error instanceof CollectionQueryInfrastructureError) {
-    res.status(error.statusCode).json({ message: error.message });
-    return true;
-  }
-  return false;
-}
-
 async function tacticBoardCollectionVisibility(req: RequestWithUser) {
   const actor = req.UserInfo?.id
     ? { id: req.UserInfo.id, roles: req.UserInfo.roles ?? [] }
@@ -83,34 +69,26 @@ async function tacticBoardCollectionVisibility(req: RequestWithUser) {
 // @access  Public - Returns public, owned, granted, or Admin-visible boards
 export const getAllTacticBoards = asyncHandler(
   async (req: RequestWithUser, res: Response) => {
-    try {
-      const intent = parseCollectionQuery("tacticBoard", req.query);
-      res.json(
-        await browse({
-          intent,
-          visibility: await tacticBoardCollectionVisibility(req),
-        }),
-      );
-    } catch (error) {
-      if (!sendCollectionQueryError(error, res)) throw error;
-    }
+    const intent = parseCollectionQuery("tacticBoard", req.query);
+    res.json(
+      await browse({
+        intent,
+        visibility: await tacticBoardCollectionVisibility(req),
+      }),
+    );
   },
 );
 
 export const getTacticBoardTags = asyncHandler(
   async (req: RequestWithUser, res: Response) => {
-    try {
-      parseCollectionFacetQuery(req.query);
-      res.json(
-        await listFacet({
-          resource: "tacticBoard",
-          facet: "tags",
-          visibility: await tacticBoardCollectionVisibility(req),
-        }),
-      );
-    } catch (error) {
-      if (!sendCollectionQueryError(error, res)) throw error;
-    }
+    parseCollectionFacetQuery(req.query);
+    res.json(
+      await listFacet({
+        resource: "tacticBoard",
+        facet: "tags",
+        visibility: await tacticBoardCollectionVisibility(req),
+      }),
+    );
   },
 );
 

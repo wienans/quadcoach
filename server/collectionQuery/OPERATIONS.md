@@ -1,6 +1,6 @@
 # Collection Query Activation Operations
 
-Exercise and TacticBoard browsing are active source contracts. PracticePlan collection routes remain dormant. Do not deploy an activation until preflight, synthetic gates, and each relevant index verification pass.
+Exercise browsing is an active source contract. TacticBoard browsing is implemented but production activation remains blocked until its archived preflight, synthetic gates, and index verification pass. PracticePlan collection routes remain dormant.
 
 ## Read-only preflight
 

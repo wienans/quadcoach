@@ -1,11 +1,11 @@
 import mongoose from "mongoose";
 
+import { loadAllCollectionGrantIds } from "../collectionQuery";
 import {
   collectionVisibility,
   CollectionResource,
   CollectionVisibility,
 } from "../collectionQuery/types";
-import { loadAllCollectionGrantIds } from "./collectionGrantIds";
 
 export interface CollectionActor {
   readonly id: string;

@@ -19,6 +19,8 @@ router
   .get(tacticBoardController.getAllTacticBoards)
   .post(verifyJWT, tacticBoardController.createNewTacticBoard);
 
+router.get("/header", (_req, res) => res.sendStatus(404));
+
 router
   .route("/:id")
   .get(tacticBoardController.getById)

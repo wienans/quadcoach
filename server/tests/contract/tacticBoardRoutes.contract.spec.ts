@@ -13,7 +13,7 @@ describe("permanent /api/tacticboards route inventory", () => {
       path: string;
       expectedStatus: number;
     }> = [
-      { method: "get", path: "/api/tacticboards/header", expectedStatus: 400 },
+      { method: "get", path: "/api/tacticboards/header", expectedStatus: 404 },
       { method: "get", path: "/api/tacticboards", expectedStatus: 200 },
       { method: "post", path: "/api/tacticboards", expectedStatus: 401 },
       {

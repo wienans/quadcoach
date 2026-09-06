@@ -21,8 +21,6 @@ import {
 } from "../compatibility/tacticBoardCompatibility";
 import {
   browse,
-  CollectionQueryInfrastructureError,
-  CollectionQueryValidationError,
   listFacet,
   parseCollectionFacetQuery,
   parseCollectionQuery,
@@ -101,31 +99,13 @@ async function rejectIfAnyPrivateTacticBoard(
   return true;
 }
 
-function sendCollectionQueryError(error: unknown, res: Response): boolean {
-  if (error instanceof CollectionQueryValidationError) {
-    res.status(error.statusCode).json(error.serialize());
-    return true;
-  }
-  if (error instanceof CollectionQueryInfrastructureError) {
-    res.status(error.statusCode).json({ message: error.message });
-    return true;
-  }
-  return false;
-}
-
 // @desc    Browse exercises
 // @route   GET /api/exercises
 // @access  Public
 export const getAllExercises = asyncHandler(
   async (req: Request, res: Response) => {
-    try {
-      const intent = parseCollectionQuery("exercise", req.query);
-      res.json(
-        await browse({ intent, visibility: collectionVisibility.all() }),
-      );
-    } catch (error) {
-      if (!sendCollectionQueryError(error, res)) throw error;
-    }
+    const intent = parseCollectionQuery("exercise", req.query);
+    res.json(await browse({ intent, visibility: collectionVisibility.all() }));
   },
 );
 
@@ -134,18 +114,14 @@ async function getExerciseFacet(
   res: Response,
   facet: "tags" | "materials",
 ): Promise<void> {
-  try {
-    parseCollectionFacetQuery(req.query);
-    res.json(
-      await listFacet({
-        resource: "exercise",
-        facet,
-        visibility: collectionVisibility.all(),
-      }),
-    );
-  } catch (error) {
-    if (!sendCollectionQueryError(error, res)) throw error;
-  }
+  parseCollectionFacetQuery(req.query);
+  res.json(
+    await listFacet({
+      resource: "exercise",
+      facet,
+      visibility: collectionVisibility.all(),
+    }),
+  );
 }
 
 export const getExerciseTags = asyncHandler(

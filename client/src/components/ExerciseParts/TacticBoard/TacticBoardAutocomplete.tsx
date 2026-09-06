@@ -41,9 +41,7 @@ const TacticBoardAutocomplete = ({
   return (
     <Autocomplete
       id="related-text"
-      options={(tacticBoards?.items ?? []).filter(
-        (option) => !publicOnly || !option.isPrivate,
-      )}
+      options={tacticBoards?.items ?? []}
       getOptionLabel={(option) => option.name ?? ""}
       isOptionEqualToValue={(option, value) => {
         if (value != null && value != undefined) {

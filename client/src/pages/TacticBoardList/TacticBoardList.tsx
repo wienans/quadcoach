@@ -31,6 +31,7 @@ import {
   AddTacticBoardDialog,
 } from "../../components";
 import {
+  GetTacticBoardRequest,
   useAddTacticBoardMutation,
   useLazyGetTacticBoardsQuery,
 } from "../../api/quadcoachApi/tacticBoardApi";
@@ -56,22 +57,23 @@ enum ViewType {
   Cards = "Cards",
 }
 
-type TacticBoardFilter = {
-  searchValue: string;
-  tagList: string[];
-  isPrivate: boolean | undefined;
-  sortBy: "name" | "created" | "updated";
-  sortOrder: "asc" | "desc";
+type TacticBoardListRequest = GetTacticBoardRequest & {
+  search: string;
+  tags: string[];
+  tagMode: "all";
+  sort: "name" | "created" | "updated";
+  direction: "asc" | "desc";
   page: number;
   limit: number;
 };
 
-const defaultTacticBoardFilter: TacticBoardFilter = {
-  searchValue: "",
-  tagList: [],
-  isPrivate: undefined,
-  sortBy: "name",
-  sortOrder: "asc",
+const defaultTacticBoardRequest: TacticBoardListRequest = {
+  search: "",
+  tags: [],
+  tagMode: "all",
+  privacy: undefined,
+  sort: "name",
+  direction: "asc",
   page: 1,
   limit: 50,
 };
@@ -99,10 +101,22 @@ const TacticBoardList = () => {
     TacticBoardSummary[]
   >([]);
 
-  const [tacticBoardFilter, setTacticBoardFilter] = useState<TacticBoardFilter>(
-    defaultTacticBoardFilter,
-  );
+  const [tacticBoardRequest, setTacticBoardRequest] =
+    useState<TacticBoardListRequest>(defaultTacticBoardRequest);
   const [tagInput, setTagInput] = useState("");
+
+  const updateTacticBoardQueryAndResetResults = (
+    update: (
+      current: TacticBoardListRequest,
+    ) => Partial<TacticBoardListRequest>,
+  ) => {
+    setLoadedTacticBoards([]);
+    setTacticBoardRequest((current) => ({
+      ...current,
+      ...update(current),
+      page: 1,
+    }));
+  };
 
   const [
     getTacticBoards,
@@ -116,40 +130,24 @@ const TacticBoardList = () => {
   // Create debounced search function
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const debouncedSearch = useCallback(
-    debounce((filter: TacticBoardFilter) => {
-      getTacticBoards({
-        search: filter.searchValue,
-        tags: filter.tagList,
-        tagMode: "all",
-        privacy: filter.isPrivate ? "private" : undefined,
-        sort: filter.sortBy,
-        direction: filter.sortOrder,
-        page: filter.page,
-        limit: filter.limit,
-      });
+    debounce((request: TacticBoardListRequest) => {
+      getTacticBoards(request);
     }, 300),
     [getTacticBoards],
   );
 
-  // Update the filter change handler
-  const onTacticBoardFilterValueChange =
-    (tacticBoardFilterProperty: keyof TacticBoardFilter) =>
-    (event: ChangeEvent<HTMLInputElement>) => {
-      setLoadedTacticBoards([]);
-      setTacticBoardFilter({
-        ...tacticBoardFilter,
-        [tacticBoardFilterProperty]: event.target.value,
-        page: 1,
-      });
-    };
+  const onSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const search = event.target.value;
+    updateTacticBoardQueryAndResetResults(() => ({ search }));
+  };
 
   // Cleanup
   useEffect(() => {
-    debouncedSearch(tacticBoardFilter);
+    debouncedSearch(tacticBoardRequest);
     return () => {
       debouncedSearch.cancel();
     };
-  }, [debouncedSearch, tacticBoardFilter]);
+  }, [debouncedSearch, tacticBoardRequest]);
 
   const [addTacticBoard] = useAddTacticBoardMutation();
 
@@ -199,44 +197,38 @@ const TacticBoardList = () => {
       event.preventDefault();
       const tag = tagInput.trim();
       if (
-        tacticBoardFilter.tagList.some(
+        tacticBoardRequest.tags.some(
           (selected) => selected.toLowerCase() === tag.toLowerCase(),
         )
       ) {
         setTagInput("");
         return;
       }
-      setLoadedTacticBoards([]);
-      setTacticBoardFilter({
-        ...tacticBoardFilter,
-        tagList: [...tacticBoardFilter.tagList, tag],
-        page: 1,
-      });
+      updateTacticBoardQueryAndResetResults((current) => ({
+        tags: [...current.tags, tag],
+      }));
       setTagInput("");
     }
   };
 
   const handleDeleteTag = (tagToDelete: string) => {
-    setLoadedTacticBoards([]);
-    setTacticBoardFilter({
-      ...tacticBoardFilter,
-      tagList: tacticBoardFilter.tagList.filter((tag) => tag !== tagToDelete),
-      page: 1,
-    });
+    updateTacticBoardQueryAndResetResults((current) => ({
+      tags: current.tags.filter((tag) => tag !== tagToDelete),
+    }));
   };
 
   // Load more function
   const loadMore = useCallback(() => {
     if (
       tacticBoardsData &&
-      tacticBoardFilter.page < tacticBoardsData.pagination.pages
+      tacticBoardRequest.page < tacticBoardsData.pagination.pages
     ) {
-      setTacticBoardFilter((prev) => ({
+      setTacticBoardRequest((prev) => ({
         ...prev,
         page: prev.page + 1,
       }));
     }
-  }, [tacticBoardsData, tacticBoardFilter.page]);
+  }, [tacticBoardsData, tacticBoardRequest.page]);
 
   // Update effect to accumulate loaded Tactic Boards.
   useEffect(() => {
@@ -296,8 +288,8 @@ const TacticBoardList = () => {
                   <SoftInput
                     id="outlined-basic"
                     placeholder={t("TacticBoardList:filter.name")}
-                    value={tacticBoardFilter.searchValue}
-                    onChange={onTacticBoardFilterValueChange("searchValue")}
+                    value={tacticBoardRequest.search}
+                    onChange={onSearchChange}
                     sx={(theme) => ({
                       minWidth: "200px",
                       mr: 1,
@@ -313,18 +305,15 @@ const TacticBoardList = () => {
                   </InputLabel>
                   <Select
                     labelId="sort-select-label"
-                    value={tacticBoardFilter.sortBy}
+                    value={tacticBoardRequest.sort}
                     label={t("TacticBoardList:filter.sort.name")}
                     onChange={(event) => {
-                      setLoadedTacticBoards([]);
-                      setTacticBoardFilter({
-                        ...tacticBoardFilter,
-                        sortBy: event.target.value as
+                      updateTacticBoardQueryAndResetResults(() => ({
+                        sort: event.target.value as
                           | "name"
                           | "created"
                           | "updated",
-                        page: 1,
-                      });
+                      }));
                     }}
                   >
                     <MenuItem value="name">
@@ -339,16 +328,13 @@ const TacticBoardList = () => {
                   </Select>
                 </FormControl>
                 <ToggleButton
-                  value={tacticBoardFilter.sortOrder}
-                  selected={tacticBoardFilter.sortOrder === "desc"}
+                  value={tacticBoardRequest.direction}
+                  selected={tacticBoardRequest.direction === "desc"}
                   onChange={() => {
-                    setLoadedTacticBoards([]);
-                    setTacticBoardFilter({
-                      ...tacticBoardFilter,
-                      sortOrder:
-                        tacticBoardFilter.sortOrder === "asc" ? "desc" : "asc",
-                      page: 1,
-                    });
+                    updateTacticBoardQueryAndResetResults((current) => ({
+                      direction:
+                        current.direction === "asc" ? "desc" : "asc",
+                    }));
                   }}
                   size="small"
                   sx={{ mr: 1 }}
@@ -372,8 +358,8 @@ const TacticBoardList = () => {
               <SoftInput
                 id="outlined-basic"
                 placeholder={t("TacticBoardList:filter.name")}
-                value={tacticBoardFilter.searchValue}
-                onChange={onTacticBoardFilterValueChange("searchValue")}
+                value={tacticBoardRequest.search}
+                onChange={onSearchChange}
               />
             </SoftBox>
           )}
@@ -423,7 +409,7 @@ const TacticBoardList = () => {
               <SoftBox
                 sx={{ display: "flex", flexWrap: "wrap", gap: 1, mt: 1 }}
               >
-                {tacticBoardFilter.tagList.map((tag) => (
+                {tacticBoardRequest.tags.map((tag) => (
                   <Chip
                     key={tag}
                     label={tag}
@@ -437,17 +423,14 @@ const TacticBoardList = () => {
                 <FormControlLabel
                   control={
                     <Checkbox
-                      checked={tacticBoardFilter.isPrivate === true}
+                      checked={tacticBoardRequest.privacy === "private"}
                       onChange={() => {
-                        setLoadedTacticBoards([]);
-                        setTacticBoardFilter({
-                          ...tacticBoardFilter,
-                          isPrivate:
-                            tacticBoardFilter.isPrivate === true
+                        updateTacticBoardQueryAndResetResults((current) => ({
+                          privacy:
+                            current.privacy === "private"
                               ? undefined
-                              : true,
-                          page: 1,
-                        });
+                              : "private",
+                        }));
                       }}
                     />
                   }
@@ -495,7 +478,7 @@ const TacticBoardList = () => {
                 />
               </SoftBox>
               {tacticBoardsData &&
-                tacticBoardFilter.page < tacticBoardsData.pagination.pages && (
+                tacticBoardRequest.page < tacticBoardsData.pagination.pages && (
                   <SoftBox
                     display="flex"
                     justifyContent="center"

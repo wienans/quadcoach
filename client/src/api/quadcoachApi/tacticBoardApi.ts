@@ -7,6 +7,7 @@ import {
   TacticPage,
 } from "./domain";
 import { TacticBoardWithOutIds } from "./domain/TacticBoard";
+import type { TacticBoardSummary } from "./domain/TacticBoard";
 import {
   GetTacticBoardRequest,
   serializeTacticBoardCollectionRequest,
@@ -18,11 +19,8 @@ import {
   TacticBoardAccessMutationResponse,
   TacticBoardAccessMutationResponseDto,
   TacticBoardAccessRequest,
-  TacticBoardCollectionResponse,
-  TacticBoardCollectionResponseDto,
   fromTacticBoardAccessEntryResponseDto,
   fromTacticBoardAccessMutationResponseDto,
-  fromTacticBoardCollectionResponseDto,
   toTacticBoardAccessDeleteRequestDto,
   toTacticBoardAccessRequestDto,
 } from "./compatibility/tacticBoardWire";
@@ -37,7 +35,15 @@ import { TACTIC_BOARD_SHARED_READ_TAG_ID } from "./shareLink";
 
 export type { GetTacticBoardRequest } from "./tacticBoardCollectionRequest";
 
-export type GetTacticBoardResponse = TacticBoardCollectionResponse;
+export type GetTacticBoardsResponse = {
+  items: TacticBoardSummary[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    pages: number;
+  };
+};
 
 export type AccessLevel = ResourceAccessLevel;
 
@@ -140,7 +146,7 @@ export const tacticBoardApiSlice = quadcoachApi.injectEndpoints({
       invalidatesTags: () => [TagType.tacticBoard, TagType.tacticBoardTag],
     }),
     getTacticBoards: builder.query<
-      GetTacticBoardResponse,
+      GetTacticBoardsResponse,
       GetTacticBoardRequest | undefined
     >({
       query: (request) => {
@@ -152,8 +158,6 @@ export const tacticBoardApiSlice = quadcoachApi.injectEndpoints({
           method: "get",
         };
       },
-      transformResponse: (response: TacticBoardCollectionResponseDto) =>
-        fromTacticBoardCollectionResponseDto(response),
       // Tag the list and each individual Tactic Board.
       providesTags: (result) =>
         result

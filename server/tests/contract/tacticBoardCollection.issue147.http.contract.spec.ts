@@ -247,4 +247,23 @@ describe("issue 147 TacticBoard collection HTTP contract", () => {
     expect(JSON.stringify(response.body)).not.toContain("private-host");
     countSpy.mockRestore();
   });
+
+  it("sanitizes authenticated Access lookup failures", async () => {
+    const { user } = await createVerifiedUser({
+      email: "board_grant_failure@example.com",
+    });
+    const grantSpy = jest
+      .spyOn(mongo.FindCursor.prototype, "toArray")
+      .mockRejectedValueOnce(new Error("mongodb://user:password@private-host"));
+
+    const response = await request(app)
+      .get("/api/tacticboards")
+      .set("Authorization", `Bearer ${await getAccessToken(user)}`)
+      .set("X-Forwarded-For", forwardedFor(115))
+      .expect(500);
+
+    expect(response.body).toEqual({ message: "Collection query unavailable" });
+    expect(JSON.stringify(response.body)).not.toContain("private-host");
+    grantSpy.mockRestore();
+  });
 });

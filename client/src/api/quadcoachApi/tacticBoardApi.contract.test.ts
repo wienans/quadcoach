@@ -143,8 +143,8 @@ describe("TacticBoard RTK Query contracts", () => {
             {
               _id: "board-1",
               name: "Press",
+              tags: ["Attack"],
               isPrivate: false,
-              pages: [{ secret: true }],
             },
           ],
           pagination: { page: 1, limit: 50, total: 1, pages: 1 },
@@ -164,11 +164,8 @@ describe("TacticBoard RTK Query contracts", () => {
       {
         _id: "board-1",
         name: "Press",
-        tags: [],
+        tags: ["Attack"],
         isPrivate: false,
-        creator: undefined,
-        createdAt: undefined,
-        updatedAt: undefined,
       },
     ]);
     expect(tags.data).toEqual({ items: ["Attack", "Zone"] });

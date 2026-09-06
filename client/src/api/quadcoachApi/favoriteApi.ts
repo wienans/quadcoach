@@ -9,7 +9,7 @@ import {
   PracticePlanFavoriteWithOutId,
 } from "./domain/Favorits";
 
-type TacticBoardFavoriteHeader = {
+type FavoriteTacticBoardSummary = {
   _id: string;
   name?: string;
 };
@@ -91,7 +91,7 @@ export const favoriteApiSlice = quadcoachApi.injectEndpoints({
       providesTags: [TagType.favorite],
     }),
     getFavoriteTacticBoardsHeaders: builder.query<
-      TacticBoardFavoriteHeader[],
+      FavoriteTacticBoardSummary[],
       FavoriteRequest
     >({
       query: (request) => ({

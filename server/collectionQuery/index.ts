@@ -30,6 +30,10 @@ interface Adapter {
   readonly collectionName: string;
   readonly ownerField?: string;
   readonly privacyField?: string;
+  readonly access?: {
+    readonly collectionName: string;
+    readonly resourceField: string;
+  };
   readonly projection: Readonly<Record<string, 0 | 1>>;
   readonly sortFields: Readonly<Record<string, string>>;
   readonly facets: readonly Facet[];
@@ -50,14 +54,13 @@ function idString(value: unknown): string | undefined {
   return undefined;
 }
 
-function commonSummary(document: mongo.Document): CollectionSummary {
+function publicSummary(document: mongo.Document): CollectionSummary {
   return {
     _id: idString(document._id) ?? "",
     name: typeof document.name === "string" ? document.name : "",
     tags: textArray(document.tags),
     creator:
       typeof document.creator === "string" ? document.creator : undefined,
-    user: idString(document.user),
     createdAt:
       document.createdAt instanceof Date ? document.createdAt : undefined,
     updatedAt:
@@ -65,12 +68,11 @@ function commonSummary(document: mongo.Document): CollectionSummary {
   };
 }
 
-const commonProjection = {
+const publicProjection = {
   _id: 1,
   name: 1,
   tags: 1,
   creator: 1,
-  user: 1,
   createdAt: 1,
   updatedAt: 1,
 } as const;
@@ -79,7 +81,8 @@ const adapters: Readonly<Record<CollectionResource, Adapter>> = Object.freeze({
   exercise: {
     collectionName: "exercises",
     projection: {
-      ...commonProjection,
+      ...publicProjection,
+      user: 1,
       materials: 1,
       time_min: 1,
       persons: 1,
@@ -97,7 +100,8 @@ const adapters: Readonly<Record<CollectionResource, Adapter>> = Object.freeze({
     facets: ["tags", "materials"],
     map(document) {
       return {
-        ...commonSummary(document),
+        ...publicSummary(document),
+        user: idString(document.user),
         materials: textArray(document.materials),
         durationMinutes:
           typeof document.time_min === "number" ? document.time_min : null,
@@ -114,20 +118,19 @@ const adapters: Readonly<Record<CollectionResource, Adapter>> = Object.freeze({
     collectionName: "tacticboards",
     ownerField: "user",
     privacyField: "isPrivate",
+    access: {
+      collectionName: "tacticboardaccesses",
+      resourceField: "tacticboard",
+    },
     projection: {
-      _id: 1,
-      name: 1,
-      tags: 1,
-      creator: 1,
-      createdAt: 1,
-      updatedAt: 1,
+      ...publicProjection,
       isPrivate: 1,
     },
     sortFields: { name: "name", created: "createdAt", updated: "updatedAt" },
     facets: ["tags"],
     map(document) {
       return {
-        ...commonSummary(document),
+        ...publicSummary(document),
         isPrivate: document.isPrivate === true,
       };
     },
@@ -136,8 +139,13 @@ const adapters: Readonly<Record<CollectionResource, Adapter>> = Object.freeze({
     collectionName: "practiceplans",
     ownerField: "user",
     privacyField: "isPrivate",
+    access: {
+      collectionName: "practiceplanaccesses",
+      resourceField: "practicePlan",
+    },
     projection: {
-      ...commonProjection,
+      ...publicProjection,
+      user: 1,
       isPrivate: 1,
       description: 1,
       sections: 1,
@@ -149,7 +157,8 @@ const adapters: Readonly<Record<CollectionResource, Adapter>> = Object.freeze({
         ? document.sections
         : [];
       return {
-        ...commonSummary(document),
+        ...publicSummary(document),
+        user: idString(document.user),
         isPrivate: document.isPrivate === true,
         description:
           typeof document.description === "string"
@@ -277,6 +286,36 @@ export class CollectionQueryInfrastructureError extends Error {
   constructor() {
     super("Collection query unavailable");
     this.name = "CollectionQueryInfrastructureError";
+  }
+}
+
+type GrantedResource = Exclude<CollectionResource, "exercise">;
+
+export async function loadAllCollectionGrantIds(
+  database: mongo.Db,
+  resource: GrantedResource,
+  actorId: string,
+): Promise<string[]> {
+  const access = adapters[resource].access;
+  if (!access) throw new TypeError(`Unsupported ${resource} Access lookup`);
+
+  try {
+    const grants = await database
+      .collection(access.collectionName)
+      .find(
+        { user: objectId(actorId) },
+        { projection: { _id: 0, [access.resourceField]: 1 } },
+      )
+      .toArray();
+
+    return grants.flatMap((grant) => {
+      const resourceId = grant[access.resourceField];
+      return resourceId === undefined || resourceId === null
+        ? []
+        : [String(resourceId)];
+    });
+  } catch {
+    throw new CollectionQueryInfrastructureError();
   }
 }
 
