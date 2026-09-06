@@ -19,22 +19,130 @@ interface RequestWithUser extends Request {
   UserInfo?: UserInfo;
 }
 
+type AccessLevel = "view" | "edit";
+
+type CardSummaryDocument = Record<string, unknown>;
+
+interface ExerciseCardSummary {
+  _id: string;
+  name: string;
+  tags: string[];
+  creator?: string;
+  user?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+  materials: string[];
+  durationMinutes: number | null;
+  persons: number | null;
+  beaters: number | null;
+  chasers: number | null;
+  relatedTo: string[];
+}
+
+interface TacticBoardCardSummary {
+  _id: string;
+  name: string;
+  tags: string[];
+  isPrivate: boolean;
+  creator?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+interface AccessibleRelationship<Summary> {
+  item: Summary;
+  accessLevel: AccessLevel;
+}
+
+const USER_SUMMARIES_UNAVAILABLE = "User summaries unavailable";
+
+// Account summaries are allowlisted: passwords, verification/reset tokens,
+// session activity, and any unintended nested fields must never leave.
+const userAccountSummarySelect = "_id name email roles active";
+
+const exerciseSummarySelect =
+  "_id name tags creator user createdAt updatedAt materials time_min persons beaters chasers related_to";
+
+const tacticBoardSummarySelect =
+  "_id name tags isPrivate creator createdAt updatedAt";
+
+function textArray(value: unknown): string[] {
+  return Array.isArray(value)
+    ? value.filter((entry): entry is string => typeof entry === "string")
+    : [];
+}
+
+function idString(value: unknown): string | undefined {
+  if (typeof value === "string") return value;
+  if (value && typeof value === "object" && "toString" in value) {
+    return String(value);
+  }
+  return undefined;
+}
+
+function optionalString(value: unknown): string | undefined {
+  return typeof value === "string" ? value : undefined;
+}
+
+function optionalDate(value: unknown): Date | undefined {
+  return value instanceof Date ? value : undefined;
+}
+
+function optionalMetric(value: unknown): number | null {
+  return typeof value === "number" ? value : null;
+}
+
+function relatedToIds(value: unknown): string[] {
+  return Array.isArray(value) ? value.map(String) : [];
+}
+
+function toExerciseCardSummary(
+  document: CardSummaryDocument,
+): ExerciseCardSummary {
+  return {
+    _id: idString(document._id) ?? "",
+    name: optionalString(document.name) ?? "",
+    tags: textArray(document.tags),
+    creator: optionalString(document.creator),
+    user: idString(document.user),
+    createdAt: optionalDate(document.createdAt),
+    updatedAt: optionalDate(document.updatedAt),
+    materials: textArray(document.materials),
+    durationMinutes: optionalMetric(document.time_min),
+    persons: optionalMetric(document.persons),
+    beaters: optionalMetric(document.beaters),
+    chasers: optionalMetric(document.chasers),
+    relatedTo: relatedToIds(document.related_to),
+  };
+}
+
+function toTacticBoardCardSummary(
+  document: CardSummaryDocument,
+): TacticBoardCardSummary {
+  return {
+    _id: idString(document._id) ?? "",
+    name: optionalString(document.name) ?? "",
+    tags: textArray(document.tags),
+    isPrivate: document.isPrivate === true,
+    creator: optionalString(document.creator),
+    createdAt: optionalDate(document.createdAt),
+    updatedAt: optionalDate(document.updatedAt),
+  };
+}
+
 // @desc    Get all users
 // @route   GET /api/users
 // @access  Private - Admin only
 export const getAllUsers = asyncHandler(async (req: Request, res: Response) => {
-  let queryString: string = JSON.stringify(req.query);
-
-  queryString = queryString.replace(
-    /\b(gte|gt|lte|lt|eq|ne|regex|options|in|nin)\b/g,
-    (match) => `$${match}`,
-  );
-
-  const users = await User.find().select("-password").lean();
-  if (!users?.length) {
-    res.status(400).json({ message: "No users found" });
-  } else {
-    res.json(users);
+  try {
+    const users = await User.find().select(userAccountSummarySelect).lean();
+    if (!users?.length) {
+      res.status(400).json({ message: "No users found" });
+    } else {
+      res.json(users);
+    }
+  } catch {
+    res.status(500).json({ message: USER_SUMMARIES_UNAVAILABLE });
   }
 });
 
@@ -253,33 +361,37 @@ export const getUserExercises = asyncHandler(
       return;
     }
 
-    const userId = req.params.id;
-    const selectFields =
-      "_id name description time persons tags created updated";
-    // Get owned exercises
-    const ownedExercises = await Exercise.find({ user: userId })
-      .select(selectFields)
-      .lean();
+    try {
+      const [ownedDocuments, accessEntries] = await Promise.all([
+        Exercise.find({ user: req.params.id })
+          .select(exerciseSummarySelect)
+          .lean(),
+        ExerciseAccess.find({ user: req.params.id })
+          .populate({ path: "exercise", select: exerciseSummarySelect })
+          .lean(),
+      ]);
 
-    // Get exercises with edit access
-    const accessEntries = await ExerciseAccess.find({
-      user: userId,
-      access: "edit",
-    })
-      .populate({
-        path: "exercise",
-        select: selectFields,
-      })
-      .lean();
-
-    const accessibleExercises = accessEntries
-      .map((entry) => entry.exercise)
-      .filter((exercise) => exercise != null);
-
-    res.json({
-      owned: ownedExercises,
-      accessible: accessibleExercises,
-    });
+      res.json({
+        owned: (ownedDocuments as unknown as CardSummaryDocument[]).map(
+          toExerciseCardSummary,
+        ),
+        accessible: accessEntries.flatMap(
+          (entry): AccessibleRelationship<ExerciseCardSummary>[] => {
+            const document =
+              entry.exercise as unknown as CardSummaryDocument | null;
+            if (document === null || document === undefined) return [];
+            return [
+              {
+                item: toExerciseCardSummary(document),
+                accessLevel: entry.access,
+              },
+            ];
+          },
+        ),
+      });
+    } catch {
+      res.status(500).json({ message: USER_SUMMARIES_UNAVAILABLE });
+    }
   },
 );
 
@@ -301,31 +413,36 @@ export const getUserTacticBoards = asyncHandler(
       return;
     }
 
-    const userId = req.params.id;
-    const selectFields = "_id name description tags created updated isPrivate";
-    // Get owned Tactic Boards
-    const ownedTacticBoards = await TacticBoard.find({ user: userId })
-      .select(selectFields)
-      .lean();
+    try {
+      const [ownedDocuments, accessEntries] = await Promise.all([
+        TacticBoard.find({ user: req.params.id })
+          .select(tacticBoardSummarySelect)
+          .lean(),
+        TacticBoardAccess.find({ user: req.params.id })
+          .populate({ path: "tacticboard", select: tacticBoardSummarySelect })
+          .lean(),
+      ]);
 
-    // Get Tactic Boards with edit access
-    const accessEntries = await TacticBoardAccess.find({
-      user: userId,
-      access: "edit",
-    })
-      .populate({
-        path: "tacticboard",
-        select: selectFields,
-      })
-      .lean();
-
-    const accessibleTacticBoards = accessEntries
-      .map((entry) => entry.tacticboard)
-      .filter((tacticBoard) => tacticBoard != null);
-
-    res.json({
-      owned: ownedTacticBoards,
-      accessible: accessibleTacticBoards,
-    });
+      res.json({
+        owned: (ownedDocuments as unknown as CardSummaryDocument[]).map(
+          toTacticBoardCardSummary,
+        ),
+        accessible: accessEntries.flatMap(
+          (entry): AccessibleRelationship<TacticBoardCardSummary>[] => {
+            const document =
+              entry.tacticboard as unknown as CardSummaryDocument | null;
+            if (document === null || document === undefined) return [];
+            return [
+              {
+                item: toTacticBoardCardSummary(document),
+                accessLevel: entry.access,
+              },
+            ];
+          },
+        ),
+      });
+    } catch {
+      res.status(500).json({ message: USER_SUMMARIES_UNAVAILABLE });
+    }
   },
 );

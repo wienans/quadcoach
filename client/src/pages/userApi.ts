@@ -1,15 +1,54 @@
 import { quadcoachApi } from "../api";
 import { TagType } from "../api/enum";
-import { User, Exercise, TacticBoard } from "../api/quadcoachApi/domain";
+import {
+  ResourceAccessLevel,
+  User,
+  ExerciseSummary,
+} from "../api/quadcoachApi/domain";
+import type { TacticBoardSummary } from "../api/quadcoachApi/domain/TacticBoard";
+import {
+  ExerciseSummaryResponseDto,
+  fromExerciseSummaryResponseDto,
+} from "../api/quadcoachApi/compatibility/tacticBoardWire";
+
+export type AccessibleExerciseRelationship = {
+  item: ExerciseSummary;
+  accessLevel: ResourceAccessLevel;
+};
+
+export type AccessibleExerciseRelationshipDto = {
+  item: ExerciseSummaryResponseDto;
+  accessLevel: ResourceAccessLevel;
+};
 
 export type UserExercisesResponse = {
-  owned: Exercise[];
-  accessible: Exercise[];
+  owned: ExerciseSummary[];
+  accessible: AccessibleExerciseRelationship[];
+};
+
+type UserExercisesResponseDto = {
+  owned: ExerciseSummaryResponseDto[];
+  accessible: AccessibleExerciseRelationshipDto[];
+};
+
+export const fromUserExercisesResponseDto = (
+  response: UserExercisesResponseDto,
+): UserExercisesResponse => ({
+  owned: response.owned.map(fromExerciseSummaryResponseDto),
+  accessible: response.accessible.map(({ item, accessLevel }) => ({
+    item: fromExerciseSummaryResponseDto(item),
+    accessLevel,
+  })),
+});
+
+export type AccessibleTacticBoardRelationship = {
+  item: TacticBoardSummary;
+  accessLevel: ResourceAccessLevel;
 };
 
 export type UserTacticBoardsResponse = {
-  owned: TacticBoard[];
-  accessible: TacticBoard[];
+  owned: TacticBoardSummary[];
+  accessible: AccessibleTacticBoardRelationship[];
 };
 
 export const userApiSlice = quadcoachApi.injectEndpoints({
@@ -65,6 +104,7 @@ export const userApiSlice = quadcoachApi.injectEndpoints({
         url: `/api/user/${userId}/exercises`,
         method: "get",
       }),
+      transformResponse: fromUserExercisesResponseDto,
       providesTags: () => [TagType.exercise],
     }),
     getUserTacticBoards: builder.query<UserTacticBoardsResponse, string>({

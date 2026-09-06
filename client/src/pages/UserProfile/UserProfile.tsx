@@ -439,7 +439,7 @@ const UserProfile = () => {
                   </AccordionSummary>
                   <AccordionDetails sx={{ ml: 1 }}>
                     <List>
-                      {userExercises?.accessible?.map((exercise) => (
+                      {userExercises?.accessible?.map(({ item: exercise }) => (
                         <ListItemButton
                           key={exercise._id}
                           href={`/exercises/${exercise._id}`}
@@ -505,28 +505,30 @@ const UserProfile = () => {
                   </AccordionSummary>
                   <AccordionDetails sx={{ ml: 1 }}>
                     <List>
-                      {userTacticBoards?.accessible?.map((tacticBoard) => (
-                        <ListItemButton
-                          key={tacticBoard._id}
-                          href={`/tacticboards/${tacticBoard._id}`}
-                          sx={{
-                            cursor: "pointer",
-                            "&:hover": {
-                              backgroundColor: "rgba(0, 0, 0, 0.04)",
-                            },
-                          }}
-                        >
-                          <ListItemText
-                            primary={tacticBoard.name}
+                      {userTacticBoards?.accessible?.map(
+                        ({ item: tacticBoard }) => (
+                          <ListItemButton
+                            key={tacticBoard._id}
+                            href={`/tacticboards/${tacticBoard._id}`}
                             sx={{
-                              "& .MuiTypography-root": {
-                                fontSize: "1rem",
-                                fontWeight: 400,
+                              cursor: "pointer",
+                              "&:hover": {
+                                backgroundColor: "rgba(0, 0, 0, 0.04)",
                               },
                             }}
-                          />
-                        </ListItemButton>
-                      ))}
+                          >
+                            <ListItemText
+                              primary={tacticBoard.name}
+                              sx={{
+                                "& .MuiTypography-root": {
+                                  fontSize: "1rem",
+                                  fontWeight: 400,
+                                },
+                              }}
+                            />
+                          </ListItemButton>
+                        ),
+                      )}
                     </List>
                   </AccordionDetails>
                 </Accordion>
