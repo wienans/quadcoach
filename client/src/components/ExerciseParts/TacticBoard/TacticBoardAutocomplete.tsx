@@ -1,13 +1,13 @@
 import { Autocomplete, CircularProgress, TextField } from "@mui/material";
 import { FocusEvent, SyntheticEvent, useEffect, useState } from "react";
-import { useLazyGetTacticBoardHeadersQuery } from "../../../api/quadcoachApi/tacticBoardApi";
-import { TacticBoardHeader } from "../../../api/quadcoachApi/domain/TacticBoard";
+import { useLazyGetTacticBoardsQuery } from "../../../api/quadcoachApi/tacticBoardApi";
+import { TacticBoardSummary } from "../../../api/quadcoachApi/domain/TacticBoard";
 
 export type TacticBoardAutocompleteProps = {
   value: string | undefined;
   onChange: (
     event: SyntheticEvent<Element, Event>,
-    value: TacticBoardHeader | null,
+    value: TacticBoardSummary | null,
   ) => void;
   onBlur: (event: FocusEvent<HTMLDivElement> | undefined) => void;
   autoFocus?: boolean;
@@ -25,16 +25,23 @@ const TacticBoardAutocomplete = ({
   const [
     getTacticBoards,
     { data: tacticBoards, isLoading: isTacticBoardsLoading },
-  ] = useLazyGetTacticBoardHeadersQuery();
+  ] = useLazyGetTacticBoardsQuery();
 
   useEffect(() => {
-    getTacticBoards(publicOnly ? { isPrivate: false } : {});
-  }, [getTacticBoards, publicOnly]);
+    const timeout = window.setTimeout(() => {
+      getTacticBoards({
+        search: searchValue.trim() || undefined,
+        privacy: publicOnly ? "public" : undefined,
+        limit: 100,
+      });
+    }, 300);
+    return () => window.clearTimeout(timeout);
+  }, [getTacticBoards, publicOnly, searchValue]);
 
   return (
     <Autocomplete
       id="related-text"
-      options={(tacticBoards?.tacticBoards ?? []).filter(
+      options={(tacticBoards?.items ?? []).filter(
         (option) => !publicOnly || !option.isPrivate,
       )}
       getOptionLabel={(option) => option.name ?? ""}
@@ -50,8 +57,8 @@ const TacticBoardAutocomplete = ({
         setSearchValue(newValue);
       }}
       value={
-        tacticBoards?.tacticBoards.find(
-          (obj: TacticBoardHeader) => obj["_id"] === value,
+        tacticBoards?.items.find(
+          (obj: TacticBoardSummary) => obj._id === value,
         ) ?? null
       }
       onChange={onChange}

@@ -8,7 +8,7 @@ import {
 import { Alert, LinearProgress, styled } from "@mui/material";
 import { SoftBox } from "../../../components";
 import { Chip } from "@mui/material";
-import { TacticBoardHeader } from "../../../api/quadcoachApi/domain/TacticBoard";
+import { TacticBoardSummary } from "../../../api/quadcoachApi/domain/TacticBoard";
 import { useTranslation } from "react-i18next";
 
 const NoRowsAlert = () => {
@@ -36,7 +36,7 @@ const StyledDataGrid = styled(DataGrid)({
 }) as typeof DataGrid;
 
 export type TacticBoardsListViewProps = {
-  tacticBoards?: TacticBoardHeader[];
+  tacticBoards?: TacticBoardSummary[];
   isTacticBoardsLoading: boolean;
   onOpenTacticBoardClick: (tacticBoardId: string) => void;
 };
@@ -49,12 +49,12 @@ const TacticBoardsListView = ({
   const { t } = useTranslation("TacticBoardList");
 
   const handleRowClick: GridEventListener<"rowClick"> = (
-    params: GridRowParams<TacticBoardHeader>,
+    params: GridRowParams<TacticBoardSummary>,
   ) => {
     onOpenTacticBoardClick(params.row._id);
   };
 
-  const columns2: GridColDef<TacticBoardHeader>[] = useMemo(
+  const columns2: GridColDef<TacticBoardSummary>[] = useMemo(
     () => [
       {
         field: "name",

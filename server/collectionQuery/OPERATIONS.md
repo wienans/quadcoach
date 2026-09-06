@@ -1,6 +1,6 @@
 # Collection Query Activation Operations
 
-Exercise browsing and its tags/materials facets are the first active source contract. TacticBoard and PracticePlan collection routes remain dormant. Do not deploy an activation until preflight, synthetic gates, and each relevant index verification pass.
+Exercise and TacticBoard browsing are active source contracts. PracticePlan collection routes remain dormant. Do not deploy an activation until preflight, synthetic gates, and each relevant index verification pass.
 
 ## Read-only preflight
 
@@ -31,10 +31,18 @@ Create reports elapsed time and index size where the server exposes it. Verify r
 3. Create and verify only the indexes for the next resource tracer bullet.
 4. Re-run preflight and representative production explains after each index.
 5. Drop only the independently named index if rollback is required.
-6. Keep each unactivated resource route on its legacy contract until its separate activation ticket.
+6. Keep the unactivated PracticePlan route on its legacy contract until its activation ticket.
 
 ## Exercise deployment and rollback
 
 The Exercise activation uses the existing named definitions `cq_exercises_name`, `cq_exercises_created`, `cq_exercises_updated`, `cq_exercises_duration`, `cq_exercises_persons`, `cq_exercises_tags`, and `cq_exercises_materials`. Create and verify only those justified by the archived production plans, one at a time; the definitions do not by themselves prove planner selection or latency.
 
 Deploy the server and first-party client artifacts atomically because the Exercise browse envelope and facet envelopes replace their legacy contracts. Artifact rollback must restore both artifacts together. Index rollback remains independent: drop only a named `cq_exercises_*` index that was created for this activation, using the command above, and preserve unrelated indexes.
+
+## TacticBoard deployment and rollback
+
+The TacticBoard activation uses `cq_tacticboards_name`, `cq_tacticboards_created`, `cq_tacticboards_updated`, `cq_tacticboards_privacy`, `cq_tacticboards_owner`, and `cq_tacticboards_tags`. Create and verify each justified index separately. Preserve the actor-first `{ user, tacticboard }` Access index because collection authorization loads every grant through it.
+
+Deploy the server and first-party client artifacts together. The browse route now returns the fixed `{ items, pagination }` summary envelope, `/api/tags/tacticboards` returns `{ items }`, and `/api/tacticboards/header` is removed. Artifact rollback must restore both artifacts together. Index rollback remains independent: drop only an index created for this activation with `npm run collection:index:drop -- <name>`.
+
+Before production activation, archive anonymous, Owner, view-granted, edit-granted, and case-insensitive Admin browse and facet evidence. Confirm hidden Private boards and Share Links change neither result totals nor facet values. The repository's Mongo-backed contracts provide local correctness evidence; they do not replace production preflight, index verification, latency, scan/sort/spill, or response-size evidence.

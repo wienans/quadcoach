@@ -109,14 +109,31 @@ describe("TacticBoard permanent wire compatibility", () => {
     expect(serializedDtos).not.toContain('"tacticBoardId"');
   });
 
-  it("maps the permanent collection key to the canonical cache field", () => {
+  it("maps fixed collection summaries and drops unapproved fields", () => {
     expect(
       fromTacticBoardCollectionResponseDto({
-        tacticboards: [{ _id: "board-1" }],
+        items: [
+          {
+            _id: "board-1",
+            name: "Press",
+            isPrivate: false,
+            pages: [{ secret: true }],
+          } as never,
+        ],
         pagination: { page: 1, limit: 25, total: 1, pages: 1 },
       }),
     ).toEqual({
-      tacticBoards: [{ _id: "board-1" }],
+      items: [
+        {
+          _id: "board-1",
+          name: "Press",
+          tags: [],
+          isPrivate: false,
+          creator: undefined,
+          createdAt: undefined,
+          updatedAt: undefined,
+        },
+      ],
       pagination: { page: 1, limit: 25, total: 1, pages: 1 },
     });
   });

@@ -5,7 +5,6 @@ import {
   toLegacyExercisePersistence,
   toLegacyTacticBoardAccessPersistence,
   toLegacyTacticBoardFavoritePersistence,
-  toLegacyTacticBoardListResponse,
 } from "../../compatibility/tacticBoardCompatibility";
 import Exercise from "../../models/exercise";
 import TacticBoard from "../../models/tacticBoard";
@@ -17,7 +16,7 @@ import {
 } from "../utils/fieldAssertions";
 
 describe("TacticBoard permanent compatibility boundaries", () => {
-  it("maps canonical DTO fields to exact legacy request, response, and persistence keys", () => {
+  it("maps canonical DTO fields to exact legacy request and persistence keys", () => {
     const tacticBoardId = new Types.ObjectId().toString();
     const userId = new Types.ObjectId().toString();
     const favorite = fromLegacyTacticBoardFavoriteRequest({
@@ -37,13 +36,6 @@ describe("TacticBoard permanent compatibility boundaries", () => {
         access: "edit",
       }),
     ).toEqual({ user: userId, tacticboard: tacticBoardId, access: "edit" });
-
-    const listResponse = toLegacyTacticBoardListResponse({
-      tacticBoards: [{ _id: tacticBoardId, name: "Press" }],
-      pagination: { total: 1, page: 1, pages: 1 },
-    });
-    expectExactFields(listResponse, ["tacticboards", "pagination"]);
-    expectForbiddenFields(listResponse, ["tacticBoards", "tacticBoard"]);
   });
 
   it("round-trips the Exercise Block DTO through tactics_board storage", () => {

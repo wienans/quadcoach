@@ -7,7 +7,6 @@ import {
   TacticPage,
 } from "./domain";
 import { TacticBoardWithOutIds } from "./domain/TacticBoard";
-import { TacticBoardHeader } from "./domain/TacticBoard";
 import {
   GetTacticBoardRequest,
   serializeTacticBoardCollectionRequest,
@@ -38,10 +37,7 @@ import { TACTIC_BOARD_SHARED_READ_TAG_ID } from "./shareLink";
 
 export type { GetTacticBoardRequest } from "./tacticBoardCollectionRequest";
 
-export type GetTacticBoardHeadersResponse =
-  TacticBoardCollectionResponse<TacticBoardHeader>;
-
-export type GetTacticBoardResponse = TacticBoardCollectionResponse<TacticBoard>;
+export type GetTacticBoardResponse = TacticBoardCollectionResponse;
 
 export type AccessLevel = ResourceAccessLevel;
 
@@ -156,14 +152,13 @@ export const tacticBoardApiSlice = quadcoachApi.injectEndpoints({
           method: "get",
         };
       },
-      transformResponse: (
-        response: TacticBoardCollectionResponseDto<TacticBoard>,
-      ) => fromTacticBoardCollectionResponseDto(response),
+      transformResponse: (response: TacticBoardCollectionResponseDto) =>
+        fromTacticBoardCollectionResponseDto(response),
       // Tag the list and each individual Tactic Board.
       providesTags: (result) =>
         result
           ? [
-              ...result.tacticBoards.map(({ _id }) => ({
+              ...result.items.map(({ _id }) => ({
                 type: TagType.tacticBoard as const,
                 id: _id,
               })),
@@ -171,24 +166,11 @@ export const tacticBoardApiSlice = quadcoachApi.injectEndpoints({
             ]
           : [TagType.tacticBoard],
     }),
-    getAllTacticBoardTags: builder.query<string[], string | undefined>({
-      query: (tagRegex) => {
-        const urlParams = new URLSearchParams();
-
-        if (tagRegex != null && tagRegex !== "") {
-          urlParams.append("tagName[regex]", tagRegex);
-          urlParams.append("tagName[options]", "i");
-        }
-
-        const urlParamsString = urlParams.toString();
-
-        return {
-          url: `/api/tags/tacticboards${
-            urlParamsString === "" ? "" : `?${urlParamsString}`
-          }`,
-          method: "get",
-        };
-      },
+    getAllTacticBoardTags: builder.query<{ items: string[] }, void>({
+      query: () => ({
+        url: "/api/tags/tacticboards",
+        method: "get",
+      }),
       providesTags: () => [TagType.tacticBoardTag],
     }),
     createTacticBoardPage: builder.mutation<
@@ -265,33 +247,6 @@ export const tacticBoardApiSlice = quadcoachApi.injectEndpoints({
         { type: TagType.shareLink, id: `tacticboard-${tacticBoardId}` },
         { type: TagType.shareLink, id: TACTIC_BOARD_SHARED_READ_TAG_ID },
       ],
-    }),
-    getTacticBoardHeaders: builder.query<
-      GetTacticBoardHeadersResponse,
-      GetTacticBoardRequest | undefined
-    >({
-      query: (request) => {
-        const urlParamsString = serializeTacticBoardCollectionRequest(request);
-        return {
-          url: `/api/tacticboards/header${
-            urlParamsString === "" ? "" : `?${urlParamsString}`
-          }`,
-          method: "get",
-        };
-      },
-      transformResponse: (
-        response: TacticBoardCollectionResponseDto<TacticBoardHeader>,
-      ) => fromTacticBoardCollectionResponseDto(response),
-      providesTags: (result) =>
-        result
-          ? [
-              ...result.tacticBoards.map(({ _id }) => ({
-                type: TagType.tacticBoard as const,
-                id: _id,
-              })),
-              TagType.tacticBoard,
-            ]
-          : [TagType.tacticBoard],
     }),
     checkTacticBoardAccess: builder.query<
       ResourceAuthorizationResponse,
@@ -434,8 +389,6 @@ export const {
   useCreateTacticBoardPageMutation,
   useInsertTacticBoardPageMutation,
   useDeleteTacticBoardPageMutation,
-  useGetTacticBoardHeadersQuery,
-  useLazyGetTacticBoardHeadersQuery,
   useCheckTacticBoardAccessQuery,
   useGetAllTacticBoardAccessUsersQuery,
   useSetTacticBoardAccessMutation,

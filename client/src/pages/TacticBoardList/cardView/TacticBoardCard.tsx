@@ -14,7 +14,7 @@ import {
   Tooltip,
   styled,
 } from "@mui/material";
-import { TacticBoardHeader } from "../../../api/quadcoachApi/domain/TacticBoard";
+import { TacticBoardSummary } from "../../../api/quadcoachApi/domain/TacticBoard";
 import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
@@ -41,7 +41,7 @@ const ExpandMore = styled((props: ExpandMoreProps) => {
 }));
 
 export type TacticBoardCardProps = {
-  tacticBoard: TacticBoardHeader;
+  tacticBoard: TacticBoardSummary;
   onOpenTacticBoardClick: () => void;
 };
 

@@ -15,7 +15,6 @@ import { allowlistedRequestFields } from "./helpers/allowlistedRequestFields";
 import { authorizationResourceFor } from "../authorization/resourceAuthorization";
 import {
   toLegacyTacticBoardAccessPersistence,
-  toLegacyTacticBoardListResponse,
   toLegacyTacticBoardReferencePersistence,
 } from "../compatibility/tacticBoardCompatibility";
 import {
@@ -24,6 +23,15 @@ import {
   resolveShareLink,
 } from "../shareLinks/shareLinkHttp";
 import { parseTacticBoardPublishMetadata } from "./helpers/publishMetadata";
+import {
+  browse,
+  CollectionQueryInfrastructureError,
+  CollectionQueryValidationError,
+  listFacet,
+  parseCollectionFacetQuery,
+  parseCollectionQuery,
+} from "../collectionQuery";
+import { decideCollectionVisibility } from "../authorization/collectionVisibility";
 
 interface UserInfo {
   id?: string;
@@ -51,200 +59,58 @@ function isMongoError(error: unknown): error is { code: number } {
   return typeof error === "object" && error !== null && "code" in error;
 }
 
-// @desc    Get all Tactic Boards
+function sendCollectionQueryError(error: unknown, res: Response): boolean {
+  if (error instanceof CollectionQueryValidationError) {
+    res.status(error.statusCode).json(error.serialize());
+    return true;
+  }
+  if (error instanceof CollectionQueryInfrastructureError) {
+    res.status(error.statusCode).json({ message: error.message });
+    return true;
+  }
+  return false;
+}
+
+async function tacticBoardCollectionVisibility(req: RequestWithUser) {
+  const actor = req.UserInfo?.id
+    ? { id: req.UserInfo.id, roles: req.UserInfo.roles ?? [] }
+    : undefined;
+  return decideCollectionVisibility("tacticBoard", actor);
+}
+
+// @desc    Browse Tactic Boards
 // @route   GET /api/tacticboards
-// @access  Public - Returns only public boards and user's private boards
+// @access  Public - Returns public, owned, granted, or Admin-visible boards
 export const getAllTacticBoards = asyncHandler(
   async (req: RequestWithUser, res: Response) => {
-    let queryString: string = JSON.stringify(req.query);
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 10;
-    const skip = (page - 1) * limit;
-    const sortBy = (req.query.sortBy as string) || "name";
-    const sortOrder = (req.query.sortOrder as string) || "asc";
-
-    // Remove pagination and sorting params from the query string
-    const queryObj = JSON.parse(queryString);
-    delete queryObj.page;
-    delete queryObj.limit;
-    delete queryObj.sortBy;
-    delete queryObj.sortOrder;
-    queryString = JSON.stringify(queryObj);
-
-    queryString = queryString.replace(
-      /\b(gte|gt|lte|lt|eq|ne|regex|options|in|nin|all)\b/g,
-      (match) => `$${match}`,
-    );
-    // Convert comma-separated strings in $all operators to arrays
-    queryString = queryString.replace(
-      /"?\$all"?\s*:\s*"([^"]+)"/g,
-      (_, match) =>
-        `"$all": [${match.split(",").map((item: string) => `"${item}"`)}]`,
-    );
-
-    let parseObject = JSON.parse(queryString);
-
-    parseObject.$or = [{ isPrivate: false }];
-
-    if (req.UserInfo?.id) {
-      parseObject.$or.push({ isPrivate: true, user: req.UserInfo.id });
-
-      // Only query for access records if user is authenticated
-      const tacticBoardAccessEntries = await TacticBoardAccess.find({
-        user: req.UserInfo.id,
-      });
-
-      if (tacticBoardAccessEntries.length > 0) {
-        parseObject.$or.push({
-          _id: {
-            $in: tacticBoardAccessEntries.map((tacticBoardAccess) =>
-              tacticBoardAccess.tacticboard.toString(),
-            ),
-          },
-        });
-      }
+    try {
+      const intent = parseCollectionQuery("tacticBoard", req.query);
+      res.json(
+        await browse({
+          intent,
+          visibility: await tacticBoardCollectionVisibility(req),
+        }),
+      );
+    } catch (error) {
+      if (!sendCollectionQueryError(error, res)) throw error;
     }
-
-    if (
-      req.UserInfo?.roles?.includes("Admin") ||
-      req.UserInfo?.roles?.includes("admin")
-    ) {
-      parseObject.$or.push({ isPrivate: true });
-    }
-
-    // Create sort object
-    const sortObj: { [key: string]: 1 | -1 } = {};
-    const sortDirection = sortOrder === "desc" ? -1 : 1;
-
-    // Map frontend sort fields to database fields
-    switch (sortBy) {
-      case "name":
-        sortObj.name = sortDirection;
-        break;
-      case "created":
-        sortObj.createdAt = sortDirection;
-        break;
-      case "updated":
-        sortObj.updatedAt = sortDirection;
-        break;
-      default:
-        sortObj.name = 1; // Default sort by name ascending
-    }
-
-    sortObj._id = 1; // Always add _id as a secondary sort to ensure consistent ordering
-
-    const totalCount = await TacticBoard.countDocuments(parseObject);
-    const tacticBoards = await TacticBoard.find(parseObject)
-      .select("-shareToken")
-      .sort(sortObj)
-      .skip(skip)
-      .limit(limit);
-
-    res.send(
-      toLegacyTacticBoardListResponse({
-        tacticBoards,
-        pagination: {
-          total: totalCount,
-          page,
-          pages: Math.ceil(totalCount / limit),
-        },
-      }),
-    );
   },
 );
 
-// @desc    Get all Tactic Board headers (minimal data)
-// @route   GET /api/tacticboards/header
-// @access  Public - Returns only public boards and user's private boards
-export const getAllTacticBoardHeaders = asyncHandler(
+export const getTacticBoardTags = asyncHandler(
   async (req: RequestWithUser, res: Response) => {
-    let queryString: string = JSON.stringify(req.query);
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 10;
-    const skip = (page - 1) * limit;
-    const sortBy = (req.query.sortBy as string) || "name";
-    const sortOrder = (req.query.sortOrder as string) || "asc";
-
-    // Remove pagination and sorting params from the query string
-    const queryObj = JSON.parse(queryString);
-    delete queryObj.page;
-    delete queryObj.limit;
-    delete queryObj.sortBy;
-    delete queryObj.sortOrder;
-    queryString = JSON.stringify(queryObj);
-
-    queryString = queryString.replace(
-      /\b(gte|gt|lte|lt|eq|ne|regex|options|in|nin)\b/g,
-      (match) => `$${match}`,
-    );
-    let parseObject = JSON.parse(queryString);
-
-    parseObject.$or = [{ isPrivate: false }];
-
-    if (req.UserInfo?.id) {
-      parseObject.$or.push({ isPrivate: true, user: req.UserInfo.id });
-
-      // Only query for access records if user is authenticated
-      const tacticBoardAccessEntries = await TacticBoardAccess.find({
-        user: req.UserInfo.id,
-      });
-
-      if (tacticBoardAccessEntries.length > 0) {
-        parseObject.$or.push({
-          _id: {
-            $in: tacticBoardAccessEntries.map((tacticBoardAccess) =>
-              tacticBoardAccess.tacticboard.toString(),
-            ),
-          },
-        });
-      }
+    try {
+      parseCollectionFacetQuery(req.query);
+      res.json(
+        await listFacet({
+          resource: "tacticBoard",
+          facet: "tags",
+          visibility: await tacticBoardCollectionVisibility(req),
+        }),
+      );
+    } catch (error) {
+      if (!sendCollectionQueryError(error, res)) throw error;
     }
-
-    if (
-      req.UserInfo?.roles?.includes("Admin") ||
-      req.UserInfo?.roles?.includes("admin")
-    ) {
-      parseObject.$or.push({ isPrivate: true });
-    }
-
-    // Create sort object
-    const sortObj: { [key: string]: 1 | -1 } = {};
-    const sortDirection = sortOrder === "desc" ? -1 : 1;
-
-    // Map frontend sort fields to database fields
-    switch (sortBy) {
-      case "name":
-        sortObj.name = sortDirection;
-        break;
-      case "created":
-        sortObj.createdAt = sortDirection;
-        break;
-      case "updated":
-        sortObj.updatedAt = sortDirection;
-        break;
-      default:
-        sortObj.name = 1; // Default sort by name ascending
-    }
-
-    sortObj._id = 1; // Always add _id as a secondary sort to ensure consistent ordering
-
-    const totalCount = await TacticBoard.countDocuments(parseObject);
-    const tacticBoards = await TacticBoard.find(parseObject)
-      .select("_id name tags isPrivate creator user")
-      .sort(sortObj)
-      .skip(skip)
-      .limit(limit);
-
-    res.send(
-      toLegacyTacticBoardListResponse({
-        tacticBoards,
-        pagination: {
-          total: totalCount,
-          page,
-          pages: Math.ceil(totalCount / limit),
-        },
-      }),
-    );
   },
 );
 

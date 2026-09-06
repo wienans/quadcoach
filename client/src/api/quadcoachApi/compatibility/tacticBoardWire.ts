@@ -4,6 +4,7 @@ import type {
   ExerciseSummary,
   ResourceAccessLevel,
 } from "../domain";
+import type { TacticBoardSummary } from "../domain/TacticBoard";
 import type { TacticBoardFavorite } from "../domain/Favorits";
 
 export type TacticBoardFavoriteRequest = {
@@ -139,26 +140,54 @@ export const toTacticBoardAccessDeleteRequestDto = ({
   userId,
 });
 
-export type TacticBoardCollectionResponseDto<T> = {
-  tacticboards: T[];
+export type TacticBoardSummaryResponseDto = {
+  _id: string;
+  name: string;
+  tags?: string[];
+  isPrivate: boolean;
+  creator?: string;
+  createdAt?: string | Date;
+  updatedAt?: string | Date;
+};
+
+export type TacticBoardCollectionResponseDto = {
+  items: TacticBoardSummaryResponseDto[];
   pagination: {
     page: number;
-    limit?: number;
+    limit: number;
     total: number;
     pages: number;
   };
 };
 
-export type TacticBoardCollectionResponse<T> = {
-  tacticBoards: T[];
-  pagination: TacticBoardCollectionResponseDto<T>["pagination"];
+export type TacticBoardCollectionResponse = {
+  items: TacticBoardSummary[];
+  pagination: TacticBoardCollectionResponseDto["pagination"];
 };
 
-export const fromTacticBoardCollectionResponseDto = <T>({
-  tacticboards,
+const fromTacticBoardSummaryResponseDto = ({
+  _id,
+  name,
+  tags,
+  isPrivate,
+  creator,
+  createdAt,
+  updatedAt,
+}: TacticBoardSummaryResponseDto): TacticBoardSummary => ({
+  _id,
+  name,
+  tags: tags ?? [],
+  isPrivate,
+  creator,
+  createdAt,
+  updatedAt,
+});
+
+export const fromTacticBoardCollectionResponseDto = ({
+  items,
   pagination,
-}: TacticBoardCollectionResponseDto<T>): TacticBoardCollectionResponse<T> => ({
-  tacticBoards: tacticboards,
+}: TacticBoardCollectionResponseDto): TacticBoardCollectionResponse => ({
+  items: items.map(fromTacticBoardSummaryResponseDto),
   pagination,
 });
 

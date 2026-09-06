@@ -114,7 +114,15 @@ const adapters: Readonly<Record<CollectionResource, Adapter>> = Object.freeze({
     collectionName: "tacticboards",
     ownerField: "user",
     privacyField: "isPrivate",
-    projection: { ...commonProjection, isPrivate: 1 },
+    projection: {
+      _id: 1,
+      name: 1,
+      tags: 1,
+      creator: 1,
+      createdAt: 1,
+      updatedAt: 1,
+      isPrivate: 1,
+    },
     sortFields: { name: "name", created: "createdAt", updated: "updatedAt" },
     facets: ["tags"],
     map(document) {

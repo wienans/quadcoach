@@ -1,13 +1,14 @@
 import { PartialBy } from "../../../helpers/typeHelpers";
 import TacticPage, { TacticPageWithOutId } from "./TacticPage";
 
-export type TacticBoardHeader = {
+export type TacticBoardSummary = {
   _id: string;
-  name?: string;
-  tags?: string[];
-  isPrivate?: boolean;
+  name: string;
+  tags: string[];
+  isPrivate: boolean;
   creator?: string;
-  user?: string;
+  createdAt?: string | Date;
+  updatedAt?: string | Date;
 };
 
 type TacticBoard = {

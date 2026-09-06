@@ -1,10 +1,10 @@
 export type GetTacticBoardRequest = {
-  nameRegex?: string;
-  tagRegex?: string;
-  tagList?: string[];
-  isPrivate?: boolean;
-  sortBy?: "name" | "created" | "updated";
-  sortOrder?: "asc" | "desc";
+  search?: string;
+  tags?: string[];
+  tagMode?: "all" | "any";
+  privacy?: "public" | "private";
+  sort?: "name" | "created" | "updated";
+  direction?: "asc" | "desc";
   page?: number;
   limit?: number;
 };
@@ -12,41 +12,18 @@ export type GetTacticBoardRequest = {
 export const serializeTacticBoardCollectionRequest = (
   request: GetTacticBoardRequest | undefined,
 ): string => {
-  const {
-    nameRegex,
-    tagRegex,
-    tagList,
-    isPrivate,
-    sortBy,
-    sortOrder,
-    page = 1,
-    limit = 50,
-  } = request || {};
+  const { search, tags, tagMode, privacy, sort, direction, page, limit } =
+    request || {};
   const urlParams = new URLSearchParams();
 
-  urlParams.append("page", page.toString());
-  urlParams.append("limit", limit.toString());
-
-  if (nameRegex != null && nameRegex !== "") {
-    urlParams.append("name[regex]", nameRegex);
-    urlParams.append("name[options]", "i");
-  }
-  if (tagList != null && tagList.length > 0) {
-    urlParams.append("tags[in]", tagList.join(","));
-  }
-  if (tagRegex != null && tagRegex !== "") {
-    urlParams.append("tags[regex]", tagRegex);
-    urlParams.append("tags[options]", "i");
-  }
-  if (isPrivate !== undefined) {
-    urlParams.append("isPrivate[eq]", String(isPrivate));
-  }
-  if (sortBy != null) {
-    urlParams.append("sortBy", sortBy);
-  }
-  if (sortOrder != null) {
-    urlParams.append("sortOrder", sortOrder);
-  }
+  if (search) urlParams.append("search", search);
+  tags?.forEach((tag) => urlParams.append("tags", tag));
+  if (tags?.length && tagMode) urlParams.append("tagMode", tagMode);
+  if (privacy) urlParams.append("privacy", privacy);
+  if (sort) urlParams.append("sort", sort);
+  if (direction) urlParams.append("direction", direction);
+  if (page != null) urlParams.append("page", page.toString());
+  if (limit != null) urlParams.append("limit", limit.toString());
 
   return urlParams.toString();
 };

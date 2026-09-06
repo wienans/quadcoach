@@ -1,11 +1,11 @@
 import { Alert, Grid } from "@mui/material";
-import { TacticBoardHeader } from "../../../api/quadcoachApi/domain/TacticBoard";
+import { TacticBoardSummary } from "../../../api/quadcoachApi/domain/TacticBoard";
 import { useTranslation } from "react-i18next";
 import TacticBoardLoadingCard from "./TacticBoardLoadingCard";
 import TacticBoardCard from "./TacticBoardCard";
 
 export type TacticBoardCardViewProps = {
-  tacticBoards?: TacticBoardHeader[];
+  tacticBoards?: TacticBoardSummary[];
   isTacticBoardsLoading: boolean;
   onOpenTacticBoardClick: (tacticBoardId: string) => void;
 };

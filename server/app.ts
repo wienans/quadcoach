@@ -14,11 +14,12 @@ import exerciseRoutes from "./routes/exerciseRoutes";
 import authRoutes from "./routes/authRoutes";
 import favoriteRoutes from "./routes/favoriteRoutes";
 import practicePlanRoutes from "./routes/practicePlanRoutes";
-import TacticBoard from "./models/tacticBoard";
 import {
   getExerciseMaterials,
   getExerciseTags,
 } from "./controllers/exerciseController";
+import { getTacticBoardTags } from "./controllers/tacticBoardController";
+import verifyJWTOptional from "./middleware/verifyJWTOptional";
 
 const app = express();
 app.set("trust proxy", 1);
@@ -42,29 +43,7 @@ app.get("/api/materials", getExerciseMaterials);
 
 app.get("/api/tags/exercises", getExerciseTags);
 
-app.get("/api/tags/tacticboards", async (req, res) => {
-  let queryString: string = JSON.stringify(req.query);
-  // Rebuild querry string
-  queryString = queryString.replace(
-    /\b(gte|gt|lte|lt|eq|ne|regex|options|in|nin)\b/g,
-    (match) => `$${match}`,
-  );
-  let querry = JSON.parse(queryString);
-  // gets all distinct values of tags
-  const result: string[] = await TacticBoard.distinct("tags");
-
-  if (querry["tagName"] != undefined) {
-    // Apply Regex, "i" for case insensitive
-    let regex: RegExp = new RegExp(
-      querry["tagName"]["$regex"],
-      querry["tagName"]["$options"],
-    );
-    let filtered: string[] = result.filter((item) => item.match(regex));
-    res.send(filtered);
-  } else {
-    res.send(result);
-  }
-});
+app.get("/api/tags/tacticboards", verifyJWTOptional, getTacticBoardTags);
 
 app.get("/api", (req, res) => {
   res.json({ message: "Hello from server!" });

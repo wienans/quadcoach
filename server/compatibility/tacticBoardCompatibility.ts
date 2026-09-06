@@ -59,25 +59,6 @@ export function toLegacyTacticBoardAccessPersistence(
   };
 }
 
-export interface TacticBoardListDto<TacticBoard, Pagination> {
-  tacticBoards: TacticBoard[];
-  pagination: Pagination;
-}
-
-export interface LegacyTacticBoardListResponse<TacticBoard, Pagination> {
-  tacticboards: TacticBoard[];
-  pagination: Pagination;
-}
-
-export function toLegacyTacticBoardListResponse<TacticBoard, Pagination>(
-  dto: TacticBoardListDto<TacticBoard, Pagination>,
-): LegacyTacticBoardListResponse<TacticBoard, Pagination> {
-  return {
-    tacticboards: dto.tacticBoards,
-    pagination: dto.pagination,
-  };
-}
-
 export interface LegacyExerciseBlock extends Record<string, unknown> {
   tactics_board?: unknown;
 }

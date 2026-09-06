@@ -39,7 +39,7 @@ describe("TacticBoard permanent legacy HTTP contracts", () => {
     ]);
   });
 
-  it("preserves list and header envelopes without canonical key leakage", async () => {
+  it("uses the summary collection envelope and removes the header route", async () => {
     const ownerId = new mongoose.Types.ObjectId();
     await TacticBoard.create({
       name: "Envelope Board",
@@ -50,38 +50,42 @@ describe("TacticBoard permanent legacy HTTP contracts", () => {
       user: ownerId,
     });
 
-    const [listResponse, headerResponse] = await Promise.all([
-      request(app)
-        .get("/api/tacticboards?limit=5")
-        .set("X-Forwarded-For", "192.0.2.10"),
-      request(app)
-        .get("/api/tacticboards/header?limit=5")
-        .set("X-Forwarded-For", "192.0.2.11"),
-    ]);
+    const listResponse = await request(app)
+      .get("/api/tacticboards?limit=5")
+      .set("X-Forwarded-For", "192.0.2.10");
+    const headerResponse = await request(app)
+      .get("/api/tacticboards/header?limit=5")
+      .set("X-Forwarded-For", "192.0.2.11");
 
     expect(listResponse.status).toBe(200);
-    expect(headerResponse.status).toBe(200);
-    expectExactFields(listResponse.body, ["tacticboards", "pagination"]);
-    expectExactFields(headerResponse.body, ["tacticboards", "pagination"]);
-    expectExactFields(listResponse.body.pagination, ["total", "page", "pages"]);
-    expectExactFields(headerResponse.body.pagination, [
+    expect(headerResponse.status).toBe(400);
+    expectExactFields(listResponse.body, ["items", "pagination"]);
+    expectExactFields(listResponse.body.pagination, [
       "total",
       "page",
+      "limit",
       "pages",
     ]);
-    expect(listResponse.body.tacticboards[0].name).toBe("Envelope Board");
-    expectExactFields(headerResponse.body.tacticboards[0], [
+    expect(listResponse.body.items[0].name).toBe("Envelope Board");
+    expectExactFields(listResponse.body.items[0], [
       "_id",
       "name",
       "isPrivate",
       "tags",
       "creator",
-      "user",
+      "createdAt",
+      "updatedAt",
     ]);
-    expectForbiddenFields(
-      [listResponse.body, headerResponse.body],
-      ["tacticBoards", "tacticBoard"],
-    );
+    expectForbiddenFields(listResponse.body, [
+      "tacticboards",
+      "tacticBoards",
+      "pages",
+      "shareToken",
+      "description",
+      "coaching_points",
+      "user",
+      "__v",
+    ]);
   });
 
   it("preserves Access and Favorite request, response, list, and header payloads", async () => {

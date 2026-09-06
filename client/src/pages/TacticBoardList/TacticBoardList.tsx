@@ -32,7 +32,7 @@ import {
 } from "../../components";
 import {
   useAddTacticBoardMutation,
-  useLazyGetTacticBoardHeadersQuery,
+  useLazyGetTacticBoardsQuery,
 } from "../../api/quadcoachApi/tacticBoardApi";
 import { TacticPageWithOutId } from "../../api/quadcoachApi/domain/TacticPage";
 import { useTranslation } from "react-i18next";
@@ -43,7 +43,7 @@ import { DashboardLayout } from "../../components/LayoutContainers";
 import { useAuth } from "../../store/hooks";
 import Footer from "../../components/Footer";
 import {
-  TacticBoardHeader,
+  TacticBoardSummary,
   TacticBoardWithOutIds,
 } from "../../api/quadcoachApi/domain/TacticBoard";
 import debounce from "lodash/debounce";
@@ -58,7 +58,6 @@ enum ViewType {
 
 type TacticBoardFilter = {
   searchValue: string;
-  tagRegex: string;
   tagList: string[];
   isPrivate: boolean | undefined;
   sortBy: "name" | "created" | "updated";
@@ -69,7 +68,6 @@ type TacticBoardFilter = {
 
 const defaultTacticBoardFilter: TacticBoardFilter = {
   searchValue: "",
-  tagRegex: "",
   tagList: [],
   isPrivate: undefined,
   sortBy: "name",
@@ -98,12 +96,13 @@ const TacticBoardList = () => {
   }, [isUpMd]);
 
   const [loadedTacticBoards, setLoadedTacticBoards] = useState<
-    TacticBoardHeader[]
+    TacticBoardSummary[]
   >([]);
 
   const [tacticBoardFilter, setTacticBoardFilter] = useState<TacticBoardFilter>(
     defaultTacticBoardFilter,
   );
+  const [tagInput, setTagInput] = useState("");
 
   const [
     getTacticBoards,
@@ -112,19 +111,19 @@ const TacticBoardList = () => {
       isError: isTacticBoardsError,
       isLoading: isTacticBoardsLoading,
     },
-  ] = useLazyGetTacticBoardHeadersQuery();
+  ] = useLazyGetTacticBoardsQuery();
 
   // Create debounced search function
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const debouncedSearch = useCallback(
     debounce((filter: TacticBoardFilter) => {
       getTacticBoards({
-        nameRegex: filter.searchValue,
-        tagRegex: filter.tagRegex,
-        tagList: filter.tagList,
-        isPrivate: filter.isPrivate,
-        sortBy: filter.sortBy,
-        sortOrder: filter.sortOrder,
+        search: filter.searchValue,
+        tags: filter.tagList,
+        tagMode: "all",
+        privacy: filter.isPrivate ? "private" : undefined,
+        sort: filter.sortBy,
+        direction: filter.sortOrder,
         page: filter.page,
         limit: filter.limit,
       });
@@ -196,18 +195,24 @@ const TacticBoardList = () => {
   };
 
   const handleTagKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === "Enter" && tacticBoardFilter.tagRegex.trim() !== "") {
+    if (event.key === "Enter" && tagInput.trim() !== "") {
       event.preventDefault();
+      const tag = tagInput.trim();
+      if (
+        tacticBoardFilter.tagList.some(
+          (selected) => selected.toLowerCase() === tag.toLowerCase(),
+        )
+      ) {
+        setTagInput("");
+        return;
+      }
       setLoadedTacticBoards([]);
       setTacticBoardFilter({
         ...tacticBoardFilter,
-        tagList: [
-          ...tacticBoardFilter.tagList,
-          tacticBoardFilter.tagRegex.trim(),
-        ],
-        tagRegex: "",
+        tagList: [...tacticBoardFilter.tagList, tag],
         page: 1,
       });
+      setTagInput("");
     }
   };
 
@@ -235,13 +240,16 @@ const TacticBoardList = () => {
 
   // Update effect to accumulate loaded Tactic Boards.
   useEffect(() => {
-    if (tacticBoardsData?.tacticBoards) {
+    if (tacticBoardsData?.items) {
       setLoadedTacticBoards((prev) => {
+        if (tacticBoardsData.pagination.page === 1) {
+          return tacticBoardsData.items;
+        }
         const newTacticBoardIds = new Set(
-          tacticBoardsData.tacticBoards.map((t) => t._id),
+          tacticBoardsData.items.map((t) => t._id),
         );
         const filteredPrev = prev.filter((t) => !newTacticBoardIds.has(t._id));
-        return [...filteredPrev, ...tacticBoardsData.tacticBoards];
+        return [...filteredPrev, ...tacticBoardsData.items];
       });
     }
   }, [tacticBoardsData]);
@@ -397,8 +405,8 @@ const TacticBoardList = () => {
               <SoftInput
                 id="outlined-basic"
                 placeholder={t("TacticBoardList:filter.tags.placeholder")}
-                value={tacticBoardFilter.tagRegex}
-                onChange={onTacticBoardFilterValueChange("tagRegex")}
+                value={tagInput}
+                onChange={(event) => setTagInput(event.target.value)}
                 onKeyDown={handleTagKeyDown}
                 sx={{ width: "100%" }}
                 endAdornment={
@@ -406,7 +414,7 @@ const TacticBoardList = () => {
                     <KeyboardReturnIcon
                       sx={{
                         fontSize: 20,
-                        opacity: tacticBoardFilter.tagRegex != "" ? 1 : 0.4,
+                        opacity: tagInput !== "" ? 1 : 0.4,
                       }}
                     />
                   </InputAdornment>

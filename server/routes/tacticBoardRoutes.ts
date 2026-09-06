@@ -11,7 +11,6 @@ router.use(verifyJWTOptional);
 router.use(ddosLimiter);
 
 // Public GET endpoints - no additional auth required
-router.route("/header").get(tacticBoardController.getAllTacticBoardHeaders);
 router.route("/share/:token").get(tacticBoardController.getByShareToken);
 router.use(malformedShareTokenPath);
 

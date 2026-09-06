@@ -22,8 +22,8 @@ const createApiStore = () =>
   });
 
 const emptyPage = {
-  tacticboards: [],
-  pagination: { page: 1, total: 0, pages: 0 },
+  items: [],
+  pagination: { page: 1, limit: 50, total: 0, pages: 0 },
 };
 
 const lastBaseQueryRequest = () =>
@@ -44,14 +44,19 @@ describe("TacticBoard RTK Query contracts", () => {
 
     await store.dispatch(
       tacticBoardApiSlice.endpoints.getTacticBoards.initiate({
-        nameRegex: "Press break",
+        search: "Press .* [break]",
+        tags: ["Attack", "Fast play"],
+        tagMode: "any",
+        privacy: "private",
+        sort: "updated",
+        direction: "desc",
         page: 2,
         limit: 25,
       }),
     );
 
     expect(lastBaseQueryRequest()).toEqual({
-      url: "/api/tacticboards?page=2&limit=25&name%5Bregex%5D=Press+break&name%5Boptions%5D=i",
+      url: "/api/tacticboards?search=Press+.*+%5Bbreak%5D&tags=Attack&tags=Fast+play&tagMode=any&privacy=private&sort=updated&direction=desc&page=2&limit=25",
       method: "get",
     });
 
@@ -127,6 +132,49 @@ describe("TacticBoard RTK Query contracts", () => {
         access: "view",
         createdAt: "2026-07-17T10:00:00.000Z",
       },
+    ]);
+  });
+
+  it("maps fixed summaries and uses a query-free tag facet envelope", async () => {
+    baseQueryMock
+      .mockResolvedValueOnce({
+        data: {
+          items: [
+            {
+              _id: "board-1",
+              name: "Press",
+              isPrivate: false,
+              pages: [{ secret: true }],
+            },
+          ],
+          pagination: { page: 1, limit: 50, total: 1, pages: 1 },
+        },
+      })
+      .mockResolvedValueOnce({ data: { items: ["Attack", "Zone"] } });
+    const store = createApiStore();
+
+    const boards = await store.dispatch(
+      tacticBoardApiSlice.endpoints.getTacticBoards.initiate(undefined),
+    );
+    const tags = await store.dispatch(
+      tacticBoardApiSlice.endpoints.getAllTacticBoardTags.initiate(),
+    );
+
+    expect(boards.data?.items).toEqual([
+      {
+        _id: "board-1",
+        name: "Press",
+        tags: [],
+        isPrivate: false,
+        creator: undefined,
+        createdAt: undefined,
+        updatedAt: undefined,
+      },
+    ]);
+    expect(tags.data).toEqual({ items: ["Attack", "Zone"] });
+    expect(baseQueryMock.mock.calls.map(([request]) => request)).toEqual([
+      { url: "/api/tacticboards", method: "get" },
+      { url: "/api/tags/tacticboards", method: "get" },
     ]);
   });
 
