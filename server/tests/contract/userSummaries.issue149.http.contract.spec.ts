@@ -92,7 +92,6 @@ describe("issue 149 purpose-specific User summaries", () => {
         name: "Owned drill",
         tags: ["Passing"],
         creator: "Coach",
-        user: owner.id,
         createdAt: expect.any(String),
         updatedAt: expect.any(String),
         materials: ["Cone", "Ball"],
@@ -108,6 +107,7 @@ describe("issue 149 purpose-specific User summaries", () => {
       "coaching_points",
       "time_min",
       "related_to",
+      "user",
       "__v",
       "accessLevel",
       "access",
@@ -129,7 +129,6 @@ describe("issue 149 purpose-specific User summaries", () => {
         _id: viewGrantedId.toString(),
         name: "View granted",
         tags: [],
-        user: collaborator.id,
         createdAt: undefined,
         updatedAt: undefined,
         materials: [],
@@ -146,7 +145,6 @@ describe("issue 149 purpose-specific User summaries", () => {
         _id: editGranted.id,
         name: "Edit granted",
         tags: ["Defense"],
-        user: collaborator.id,
         createdAt: expect.any(String),
         updatedAt: expect.any(String),
         materials: [],
@@ -379,6 +377,72 @@ describe("issue 149 purpose-specific User summaries", () => {
       ]),
     );
     const serialized = JSON.stringify(legacyQuery.body);
+    expect(serialized).not.toContain("hashed-password-secret");
+    expect(serialized).not.toContain("verification-secret");
+    expect(serialized).not.toContain("reset-secret");
+    expect(serialized).not.toContain("lastActivity");
+    expect(serialized).not.toContain("isVerified");
+    expect(serialized).not.toContain("password");
+  });
+
+  it("returns an allowlisted account summary on the User detail route", async () => {
+    const { user: admin } = await createVerifiedUser({
+      email: "profile_detail_admin@example.com",
+    });
+    admin.roles = ["AdMiN"];
+    await admin.save();
+    const { user: stranger } = await createVerifiedUser({
+      email: "profile_detail_stranger@example.com",
+    });
+    const { insertedId: legacyId } = await mongoose.connection
+      .db!.collection("users")
+      .insertOne({
+        name: "Legacy",
+        email: "profile_detail_legacy@example.com",
+        password: "hashed-password-secret",
+        roles: ["user"],
+        active: true,
+        isVerified: true,
+        emailToken: "verification-secret",
+        passwordResetToken: "reset-secret",
+        lastActivity: new Date(),
+      });
+    const legacyActor = {
+      id: legacyId.toString(),
+      name: "Legacy",
+      email: "profile_detail_legacy@example.com",
+      roles: ["user"],
+    };
+
+    await request(app)
+      .get(`/api/user/${legacyActor.id}`)
+      .expect(401, { message: "Unauthorized" });
+    await request(app)
+      .get(`/api/user/${legacyActor.id}`)
+      .set("Authorization", await authFor(stranger))
+      .expect(403, { message: "Forbidden" });
+
+    const expectedSummary = {
+      _id: legacyActor.id,
+      name: "Legacy",
+      email: "profile_detail_legacy@example.com",
+      roles: ["user"],
+      active: true,
+    };
+
+    const selfResponse = await request(app)
+      .get(`/api/user/${legacyActor.id}`)
+      .set("Authorization", `Bearer ${await getAccessToken(legacyActor)}`)
+      .expect(200);
+    expect(selfResponse.body).toEqual(expectedSummary);
+
+    const adminResponse = await request(app)
+      .get(`/api/user/${legacyActor.id}`)
+      .set("Authorization", await authFor(admin))
+      .expect(200);
+    expect(adminResponse.body).toEqual(expectedSummary);
+
+    const serialized = JSON.stringify(adminResponse.body);
     expect(serialized).not.toContain("hashed-password-secret");
     expect(serialized).not.toContain("verification-secret");
     expect(serialized).not.toContain("reset-secret");

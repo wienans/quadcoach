@@ -5,6 +5,7 @@ import type {
   ResourceAccessLevel,
 } from "../domain";
 import type { TacticBoardFavorite } from "../domain/Favorits";
+import type { TacticBoardSummary } from "../domain/TacticBoard";
 
 export type TacticBoardFavoriteRequest = {
   userId: string;
@@ -215,6 +216,24 @@ export const fromExerciseSummaryResponseDto = ({
   beaters,
   chasers,
   relatedTo: relatedTo ?? [],
+});
+
+export type TacticBoardSummaryResponseDto = {
+  _id: string;
+  name: string;
+  tags?: string[];
+  isPrivate: boolean;
+  creator?: string;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
+export const fromTacticBoardSummaryResponseDto = ({
+  tags,
+  ...summary
+}: TacticBoardSummaryResponseDto): TacticBoardSummary => ({
+  ...summary,
+  tags: tags ?? [],
 });
 
 export const toExerciseRequestDto = <

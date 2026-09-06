@@ -8,48 +8,45 @@ import {
 import type { TacticBoardSummary } from "../api/quadcoachApi/domain/TacticBoard";
 import {
   ExerciseSummaryResponseDto,
+  TacticBoardSummaryResponseDto,
   fromExerciseSummaryResponseDto,
+  fromTacticBoardSummaryResponseDto,
 } from "../api/quadcoachApi/compatibility/tacticBoardWire";
 
-export type AccessibleExerciseRelationship = {
-  item: ExerciseSummary;
+export type AccessibleRelationship<Item> = {
+  item: Item;
   accessLevel: ResourceAccessLevel;
 };
 
-export type AccessibleExerciseRelationshipDto = {
-  item: ExerciseSummaryResponseDto;
-  accessLevel: ResourceAccessLevel;
+type OwnedAndAccessible<Item> = {
+  owned: Item[];
+  accessible: AccessibleRelationship<Item>[];
 };
 
-export type UserExercisesResponse = {
-  owned: ExerciseSummary[];
-  accessible: AccessibleExerciseRelationship[];
-};
-
-type UserExercisesResponseDto = {
-  owned: ExerciseSummaryResponseDto[];
-  accessible: AccessibleExerciseRelationshipDto[];
-};
-
-export const fromUserExercisesResponseDto = (
-  response: UserExercisesResponseDto,
-): UserExercisesResponse => ({
-  owned: response.owned.map(fromExerciseSummaryResponseDto),
+const fromOwnedAndAccessible = <Item, Dto>(
+  response: OwnedAndAccessible<Dto>,
+  fromItemDto: (itemDto: Dto) => Item,
+): OwnedAndAccessible<Item> => ({
+  owned: response.owned.map(fromItemDto),
   accessible: response.accessible.map(({ item, accessLevel }) => ({
-    item: fromExerciseSummaryResponseDto(item),
+    item: fromItemDto(item),
     accessLevel,
   })),
 });
 
-export type AccessibleTacticBoardRelationship = {
-  item: TacticBoardSummary;
-  accessLevel: ResourceAccessLevel;
-};
+export type UserExercisesResponse = OwnedAndAccessible<ExerciseSummary>;
 
-export type UserTacticBoardsResponse = {
-  owned: TacticBoardSummary[];
-  accessible: AccessibleTacticBoardRelationship[];
-};
+export type UserTacticBoardsResponse = OwnedAndAccessible<TacticBoardSummary>;
+
+const fromUserExercisesResponseDto = (
+  response: OwnedAndAccessible<ExerciseSummaryResponseDto>,
+): UserExercisesResponse =>
+  fromOwnedAndAccessible(response, fromExerciseSummaryResponseDto);
+
+const fromUserTacticBoardsResponseDto = (
+  response: OwnedAndAccessible<TacticBoardSummaryResponseDto>,
+): UserTacticBoardsResponse =>
+  fromOwnedAndAccessible(response, fromTacticBoardSummaryResponseDto);
 
 export const userApiSlice = quadcoachApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -112,6 +109,7 @@ export const userApiSlice = quadcoachApi.injectEndpoints({
         url: `/api/user/${userId}/tacticboards`,
         method: "get",
       }),
+      transformResponse: fromUserTacticBoardsResponseDto,
       providesTags: () => [TagType.tacticBoard],
     }),
   }),
